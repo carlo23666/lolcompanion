@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { LiveClientSnapshot } from '@shared/schemas/liveclient'
+import SettingsStub from './SettingsStub'
 
 function formatClock(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60)
@@ -52,6 +53,8 @@ export default function App(): React.JSX.Element {
           </ul>
         </section>
       )}
+
+      <SettingsStub />
     </main>
   )
 }

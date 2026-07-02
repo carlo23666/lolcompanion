@@ -1,0 +1,3406 @@
+{
+ "metadata": {
+  "dataVersion": "2",
+  "matchId": "EUW1_7000000001",
+  "participants": [
+   "PUUID_PLAYER_1",
+   "PUUID_PLAYER_2",
+   "PUUID_PLAYER_3",
+   "PUUID_PLAYER_4",
+   "PUUID_PLAYER_5",
+   "PUUID_PLAYER_6",
+   "PUUID_PLAYER_7",
+   "PUUID_PLAYER_8",
+   "PUUID_PLAYER_9",
+   "PUUID_PLAYER_10"
+  ]
+ },
+ "info": {
+  "frameInterval": 60000,
+  "frames": [
+   {
+    "timestamp": 0,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 513,
+      "currentGold": 231,
+      "level": 1,
+      "xp": 0,
+      "minionsKilled": 0,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 50
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 526,
+      "currentGold": 262,
+      "level": 1,
+      "xp": 0,
+      "minionsKilled": 0,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 100
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 539,
+      "currentGold": 293,
+      "level": 1,
+      "xp": 0,
+      "minionsKilled": 0,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 150
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 552,
+      "currentGold": 324,
+      "level": 1,
+      "xp": 0,
+      "minionsKilled": 0,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 200
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 565,
+      "currentGold": 355,
+      "level": 1,
+      "xp": 0,
+      "minionsKilled": 0,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 250
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 578,
+      "currentGold": 386,
+      "level": 1,
+      "xp": 0,
+      "minionsKilled": 0,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 300
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 591,
+      "currentGold": 417,
+      "level": 1,
+      "xp": 0,
+      "minionsKilled": 0,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 350
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 604,
+      "currentGold": 448,
+      "level": 1,
+      "xp": 0,
+      "minionsKilled": 0,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 400
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 617,
+      "currentGold": 479,
+      "level": 1,
+      "xp": 0,
+      "minionsKilled": 0,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 450
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 630,
+      "currentGold": 510,
+      "level": 1,
+      "xp": 0,
+      "minionsKilled": 0,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 500
+     }
+    },
+    "events": [
+     {
+      "type": "PAUSE_END",
+      "timestamp": 0,
+      "realTimestamp": 1751400000000
+     }
+    ]
+   },
+   {
+    "timestamp": 60000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 893,
+      "currentGold": 328,
+      "level": 1,
+      "xp": 580,
+      "minionsKilled": 6,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 850
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 906,
+      "currentGold": 359,
+      "level": 1,
+      "xp": 580,
+      "minionsKilled": 6,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 900
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 919,
+      "currentGold": 390,
+      "level": 1,
+      "xp": 580,
+      "minionsKilled": 6,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 950
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 932,
+      "currentGold": 421,
+      "level": 1,
+      "xp": 580,
+      "minionsKilled": 6,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 1000
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 945,
+      "currentGold": 452,
+      "level": 1,
+      "xp": 580,
+      "minionsKilled": 6,
+      "jungleMinionsKilled": 4,
+      "totalDamageDoneToChampions": 1050
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 958,
+      "currentGold": 483,
+      "level": 1,
+      "xp": 580,
+      "minionsKilled": 6,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 1100
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 971,
+      "currentGold": 514,
+      "level": 1,
+      "xp": 580,
+      "minionsKilled": 6,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 1150
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 984,
+      "currentGold": 545,
+      "level": 1,
+      "xp": 580,
+      "minionsKilled": 6,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 1200
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 997,
+      "currentGold": 576,
+      "level": 1,
+      "xp": 580,
+      "minionsKilled": 6,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 1250
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 1010,
+      "currentGold": 607,
+      "level": 1,
+      "xp": 580,
+      "minionsKilled": 6,
+      "jungleMinionsKilled": 4,
+      "totalDamageDoneToChampions": 1300
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 120000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 1273,
+      "currentGold": 425,
+      "level": 2,
+      "xp": 1160,
+      "minionsKilled": 13,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 1650
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 1286,
+      "currentGold": 456,
+      "level": 2,
+      "xp": 1160,
+      "minionsKilled": 13,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 1700
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 1299,
+      "currentGold": 487,
+      "level": 2,
+      "xp": 1160,
+      "minionsKilled": 13,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 1750
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 1312,
+      "currentGold": 518,
+      "level": 2,
+      "xp": 1160,
+      "minionsKilled": 13,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 1800
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 1325,
+      "currentGold": 549,
+      "level": 2,
+      "xp": 1160,
+      "minionsKilled": 13,
+      "jungleMinionsKilled": 8,
+      "totalDamageDoneToChampions": 1850
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 1338,
+      "currentGold": 580,
+      "level": 2,
+      "xp": 1160,
+      "minionsKilled": 13,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 1900
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 1351,
+      "currentGold": 611,
+      "level": 2,
+      "xp": 1160,
+      "minionsKilled": 13,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 1950
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 1364,
+      "currentGold": 642,
+      "level": 2,
+      "xp": 1160,
+      "minionsKilled": 13,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 2000
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 1377,
+      "currentGold": 673,
+      "level": 2,
+      "xp": 1160,
+      "minionsKilled": 13,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 2050
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 1390,
+      "currentGold": 704,
+      "level": 2,
+      "xp": 1160,
+      "minionsKilled": 13,
+      "jungleMinionsKilled": 8,
+      "totalDamageDoneToChampions": 2100
+     }
+    },
+    "events": [
+     {
+      "type": "ITEM_PURCHASED",
+      "timestamp": 121500,
+      "participantId": 3,
+      "itemId": 1055
+     }
+    ]
+   },
+   {
+    "timestamp": 180000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 1653,
+      "currentGold": 522,
+      "level": 2,
+      "xp": 1740,
+      "minionsKilled": 19,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 2450
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 1666,
+      "currentGold": 553,
+      "level": 2,
+      "xp": 1740,
+      "minionsKilled": 19,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 2500
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 1679,
+      "currentGold": 584,
+      "level": 2,
+      "xp": 1740,
+      "minionsKilled": 19,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 2550
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 1692,
+      "currentGold": 615,
+      "level": 2,
+      "xp": 1740,
+      "minionsKilled": 19,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 2600
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 1705,
+      "currentGold": 646,
+      "level": 2,
+      "xp": 1740,
+      "minionsKilled": 19,
+      "jungleMinionsKilled": 12,
+      "totalDamageDoneToChampions": 2650
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 1718,
+      "currentGold": 677,
+      "level": 2,
+      "xp": 1740,
+      "minionsKilled": 19,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 2700
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 1731,
+      "currentGold": 708,
+      "level": 2,
+      "xp": 1740,
+      "minionsKilled": 19,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 2750
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 1744,
+      "currentGold": 739,
+      "level": 2,
+      "xp": 1740,
+      "minionsKilled": 19,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 2800
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 1757,
+      "currentGold": 770,
+      "level": 2,
+      "xp": 1740,
+      "minionsKilled": 19,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 2850
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 1770,
+      "currentGold": 801,
+      "level": 2,
+      "xp": 1740,
+      "minionsKilled": 19,
+      "jungleMinionsKilled": 12,
+      "totalDamageDoneToChampions": 2900
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 240000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 2033,
+      "currentGold": 619,
+      "level": 3,
+      "xp": 2320,
+      "minionsKilled": 26,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 3250
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 2046,
+      "currentGold": 650,
+      "level": 3,
+      "xp": 2320,
+      "minionsKilled": 26,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 3300
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 2059,
+      "currentGold": 681,
+      "level": 3,
+      "xp": 2320,
+      "minionsKilled": 26,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 3350
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 2072,
+      "currentGold": 712,
+      "level": 3,
+      "xp": 2320,
+      "minionsKilled": 26,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 3400
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 2085,
+      "currentGold": 743,
+      "level": 3,
+      "xp": 2320,
+      "minionsKilled": 26,
+      "jungleMinionsKilled": 16,
+      "totalDamageDoneToChampions": 3450
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 2098,
+      "currentGold": 774,
+      "level": 3,
+      "xp": 2320,
+      "minionsKilled": 26,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 3500
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 2111,
+      "currentGold": 805,
+      "level": 3,
+      "xp": 2320,
+      "minionsKilled": 26,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 3550
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 2124,
+      "currentGold": 836,
+      "level": 3,
+      "xp": 2320,
+      "minionsKilled": 26,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 3600
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 2137,
+      "currentGold": 867,
+      "level": 3,
+      "xp": 2320,
+      "minionsKilled": 26,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 3650
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 2150,
+      "currentGold": 898,
+      "level": 3,
+      "xp": 2320,
+      "minionsKilled": 26,
+      "jungleMinionsKilled": 16,
+      "totalDamageDoneToChampions": 3700
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 300000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 2413,
+      "currentGold": 716,
+      "level": 3,
+      "xp": 2900,
+      "minionsKilled": 32,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 4050
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 2426,
+      "currentGold": 747,
+      "level": 3,
+      "xp": 2900,
+      "minionsKilled": 32,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 4100
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 2439,
+      "currentGold": 778,
+      "level": 3,
+      "xp": 2900,
+      "minionsKilled": 32,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 4150
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 2452,
+      "currentGold": 809,
+      "level": 3,
+      "xp": 2900,
+      "minionsKilled": 32,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 4200
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 2465,
+      "currentGold": 840,
+      "level": 3,
+      "xp": 2900,
+      "minionsKilled": 32,
+      "jungleMinionsKilled": 20,
+      "totalDamageDoneToChampions": 4250
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 2478,
+      "currentGold": 871,
+      "level": 3,
+      "xp": 2900,
+      "minionsKilled": 32,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 4300
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 2491,
+      "currentGold": 902,
+      "level": 3,
+      "xp": 2900,
+      "minionsKilled": 32,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 4350
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 2504,
+      "currentGold": 933,
+      "level": 3,
+      "xp": 2900,
+      "minionsKilled": 32,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 4400
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 2517,
+      "currentGold": 964,
+      "level": 3,
+      "xp": 2900,
+      "minionsKilled": 32,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 4450
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 2530,
+      "currentGold": 995,
+      "level": 3,
+      "xp": 2900,
+      "minionsKilled": 32,
+      "jungleMinionsKilled": 20,
+      "totalDamageDoneToChampions": 4500
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 360000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 2793,
+      "currentGold": 813,
+      "level": 4,
+      "xp": 3480,
+      "minionsKilled": 39,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 4850
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 2806,
+      "currentGold": 844,
+      "level": 4,
+      "xp": 3480,
+      "minionsKilled": 39,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 4900
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 2819,
+      "currentGold": 875,
+      "level": 4,
+      "xp": 3480,
+      "minionsKilled": 39,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 4950
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 2832,
+      "currentGold": 906,
+      "level": 4,
+      "xp": 3480,
+      "minionsKilled": 39,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 5000
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 2845,
+      "currentGold": 937,
+      "level": 4,
+      "xp": 3480,
+      "minionsKilled": 39,
+      "jungleMinionsKilled": 24,
+      "totalDamageDoneToChampions": 5050
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 2858,
+      "currentGold": 968,
+      "level": 4,
+      "xp": 3480,
+      "minionsKilled": 39,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 5100
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 2871,
+      "currentGold": 999,
+      "level": 4,
+      "xp": 3480,
+      "minionsKilled": 39,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 5150
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 2884,
+      "currentGold": 1030,
+      "level": 4,
+      "xp": 3480,
+      "minionsKilled": 39,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 5200
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 2897,
+      "currentGold": 1061,
+      "level": 4,
+      "xp": 3480,
+      "minionsKilled": 39,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 5250
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 2910,
+      "currentGold": 1092,
+      "level": 4,
+      "xp": 3480,
+      "minionsKilled": 39,
+      "jungleMinionsKilled": 24,
+      "totalDamageDoneToChampions": 5300
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 420000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 3173,
+      "currentGold": 910,
+      "level": 4,
+      "xp": 4060,
+      "minionsKilled": 45,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 5650
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 3186,
+      "currentGold": 941,
+      "level": 4,
+      "xp": 4060,
+      "minionsKilled": 45,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 5700
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 3199,
+      "currentGold": 972,
+      "level": 4,
+      "xp": 4060,
+      "minionsKilled": 45,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 5750
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 3212,
+      "currentGold": 1003,
+      "level": 4,
+      "xp": 4060,
+      "minionsKilled": 45,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 5800
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 3225,
+      "currentGold": 1034,
+      "level": 4,
+      "xp": 4060,
+      "minionsKilled": 45,
+      "jungleMinionsKilled": 28,
+      "totalDamageDoneToChampions": 5850
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 3238,
+      "currentGold": 1065,
+      "level": 4,
+      "xp": 4060,
+      "minionsKilled": 45,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 5900
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 3251,
+      "currentGold": 1096,
+      "level": 4,
+      "xp": 4060,
+      "minionsKilled": 45,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 5950
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 3264,
+      "currentGold": 1127,
+      "level": 4,
+      "xp": 4060,
+      "minionsKilled": 45,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 6000
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 3277,
+      "currentGold": 1158,
+      "level": 4,
+      "xp": 4060,
+      "minionsKilled": 45,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 6050
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 3290,
+      "currentGold": 1189,
+      "level": 4,
+      "xp": 4060,
+      "minionsKilled": 45,
+      "jungleMinionsKilled": 28,
+      "totalDamageDoneToChampions": 6100
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 480000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 3553,
+      "currentGold": 1007,
+      "level": 5,
+      "xp": 4640,
+      "minionsKilled": 52,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 6450
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 3566,
+      "currentGold": 1038,
+      "level": 5,
+      "xp": 4640,
+      "minionsKilled": 52,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 6500
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 3579,
+      "currentGold": 1069,
+      "level": 5,
+      "xp": 4640,
+      "minionsKilled": 52,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 6550
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 3592,
+      "currentGold": 1100,
+      "level": 5,
+      "xp": 4640,
+      "minionsKilled": 52,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 6600
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 3605,
+      "currentGold": 1131,
+      "level": 5,
+      "xp": 4640,
+      "minionsKilled": 52,
+      "jungleMinionsKilled": 32,
+      "totalDamageDoneToChampions": 6650
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 3618,
+      "currentGold": 1162,
+      "level": 5,
+      "xp": 4640,
+      "minionsKilled": 52,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 6700
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 3631,
+      "currentGold": 1193,
+      "level": 5,
+      "xp": 4640,
+      "minionsKilled": 52,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 6750
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 3644,
+      "currentGold": 1224,
+      "level": 5,
+      "xp": 4640,
+      "minionsKilled": 52,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 6800
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 3657,
+      "currentGold": 1255,
+      "level": 5,
+      "xp": 4640,
+      "minionsKilled": 52,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 6850
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 3670,
+      "currentGold": 1286,
+      "level": 5,
+      "xp": 4640,
+      "minionsKilled": 52,
+      "jungleMinionsKilled": 32,
+      "totalDamageDoneToChampions": 6900
+     }
+    },
+    "events": [
+     {
+      "type": "ITEM_PURCHASED",
+      "timestamp": 484000,
+      "participantId": 3,
+      "itemId": 1038
+     }
+    ]
+   },
+   {
+    "timestamp": 540000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 3933,
+      "currentGold": 1104,
+      "level": 5,
+      "xp": 5220,
+      "minionsKilled": 58,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 7250
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 3946,
+      "currentGold": 1135,
+      "level": 5,
+      "xp": 5220,
+      "minionsKilled": 58,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 7300
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 3959,
+      "currentGold": 1166,
+      "level": 5,
+      "xp": 5220,
+      "minionsKilled": 58,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 7350
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 3972,
+      "currentGold": 1197,
+      "level": 5,
+      "xp": 5220,
+      "minionsKilled": 58,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 7400
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 3985,
+      "currentGold": 1228,
+      "level": 5,
+      "xp": 5220,
+      "minionsKilled": 58,
+      "jungleMinionsKilled": 36,
+      "totalDamageDoneToChampions": 7450
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 3998,
+      "currentGold": 1259,
+      "level": 5,
+      "xp": 5220,
+      "minionsKilled": 58,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 7500
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 4011,
+      "currentGold": 1290,
+      "level": 5,
+      "xp": 5220,
+      "minionsKilled": 58,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 7550
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 4024,
+      "currentGold": 1321,
+      "level": 5,
+      "xp": 5220,
+      "minionsKilled": 58,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 7600
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 4037,
+      "currentGold": 1352,
+      "level": 5,
+      "xp": 5220,
+      "minionsKilled": 58,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 7650
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 4050,
+      "currentGold": 1383,
+      "level": 5,
+      "xp": 5220,
+      "minionsKilled": 58,
+      "jungleMinionsKilled": 36,
+      "totalDamageDoneToChampions": 7700
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 600000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 4313,
+      "currentGold": 1201,
+      "level": 6,
+      "xp": 5800,
+      "minionsKilled": 65,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 8050
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 4326,
+      "currentGold": 1232,
+      "level": 6,
+      "xp": 5800,
+      "minionsKilled": 65,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 8100
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 4339,
+      "currentGold": 1263,
+      "level": 6,
+      "xp": 5800,
+      "minionsKilled": 65,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 8150
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 4352,
+      "currentGold": 1294,
+      "level": 6,
+      "xp": 5800,
+      "minionsKilled": 65,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 8200
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 4365,
+      "currentGold": 1325,
+      "level": 6,
+      "xp": 5800,
+      "minionsKilled": 65,
+      "jungleMinionsKilled": 40,
+      "totalDamageDoneToChampions": 8250
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 4378,
+      "currentGold": 1356,
+      "level": 6,
+      "xp": 5800,
+      "minionsKilled": 65,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 8300
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 4391,
+      "currentGold": 1387,
+      "level": 6,
+      "xp": 5800,
+      "minionsKilled": 65,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 8350
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 4404,
+      "currentGold": 1418,
+      "level": 6,
+      "xp": 5800,
+      "minionsKilled": 65,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 8400
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 4417,
+      "currentGold": 1449,
+      "level": 6,
+      "xp": 5800,
+      "minionsKilled": 65,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 8450
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 4430,
+      "currentGold": 1480,
+      "level": 6,
+      "xp": 5800,
+      "minionsKilled": 65,
+      "jungleMinionsKilled": 40,
+      "totalDamageDoneToChampions": 8500
+     }
+    },
+    "events": [
+     {
+      "type": "CHAMPION_KILL",
+      "timestamp": 609000,
+      "killerId": 3,
+      "victimId": 8,
+      "assistingParticipantIds": [
+       4
+      ]
+     }
+    ]
+   },
+   {
+    "timestamp": 660000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 4693,
+      "currentGold": 1298,
+      "level": 7,
+      "xp": 6380,
+      "minionsKilled": 71,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 8850
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 4706,
+      "currentGold": 1329,
+      "level": 7,
+      "xp": 6380,
+      "minionsKilled": 71,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 8900
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 4719,
+      "currentGold": 1360,
+      "level": 7,
+      "xp": 6380,
+      "minionsKilled": 71,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 8950
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 4732,
+      "currentGold": 1391,
+      "level": 7,
+      "xp": 6380,
+      "minionsKilled": 71,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 9000
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 4745,
+      "currentGold": 1422,
+      "level": 7,
+      "xp": 6380,
+      "minionsKilled": 71,
+      "jungleMinionsKilled": 44,
+      "totalDamageDoneToChampions": 9050
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 4758,
+      "currentGold": 1453,
+      "level": 7,
+      "xp": 6380,
+      "minionsKilled": 71,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 9100
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 4771,
+      "currentGold": 1484,
+      "level": 7,
+      "xp": 6380,
+      "minionsKilled": 71,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 9150
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 4784,
+      "currentGold": 1515,
+      "level": 7,
+      "xp": 6380,
+      "minionsKilled": 71,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 9200
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 4797,
+      "currentGold": 1546,
+      "level": 7,
+      "xp": 6380,
+      "minionsKilled": 71,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 9250
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 4810,
+      "currentGold": 1577,
+      "level": 7,
+      "xp": 6380,
+      "minionsKilled": 71,
+      "jungleMinionsKilled": 44,
+      "totalDamageDoneToChampions": 9300
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 720000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 5073,
+      "currentGold": 1395,
+      "level": 7,
+      "xp": 6960,
+      "minionsKilled": 78,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 9650
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 5086,
+      "currentGold": 1426,
+      "level": 7,
+      "xp": 6960,
+      "minionsKilled": 78,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 9700
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 5099,
+      "currentGold": 1457,
+      "level": 7,
+      "xp": 6960,
+      "minionsKilled": 78,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 9750
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 5112,
+      "currentGold": 1488,
+      "level": 7,
+      "xp": 6960,
+      "minionsKilled": 78,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 9800
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 5125,
+      "currentGold": 1519,
+      "level": 7,
+      "xp": 6960,
+      "minionsKilled": 78,
+      "jungleMinionsKilled": 48,
+      "totalDamageDoneToChampions": 9850
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 5138,
+      "currentGold": 1550,
+      "level": 7,
+      "xp": 6960,
+      "minionsKilled": 78,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 9900
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 5151,
+      "currentGold": 1581,
+      "level": 7,
+      "xp": 6960,
+      "minionsKilled": 78,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 9950
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 5164,
+      "currentGold": 212,
+      "level": 7,
+      "xp": 6960,
+      "minionsKilled": 78,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 10000
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 5177,
+      "currentGold": 243,
+      "level": 7,
+      "xp": 6960,
+      "minionsKilled": 78,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 10050
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 5190,
+      "currentGold": 274,
+      "level": 7,
+      "xp": 6960,
+      "minionsKilled": 78,
+      "jungleMinionsKilled": 48,
+      "totalDamageDoneToChampions": 10100
+     }
+    },
+    "events": [
+     {
+      "type": "ELITE_MONSTER_KILL",
+      "timestamp": 750000,
+      "killerId": 5,
+      "monsterType": "DRAGON",
+      "monsterSubType": "FIRE_DRAGON",
+      "killerTeamId": 100
+     }
+    ]
+   },
+   {
+    "timestamp": 780000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 5453,
+      "currentGold": 1492,
+      "level": 8,
+      "xp": 7540,
+      "minionsKilled": 84,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 10450
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 5466,
+      "currentGold": 1523,
+      "level": 8,
+      "xp": 7540,
+      "minionsKilled": 84,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 10500
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 5479,
+      "currentGold": 1554,
+      "level": 8,
+      "xp": 7540,
+      "minionsKilled": 84,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 10550
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 5492,
+      "currentGold": 1585,
+      "level": 8,
+      "xp": 7540,
+      "minionsKilled": 84,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 10600
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 5505,
+      "currentGold": 216,
+      "level": 8,
+      "xp": 7540,
+      "minionsKilled": 84,
+      "jungleMinionsKilled": 52,
+      "totalDamageDoneToChampions": 10650
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 5518,
+      "currentGold": 247,
+      "level": 8,
+      "xp": 7540,
+      "minionsKilled": 84,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 10700
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 5531,
+      "currentGold": 278,
+      "level": 8,
+      "xp": 7540,
+      "minionsKilled": 84,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 10750
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 5544,
+      "currentGold": 309,
+      "level": 8,
+      "xp": 7540,
+      "minionsKilled": 84,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 10800
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 5557,
+      "currentGold": 340,
+      "level": 8,
+      "xp": 7540,
+      "minionsKilled": 84,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 10850
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 5570,
+      "currentGold": 371,
+      "level": 8,
+      "xp": 7540,
+      "minionsKilled": 84,
+      "jungleMinionsKilled": 52,
+      "totalDamageDoneToChampions": 10900
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 840000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 5833,
+      "currentGold": 1589,
+      "level": 8,
+      "xp": 8120,
+      "minionsKilled": 91,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 11250
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 5846,
+      "currentGold": 220,
+      "level": 8,
+      "xp": 8120,
+      "minionsKilled": 91,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 11300
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 5859,
+      "currentGold": 251,
+      "level": 8,
+      "xp": 8120,
+      "minionsKilled": 91,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 11350
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 5872,
+      "currentGold": 282,
+      "level": 8,
+      "xp": 8120,
+      "minionsKilled": 91,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 11400
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 5885,
+      "currentGold": 313,
+      "level": 8,
+      "xp": 8120,
+      "minionsKilled": 91,
+      "jungleMinionsKilled": 56,
+      "totalDamageDoneToChampions": 11450
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 5898,
+      "currentGold": 344,
+      "level": 8,
+      "xp": 8120,
+      "minionsKilled": 91,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 11500
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 5911,
+      "currentGold": 375,
+      "level": 8,
+      "xp": 8120,
+      "minionsKilled": 91,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 11550
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 5924,
+      "currentGold": 406,
+      "level": 8,
+      "xp": 8120,
+      "minionsKilled": 91,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 11600
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 5937,
+      "currentGold": 437,
+      "level": 8,
+      "xp": 8120,
+      "minionsKilled": 91,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 11650
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 5950,
+      "currentGold": 468,
+      "level": 8,
+      "xp": 8120,
+      "minionsKilled": 91,
+      "jungleMinionsKilled": 56,
+      "totalDamageDoneToChampions": 11700
+     }
+    },
+    "events": [
+     {
+      "type": "ITEM_PURCHASED",
+      "timestamp": 842500,
+      "participantId": 3,
+      "itemId": 3031
+     }
+    ]
+   },
+   {
+    "timestamp": 900000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 6213,
+      "currentGold": 286,
+      "level": 9,
+      "xp": 8700,
+      "minionsKilled": 97,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 12050
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 6226,
+      "currentGold": 317,
+      "level": 9,
+      "xp": 8700,
+      "minionsKilled": 97,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 12100
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 6239,
+      "currentGold": 348,
+      "level": 9,
+      "xp": 8700,
+      "minionsKilled": 97,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 12150
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 6252,
+      "currentGold": 379,
+      "level": 9,
+      "xp": 8700,
+      "minionsKilled": 97,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 12200
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 6265,
+      "currentGold": 410,
+      "level": 9,
+      "xp": 8700,
+      "minionsKilled": 97,
+      "jungleMinionsKilled": 60,
+      "totalDamageDoneToChampions": 12250
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 6278,
+      "currentGold": 441,
+      "level": 9,
+      "xp": 8700,
+      "minionsKilled": 97,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 12300
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 6291,
+      "currentGold": 472,
+      "level": 9,
+      "xp": 8700,
+      "minionsKilled": 97,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 12350
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 6304,
+      "currentGold": 503,
+      "level": 9,
+      "xp": 8700,
+      "minionsKilled": 97,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 12400
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 6317,
+      "currentGold": 534,
+      "level": 9,
+      "xp": 8700,
+      "minionsKilled": 97,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 12450
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 6330,
+      "currentGold": 565,
+      "level": 9,
+      "xp": 8700,
+      "minionsKilled": 97,
+      "jungleMinionsKilled": 60,
+      "totalDamageDoneToChampions": 12500
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 960000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 6593,
+      "currentGold": 383,
+      "level": 9,
+      "xp": 9280,
+      "minionsKilled": 104,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 12850
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 6606,
+      "currentGold": 414,
+      "level": 9,
+      "xp": 9280,
+      "minionsKilled": 104,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 12900
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 6619,
+      "currentGold": 445,
+      "level": 9,
+      "xp": 9280,
+      "minionsKilled": 104,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 12950
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 6632,
+      "currentGold": 476,
+      "level": 9,
+      "xp": 9280,
+      "minionsKilled": 104,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 13000
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 6645,
+      "currentGold": 507,
+      "level": 9,
+      "xp": 9280,
+      "minionsKilled": 104,
+      "jungleMinionsKilled": 64,
+      "totalDamageDoneToChampions": 13050
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 6658,
+      "currentGold": 538,
+      "level": 9,
+      "xp": 9280,
+      "minionsKilled": 104,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 13100
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 6671,
+      "currentGold": 569,
+      "level": 9,
+      "xp": 9280,
+      "minionsKilled": 104,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 13150
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 6684,
+      "currentGold": 600,
+      "level": 9,
+      "xp": 9280,
+      "minionsKilled": 104,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 13200
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 6697,
+      "currentGold": 631,
+      "level": 9,
+      "xp": 9280,
+      "minionsKilled": 104,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 13250
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 6710,
+      "currentGold": 662,
+      "level": 9,
+      "xp": 9280,
+      "minionsKilled": 104,
+      "jungleMinionsKilled": 64,
+      "totalDamageDoneToChampions": 13300
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 1020000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 6973,
+      "currentGold": 480,
+      "level": 10,
+      "xp": 9860,
+      "minionsKilled": 110,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 13650
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 6986,
+      "currentGold": 511,
+      "level": 10,
+      "xp": 9860,
+      "minionsKilled": 110,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 13700
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 6999,
+      "currentGold": 542,
+      "level": 10,
+      "xp": 9860,
+      "minionsKilled": 110,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 13750
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 7012,
+      "currentGold": 573,
+      "level": 10,
+      "xp": 9860,
+      "minionsKilled": 110,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 13800
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 7025,
+      "currentGold": 604,
+      "level": 10,
+      "xp": 9860,
+      "minionsKilled": 110,
+      "jungleMinionsKilled": 68,
+      "totalDamageDoneToChampions": 13850
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 7038,
+      "currentGold": 635,
+      "level": 10,
+      "xp": 9860,
+      "minionsKilled": 110,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 13900
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 7051,
+      "currentGold": 666,
+      "level": 10,
+      "xp": 9860,
+      "minionsKilled": 110,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 13950
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 7064,
+      "currentGold": 697,
+      "level": 10,
+      "xp": 9860,
+      "minionsKilled": 110,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 14000
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 7077,
+      "currentGold": 728,
+      "level": 10,
+      "xp": 9860,
+      "minionsKilled": 110,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 14050
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 7090,
+      "currentGold": 759,
+      "level": 10,
+      "xp": 9860,
+      "minionsKilled": 110,
+      "jungleMinionsKilled": 68,
+      "totalDamageDoneToChampions": 14100
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 1080000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 7353,
+      "currentGold": 577,
+      "level": 10,
+      "xp": 10440,
+      "minionsKilled": 117,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 14450
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 7366,
+      "currentGold": 608,
+      "level": 10,
+      "xp": 10440,
+      "minionsKilled": 117,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 14500
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 7379,
+      "currentGold": 639,
+      "level": 10,
+      "xp": 10440,
+      "minionsKilled": 117,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 14550
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 7392,
+      "currentGold": 670,
+      "level": 10,
+      "xp": 10440,
+      "minionsKilled": 117,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 14600
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 7405,
+      "currentGold": 701,
+      "level": 10,
+      "xp": 10440,
+      "minionsKilled": 117,
+      "jungleMinionsKilled": 72,
+      "totalDamageDoneToChampions": 14650
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 7418,
+      "currentGold": 732,
+      "level": 10,
+      "xp": 10440,
+      "minionsKilled": 117,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 14700
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 7431,
+      "currentGold": 763,
+      "level": 10,
+      "xp": 10440,
+      "minionsKilled": 117,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 14750
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 7444,
+      "currentGold": 794,
+      "level": 10,
+      "xp": 10440,
+      "minionsKilled": 117,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 14800
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 7457,
+      "currentGold": 825,
+      "level": 10,
+      "xp": 10440,
+      "minionsKilled": 117,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 14850
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 7470,
+      "currentGold": 856,
+      "level": 10,
+      "xp": 10440,
+      "minionsKilled": 117,
+      "jungleMinionsKilled": 72,
+      "totalDamageDoneToChampions": 14900
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 1140000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 7733,
+      "currentGold": 674,
+      "level": 11,
+      "xp": 11020,
+      "minionsKilled": 123,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 15250
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 7746,
+      "currentGold": 705,
+      "level": 11,
+      "xp": 11020,
+      "minionsKilled": 123,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 15300
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 7759,
+      "currentGold": 736,
+      "level": 11,
+      "xp": 11020,
+      "minionsKilled": 123,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 15350
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 7772,
+      "currentGold": 767,
+      "level": 11,
+      "xp": 11020,
+      "minionsKilled": 123,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 15400
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 7785,
+      "currentGold": 798,
+      "level": 11,
+      "xp": 11020,
+      "minionsKilled": 123,
+      "jungleMinionsKilled": 76,
+      "totalDamageDoneToChampions": 15450
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 7798,
+      "currentGold": 829,
+      "level": 11,
+      "xp": 11020,
+      "minionsKilled": 123,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 15500
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 7811,
+      "currentGold": 860,
+      "level": 11,
+      "xp": 11020,
+      "minionsKilled": 123,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 15550
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 7824,
+      "currentGold": 891,
+      "level": 11,
+      "xp": 11020,
+      "minionsKilled": 123,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 15600
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 7837,
+      "currentGold": 922,
+      "level": 11,
+      "xp": 11020,
+      "minionsKilled": 123,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 15650
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 7850,
+      "currentGold": 953,
+      "level": 11,
+      "xp": 11020,
+      "minionsKilled": 123,
+      "jungleMinionsKilled": 76,
+      "totalDamageDoneToChampions": 15700
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 1200000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 8113,
+      "currentGold": 771,
+      "level": 12,
+      "xp": 11600,
+      "minionsKilled": 130,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 16050
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 8126,
+      "currentGold": 802,
+      "level": 12,
+      "xp": 11600,
+      "minionsKilled": 130,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 16100
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 8139,
+      "currentGold": 833,
+      "level": 12,
+      "xp": 11600,
+      "minionsKilled": 130,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 16150
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 8152,
+      "currentGold": 864,
+      "level": 12,
+      "xp": 11600,
+      "minionsKilled": 130,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 16200
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 8165,
+      "currentGold": 895,
+      "level": 12,
+      "xp": 11600,
+      "minionsKilled": 130,
+      "jungleMinionsKilled": 80,
+      "totalDamageDoneToChampions": 16250
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 8178,
+      "currentGold": 926,
+      "level": 12,
+      "xp": 11600,
+      "minionsKilled": 130,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 16300
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 8191,
+      "currentGold": 957,
+      "level": 12,
+      "xp": 11600,
+      "minionsKilled": 130,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 16350
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 8204,
+      "currentGold": 988,
+      "level": 12,
+      "xp": 11600,
+      "minionsKilled": 130,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 16400
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 8217,
+      "currentGold": 1019,
+      "level": 12,
+      "xp": 11600,
+      "minionsKilled": 130,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 16450
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 8230,
+      "currentGold": 1050,
+      "level": 12,
+      "xp": 11600,
+      "minionsKilled": 130,
+      "jungleMinionsKilled": 80,
+      "totalDamageDoneToChampions": 16500
+     }
+    },
+    "events": [
+     {
+      "type": "BUILDING_KILL",
+      "timestamp": 1211000,
+      "killerId": 1,
+      "buildingType": "TOWER_BUILDING",
+      "teamId": 200
+     }
+    ]
+   },
+   {
+    "timestamp": 1260000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 8493,
+      "currentGold": 868,
+      "level": 12,
+      "xp": 12180,
+      "minionsKilled": 136,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 16850
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 8506,
+      "currentGold": 899,
+      "level": 12,
+      "xp": 12180,
+      "minionsKilled": 136,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 16900
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 8519,
+      "currentGold": 930,
+      "level": 12,
+      "xp": 12180,
+      "minionsKilled": 136,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 16950
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 8532,
+      "currentGold": 961,
+      "level": 12,
+      "xp": 12180,
+      "minionsKilled": 136,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 17000
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 8545,
+      "currentGold": 992,
+      "level": 12,
+      "xp": 12180,
+      "minionsKilled": 136,
+      "jungleMinionsKilled": 84,
+      "totalDamageDoneToChampions": 17050
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 8558,
+      "currentGold": 1023,
+      "level": 12,
+      "xp": 12180,
+      "minionsKilled": 136,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 17100
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 8571,
+      "currentGold": 1054,
+      "level": 12,
+      "xp": 12180,
+      "minionsKilled": 136,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 17150
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 8584,
+      "currentGold": 1085,
+      "level": 12,
+      "xp": 12180,
+      "minionsKilled": 136,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 17200
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 8597,
+      "currentGold": 1116,
+      "level": 12,
+      "xp": 12180,
+      "minionsKilled": 136,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 17250
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 8610,
+      "currentGold": 1147,
+      "level": 12,
+      "xp": 12180,
+      "minionsKilled": 136,
+      "jungleMinionsKilled": 84,
+      "totalDamageDoneToChampions": 17300
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 1320000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 8873,
+      "currentGold": 965,
+      "level": 13,
+      "xp": 12760,
+      "minionsKilled": 143,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 17650
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 8886,
+      "currentGold": 996,
+      "level": 13,
+      "xp": 12760,
+      "minionsKilled": 143,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 17700
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 8899,
+      "currentGold": 1027,
+      "level": 13,
+      "xp": 12760,
+      "minionsKilled": 143,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 17750
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 8912,
+      "currentGold": 1058,
+      "level": 13,
+      "xp": 12760,
+      "minionsKilled": 143,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 17800
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 8925,
+      "currentGold": 1089,
+      "level": 13,
+      "xp": 12760,
+      "minionsKilled": 143,
+      "jungleMinionsKilled": 88,
+      "totalDamageDoneToChampions": 17850
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 8938,
+      "currentGold": 1120,
+      "level": 13,
+      "xp": 12760,
+      "minionsKilled": 143,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 17900
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 8951,
+      "currentGold": 1151,
+      "level": 13,
+      "xp": 12760,
+      "minionsKilled": 143,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 17950
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 8964,
+      "currentGold": 1182,
+      "level": 13,
+      "xp": 12760,
+      "minionsKilled": 143,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 18000
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 8977,
+      "currentGold": 1213,
+      "level": 13,
+      "xp": 12760,
+      "minionsKilled": 143,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 18050
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 8990,
+      "currentGold": 1244,
+      "level": 13,
+      "xp": 12760,
+      "minionsKilled": 143,
+      "jungleMinionsKilled": 88,
+      "totalDamageDoneToChampions": 18100
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 1380000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 9253,
+      "currentGold": 1062,
+      "level": 13,
+      "xp": 13340,
+      "minionsKilled": 149,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 18450
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 9266,
+      "currentGold": 1093,
+      "level": 13,
+      "xp": 13340,
+      "minionsKilled": 149,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 18500
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 9279,
+      "currentGold": 1124,
+      "level": 13,
+      "xp": 13340,
+      "minionsKilled": 149,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 18550
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 9292,
+      "currentGold": 1155,
+      "level": 13,
+      "xp": 13340,
+      "minionsKilled": 149,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 18600
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 9305,
+      "currentGold": 1186,
+      "level": 13,
+      "xp": 13340,
+      "minionsKilled": 149,
+      "jungleMinionsKilled": 92,
+      "totalDamageDoneToChampions": 18650
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 9318,
+      "currentGold": 1217,
+      "level": 13,
+      "xp": 13340,
+      "minionsKilled": 149,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 18700
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 9331,
+      "currentGold": 1248,
+      "level": 13,
+      "xp": 13340,
+      "minionsKilled": 149,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 18750
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 9344,
+      "currentGold": 1279,
+      "level": 13,
+      "xp": 13340,
+      "minionsKilled": 149,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 18800
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 9357,
+      "currentGold": 1310,
+      "level": 13,
+      "xp": 13340,
+      "minionsKilled": 149,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 18850
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 9370,
+      "currentGold": 1341,
+      "level": 13,
+      "xp": 13340,
+      "minionsKilled": 149,
+      "jungleMinionsKilled": 92,
+      "totalDamageDoneToChampions": 18900
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 1440000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 9633,
+      "currentGold": 1159,
+      "level": 14,
+      "xp": 13920,
+      "minionsKilled": 156,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 19250
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 9646,
+      "currentGold": 1190,
+      "level": 14,
+      "xp": 13920,
+      "minionsKilled": 156,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 19300
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 9659,
+      "currentGold": 1221,
+      "level": 14,
+      "xp": 13920,
+      "minionsKilled": 156,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 19350
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 9672,
+      "currentGold": 1252,
+      "level": 14,
+      "xp": 13920,
+      "minionsKilled": 156,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 19400
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 9685,
+      "currentGold": 1283,
+      "level": 14,
+      "xp": 13920,
+      "minionsKilled": 156,
+      "jungleMinionsKilled": 96,
+      "totalDamageDoneToChampions": 19450
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 9698,
+      "currentGold": 1314,
+      "level": 14,
+      "xp": 13920,
+      "minionsKilled": 156,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 19500
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 9711,
+      "currentGold": 1345,
+      "level": 14,
+      "xp": 13920,
+      "minionsKilled": 156,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 19550
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 9724,
+      "currentGold": 1376,
+      "level": 14,
+      "xp": 13920,
+      "minionsKilled": 156,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 19600
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 9737,
+      "currentGold": 1407,
+      "level": 14,
+      "xp": 13920,
+      "minionsKilled": 156,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 19650
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 9750,
+      "currentGold": 1438,
+      "level": 14,
+      "xp": 13920,
+      "minionsKilled": 156,
+      "jungleMinionsKilled": 96,
+      "totalDamageDoneToChampions": 19700
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 1500000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 10013,
+      "currentGold": 1256,
+      "level": 14,
+      "xp": 14500,
+      "minionsKilled": 162,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 20050
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 10026,
+      "currentGold": 1287,
+      "level": 14,
+      "xp": 14500,
+      "minionsKilled": 162,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 20100
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 10039,
+      "currentGold": 1318,
+      "level": 14,
+      "xp": 14500,
+      "minionsKilled": 162,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 20150
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 10052,
+      "currentGold": 1349,
+      "level": 14,
+      "xp": 14500,
+      "minionsKilled": 162,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 20200
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 10065,
+      "currentGold": 1380,
+      "level": 14,
+      "xp": 14500,
+      "minionsKilled": 162,
+      "jungleMinionsKilled": 100,
+      "totalDamageDoneToChampions": 20250
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 10078,
+      "currentGold": 1411,
+      "level": 14,
+      "xp": 14500,
+      "minionsKilled": 162,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 20300
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 10091,
+      "currentGold": 1442,
+      "level": 14,
+      "xp": 14500,
+      "minionsKilled": 162,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 20350
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 10104,
+      "currentGold": 1473,
+      "level": 14,
+      "xp": 14500,
+      "minionsKilled": 162,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 20400
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 10117,
+      "currentGold": 1504,
+      "level": 14,
+      "xp": 14500,
+      "minionsKilled": 162,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 20450
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 10130,
+      "currentGold": 1535,
+      "level": 14,
+      "xp": 14500,
+      "minionsKilled": 162,
+      "jungleMinionsKilled": 100,
+      "totalDamageDoneToChampions": 20500
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 1560000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 10393,
+      "currentGold": 1353,
+      "level": 15,
+      "xp": 15080,
+      "minionsKilled": 169,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 20850
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 10406,
+      "currentGold": 1384,
+      "level": 15,
+      "xp": 15080,
+      "minionsKilled": 169,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 20900
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 10419,
+      "currentGold": 1415,
+      "level": 15,
+      "xp": 15080,
+      "minionsKilled": 169,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 20950
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 10432,
+      "currentGold": 1446,
+      "level": 15,
+      "xp": 15080,
+      "minionsKilled": 169,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 21000
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 10445,
+      "currentGold": 1477,
+      "level": 15,
+      "xp": 15080,
+      "minionsKilled": 169,
+      "jungleMinionsKilled": 104,
+      "totalDamageDoneToChampions": 21050
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 10458,
+      "currentGold": 1508,
+      "level": 15,
+      "xp": 15080,
+      "minionsKilled": 169,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 21100
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 10471,
+      "currentGold": 1539,
+      "level": 15,
+      "xp": 15080,
+      "minionsKilled": 169,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 21150
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 10484,
+      "currentGold": 1570,
+      "level": 15,
+      "xp": 15080,
+      "minionsKilled": 169,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 21200
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 10497,
+      "currentGold": 201,
+      "level": 15,
+      "xp": 15080,
+      "minionsKilled": 169,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 21250
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 10510,
+      "currentGold": 232,
+      "level": 15,
+      "xp": 15080,
+      "minionsKilled": 169,
+      "jungleMinionsKilled": 104,
+      "totalDamageDoneToChampions": 21300
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 1620000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 10773,
+      "currentGold": 1450,
+      "level": 15,
+      "xp": 15660,
+      "minionsKilled": 175,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 21650
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 10786,
+      "currentGold": 1481,
+      "level": 15,
+      "xp": 15660,
+      "minionsKilled": 175,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 21700
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 10799,
+      "currentGold": 1512,
+      "level": 15,
+      "xp": 15660,
+      "minionsKilled": 175,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 21750
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 10812,
+      "currentGold": 1543,
+      "level": 15,
+      "xp": 15660,
+      "minionsKilled": 175,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 21800
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 10825,
+      "currentGold": 1574,
+      "level": 15,
+      "xp": 15660,
+      "minionsKilled": 175,
+      "jungleMinionsKilled": 108,
+      "totalDamageDoneToChampions": 21850
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 10838,
+      "currentGold": 205,
+      "level": 15,
+      "xp": 15660,
+      "minionsKilled": 175,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 21900
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 10851,
+      "currentGold": 236,
+      "level": 15,
+      "xp": 15660,
+      "minionsKilled": 175,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 21950
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 10864,
+      "currentGold": 267,
+      "level": 15,
+      "xp": 15660,
+      "minionsKilled": 175,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 22000
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 10877,
+      "currentGold": 298,
+      "level": 15,
+      "xp": 15660,
+      "minionsKilled": 175,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 22050
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 10890,
+      "currentGold": 329,
+      "level": 15,
+      "xp": 15660,
+      "minionsKilled": 175,
+      "jungleMinionsKilled": 108,
+      "totalDamageDoneToChampions": 22100
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 1680000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 11153,
+      "currentGold": 1547,
+      "level": 16,
+      "xp": 16240,
+      "minionsKilled": 182,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 22450
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 11166,
+      "currentGold": 1578,
+      "level": 16,
+      "xp": 16240,
+      "minionsKilled": 182,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 22500
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 11179,
+      "currentGold": 209,
+      "level": 16,
+      "xp": 16240,
+      "minionsKilled": 182,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 22550
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 11192,
+      "currentGold": 240,
+      "level": 16,
+      "xp": 16240,
+      "minionsKilled": 182,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 22600
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 11205,
+      "currentGold": 271,
+      "level": 16,
+      "xp": 16240,
+      "minionsKilled": 182,
+      "jungleMinionsKilled": 112,
+      "totalDamageDoneToChampions": 22650
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 11218,
+      "currentGold": 302,
+      "level": 16,
+      "xp": 16240,
+      "minionsKilled": 182,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 22700
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 11231,
+      "currentGold": 333,
+      "level": 16,
+      "xp": 16240,
+      "minionsKilled": 182,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 22750
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 11244,
+      "currentGold": 364,
+      "level": 16,
+      "xp": 16240,
+      "minionsKilled": 182,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 22800
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 11257,
+      "currentGold": 395,
+      "level": 16,
+      "xp": 16240,
+      "minionsKilled": 182,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 22850
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 11270,
+      "currentGold": 426,
+      "level": 16,
+      "xp": 16240,
+      "minionsKilled": 182,
+      "jungleMinionsKilled": 112,
+      "totalDamageDoneToChampions": 22900
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 1740000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 11533,
+      "currentGold": 244,
+      "level": 16,
+      "xp": 16820,
+      "minionsKilled": 188,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 23250
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 11546,
+      "currentGold": 275,
+      "level": 16,
+      "xp": 16820,
+      "minionsKilled": 188,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 23300
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 11559,
+      "currentGold": 306,
+      "level": 16,
+      "xp": 16820,
+      "minionsKilled": 188,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 23350
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 11572,
+      "currentGold": 337,
+      "level": 16,
+      "xp": 16820,
+      "minionsKilled": 188,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 23400
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 11585,
+      "currentGold": 368,
+      "level": 16,
+      "xp": 16820,
+      "minionsKilled": 188,
+      "jungleMinionsKilled": 116,
+      "totalDamageDoneToChampions": 23450
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 11598,
+      "currentGold": 399,
+      "level": 16,
+      "xp": 16820,
+      "minionsKilled": 188,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 23500
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 11611,
+      "currentGold": 430,
+      "level": 16,
+      "xp": 16820,
+      "minionsKilled": 188,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 23550
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 11624,
+      "currentGold": 461,
+      "level": 16,
+      "xp": 16820,
+      "minionsKilled": 188,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 23600
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 11637,
+      "currentGold": 492,
+      "level": 16,
+      "xp": 16820,
+      "minionsKilled": 188,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 23650
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 11650,
+      "currentGold": 523,
+      "level": 16,
+      "xp": 16820,
+      "minionsKilled": 188,
+      "jungleMinionsKilled": 116,
+      "totalDamageDoneToChampions": 23700
+     }
+    },
+    "events": []
+   },
+   {
+    "timestamp": 1800000,
+    "participantFrames": {
+     "1": {
+      "participantId": 1,
+      "totalGold": 11913,
+      "currentGold": 341,
+      "level": 17,
+      "xp": 17400,
+      "minionsKilled": 195,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 24050
+     },
+     "2": {
+      "participantId": 2,
+      "totalGold": 11926,
+      "currentGold": 372,
+      "level": 17,
+      "xp": 17400,
+      "minionsKilled": 195,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 24100
+     },
+     "3": {
+      "participantId": 3,
+      "totalGold": 11939,
+      "currentGold": 403,
+      "level": 17,
+      "xp": 17400,
+      "minionsKilled": 195,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 24150
+     },
+     "4": {
+      "participantId": 4,
+      "totalGold": 11952,
+      "currentGold": 434,
+      "level": 17,
+      "xp": 17400,
+      "minionsKilled": 195,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 24200
+     },
+     "5": {
+      "participantId": 5,
+      "totalGold": 11965,
+      "currentGold": 465,
+      "level": 17,
+      "xp": 17400,
+      "minionsKilled": 195,
+      "jungleMinionsKilled": 120,
+      "totalDamageDoneToChampions": 24250
+     },
+     "6": {
+      "participantId": 6,
+      "totalGold": 11978,
+      "currentGold": 496,
+      "level": 17,
+      "xp": 17400,
+      "minionsKilled": 195,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 24300
+     },
+     "7": {
+      "participantId": 7,
+      "totalGold": 11991,
+      "currentGold": 527,
+      "level": 17,
+      "xp": 17400,
+      "minionsKilled": 195,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 24350
+     },
+     "8": {
+      "participantId": 8,
+      "totalGold": 12004,
+      "currentGold": 558,
+      "level": 17,
+      "xp": 17400,
+      "minionsKilled": 195,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 24400
+     },
+     "9": {
+      "participantId": 9,
+      "totalGold": 12017,
+      "currentGold": 589,
+      "level": 17,
+      "xp": 17400,
+      "minionsKilled": 195,
+      "jungleMinionsKilled": 0,
+      "totalDamageDoneToChampions": 24450
+     },
+     "10": {
+      "participantId": 10,
+      "totalGold": 12030,
+      "currentGold": 620,
+      "level": 17,
+      "xp": 17400,
+      "minionsKilled": 195,
+      "jungleMinionsKilled": 120,
+      "totalDamageDoneToChampions": 24500
+     }
+    },
+    "events": []
+   }
+  ],
+  "gameId": 7000000001,
+  "participants": [
+   {
+    "participantId": 1,
+    "puuid": "PUUID_PLAYER_1"
+   },
+   {
+    "participantId": 2,
+    "puuid": "PUUID_PLAYER_2"
+   },
+   {
+    "participantId": 3,
+    "puuid": "PUUID_PLAYER_3"
+   },
+   {
+    "participantId": 4,
+    "puuid": "PUUID_PLAYER_4"
+   },
+   {
+    "participantId": 5,
+    "puuid": "PUUID_PLAYER_5"
+   },
+   {
+    "participantId": 6,
+    "puuid": "PUUID_PLAYER_6"
+   },
+   {
+    "participantId": 7,
+    "puuid": "PUUID_PLAYER_7"
+   },
+   {
+    "participantId": 8,
+    "puuid": "PUUID_PLAYER_8"
+   },
+   {
+    "participantId": 9,
+    "puuid": "PUUID_PLAYER_9"
+   },
+   {
+    "participantId": 10,
+    "puuid": "PUUID_PLAYER_10"
+   }
+  ]
+ }
+}

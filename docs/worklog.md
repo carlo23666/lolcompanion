@@ -1,6 +1,19 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-02 — WP-004 — Riot API client + rate limiter + history ingestion
+**Done:** `src/main/riot/` — `RiotRateLimiter` (token buckets for app limits 20/1s + 100/120s AND per-method limits, fixed windows; priority queue with no head-of-line blocking across methods; `Retry-After` honored on 429 with replay through the queue so retries consume fresh tokens; 403 → persistent `RiotKeyInvalidError`, everything fails fast until `reset()`, no retry storm). Typed `RiotClient` (account-v1 by-riot-id, match-v5 ids/match/timeline, league-v4 entries by-puuid) with platform→regional routing map, zod validation of every payload (`src/shared/schemas/riot.ts`), `Result`-style returns, API key only in the `X-Riot-Token` header and never in error messages. Resumable `ingestHistory` walking matchlist newest→oldest, skipping stored ids (resume = skip, no re-download), owner-centric `matches.win`, progress via `ingest:progress` IPC. Settings (riotId/platform/puuid cache) in the meta table; `ingest:start`/`settings:get`/`settings:set` IPC; renderer settings stub with sync button + progress bar. Zero-dep `.env` loader (`src/main/env.ts`). 18 new tests (limiter with fake timers incl. burst/120s window/429 replay/method independence/priority/403; client against fixtures; ingestion store/resume/fail/cancel/maxMatches).
+
+**Deviations:**
+- Match + timeline fixtures are **synthetic but shape-accurate** (anonymized PLAYER_1..10): no API key available in this session to record real ones. Owner: after configuring `.env`, run one sync and consider re-recording fixtures from a real response (INBOX).
+- Per-method limits use conservative defaults (200/10s for match-v5) rather than parsing `X-Method-Rate-Limit` response headers dynamically; noted in INBOX as an improvement.
+- `maxMatches` for the UI sync is set to 200 per the acceptance criterion ("last 200 matches").
+- Renamed `src/main/env.d.ts` → `src/main/modules.d.ts` (new `env.ts` shadowed the declaration file with the same basename).
+
+**Gaps (owner):** real 200-match sync (needs `.env` key), invalid-key UI path visually confirmed (logic tested).
+
+**Files:** src/main/riot/{limiter,client,ingest,index}.ts, src/shared/schemas/riot.ts, src/main/env.ts, src/main/modules.d.ts, src/main/db/repos/settings.ts, src/shared/ipc.ts, src/preload/index.ts, src/main/index.ts, src/renderer/src/{SettingsStub.tsx,App.tsx}, fixtures/riot/{match,timeline}.json, tests/main/riot-*.test.ts.
+
 ## 2026-07-02 — WP-003 — SQLite store + schema
 **Done:** migration 002 creating `matches`, `participants` (items0-6 + kda/cs/gold/damage/vision aggregates), `timelines`, `live_sessions`, `live_snapshots`, with indices on participants.champion, participants.puuid, matches.gameCreation, all STRICT tables with FK cascade. Repo layer `src/main/db/repos/` (`MatchRepo`, `TimelineRepo`, `LiveSessionRepo`) — idempotent inserts via INSERT OR IGNORE inside transactions, no SQL outside repos. Live Client wired to persist every validated snapshot into live_sessions/live_snapshots (`LiveSessionPersister`: new session on game-time reset, session closed when port drops; file recorder unchanged for fixtures). 10 new tests: round-trips for every table, idempotency, champion/recency queries, session lifecycle, and a 900-snapshot size check.
 

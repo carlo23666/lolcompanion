@@ -1,8 +1,10 @@
 import { join } from 'node:path'
 import { app, BrowserWindow } from 'electron'
 import { openDatabase, type AppDatabase } from './db'
+import { loadDotEnv } from './env'
 import { handleInvoke } from './ipc'
 import { startLiveClient, type LiveClientPoller } from './liveclient'
+import { registerRiotIpc } from './riot'
 
 let db: AppDatabase | null = null
 let liveClient: LiveClientPoller | null = null
@@ -33,8 +35,10 @@ function registerIpcHandlers(): void {
 }
 
 void app.whenReady().then(() => {
+  loadDotEnv(app.getAppPath())
   db = openDatabase(join(app.getPath('userData'), 'lol-companion.db'))
   registerIpcHandlers()
+  registerRiotIpc(db)
   liveClient = startLiveClient(db)
   createWindow()
 

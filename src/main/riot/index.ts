@@ -1,0 +1,90 @@
+import type { AppDatabase } from '../db'
+import { MatchRepo, TimelineRepo } from '../db/repos'
+import { SettingsRepo, SETTING_KEYS } from '../db/repos/settings'
+import { broadcast, handleInvoke } from '../ipc'
+import { RiotClient } from './client'
+import { ingestHistory } from './ingest'
+import { RiotRateLimiter } from './limiter'
+
+export { RiotClient, RiotApiError, PLATFORM_TO_REGIONAL } from './client'
+export type { Result, RiotErrorKind } from './client'
+export { RiotRateLimiter, APP_LIMITS, DEFAULT_METHOD_LIMITS } from './limiter'
+export { ingestHistory, matchToRows } from './ingest'
+export type { IngestProgress } from './ingest'
+
+let ingestRunning = false
+// One limiter per app lifetime so all Riot traffic shares the same buckets.
+const limiter = new RiotRateLimiter()
+
+export function registerRiotIpc(db: AppDatabase): void {
+  const settings = new SettingsRepo(db)
+
+  handleInvoke('settings:get', () => ({
+    riotId: settings.get(SETTING_KEYS.riotId),
+    platform: settings.get(SETTING_KEYS.platform) ?? 'euw1'
+  }))
+
+  handleInvoke('settings:set', (update) => {
+    settings.set(SETTING_KEYS.riotId, update.riotId)
+    settings.set(SETTING_KEYS.platform, update.platform)
+    // riotId changed → cached puuid no longer valid.
+    settings.set(SETTING_KEYS.puuid, '')
+    limiter.reset()
+    return { saved: true as const }
+  })
+
+  handleInvoke('ingest:start', async () => {
+    if (ingestRunning) return { started: false as const, error: 'Sincronización ya en curso' }
+
+    const apiKey = process.env['RIOT_API_KEY']
+    if (apiKey === undefined || apiKey === '') {
+      return {
+        started: false as const,
+        error: 'Falta RIOT_API_KEY en .env (ver .env.example)'
+      }
+    }
+    const riotId = settings.get(SETTING_KEYS.riotId)
+    if (riotId === null || !riotId.includes('#')) {
+      return { started: false as const, error: 'Configura tu Riot ID (nombre#TAG) primero' }
+    }
+    const platform = settings.get(SETTING_KEYS.platform) ?? 'euw1'
+    const client = new RiotClient({ apiKey, platform, limiter })
+
+    const [gameName = '', tagLine = ''] = riotId.split('#', 2)
+    let puuid = settings.get(SETTING_KEYS.puuid)
+    if (puuid === null || puuid === '') {
+      const account = await client.accountByRiotId(gameName, tagLine)
+      if (!account.ok) {
+        return { started: false as const, error: `Cuenta no encontrada: ${account.error.message}` }
+      }
+      puuid = account.value.puuid
+      settings.set(SETTING_KEYS.puuid, puuid)
+    }
+
+    ingestRunning = true
+    const resolvedPuuid = puuid
+    void ingestHistory({
+      client,
+      matchRepo: new MatchRepo(db),
+      timelineRepo: new TimelineRepo(db),
+      puuid: resolvedPuuid,
+      maxMatches: 200,
+      onProgress: (progress) => broadcast('ingest:progress', progress)
+    })
+      .catch((error: unknown) => {
+        broadcast('ingest:progress', {
+          fetched: 0,
+          stored: 0,
+          skipped: 0,
+          failed: 0,
+          done: false,
+          error: error instanceof Error ? error.message : String(error)
+        })
+      })
+      .finally(() => {
+        ingestRunning = false
+      })
+
+    return { started: true as const }
+  })
+}
