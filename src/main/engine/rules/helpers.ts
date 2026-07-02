@@ -31,6 +31,14 @@ export function firstAvailable(
   return null
 }
 
+/** All ids of the list that exist and are purchasable on SR this patch. */
+export function availableOptions(
+  staticData: StaticData,
+  itemIds: readonly number[]
+): number[] {
+  return itemIds.filter((id) => staticData.itemGraph.nodes.get(id)?.availableOnSR === true)
+}
+
 export function clampScore(score: number): number {
   return Math.max(0, Math.min(100, Math.round(score)))
 }

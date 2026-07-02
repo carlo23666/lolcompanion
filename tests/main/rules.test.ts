@@ -90,14 +90,16 @@ describe('rule: antiheal', () => {
 })
 
 describe('rule: armor-vs-mr', () => {
-  it('recommends armor against the 80% physical enemy comp', () => {
+  it('recommends every squishy armor option against the 80% physical comp, preferred first', () => {
     const outputs = armorVsMrRule(mid, staticData)
-    expect(outputs).toHaveLength(1)
-    const output = outputs[0]
-    expect(output?.category).toBe('armadura')
-    // Jinx (Marksman) → squishy options, GA first.
-    expect(output?.itemId).toBe(3026)
-    expect(output?.reasons[0]).toMatch(/El \d+% del daño enemigo estimado es físico/)
+    // Jinx (Marksman) → squishy options: GA preferred, Zhonya as alternative.
+    expect(outputs.map((o) => o.itemId)).toEqual([3026, 3157])
+    const [preferred, alternative] = outputs
+    expect(preferred?.category).toBe('armadura')
+    expect(preferred?.reasons[0]).toMatch(/El \d+% del daño enemigo estimado es físico/)
+    // Same advice on both outputs, alternative ranked just below.
+    expect(alternative?.reasons).toEqual(preferred?.reasons)
+    expect(alternative?.score).toBeLessThan(preferred?.score ?? 0)
   })
 
   it('recommends tank armor items for a tank self', () => {
@@ -105,6 +107,7 @@ describe('rule: armor-vs-mr', () => {
     tankSelf.self.championId = 'Malphite' // Tank tag
     const outputs = armorVsMrRule(tankSelf, staticData)
     expect(outputs[0]?.itemId).toBe(3075)
+    expect(outputs.length).toBeGreaterThan(1)
   })
 
   it('recommends MR when magic damage dominates', () => {
@@ -112,8 +115,18 @@ describe('rule: armor-vs-mr', () => {
     magicComp.enemyAggregates.physicalShare = 0.3
     magicComp.enemyAggregates.magicShare = 0.7
     const outputs = armorVsMrRule(magicComp, staticData)
-    expect(outputs).toHaveLength(1)
-    expect(outputs[0]?.category).toBe('resistencia mágica')
+    expect(outputs.length).toBeGreaterThan(0)
+    expect(outputs.every((o) => o.category === 'resistencia mágica')).toBe(true)
+  })
+
+  it('goes silent when self already owns any option of the advised class', () => {
+    // Real-world capture (2026-07-02): owner had Zhonya, the rule kept
+    // recommending GA — and kept firing after buying GA too.
+    const covered = structuredClone(mid)
+    covered.self.items.push(makeItem(3157, staticData)) // Zhonya owned
+    expect(armorVsMrRule(covered, staticData)).toEqual([])
+    covered.self.items.push(makeItem(3026, staticData)) // both owned
+    expect(armorVsMrRule(covered, staticData)).toEqual([])
   })
 
   it('stays silent on an even damage split', () => {
@@ -127,12 +140,12 @@ describe('rule: armor-vs-mr', () => {
 describe('rule: anti-tank', () => {
   it('triggers on the late-game raid boss (Aatrox, ~7600 eHP)', () => {
     const outputs = antiTankRule(late, staticData)
-    expect(outputs).toHaveLength(1)
+    // Self AD, Aatrox stacks resists → % armor pen: LDR preferred, Serylda alternative.
+    expect(outputs.map((o) => o.itemId)).toEqual([3036, 6694])
     const output = outputs[0]
-    // Self AD, Aatrox stacks resists → % armor pen (LDR).
-    expect(output?.itemId).toBe(3036)
     expect(output?.reasons.join(' ')).toContain('Aatrox')
     expect(output?.reasons.join(' ')).toMatch(/\d+ de HP efectiva/)
+    expect(outputs[1]?.score).toBeLessThan(output?.score ?? 0)
   })
 
   it('recommends magic pen for an AP self', () => {
@@ -141,6 +154,12 @@ describe('rule: anti-tank', () => {
     apSelf.self.items = []
     const outputs = antiTankRule(apSelf, staticData)
     expect(outputs[0]?.itemId).toBe(3135)
+  })
+
+  it('goes silent once self owns any anti-tank option', () => {
+    const covered = structuredClone(late)
+    covered.self.items.push(makeItem(3036, staticData)) // LDR owned
+    expect(antiTankRule(covered, staticData)).toEqual([])
   })
 
   it('stays silent mid game when nobody outgrew the baseline', () => {

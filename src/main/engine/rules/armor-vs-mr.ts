@@ -1,5 +1,5 @@
 import { THRESHOLDS } from './thresholds'
-import { clampScore, firstAvailable, itemName, pct } from './helpers'
+import { availableOptions, clampScore, itemName, ownsAny, pct } from './helpers'
 import type { Rule, RuleOutput } from './types'
 
 /** Defensive options per (damage type to resist, own class). */
@@ -36,44 +36,58 @@ export const armorVsMrRule: Rule = (state, staticData) => {
         return `${enemy.championName}${damageItems > 0 ? ` con ${String(damageItems)} objetos de daño` : ''}`
       })
 
-  if (physicalShare >= THRESHOLDS.DAMAGE_SKEW_SHARE) {
-    const options = tanky ? ARMOR_TANK : ARMOR_SQUISHY
-    const pick = firstAvailable(staticData, options)
-    if (pick !== null) {
+  // Every viable option becomes its own output (same reasons) so the UI can
+  // show the alternatives; owning ANY of them means the advice is covered and
+  // the rule goes silent.
+  const pushOptions = (
+    options: readonly number[],
+    category: string,
+    score: number,
+    reasons: string[]
+  ): void => {
+    const viable = availableOptions(staticData, options)
+    if (viable.length === 0 || ownsAny(state.self, viable)) return
+    viable.forEach((itemId, index) => {
       outputs.push({
         ruleId: 'armor-vs-mr',
-        itemId: pick,
-        category: 'armadura',
+        itemId,
+        category,
         action: 'prioritize',
-        score: clampScore(40 + (physicalShare - THRESHOLDS.DAMAGE_SKEW_SHARE) * 150),
-        reasons: [
-          `El ${pct(physicalShare)} del daño enemigo estimado es físico (${topDealers('physical').join(', ')})`,
-          `Prioriza armadura: ${options
-            .map((id) => itemName(staticData, id))
-            .join(' / ')} encajan con tu campeón`
-        ]
+        // Alternatives rank right below the preferred option.
+        score: clampScore(score - index * 8),
+        reasons
       })
-    }
+    })
+  }
+
+  if (physicalShare >= THRESHOLDS.DAMAGE_SKEW_SHARE) {
+    const options = tanky ? ARMOR_TANK : ARMOR_SQUISHY
+    pushOptions(
+      options,
+      'armadura',
+      clampScore(40 + (physicalShare - THRESHOLDS.DAMAGE_SKEW_SHARE) * 150),
+      [
+        `El ${pct(physicalShare)} del daño enemigo estimado es físico (${topDealers('physical').join(', ')})`,
+        `Prioriza armadura: ${options
+          .map((id) => itemName(staticData, id))
+          .join(' / ')} encajan con tu campeón`
+      ]
+    )
   }
 
   if (magicShare >= THRESHOLDS.DAMAGE_SKEW_SHARE) {
     const options = tanky ? MR_TANK : MR_SQUISHY
-    const pick = firstAvailable(staticData, options)
-    if (pick !== null) {
-      outputs.push({
-        ruleId: 'armor-vs-mr',
-        itemId: pick,
-        category: 'resistencia mágica',
-        action: 'prioritize',
-        score: clampScore(40 + (magicShare - THRESHOLDS.DAMAGE_SKEW_SHARE) * 150),
-        reasons: [
-          `El ${pct(magicShare)} del daño enemigo estimado es mágico (${topDealers('magic').join(', ')})`,
-          `Prioriza resistencia mágica: ${options
-            .map((id) => itemName(staticData, id))
-            .join(' / ')} encajan con tu campeón`
-        ]
-      })
-    }
+    pushOptions(
+      options,
+      'resistencia mágica',
+      clampScore(40 + (magicShare - THRESHOLDS.DAMAGE_SKEW_SHARE) * 150),
+      [
+        `El ${pct(magicShare)} del daño enemigo estimado es mágico (${topDealers('magic').join(', ')})`,
+        `Prioriza resistencia mágica: ${options
+          .map((id) => itemName(staticData, id))
+          .join(' / ')} encajan con tu campeón`
+      ]
+    )
   }
 
   return outputs

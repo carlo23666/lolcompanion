@@ -1,7 +1,7 @@
 import type { PlayerState } from '@shared/gamestate'
 import { THRESHOLDS } from './thresholds'
-import { clampScore, firstAvailable, itemName, selfIsPhysical } from './helpers'
-import type { Rule, RuleOutput } from './types'
+import { availableOptions, clampScore, itemName, ownsAny, selfIsPhysical } from './helpers'
+import type { Rule } from './types'
 
 const ANTITANK_PHYSICAL = [3036, 6694] as const // LDR, Serylda
 const ANTITANK_PHYSICAL_HP = [3153] as const // BotRK vs HP stackers
@@ -31,13 +31,17 @@ export const antiTankRule: Rule = (state, staticData) => {
   const hpStacking =
     raidBosses.length > 0 &&
     raidBosses.every((boss) => boss.estimatedStats.armor + boss.estimatedStats.magicResist < 200)
-  const options = physical
-    ? hpStacking
-      ? [...ANTITANK_PHYSICAL_HP, ...ANTITANK_PHYSICAL]
-      : ANTITANK_PHYSICAL
-    : ANTITANK_MAGIC
-  const pick = firstAvailable(staticData, options)
-  if (pick === null) return []
+  const options = availableOptions(
+    staticData,
+    physical
+      ? hpStacking
+        ? [...ANTITANK_PHYSICAL_HP, ...ANTITANK_PHYSICAL]
+        : ANTITANK_PHYSICAL
+      : ANTITANK_MAGIC
+  )
+  // Owning any anti-tank option means the advice is covered — stacking a
+  // second %pen item is rarely right and the alert must clear once bought.
+  if (options.length === 0 || ownsAny(state.self, options)) return []
 
   const reasons: string[] = []
   if (teamTanky) {
@@ -57,13 +61,15 @@ export const antiTankRule: Rule = (state, staticData) => {
   )
 
   const intensity = raidBosses.length > 0 ? effectiveHp(raidBosses[0] as PlayerState) / baseline : state.enemyAggregates.tankinessIndex / baseline
-  const output: RuleOutput = {
+  const score = clampScore(35 + (intensity - 1) * 60)
+  // One output per option (shared reasons) so the UI can show alternatives;
+  // the preferred option ranks first.
+  return options.map((itemId, index) => ({
     ruleId: 'anti-tank',
-    itemId: pick,
+    itemId,
     category: 'anti-tanque',
-    action: 'add',
-    score: clampScore(35 + (intensity - 1) * 60),
+    action: 'add' as const,
+    score: clampScore(score - index * 8),
     reasons
-  }
-  return [output]
+  }))
 }
