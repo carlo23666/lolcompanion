@@ -1,6 +1,20 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-02 — Owner feature batch (unplanned WP, owner-directed) — stats, live insights, visual identity, overlay, post-game report
+**Done (5 commits, one per group; 206/206 tests green):**
+1. **Personal statistics** (`src/main/stats.ts`, Estadísticas tab in Historial): per-champion WR/KDA/CS-min/gold-min/damage-share/vision-min, personal farm curves (CS+gold @10/@15 from stored timelines), streaks + session-position tilt indicator (games 1-2 vs 3+, 45-min session gap), WR by duration bucket, WR by first dragon (timeline events), best/worst same-lane matchups (≥2 games), WR by weekday. Cached, self-invalidating on newest-match change.
+2. **Live insights** (renderer over existing gamestate channels): live CS vs personal average chip (championId-keyed), enemy power-spike alert feed (completed items ≥2400g, levels 6/11/16 — visible info only, team-relative), dragon/baron spawn countdowns from objective events (constants documented, adjust per patch), estimated team gold bar, dead-gold reminder (≥2500).
+3. **Visual identity**: hextech palette remapped over the slate scale (app-wide reskin), gold/teal accents, ambient gradients, themed scrollbars, card/alert entrance animations, gold glow pulse on top-pick change, prefers-reduced-motion respected; **Hexi** mascot (original SVG hextech spirit, mood per phase, phrases, reacts to spikes); WebAudio-synthesized sounds (rec chime, spike blip) behind persisted `soundsEnabled` toggle.
+4. **Experimental overlay** (ADR-005 revised in decisions.md): transparent always-on-top frameless window (`?overlay=1` same renderer) with compact top rec + latest alert, auto show/hide on inGame, Ajustes toggle (`overlayEnabled`). Limitation: exclusive fullscreen hides it.
+5. **Post-game report** (`report:last` IPC): finished match vs personal averages + engine recommendations followed/ignored vs final build; replaces the postGame empty state; refreshes when auto-ingest links the match.
+
+**Deviations / notes for reviewer:** owner explicitly requested implementing a large feature batch outside the WP flow ("si no me gusta ya quitaremos"); each group is an isolated commit for easy revert. Objective spawn constants are game knowledge that may drift per patch (documented in hooks.ts). Post-game averages include the reported match itself (small bias, noted in code). Timelines are read raw (WP-003 read policy) for stats. Report card counts "followed" by exact item id (components/upgrades not resolved yet).
+
+**Gaps (owner):** judge the new UI in a real game; overlay needs LoL in windowed/borderless; sounds need one save in Ajustes to (de)activate.
+
+**Files:** src/main/{stats,report,overlay}.ts, src/main/history-ipc.ts, src/main/index.ts, src/main/riot/index.ts, src/main/db/repos/settings.ts, src/shared/{stats,report,ipc}.ts, src/renderer/src/{App,OverlayApp,main,sounds,hooks}.ts(x), src/renderer/src/components/{StatsView,LiveInsights,Mascot,PostGameReport,Sidebar,SettingsView,HistoryView,LiveView,RecommendationCard}.tsx, src/renderer/src/assets/main.css, tests/main/{stats-service,report-service}.test.ts, tests/renderer/{mascot.test.tsx,liveview.test.tsx,app.test.tsx,setup.ts}, docs/decisions.md.
+
 ## 2026-07-02 — Real-client validation (first findings) — Riot ID sanitization fix
 **Done:** first real bug found by the Windows validation pass: Riot IDs copied from the League client carry invisible Unicode BiDi isolate characters (U+2066/U+2069 around name and tag), the app stored them raw, and account-v1 404'd → "Cuenta no encontrada" for a perfectly valid account. New `src/main/riot/riotid.ts` `normalizeRiotId()` strips all format-category characters (`\p{Cf}`, covers BiDi isolates, zero-width chars, BOM) and trims whitespace around name and tag. Applied at both boundaries in `registerRiotIpc`: `settings:set` (stores normalized, uses normalized for the changed-riotId puuid re-resolution) and `ingest:start` (normalizes on read, healing values stored before the fix). 6 new tests incl. the exact real-world captured string. `npm run check` green: **191/191**.
 
