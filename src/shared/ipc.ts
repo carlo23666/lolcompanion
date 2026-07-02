@@ -8,6 +8,7 @@
  */
 import type { LiveClientSnapshot } from './schemas/liveclient'
 import type { ChampSelectState } from './schemas/lcu'
+import type { GameState, GameStateEvent } from './gamestate'
 import type { SessionPhase } from './session'
 
 export interface AppSettings {
@@ -42,6 +43,8 @@ export interface IpcEventChannels {
   'ingest:progress': IngestProgressPayload
   'session:phase': SessionPhase
   'session:champselect': ChampSelectState | null
+  'gamestate:update': GameState
+  'gamestate:events': GameStateEvent[]
 }
 
 export type IpcInvokeChannel = keyof IpcInvokeChannels
@@ -60,7 +63,9 @@ export const IPC_EVENT_CHANNELS: readonly IpcEventChannel[] = [
   'live:state',
   'ingest:progress',
   'session:phase',
-  'session:champselect'
+  'session:champselect',
+  'gamestate:update',
+  'gamestate:events'
 ]
 
 /** Shape of the API the preload script exposes on window.api */

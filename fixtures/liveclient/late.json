@@ -1,0 +1,861 @@
+{
+ "activePlayer": {
+  "riotId": "PLAYER_1#TAG",
+  "summonerName": "PLAYER_1",
+  "level": 16,
+  "currentGold": 2100,
+  "championStats": {
+   "abilityPower": 0,
+   "armor": 92,
+   "armorPenetrationFlat": 0,
+   "armorPenetrationPercent": 0,
+   "attackDamage": 156,
+   "attackRange": 525,
+   "attackSpeed": 1.38,
+   "critChance": 0.5,
+   "critDamage": 175,
+   "currentHealth": 2340,
+   "healthRegenRate": 3.5,
+   "lifeSteal": 0,
+   "magicLethality": 0,
+   "magicPenetrationFlat": 0,
+   "magicPenetrationPercent": 0,
+   "magicResist": 46,
+   "maxHealth": 2420,
+   "moveSpeed": 325,
+   "physicalLethality": 0,
+   "resourceMax": 1000,
+   "resourceRegenRate": 8,
+   "resourceType": "MANA",
+   "resourceValue": 700,
+   "spellVamp": 0,
+   "tenacity": 0
+  },
+  "fullRunes": {
+   "keystone": {
+    "id": 8008,
+    "displayName": "Lethal Tempo"
+   },
+   "generalRunes": [
+    {
+     "id": 8008
+    },
+    {
+     "id": 9111
+    },
+    {
+     "id": 9104
+    },
+    {
+     "id": 8014
+    },
+    {
+     "id": 8345
+    },
+    {
+     "id": 8347
+    }
+   ],
+   "statRunes": [
+    {
+     "id": 5005
+    },
+    {
+     "id": 5008
+    },
+    {
+     "id": 5001
+    }
+   ]
+  }
+ },
+ "allPlayers": [
+  {
+   "championName": "Jinx",
+   "isBot": false,
+   "isDead": false,
+   "respawnTimer": 0,
+   "level": 16,
+   "position": "BOTTOM",
+   "rawChampionName": "game_character_displayname_Jinx",
+   "team": "ORDER",
+   "items": [
+    {
+     "itemID": 3031,
+     "count": 1,
+     "slot": 0,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Filo infinito",
+     "price": 725
+    },
+    {
+     "itemID": 3006,
+     "count": 1,
+     "slot": 1,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Grebas de berserker",
+     "price": 300
+    },
+    {
+     "itemID": 3085,
+     "count": 1,
+     "slot": 2,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Huracán de Runaan",
+     "price": 850
+    },
+    {
+     "itemID": 3153,
+     "count": 1,
+     "slot": 3,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Hoja del rey arruinado",
+     "price": 725
+    },
+    {
+     "itemID": 3340,
+     "count": 1,
+     "slot": 4,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Guardián invisible",
+     "price": 0
+    }
+   ],
+   "scores": {
+    "kills": 9,
+    "deaths": 3,
+    "assists": 6,
+    "creepScore": 260,
+    "wardScore": 15
+   },
+   "riotId": "PLAYER_1#TAG",
+   "riotIdGameName": "PLAYER_1",
+   "riotIdTagLine": "TAG",
+   "summonerName": "PLAYER_1",
+   "skinID": 0,
+   "summonerSpells": {
+    "summonerSpellOne": {
+     "displayName": "Flash"
+    },
+    "summonerSpellTwo": {
+     "displayName": "Heal"
+    }
+   },
+   "runes": {}
+  },
+  {
+   "championName": "Leona",
+   "isBot": false,
+   "isDead": false,
+   "respawnTimer": 0,
+   "level": 13,
+   "position": "UTILITY",
+   "rawChampionName": "game_character_displayname_Leona",
+   "team": "ORDER",
+   "items": [
+    {
+     "itemID": 1001,
+     "count": 1,
+     "slot": 0,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Botas",
+     "price": 300
+    },
+    {
+     "itemID": 3107,
+     "count": 1,
+     "slot": 1,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Redención",
+     "price": 850
+    },
+    {
+     "itemID": 3075,
+     "count": 1,
+     "slot": 2,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Malla de espinas",
+     "price": 450
+    },
+    {
+     "itemID": 3340,
+     "count": 1,
+     "slot": 3,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Guardián invisible",
+     "price": 0
+    }
+   ],
+   "scores": {
+    "kills": 2,
+    "deaths": 4,
+    "assists": 12,
+    "creepScore": 35,
+    "wardScore": 55
+   },
+   "riotId": "PLAYER_2#TAG",
+   "riotIdGameName": "PLAYER_2",
+   "riotIdTagLine": "TAG",
+   "summonerName": "PLAYER_2",
+   "skinID": 0,
+   "summonerSpells": {
+    "summonerSpellOne": {
+     "displayName": "Flash"
+    },
+    "summonerSpellTwo": {
+     "displayName": "Heal"
+    }
+   },
+   "runes": {}
+  },
+  {
+   "championName": "Ahri",
+   "isBot": false,
+   "isDead": false,
+   "respawnTimer": 0,
+   "level": 16,
+   "position": "MIDDLE",
+   "rawChampionName": "game_character_displayname_Ahri",
+   "team": "ORDER",
+   "items": [
+    {
+     "itemID": 3020,
+     "count": 1,
+     "slot": 0,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Botas de hechicero",
+     "price": 800
+    },
+    {
+     "itemID": 3089,
+     "count": 1,
+     "slot": 1,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Sombrero mortal de Rabadon",
+     "price": 1100
+    },
+    {
+     "itemID": 3135,
+     "count": 1,
+     "slot": 2,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Bastón del Vacío",
+     "price": 1050
+    },
+    {
+     "itemID": 3340,
+     "count": 1,
+     "slot": 3,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Guardián invisible",
+     "price": 0
+    }
+   ],
+   "scores": {
+    "kills": 7,
+    "deaths": 4,
+    "assists": 5,
+    "creepScore": 230,
+    "wardScore": 20
+   },
+   "riotId": "PLAYER_3#TAG",
+   "riotIdGameName": "PLAYER_3",
+   "riotIdTagLine": "TAG",
+   "summonerName": "PLAYER_3",
+   "skinID": 0,
+   "summonerSpells": {
+    "summonerSpellOne": {
+     "displayName": "Flash"
+    },
+    "summonerSpellTwo": {
+     "displayName": "Heal"
+    }
+   },
+   "runes": {}
+  },
+  {
+   "championName": "Vi",
+   "isBot": false,
+   "isDead": false,
+   "respawnTimer": 0,
+   "level": 15,
+   "position": "JUNGLE",
+   "rawChampionName": "game_character_displayname_Vi",
+   "team": "ORDER",
+   "items": [
+    {
+     "itemID": 1001,
+     "count": 1,
+     "slot": 0,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Botas",
+     "price": 300
+    },
+    {
+     "itemID": 6692,
+     "count": 1,
+     "slot": 1,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Eclipse",
+     "price": 625
+    },
+    {
+     "itemID": 6694,
+     "count": 1,
+     "slot": 2,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Rencor de Serylda",
+     "price": 500
+    },
+    {
+     "itemID": 3340,
+     "count": 1,
+     "slot": 3,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Guardián invisible",
+     "price": 0
+    }
+   ],
+   "scores": {
+    "kills": 4,
+    "deaths": 3,
+    "assists": 9,
+    "creepScore": 70,
+    "wardScore": 28
+   },
+   "riotId": "PLAYER_4#TAG",
+   "riotIdGameName": "PLAYER_4",
+   "riotIdTagLine": "TAG",
+   "summonerName": "PLAYER_4",
+   "skinID": 0,
+   "summonerSpells": {
+    "summonerSpellOne": {
+     "displayName": "Flash"
+    },
+    "summonerSpellTwo": {
+     "displayName": "Heal"
+    }
+   },
+   "runes": {}
+  },
+  {
+   "championName": "Malphite",
+   "isBot": false,
+   "isDead": false,
+   "respawnTimer": 0,
+   "level": 16,
+   "position": "TOP",
+   "rawChampionName": "game_character_displayname_Malphite",
+   "team": "ORDER",
+   "items": [
+    {
+     "itemID": 3068,
+     "count": 1,
+     "slot": 0,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Égida de fuego solar",
+     "price": 600
+    },
+    {
+     "itemID": 1001,
+     "count": 1,
+     "slot": 1,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Botas",
+     "price": 300
+    },
+    {
+     "itemID": 3075,
+     "count": 1,
+     "slot": 2,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Malla de espinas",
+     "price": 450
+    },
+    {
+     "itemID": 3065,
+     "count": 1,
+     "slot": 3,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Rostro espiritual",
+     "price": 650
+    },
+    {
+     "itemID": 3340,
+     "count": 1,
+     "slot": 4,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Guardián invisible",
+     "price": 0
+    }
+   ],
+   "scores": {
+    "kills": 3,
+    "deaths": 4,
+    "assists": 6,
+    "creepScore": 210,
+    "wardScore": 16
+   },
+   "riotId": "PLAYER_5#TAG",
+   "riotIdGameName": "PLAYER_5",
+   "riotIdTagLine": "TAG",
+   "summonerName": "PLAYER_5",
+   "skinID": 0,
+   "summonerSpells": {
+    "summonerSpellOne": {
+     "displayName": "Flash"
+    },
+    "summonerSpellTwo": {
+     "displayName": "Heal"
+    }
+   },
+   "runes": {}
+  },
+  {
+   "championName": "Aatrox",
+   "isBot": false,
+   "isDead": false,
+   "respawnTimer": 0,
+   "level": 17,
+   "position": "TOP",
+   "rawChampionName": "game_character_displayname_Aatrox",
+   "team": "CHAOS",
+   "items": [
+    {
+     "itemID": 6692,
+     "count": 1,
+     "slot": 0,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Eclipse",
+     "price": 625
+    },
+    {
+     "itemID": 1001,
+     "count": 1,
+     "slot": 1,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Botas",
+     "price": 300
+    },
+    {
+     "itemID": 3065,
+     "count": 1,
+     "slot": 2,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Rostro espiritual",
+     "price": 650
+    },
+    {
+     "itemID": 3068,
+     "count": 1,
+     "slot": 3,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Égida de fuego solar",
+     "price": 600
+    },
+    {
+     "itemID": 3340,
+     "count": 1,
+     "slot": 4,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Guardián invisible",
+     "price": 0
+    }
+   ],
+   "scores": {
+    "kills": 10,
+    "deaths": 4,
+    "assists": 3,
+    "creepScore": 250,
+    "wardScore": 10
+   },
+   "riotId": "PLAYER_6#TAG",
+   "riotIdGameName": "PLAYER_6",
+   "riotIdTagLine": "TAG",
+   "summonerName": "PLAYER_6",
+   "skinID": 0,
+   "summonerSpells": {
+    "summonerSpellOne": {
+     "displayName": "Flash"
+    },
+    "summonerSpellTwo": {
+     "displayName": "Heal"
+    }
+   },
+   "runes": {}
+  },
+  {
+   "championName": "Lee Sin",
+   "isBot": false,
+   "isDead": false,
+   "respawnTimer": 0,
+   "level": 14,
+   "position": "JUNGLE",
+   "rawChampionName": "game_character_displayname_LeeSin",
+   "team": "CHAOS",
+   "items": [
+    {
+     "itemID": 1001,
+     "count": 1,
+     "slot": 0,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Botas",
+     "price": 300
+    },
+    {
+     "itemID": 3153,
+     "count": 1,
+     "slot": 1,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Hoja del rey arruinado",
+     "price": 725
+    },
+    {
+     "itemID": 6694,
+     "count": 1,
+     "slot": 2,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Rencor de Serylda",
+     "price": 500
+    },
+    {
+     "itemID": 3340,
+     "count": 1,
+     "slot": 3,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Guardián invisible",
+     "price": 0
+    }
+   ],
+   "scores": {
+    "kills": 4,
+    "deaths": 5,
+    "assists": 8,
+    "creepScore": 90,
+    "wardScore": 35
+   },
+   "riotId": "PLAYER_7#TAG",
+   "riotIdGameName": "PLAYER_7",
+   "riotIdTagLine": "TAG",
+   "summonerName": "PLAYER_7",
+   "skinID": 0,
+   "summonerSpells": {
+    "summonerSpellOne": {
+     "displayName": "Flash"
+    },
+    "summonerSpellTwo": {
+     "displayName": "Heal"
+    }
+   },
+   "runes": {}
+  },
+  {
+   "championName": "Zed",
+   "isBot": false,
+   "isDead": false,
+   "respawnTimer": 0,
+   "level": 17,
+   "position": "MIDDLE",
+   "rawChampionName": "game_character_displayname_Zed",
+   "team": "CHAOS",
+   "items": [
+    {
+     "itemID": 6692,
+     "count": 1,
+     "slot": 0,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Eclipse",
+     "price": 625
+    },
+    {
+     "itemID": 1001,
+     "count": 1,
+     "slot": 1,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Botas",
+     "price": 300
+    },
+    {
+     "itemID": 6694,
+     "count": 1,
+     "slot": 2,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Rencor de Serylda",
+     "price": 500
+    },
+    {
+     "itemID": 3031,
+     "count": 1,
+     "slot": 3,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Filo infinito",
+     "price": 725
+    },
+    {
+     "itemID": 3340,
+     "count": 1,
+     "slot": 4,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Guardián invisible",
+     "price": 0
+    }
+   ],
+   "scores": {
+    "kills": 8,
+    "deaths": 3,
+    "assists": 2,
+    "creepScore": 255,
+    "wardScore": 12
+   },
+   "riotId": "PLAYER_8#TAG",
+   "riotIdGameName": "PLAYER_8",
+   "riotIdTagLine": "TAG",
+   "summonerName": "PLAYER_8",
+   "skinID": 0,
+   "summonerSpells": {
+    "summonerSpellOne": {
+     "displayName": "Flash"
+    },
+    "summonerSpellTwo": {
+     "displayName": "Heal"
+    }
+   },
+   "runes": {}
+  },
+  {
+   "championName": "Caitlyn",
+   "isBot": false,
+   "isDead": false,
+   "respawnTimer": 0,
+   "level": 16,
+   "position": "BOTTOM",
+   "rawChampionName": "game_character_displayname_Caitlyn",
+   "team": "CHAOS",
+   "items": [
+    {
+     "itemID": 3031,
+     "count": 1,
+     "slot": 0,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Filo infinito",
+     "price": 725
+    },
+    {
+     "itemID": 3006,
+     "count": 1,
+     "slot": 1,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Grebas de berserker",
+     "price": 300
+    },
+    {
+     "itemID": 3085,
+     "count": 1,
+     "slot": 2,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Huracán de Runaan",
+     "price": 850
+    },
+    {
+     "itemID": 3340,
+     "count": 1,
+     "slot": 3,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Guardián invisible",
+     "price": 0
+    }
+   ],
+   "scores": {
+    "kills": 6,
+    "deaths": 4,
+    "assists": 4,
+    "creepScore": 245,
+    "wardScore": 17
+   },
+   "riotId": "PLAYER_9#TAG",
+   "riotIdGameName": "PLAYER_9",
+   "riotIdTagLine": "TAG",
+   "summonerName": "PLAYER_9",
+   "skinID": 0,
+   "summonerSpells": {
+    "summonerSpellOne": {
+     "displayName": "Flash"
+    },
+    "summonerSpellTwo": {
+     "displayName": "Heal"
+    }
+   },
+   "runes": {}
+  },
+  {
+   "championName": "Soraka",
+   "isBot": false,
+   "isDead": false,
+   "respawnTimer": 0,
+   "level": 13,
+   "position": "UTILITY",
+   "rawChampionName": "game_character_displayname_Soraka",
+   "team": "CHAOS",
+   "items": [
+    {
+     "itemID": 1001,
+     "count": 1,
+     "slot": 0,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Botas",
+     "price": 300
+    },
+    {
+     "itemID": 3107,
+     "count": 1,
+     "slot": 1,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Redención",
+     "price": 850
+    },
+    {
+     "itemID": 3340,
+     "count": 1,
+     "slot": 2,
+     "canUse": false,
+     "consumable": false,
+     "displayName": "Guardián invisible",
+     "price": 0
+    }
+   ],
+   "scores": {
+    "kills": 1,
+    "deaths": 5,
+    "assists": 14,
+    "creepScore": 25,
+    "wardScore": 60
+   },
+   "riotId": "PLAYER_10#TAG",
+   "riotIdGameName": "PLAYER_10",
+   "riotIdTagLine": "TAG",
+   "summonerName": "PLAYER_10",
+   "skinID": 0,
+   "summonerSpells": {
+    "summonerSpellOne": {
+     "displayName": "Flash"
+    },
+    "summonerSpellTwo": {
+     "displayName": "Heal"
+    }
+   },
+   "runes": {}
+  }
+ ],
+ "events": {
+  "Events": [
+   {
+    "EventID": 0,
+    "EventName": "GameStart",
+    "EventTime": 0
+   },
+   {
+    "EventID": 1,
+    "EventName": "DragonKill",
+    "EventTime": 480,
+    "DragonType": "Fire",
+    "KillerName": "PLAYER_4#TAG",
+    "Assisters": []
+   },
+   {
+    "EventID": 2,
+    "EventName": "TurretKilled",
+    "EventTime": 700,
+    "TurretKilled": "Turret_T2_L_03_A",
+    "KillerName": "PLAYER_1#TAG",
+    "Assisters": []
+   },
+   {
+    "EventID": 3,
+    "EventName": "HeraldKill",
+    "EventTime": 840,
+    "KillerName": "PLAYER_7#TAG",
+    "Assisters": []
+   },
+   {
+    "EventID": 4,
+    "EventName": "DragonKill",
+    "EventTime": 1200,
+    "DragonType": "Ocean",
+    "KillerName": "PLAYER_7#TAG",
+    "Assisters": []
+   },
+   {
+    "EventID": 5,
+    "EventName": "DragonKill",
+    "EventTime": 1560,
+    "DragonType": "Hextech",
+    "KillerName": "PLAYER_4#TAG",
+    "Assisters": []
+   },
+   {
+    "EventID": 6,
+    "EventName": "BaronKill",
+    "EventTime": 1700,
+    "KillerName": "PLAYER_4#TAG",
+    "Assisters": []
+   },
+   {
+    "EventID": 7,
+    "EventName": "TurretKilled",
+    "EventTime": 1750,
+    "TurretKilled": "Turret_T1_C_05_A",
+    "KillerName": "PLAYER_8#TAG",
+    "Assisters": []
+   }
+  ]
+ },
+ "gameData": {
+  "gameMode": "CLASSIC",
+  "gameTime": 1800,
+  "mapName": "Map11",
+  "mapNumber": 11,
+  "mapTerrain": "Default"
+ }
+}

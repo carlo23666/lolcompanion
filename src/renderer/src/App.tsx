@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { GameState } from '@shared/gamestate'
 import type { LiveClientSnapshot } from '@shared/schemas/liveclient'
 import SettingsStub from './SettingsStub'
 
@@ -13,6 +14,7 @@ export default function App(): React.JSX.Element {
   const [error, setError] = useState<string | null>(null)
   const [liveState, setLiveState] = useState<'unavailable' | 'polling'>('unavailable')
   const [snapshot, setSnapshot] = useState<LiveClientSnapshot | null>(null)
+  const [gameState, setGameState] = useState<GameState | null>(null)
 
   useEffect(() => {
     window.api
@@ -22,9 +24,11 @@ export default function App(): React.JSX.Element {
 
     const offState = window.api.on('live:state', setLiveState)
     const offSnapshot = window.api.on('live:snapshot', setSnapshot)
+    const offGameState = window.api.on('gamestate:update', setGameState)
     return () => {
       offState()
       offSnapshot()
+      offGameState()
     }
   }, [])
 
@@ -51,6 +55,32 @@ export default function App(): React.JSX.Element {
               </li>
             ))}
           </ul>
+        </section>
+      )}
+      {liveState === 'polling' && gameState !== null && (
+        <section className="w-full max-w-md rounded-lg border border-slate-800 bg-slate-900 p-4 text-sm">
+          <h2 className="mb-2 font-semibold text-slate-300">Análisis enemigo (provisional)</h2>
+          <p>
+            Daño físico estimado:{' '}
+            <span className="font-mono">
+              {Math.round(gameState.enemyAggregates.physicalShare * 100)}%
+            </span>
+          </p>
+          <p>
+            Tanquismo (HP efectiva media):{' '}
+            <span className="font-mono">
+              {Math.round(gameState.enemyAggregates.tankinessIndex)}
+            </span>
+          </p>
+          <p>
+            Índice de curación:{' '}
+            <span className="font-mono">
+              {gameState.enemyAggregates.healingIndex.toFixed(1)}
+            </span>
+          </p>
+          <p>
+            Oro propio: <span className="font-mono">{Math.round(gameState.self.currentGold)}</span>
+          </p>
         </section>
       )}
 
