@@ -11,6 +11,7 @@ export default function App(): React.JSX.Element {
   const [phase, setPhase] = useState<SessionPhase>('idle')
   const gameState = useIpcEvent('gamestate:update')
   const champSelect = useIpcEvent('session:champselect')
+  const recommendations = useIpcEvent('gamestate:recommendations')
 
   useEffect(() => {
     void window.api.invoke('session:get').then(setPhase)
@@ -22,7 +23,12 @@ export default function App(): React.JSX.Element {
       <Sidebar active={view} onSelect={setView} />
       <main className="min-w-0 flex-1 overflow-y-auto">
         {view === 'live' && (
-          <LiveView phase={phase} gameState={gameState} champSelect={champSelect} />
+          <LiveView
+            phase={phase}
+            gameState={gameState}
+            champSelect={champSelect}
+            recommendations={recommendations}
+          />
         )}
         {view === 'history' && <HistoryView />}
         {view === 'settings' && <SettingsView />}

@@ -1,8 +1,10 @@
 import type { GameState } from '@shared/gamestate'
+import type { RecommendationsPayload } from '@shared/ipc'
 import type { ChampSelectState } from '@shared/schemas/lcu'
 import type { SessionPhase } from '@shared/session'
 import Gauges from './Gauges'
 import ObjectivesRow from './ObjectivesRow'
+import RecommendationCard from './RecommendationCard'
 import TeamPanel from './TeamPanel'
 
 function formatClock(totalSeconds: number): string {
@@ -84,6 +86,7 @@ export default function LiveView(props: {
   phase: SessionPhase
   gameState: GameState | null
   champSelect: ChampSelectState | null
+  recommendations?: RecommendationsPayload | null
 }): React.JSX.Element {
   const { phase, gameState } = props
 
@@ -140,6 +143,11 @@ export default function LiveView(props: {
                 {gameState.patch}
               </span>
             </div>
+
+            <RecommendationCard
+              payload={props.recommendations ?? null}
+              currentGold={gameState.self.currentGold}
+            />
 
             <div className="flex gap-3">
               <TeamPanel

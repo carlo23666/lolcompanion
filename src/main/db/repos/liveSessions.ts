@@ -81,4 +81,27 @@ export class LiveSessionRepo {
       .get(sessionId) as { n: number }
     return row.n
   }
+
+  /** Persists the recommendations emitted at a given game time (WP-009). */
+  appendRecommendations(sessionId: number, gameTimeS: number, recommendations: unknown): void {
+    this.db
+      .prepare(
+        'INSERT OR REPLACE INTO live_recommendations (sessionId, gameTimeS, recommendations) VALUES (?, ?, ?)'
+      )
+      .run(sessionId, gameTimeS, JSON.stringify(recommendations))
+  }
+
+  getRecommendations(sessionId: number): { gameTimeS: number; recommendations: unknown }[] {
+    const rows = this.db
+      .prepare(
+        'SELECT gameTimeS, recommendations FROM live_recommendations WHERE sessionId = ? ORDER BY gameTimeS'
+      )
+      .all(sessionId) as { gameTimeS: number; recommendations: string }[]
+    return rows.map((row) => ({
+      gameTimeS: row.gameTimeS,
+      recommendations: storedJsonArraySchema.parse(JSON.parse(row.recommendations))
+    }))
+  }
 }
+
+const storedJsonArraySchema = z.array(z.unknown())

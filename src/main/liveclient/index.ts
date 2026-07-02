@@ -6,6 +6,7 @@ import { LiveSessionRepo } from '../db/repos'
 import { SettingsRepo, SETTING_KEYS } from '../db/repos/settings'
 import { diffGameStates } from '../engine/diff'
 import { normalizeSnapshot } from '../engine/normalize'
+import { recommend } from '../engine/recommend'
 import { broadcast } from '../ipc'
 import { getStaticDataManager } from '../staticdata'
 import type { StaticData } from '../staticdata/manager'
@@ -59,6 +60,7 @@ export function startLiveClient(
     })
 
   let previousState: GameState | null = null
+  let lastPersistedTop = ''
 
   const poller = new LiveClientPoller({
     transport: createLiveClientTransport(certPath()),
@@ -78,6 +80,27 @@ export function startLiveClient(
             if (events.length > 0) broadcast('gamestate:events', events)
           }
           previousState = state
+
+          const recommendations = recommend(state, staticData)
+          broadcast('gamestate:recommendations', {
+            gameTimeS: state.gameTimeS,
+            recommendations
+          })
+          // Persist for post-game auditing/backtesting, but only when the
+          // recommended set actually changes (not every 2s tick).
+          const sessionId = persister.currentSessionId()
+          const topKey = recommendations
+            .slice(0, 3)
+            .map((rec) => `${String(rec.itemId ?? rec.category)}:${rec.action}`)
+            .join('|')
+          if (sessionId !== null && topKey !== lastPersistedTop) {
+            lastPersistedTop = topKey
+            new LiveSessionRepo(db).appendRecommendations(
+              sessionId,
+              state.gameTimeS,
+              recommendations
+            )
+          }
         }
       }
     },
@@ -86,6 +109,7 @@ export function startLiveClient(
       if (state === 'unavailable') {
         persister.endSession()
         previousState = null
+        lastPersistedTop = ''
       }
       onStateChange?.(state)
     },

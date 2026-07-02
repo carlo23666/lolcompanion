@@ -1,0 +1,40 @@
+{
+  "_comment": "PLACEHOLDER POOL — ADR-006 still open. Owner: replace with your real champion pool (10-15 entries). Structure: championId = ddragon id, role = TOP|JUNGLE|MIDDLE|BOTTOM|UTILITY, core = ordered completed-item build, situational = swap candidates the rules may promote, runePageName = informational only in v1.",
+  "champions": [
+    {
+      "championId": "Jinx",
+      "role": "BOTTOM",
+      "core": [3006, 3031, 3085, 3036],
+      "situational": [3026, 3139, 3153],
+      "runePageName": "Lethal Tempo / PTA estándar"
+    },
+    {
+      "championId": "Ahri",
+      "role": "MIDDLE",
+      "core": [3020, 3118, 3089, 3135],
+      "situational": [3157, 3102, 4645],
+      "runePageName": "Electrocute burst"
+    },
+    {
+      "championId": "Malphite",
+      "role": "TOP",
+      "core": [3047, 3068, 3075, 3110],
+      "situational": [4401, 3065, 3143],
+      "runePageName": "Grasp tanque"
+    },
+    {
+      "championId": "Vi",
+      "role": "JUNGLE",
+      "core": [3047, 6692, 3071, 3053],
+      "situational": [3026, 6694, 3742],
+      "runePageName": "Conqueror bruiser"
+    },
+    {
+      "championId": "Leona",
+      "role": "UTILITY",
+      "core": [3047, 3190, 3109],
+      "situational": [3075, 4401, 3107],
+      "runePageName": "Aftershock engage"
+    }
+  ]
+}

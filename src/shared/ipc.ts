@@ -9,7 +9,13 @@
 import type { LiveClientSnapshot } from './schemas/liveclient'
 import type { ChampSelectState } from './schemas/lcu'
 import type { GameState, GameStateEvent } from './gamestate'
+import type { Recommendation } from './recommendation'
 import type { SessionPhase } from './session'
+
+export interface RecommendationsPayload {
+  gameTimeS: number
+  recommendations: Recommendation[]
+}
 
 export interface AppSettings {
   riotId: string | null
@@ -47,6 +53,7 @@ export interface IpcEventChannels {
   'session:champselect': ChampSelectState | null
   'gamestate:update': GameState
   'gamestate:events': GameStateEvent[]
+  'gamestate:recommendations': RecommendationsPayload
 }
 
 export type IpcInvokeChannel = keyof IpcInvokeChannels
@@ -67,7 +74,8 @@ export const IPC_EVENT_CHANNELS: readonly IpcEventChannel[] = [
   'session:phase',
   'session:champselect',
   'gamestate:update',
-  'gamestate:events'
+  'gamestate:events',
+  'gamestate:recommendations'
 ]
 
 /** Shape of the API the preload script exposes on window.api */
