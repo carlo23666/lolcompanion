@@ -27,8 +27,10 @@
     "src/preload/**/*.ts",
     "src/shared/**/*.ts",
     "tests/**/*.ts",
+    "scripts/**/*.ts",
     "electron.vite.config.ts",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "vitest.backtest.config.ts"
   ],
   "exclude": ["tests/renderer/**"]
 }

@@ -168,7 +168,7 @@ export function playerDamageSplit(
   return [phys, 1 - phys]
 }
 
-function computeAggregates(players: PlayerState[]): TeamAggregates {
+export function computeAggregates(players: PlayerState[]): TeamAggregates {
   if (players.length === 0) {
     return {
       physicalShare: 0.5,

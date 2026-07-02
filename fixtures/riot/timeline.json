@@ -343,7 +343,7 @@
     "events": [
      {
       "type": "ITEM_PURCHASED",
-      "timestamp": 121500,
+      "timestamp": 125000,
       "participantId": 3,
       "itemId": 1055
      }
@@ -986,7 +986,7 @@
     "events": [
      {
       "type": "ITEM_PURCHASED",
-      "timestamp": 484000,
+      "timestamp": 485000,
       "participantId": 3,
       "itemId": 1038
      }
@@ -1648,9 +1648,39 @@
     "events": [
      {
       "type": "ITEM_PURCHASED",
-      "timestamp": 842500,
+      "timestamp": 845000,
+      "participantId": 3,
+      "itemId": 1037
+     },
+     {
+      "type": "ITEM_PURCHASED",
+      "timestamp": 845000,
+      "participantId": 3,
+      "itemId": 1018
+     },
+     {
+      "type": "ITEM_PURCHASED",
+      "timestamp": 845000,
       "participantId": 3,
       "itemId": 3031
+     },
+     {
+      "type": "ITEM_DESTROYED",
+      "timestamp": 845000,
+      "participantId": 3,
+      "itemId": 1038
+     },
+     {
+      "type": "ITEM_DESTROYED",
+      "timestamp": 845000,
+      "participantId": 3,
+      "itemId": 1037
+     },
+     {
+      "type": "ITEM_DESTROYED",
+      "timestamp": 845000,
+      "participantId": 3,
+      "itemId": 1018
      }
     ]
    },
@@ -1970,7 +2000,14 @@
       "totalDamageDoneToChampions": 14100
      }
     },
-    "events": []
+    "events": [
+     {
+      "type": "ITEM_PURCHASED",
+      "timestamp": 1025000,
+      "participantId": 3,
+      "itemId": 1001
+     }
+    ]
    },
    {
     "timestamp": 1080000,
@@ -2182,7 +2219,44 @@
       "totalDamageDoneToChampions": 15700
      }
     },
-    "events": []
+    "events": [
+     {
+      "type": "ITEM_PURCHASED",
+      "timestamp": 1145000,
+      "participantId": 3,
+      "itemId": 1042
+     },
+     {
+      "type": "ITEM_PURCHASED",
+      "timestamp": 1145000,
+      "participantId": 3,
+      "itemId": 1042
+     },
+     {
+      "type": "ITEM_PURCHASED",
+      "timestamp": 1145000,
+      "participantId": 3,
+      "itemId": 3006
+     },
+     {
+      "type": "ITEM_DESTROYED",
+      "timestamp": 1145000,
+      "participantId": 3,
+      "itemId": 1001
+     },
+     {
+      "type": "ITEM_DESTROYED",
+      "timestamp": 1145000,
+      "participantId": 3,
+      "itemId": 1042
+     },
+     {
+      "type": "ITEM_DESTROYED",
+      "timestamp": 1145000,
+      "participantId": 3,
+      "itemId": 1042
+     }
+    ]
    },
    {
     "timestamp": 1200000,
@@ -2289,6 +2363,12 @@
      }
     },
     "events": [
+     {
+      "type": "ITEM_SOLD",
+      "timestamp": 1205000,
+      "participantId": 3,
+      "itemId": 1055
+     },
      {
       "type": "BUILDING_KILL",
       "timestamp": 1211000,
@@ -2508,7 +2588,20 @@
       "totalDamageDoneToChampions": 18100
      }
     },
-    "events": []
+    "events": [
+     {
+      "type": "ITEM_PURCHASED",
+      "timestamp": 1325000,
+      "participantId": 3,
+      "itemId": 1036
+     },
+     {
+      "type": "ITEM_PURCHASED",
+      "timestamp": 1325000,
+      "participantId": 3,
+      "itemId": 1036
+     }
+    ]
    },
    {
     "timestamp": 1380000,
@@ -2720,7 +2813,26 @@
       "totalDamageDoneToChampions": 19700
      }
     },
-    "events": []
+    "events": [
+     {
+      "type": "ITEM_PURCHASED",
+      "timestamp": 1445000,
+      "participantId": 3,
+      "itemId": 3035
+     },
+     {
+      "type": "ITEM_DESTROYED",
+      "timestamp": 1445000,
+      "participantId": 3,
+      "itemId": 1036
+     },
+     {
+      "type": "ITEM_DESTROYED",
+      "timestamp": 1445000,
+      "participantId": 3,
+      "itemId": 1036
+     }
+    ]
    },
    {
     "timestamp": 1500000,
@@ -2932,7 +3044,14 @@
       "totalDamageDoneToChampions": 21300
      }
     },
-    "events": []
+    "events": [
+     {
+      "type": "ITEM_PURCHASED",
+      "timestamp": 1565000,
+      "participantId": 3,
+      "itemId": 6670
+     }
+    ]
    },
    {
     "timestamp": 1620000,
@@ -3038,7 +3157,26 @@
       "totalDamageDoneToChampions": 22100
      }
     },
-    "events": []
+    "events": [
+     {
+      "type": "ITEM_PURCHASED",
+      "timestamp": 1625000,
+      "participantId": 3,
+      "itemId": 3036
+     },
+     {
+      "type": "ITEM_DESTROYED",
+      "timestamp": 1625000,
+      "participantId": 3,
+      "itemId": 3035
+     },
+     {
+      "type": "ITEM_DESTROYED",
+      "timestamp": 1625000,
+      "participantId": 3,
+      "itemId": 6670
+     }
+    ]
    },
    {
     "timestamp": 1680000,
@@ -3144,7 +3282,14 @@
       "totalDamageDoneToChampions": 22900
      }
     },
-    "events": []
+    "events": [
+     {
+      "type": "ITEM_PURCHASED",
+      "timestamp": 1685000,
+      "participantId": 3,
+      "itemId": 1038
+     }
+    ]
    },
    {
     "timestamp": 1740000,
