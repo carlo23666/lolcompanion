@@ -21,14 +21,19 @@ export function registerRiotIpc(db: AppDatabase): void {
 
   handleInvoke('settings:get', () => ({
     riotId: settings.get(SETTING_KEYS.riotId),
-    platform: settings.get(SETTING_KEYS.platform) ?? 'euw1'
+    platform: settings.get(SETTING_KEYS.platform) ?? 'euw1',
+    recordLive: settings.get(SETTING_KEYS.recordLive) === '1'
   }))
 
   handleInvoke('settings:set', (update) => {
+    const previousRiotId = settings.get(SETTING_KEYS.riotId)
     settings.set(SETTING_KEYS.riotId, update.riotId)
     settings.set(SETTING_KEYS.platform, update.platform)
-    // riotId changed → cached puuid no longer valid.
-    settings.set(SETTING_KEYS.puuid, '')
+    settings.set(SETTING_KEYS.recordLive, update.recordLive ? '1' : '0')
+    if (previousRiotId !== update.riotId) {
+      // riotId changed → cached puuid no longer valid.
+      settings.set(SETTING_KEYS.puuid, '')
+    }
     limiter.reset()
     return { saved: true as const }
   })

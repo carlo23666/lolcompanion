@@ -1,0 +1,568 @@
+{
+ "gameTimeS": 300,
+ "patch": "16.13.1",
+ "gameMode": "CLASSIC",
+ "self": {
+  "championId": "Jinx",
+  "championName": "Jinx",
+  "team": "ORDER",
+  "level": 4,
+  "position": "BOTTOM",
+  "isDead": false,
+  "respawnTimer": 0,
+  "scores": {
+   "kills": 1,
+   "deaths": 0,
+   "assists": 0,
+   "creepScore": 42,
+   "wardScore": 2
+  },
+  "items": [
+   {
+    "id": 1055,
+    "name": "Espada de Doran",
+    "totalGold": 450,
+    "isCompleted": false,
+    "tags": [
+     "Health",
+     "Damage",
+     "LifeSteal",
+     "SpellVamp",
+     "Lane"
+    ],
+    "stats": {
+     "FlatHPPoolMod": 80,
+     "FlatPhysicalDamageMod": 10
+    }
+   },
+   {
+    "id": 3340,
+    "name": "Guardián invisible",
+    "totalGold": 0,
+    "isCompleted": false,
+    "tags": [
+     "Active",
+     "Jungle",
+     "Lane",
+     "Trinket",
+     "Vision"
+    ],
+    "stats": {}
+   }
+  ],
+  "damageType": "physical",
+  "estimatedGoldEarned": 2069.6,
+  "estimatedStats": {
+   "hp": 947.825,
+   "armor": 35.513000000000005,
+   "magicResist": 32.9445,
+   "attackDamage": 69
+  },
+  "currentGold": 350,
+  "stats": {
+   "abilityPower": 0,
+   "attackDamage": 84,
+   "armor": 68,
+   "magicResist": 34,
+   "currentHealth": 1260,
+   "maxHealth": 1280,
+   "attackSpeed": 1.02,
+   "critChance": 0,
+   "moveSpeed": 325
+  },
+  "runeIds": [
+   8008,
+   8008,
+   9111,
+   9104,
+   8014,
+   8345,
+   8347
+  ]
+ },
+ "allies": [
+  {
+   "championId": "Leona",
+   "championName": "Leona",
+   "team": "ORDER",
+   "level": 3,
+   "position": "UTILITY",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 0,
+    "deaths": 0,
+    "assists": 1,
+    "creepScore": 8,
+    "wardScore": 8
+   },
+   "items": [
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "magic",
+   "estimatedGoldEarned": 1205.6,
+   "estimatedStats": {
+    "hp": 794.975,
+    "armor": 50.08,
+    "magicResist": 35.02375,
+    "attackDamage": 60
+   }
+  },
+  {
+   "championId": "Ahri",
+   "championName": "Ahri",
+   "team": "ORDER",
+   "level": 4,
+   "position": "MIDDLE",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 0,
+    "deaths": 1,
+    "assists": 0,
+    "creepScore": 38,
+    "wardScore": 3
+   },
+   "items": [
+    {
+     "id": 1056,
+     "name": "Anillo de Doran",
+     "totalGold": 400,
+     "isCompleted": false,
+     "tags": [
+      "Health",
+      "Lane",
+      "ManaRegen",
+      "SpellDamage"
+     ],
+     "stats": {
+      "FlatHPPoolMod": 90,
+      "FlatMagicDamageMod": 18
+     }
+    },
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "magic",
+   "estimatedGoldEarned": 1685.6,
+   "estimatedStats": {
+    "hp": 915.56,
+    "armor": 30.513,
+    "magicResist": 32.9445,
+    "attackDamage": 53
+   }
+  },
+  {
+   "championId": "Vi",
+   "championName": "Vi",
+   "team": "ORDER",
+   "level": 4,
+   "position": "JUNGLE",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 1,
+    "deaths": 0,
+    "assists": 1,
+    "creepScore": 12,
+    "wardScore": 4
+   },
+   "items": [
+    {
+     "id": 1036,
+     "name": "Espada larga",
+     "totalGold": 350,
+     "isCompleted": false,
+     "tags": [
+      "Damage",
+      "Lane"
+     ],
+     "stats": {
+      "FlatPhysicalDamageMod": 10
+     }
+    },
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "physical",
+   "estimatedGoldEarned": 1589.6,
+   "estimatedStats": {
+    "hp": 892.825,
+    "armor": 40.6455,
+    "magicResist": 36.64325,
+    "attackDamage": 73
+   }
+  },
+  {
+   "championId": "Malphite",
+   "championName": "Malphite",
+   "team": "ORDER",
+   "level": 4,
+   "position": "TOP",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 0,
+    "deaths": 0,
+    "assists": 0,
+    "creepScore": 35,
+    "wardScore": 2
+   },
+   "items": [
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "magic",
+   "estimatedGoldEarned": 1622.6,
+   "estimatedStats": {
+    "hp": 900.56,
+    "armor": 51.21175,
+    "magicResist": 32.64325,
+    "attackDamage": 62
+   }
+  }
+ ],
+ "enemies": [
+  {
+   "championId": "Aatrox",
+   "championName": "Aatrox",
+   "team": "CHAOS",
+   "level": 4,
+   "position": "TOP",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 1,
+    "deaths": 1,
+    "assists": 0,
+    "creepScore": 40,
+    "wardScore": 1
+   },
+   "items": [
+    {
+     "id": 1055,
+     "name": "Espada de Doran",
+     "totalGold": 450,
+     "isCompleted": false,
+     "tags": [
+      "Health",
+      "Damage",
+      "LifeSteal",
+      "SpellVamp",
+      "Lane"
+     ],
+     "stats": {
+      "FlatHPPoolMod": 80,
+      "FlatPhysicalDamageMod": 10
+     }
+    },
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "physical",
+   "estimatedGoldEarned": 2027.6,
+   "estimatedStats": {
+    "hp": 988.21,
+    "armor": 48.872,
+    "magicResist": 36.64325,
+    "attackDamage": 70
+   }
+  },
+  {
+   "championId": "LeeSin",
+   "championName": "Lee Sin",
+   "team": "CHAOS",
+   "level": 4,
+   "position": "JUNGLE",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 0,
+    "deaths": 0,
+    "assists": 1,
+    "creepScore": 14,
+    "wardScore": 5
+   },
+   "items": [
+    {
+     "id": 1036,
+     "name": "Espada larga",
+     "totalGold": 350,
+     "isCompleted": false,
+     "tags": [
+      "Damage",
+      "Lane"
+     ],
+     "stats": {
+      "FlatPhysicalDamageMod": 10
+     }
+    },
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "physical",
+   "estimatedGoldEarned": 1331.6,
+   "estimatedStats": {
+    "hp": 889.62,
+    "armor": 46.1925,
+    "magicResist": 36.64325,
+    "attackDamage": 76
+   }
+  },
+  {
+   "championId": "Zed",
+   "championName": "Zed",
+   "team": "CHAOS",
+   "level": 4,
+   "position": "MIDDLE",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 1,
+    "deaths": 0,
+    "assists": 0,
+    "creepScore": 44,
+    "wardScore": 2
+   },
+   "items": [
+    {
+     "id": 1036,
+     "name": "Espada larga",
+     "totalGold": 350,
+     "isCompleted": false,
+     "tags": [
+      "Damage",
+      "Lane"
+     ],
+     "stats": {
+      "FlatPhysicalDamageMod": 10
+     }
+    },
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "physical",
+   "estimatedGoldEarned": 2111.6,
+   "estimatedStats": {
+    "hp": 878.235,
+    "armor": 42.6455,
+    "magicResist": 33.64325,
+    "attackDamage": 73
+   }
+  },
+  {
+   "championId": "Caitlyn",
+   "championName": "Caitlyn",
+   "team": "CHAOS",
+   "level": 4,
+   "position": "BOTTOM",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 0,
+    "deaths": 1,
+    "assists": 0,
+    "creepScore": 39,
+    "wardScore": 3
+   },
+   "items": [
+    {
+     "id": 1055,
+     "name": "Espada de Doran",
+     "totalGold": 450,
+     "isCompleted": false,
+     "tags": [
+      "Health",
+      "Damage",
+      "LifeSteal",
+      "SpellVamp",
+      "Lane"
+     ],
+     "stats": {
+      "FlatHPPoolMod": 80,
+      "FlatPhysicalDamageMod": 10
+     }
+    },
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "physical",
+   "estimatedGoldEarned": 1706.6,
+   "estimatedStats": {
+    "hp": 902.355,
+    "armor": 37.6455,
+    "magicResist": 32.9445,
+    "attackDamage": 72
+   }
+  },
+  {
+   "championId": "Soraka",
+   "championName": "Soraka",
+   "team": "CHAOS",
+   "level": 3,
+   "position": "UTILITY",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 0,
+    "deaths": 1,
+    "assists": 2,
+    "creepScore": 6,
+    "wardScore": 9
+   },
+   "items": [
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "magic",
+   "estimatedGoldEarned": 1313.6,
+   "estimatedStats": {
+    "hp": 734.8,
+    "armor": 39.375,
+    "magicResist": 31.9175,
+    "attackDamage": 50
+   }
+  }
+ ],
+ "objectives": {
+  "dragons": {
+   "ORDER": [],
+   "CHAOS": []
+  },
+  "barons": {
+   "ORDER": 0,
+   "CHAOS": 0
+  },
+  "heralds": {
+   "ORDER": 0,
+   "CHAOS": 0
+  },
+  "towers": {
+   "ORDER": 0,
+   "CHAOS": 0
+  }
+ },
+ "allyAggregates": {
+  "physicalShare": 0.477891349565643,
+  "magicShare": 0.522108650434357,
+  "tankinessIndex": 1225.5110193125001,
+  "healingIndex": 0.5,
+  "estimatedTotalGold": 8173
+ },
+ "enemyAggregates": {
+  "physicalShare": 0.792424213873513,
+  "magicShare": 0.20757578612648683,
+  "tankinessIndex": 1219.92578392375,
+  "healingIndex": 5,
+  "estimatedTotalGold": 8491
+ }
+}

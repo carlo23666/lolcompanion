@@ -23,5 +23,6 @@ export class SettingsRepo {
 export const SETTING_KEYS = {
   riotId: 'settings.riotId',
   platform: 'settings.platform',
-  puuid: 'settings.puuid'
+  puuid: 'settings.puuid',
+  recordLive: 'settings.recordLive'
 } as const

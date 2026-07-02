@@ -2,11 +2,15 @@ import { join } from 'node:path'
 import { app, BrowserWindow } from 'electron'
 import { openDatabase, type AppDatabase } from './db'
 import { loadDotEnv } from './env'
+import { registerIconProtocol, registerIconScheme } from './icons'
 import { broadcast, handleInvoke } from './ipc'
 import { startLcu, type LcuConnector } from './lcu'
 import { startLiveClient, type LiveClientPoller } from './liveclient'
 import { registerRiotIpc } from './riot'
 import { SessionMachine } from './session/machine'
+import { getStaticDataManager } from './staticdata'
+
+registerIconScheme()
 
 let db: AppDatabase | null = null
 let liveClient: LiveClientPoller | null = null
@@ -40,6 +44,7 @@ function registerIpcHandlers(): void {
 void app.whenReady().then(() => {
   loadDotEnv(app.getAppPath())
   db = openDatabase(join(app.getPath('userData'), 'lol-companion.db'))
+  registerIconProtocol(() => getStaticDataManager().getLoadedPatch())
   registerIpcHandlers()
   registerRiotIpc(db)
 

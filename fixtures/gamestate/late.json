@@ -1,0 +1,940 @@
+{
+ "gameTimeS": 1800,
+ "patch": "16.13.1",
+ "gameMode": "CLASSIC",
+ "self": {
+  "championId": "Jinx",
+  "championName": "Jinx",
+  "team": "ORDER",
+  "level": 16,
+  "position": "BOTTOM",
+  "isDead": false,
+  "respawnTimer": 0,
+  "scores": {
+   "kills": 9,
+   "deaths": 3,
+   "assists": 6,
+   "creepScore": 260,
+   "wardScore": 15
+  },
+  "items": [
+   {
+    "id": 3031,
+    "name": "Filo infinito",
+    "totalGold": 3500,
+    "isCompleted": true,
+    "tags": [
+     "CriticalStrike",
+     "Damage"
+    ],
+    "stats": {
+     "FlatCritChanceMod": 0.25,
+     "FlatPhysicalDamageMod": 75
+    }
+   },
+   {
+    "id": 3006,
+    "name": "Grebas de berserker",
+    "totalGold": 1100,
+    "isCompleted": true,
+    "tags": [
+     "AttackSpeed",
+     "Boots"
+    ],
+    "stats": {
+     "FlatMovementSpeedMod": 45,
+     "PercentAttackSpeedMod": 0.25
+    }
+   },
+   {
+    "id": 3085,
+    "name": "Huracán de Runaan",
+    "totalGold": 2650,
+    "isCompleted": true,
+    "tags": [
+     "CriticalStrike",
+     "AttackSpeed",
+     "OnHit",
+     "NonbootsMovement"
+    ],
+    "stats": {
+     "FlatCritChanceMod": 0.25,
+     "PercentAttackSpeedMod": 0.4,
+     "PercentMovementSpeedMod": 0.04
+    }
+   },
+   {
+    "id": 3153,
+    "name": "Hoja del rey arruinado",
+    "totalGold": 3200,
+    "isCompleted": true,
+    "tags": [
+     "Damage",
+     "AttackSpeed",
+     "LifeSteal",
+     "Slow",
+     "OnHit"
+    ],
+    "stats": {
+     "FlatPhysicalDamageMod": 40,
+     "PercentAttackSpeedMod": 0.25,
+     "PercentLifeStealMod": 0.1
+    }
+   },
+   {
+    "id": 3340,
+    "name": "Guardián invisible",
+    "totalGold": 0,
+    "isCompleted": false,
+    "tags": [
+     "Active",
+     "Jungle",
+     "Lane",
+     "Trinket",
+     "Vision"
+    ],
+    "stats": {}
+   }
+  ],
+  "damageType": "physical",
+  "estimatedGoldEarned": 13007.6,
+  "estimatedStats": {
+   "hp": 2149.875,
+   "armor": 86.79500000000002,
+   "magicResist": 48.8175,
+   "attackDamage": 174
+  },
+  "currentGold": 2100,
+  "stats": {
+   "abilityPower": 0,
+   "attackDamage": 156,
+   "armor": 92,
+   "magicResist": 46,
+   "currentHealth": 2340,
+   "maxHealth": 2420,
+   "attackSpeed": 1.38,
+   "critChance": 0.5,
+   "moveSpeed": 325
+  },
+  "runeIds": [
+   8008,
+   8008,
+   9111,
+   9104,
+   8014,
+   8345,
+   8347
+  ]
+ },
+ "allies": [
+  {
+   "championId": "Leona",
+   "championName": "Leona",
+   "team": "ORDER",
+   "level": 13,
+   "position": "UTILITY",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 2,
+    "deaths": 4,
+    "assists": 12,
+    "creepScore": 35,
+    "wardScore": 55
+   },
+   "items": [
+    {
+     "id": 1001,
+     "name": "Botas",
+     "totalGold": 300,
+     "isCompleted": false,
+     "tags": [
+      "Boots"
+     ],
+     "stats": {
+      "FlatMovementSpeedMod": 25
+     }
+    },
+    {
+     "id": 3107,
+     "name": "Redención",
+     "totalGold": 2300,
+     "isCompleted": true,
+     "tags": [
+      "SpellDamage",
+      "ManaRegen",
+      "CooldownReduction",
+      "AbilityHaste"
+     ],
+     "stats": {
+      "FlatMagicDamageMod": 30
+     }
+    },
+    {
+     "id": 3075,
+     "name": "Malla de espinas",
+     "totalGold": 2450,
+     "isCompleted": true,
+     "tags": [
+      "Health",
+      "Armor"
+     ],
+     "stats": {
+      "FlatHPPoolMod": 150,
+      "FlatArmorMod": 75
+     }
+    },
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "magic",
+   "estimatedGoldEarned": 7082.6,
+   "estimatedStats": {
+    "hp": 1901.95,
+    "armor": 170.56,
+    "magicResist": 54.447500000000005,
+    "attackDamage": 60
+   }
+  },
+  {
+   "championId": "Ahri",
+   "championName": "Ahri",
+   "team": "ORDER",
+   "level": 16,
+   "position": "MIDDLE",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 7,
+    "deaths": 4,
+    "assists": 5,
+    "creepScore": 230,
+    "wardScore": 20
+   },
+   "items": [
+    {
+     "id": 3020,
+     "name": "Botas de hechicero",
+     "totalGold": 1100,
+     "isCompleted": true,
+     "tags": [
+      "Boots",
+      "MagicPenetration"
+     ],
+     "stats": {
+      "FlatMovementSpeedMod": 45
+     }
+    },
+    {
+     "id": 3089,
+     "name": "Sombrero mortal de Rabadon",
+     "totalGold": 3500,
+     "isCompleted": true,
+     "tags": [
+      "SpellDamage"
+     ],
+     "stats": {
+      "FlatMagicDamageMod": 130
+     }
+    },
+    {
+     "id": 3135,
+     "name": "Bastón del Vacío",
+     "totalGold": 3000,
+     "isCompleted": true,
+     "tags": [
+      "MagicPenetration",
+      "SpellDamage"
+     ],
+     "stats": {
+      "FlatMagicDamageMod": 95
+     }
+    },
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "magic",
+   "estimatedGoldEarned": 11627.6,
+   "estimatedStats": {
+    "hp": 2095.4,
+    "armor": 81.79500000000002,
+    "magicResist": 48.8175,
+    "attackDamage": 53
+   }
+  },
+  {
+   "championId": "Vi",
+   "championName": "Vi",
+   "team": "ORDER",
+   "level": 15,
+   "position": "JUNGLE",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 4,
+    "deaths": 3,
+    "assists": 9,
+    "creepScore": 70,
+    "wardScore": 28
+   },
+   "items": [
+    {
+     "id": 1001,
+     "name": "Botas",
+     "totalGold": 300,
+     "isCompleted": false,
+     "tags": [
+      "Boots"
+     ],
+     "stats": {
+      "FlatMovementSpeedMod": 25
+     }
+    },
+    {
+     "id": 6692,
+     "name": "Eclipse",
+     "totalGold": 2900,
+     "isCompleted": true,
+     "tags": [
+      "Damage",
+      "CooldownReduction",
+      "AbilityHaste"
+     ],
+     "stats": {
+      "FlatPhysicalDamageMod": 60
+     }
+    },
+    {
+     "id": 6694,
+     "name": "Rencor de Serylda",
+     "totalGold": 3000,
+     "isCompleted": true,
+     "tags": [
+      "Damage",
+      "CooldownReduction",
+      "ArmorPenetration",
+      "AbilityHaste"
+     ],
+     "stats": {
+      "FlatPhysicalDamageMod": 45
+     }
+    },
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "physical",
+   "estimatedGoldEarned": 7967.6,
+   "estimatedStats": {
+    "hp": 2047.825,
+    "armor": 92.34550000000002,
+    "magicResist": 59.19325,
+    "attackDamage": 168
+   }
+  },
+  {
+   "championId": "Malphite",
+   "championName": "Malphite",
+   "team": "ORDER",
+   "level": 16,
+   "position": "TOP",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 3,
+    "deaths": 4,
+    "assists": 6,
+    "creepScore": 210,
+    "wardScore": 16
+   },
+   "items": [
+    {
+     "id": 3068,
+     "name": "Égida de fuego solar",
+     "totalGold": 2700,
+     "isCompleted": true,
+     "tags": [
+      "Health",
+      "Armor",
+      "Aura",
+      "AbilityHaste"
+     ],
+     "stats": {
+      "FlatHPPoolMod": 350,
+      "FlatArmorMod": 50
+     }
+    },
+    {
+     "id": 1001,
+     "name": "Botas",
+     "totalGold": 300,
+     "isCompleted": false,
+     "tags": [
+      "Boots"
+     ],
+     "stats": {
+      "FlatMovementSpeedMod": 25
+     }
+    },
+    {
+     "id": 3075,
+     "name": "Malla de espinas",
+     "totalGold": 2450,
+     "isCompleted": true,
+     "tags": [
+      "Health",
+      "Armor"
+     ],
+     "stats": {
+      "FlatHPPoolMod": 150,
+      "FlatArmorMod": 75
+     }
+    },
+    {
+     "id": 3065,
+     "name": "Rostro espiritual",
+     "totalGold": 2700,
+     "isCompleted": true,
+     "tags": [
+      "Health",
+      "SpellBlock",
+      "HealthRegen",
+      "CooldownReduction",
+      "AbilityHaste"
+     ],
+     "stats": {
+      "FlatSpellBlockMod": 50,
+      "FlatHPPoolMod": 400
+     }
+    },
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "magic",
+   "estimatedGoldEarned": 10157.6,
+   "estimatedStats": {
+    "hp": 3070.4,
+    "armor": 236.65125,
+    "magicResist": 107.67375,
+    "attackDamage": 62
+   }
+  }
+ ],
+ "enemies": [
+  {
+   "championId": "Aatrox",
+   "championName": "Aatrox",
+   "team": "CHAOS",
+   "level": 17,
+   "position": "TOP",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 10,
+    "deaths": 4,
+    "assists": 3,
+    "creepScore": 250,
+    "wardScore": 10
+   },
+   "items": [
+    {
+     "id": 6692,
+     "name": "Eclipse",
+     "totalGold": 2900,
+     "isCompleted": true,
+     "tags": [
+      "Damage",
+      "CooldownReduction",
+      "AbilityHaste"
+     ],
+     "stats": {
+      "FlatPhysicalDamageMod": 60
+     }
+    },
+    {
+     "id": 1001,
+     "name": "Botas",
+     "totalGold": 300,
+     "isCompleted": false,
+     "tags": [
+      "Boots"
+     ],
+     "stats": {
+      "FlatMovementSpeedMod": 25
+     }
+    },
+    {
+     "id": 3065,
+     "name": "Rostro espiritual",
+     "totalGold": 2700,
+     "isCompleted": true,
+     "tags": [
+      "Health",
+      "SpellBlock",
+      "HealthRegen",
+      "CooldownReduction",
+      "AbilityHaste"
+     ],
+     "stats": {
+      "FlatSpellBlockMod": 50,
+      "FlatHPPoolMod": 400
+     }
+    },
+    {
+     "id": 3068,
+     "name": "Égida de fuego solar",
+     "totalGold": 2700,
+     "isCompleted": true,
+     "tags": [
+      "Health",
+      "Armor",
+      "Aura",
+      "AbilityHaste"
+     ],
+     "stats": {
+      "FlatHPPoolMod": 350,
+      "FlatArmorMod": 50
+     }
+    },
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "physical",
+   "estimatedGoldEarned": 12647.6,
+   "estimatedStats": {
+    "hp": 3192.08,
+    "armor": 163.45600000000002,
+    "magicResist": 114.226,
+    "attackDamage": 120
+   }
+  },
+  {
+   "championId": "LeeSin",
+   "championName": "Lee Sin",
+   "team": "CHAOS",
+   "level": 14,
+   "position": "JUNGLE",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 4,
+    "deaths": 5,
+    "assists": 8,
+    "creepScore": 90,
+    "wardScore": 35
+   },
+   "items": [
+    {
+     "id": 1001,
+     "name": "Botas",
+     "totalGold": 300,
+     "isCompleted": false,
+     "tags": [
+      "Boots"
+     ],
+     "stats": {
+      "FlatMovementSpeedMod": 25
+     }
+    },
+    {
+     "id": 3153,
+     "name": "Hoja del rey arruinado",
+     "totalGold": 3200,
+     "isCompleted": true,
+     "tags": [
+      "Damage",
+      "AttackSpeed",
+      "LifeSteal",
+      "Slow",
+      "OnHit"
+     ],
+     "stats": {
+      "FlatPhysicalDamageMod": 40,
+      "PercentAttackSpeedMod": 0.25,
+      "PercentLifeStealMod": 0.1
+     }
+    },
+    {
+     "id": 6694,
+     "name": "Rencor de Serylda",
+     "totalGold": 3000,
+     "isCompleted": true,
+     "tags": [
+      "Damage",
+      "CooldownReduction",
+      "ArmorPenetration",
+      "AbilityHaste"
+     ],
+     "stats": {
+      "FlatPhysicalDamageMod": 45
+     }
+    },
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "physical",
+   "estimatedGoldEarned": 8237.6,
+   "estimatedStats": {
+    "hp": 1950.72,
+    "armor": 90.405,
+    "magicResist": 56.784499999999994,
+    "attackDamage": 151
+   }
+  },
+  {
+   "championId": "Zed",
+   "championName": "Zed",
+   "team": "CHAOS",
+   "level": 17,
+   "position": "MIDDLE",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 8,
+    "deaths": 3,
+    "assists": 2,
+    "creepScore": 255,
+    "wardScore": 12
+   },
+   "items": [
+    {
+     "id": 6692,
+     "name": "Eclipse",
+     "totalGold": 2900,
+     "isCompleted": true,
+     "tags": [
+      "Damage",
+      "CooldownReduction",
+      "AbilityHaste"
+     ],
+     "stats": {
+      "FlatPhysicalDamageMod": 60
+     }
+    },
+    {
+     "id": 1001,
+     "name": "Botas",
+     "totalGold": 300,
+     "isCompleted": false,
+     "tags": [
+      "Boots"
+     ],
+     "stats": {
+      "FlatMovementSpeedMod": 25
+     }
+    },
+    {
+     "id": 6694,
+     "name": "Rencor de Serylda",
+     "totalGold": 3000,
+     "isCompleted": true,
+     "tags": [
+      "Damage",
+      "CooldownReduction",
+      "ArmorPenetration",
+      "AbilityHaste"
+     ],
+     "stats": {
+      "FlatPhysicalDamageMod": 45
+     }
+    },
+    {
+     "id": 3031,
+     "name": "Filo infinito",
+     "totalGold": 3500,
+     "isCompleted": true,
+     "tags": [
+      "CriticalStrike",
+      "Damage"
+     ],
+     "stats": {
+      "FlatCritChanceMod": 0.25,
+      "FlatPhysicalDamageMod": 75
+     }
+    },
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "physical",
+   "estimatedGoldEarned": 12002.6,
+   "estimatedStats": {
+    "hp": 2210.2799999999997,
+    "armor": 105.884,
+    "magicResist": 61.226,
+    "attackDamage": 243
+   }
+  },
+  {
+   "championId": "Caitlyn",
+   "championName": "Caitlyn",
+   "team": "CHAOS",
+   "level": 16,
+   "position": "BOTTOM",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 6,
+    "deaths": 4,
+    "assists": 4,
+    "creepScore": 245,
+    "wardScore": 17
+   },
+   "items": [
+    {
+     "id": 3031,
+     "name": "Filo infinito",
+     "totalGold": 3500,
+     "isCompleted": true,
+     "tags": [
+      "CriticalStrike",
+      "Damage"
+     ],
+     "stats": {
+      "FlatCritChanceMod": 0.25,
+      "FlatPhysicalDamageMod": 75
+     }
+    },
+    {
+     "id": 3006,
+     "name": "Grebas de berserker",
+     "totalGold": 1100,
+     "isCompleted": true,
+     "tags": [
+      "AttackSpeed",
+      "Boots"
+     ],
+     "stats": {
+      "FlatMovementSpeedMod": 45,
+      "PercentAttackSpeedMod": 0.25
+     }
+    },
+    {
+     "id": 3085,
+     "name": "Huracán de Runaan",
+     "totalGold": 2650,
+     "isCompleted": true,
+     "tags": [
+      "CriticalStrike",
+      "AttackSpeed",
+      "OnHit",
+      "NonbootsMovement"
+     ],
+     "stats": {
+      "FlatCritChanceMod": 0.25,
+      "PercentAttackSpeedMod": 0.4,
+      "PercentMovementSpeedMod": 0.04
+     }
+    },
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "physical",
+   "estimatedGoldEarned": 11492.6,
+   "estimatedStats": {
+    "hp": 2128.825,
+    "armor": 95.03250000000001,
+    "magicResist": 48.8175,
+    "attackDamage": 137
+   }
+  },
+  {
+   "championId": "Soraka",
+   "championName": "Soraka",
+   "team": "CHAOS",
+   "level": 13,
+   "position": "UTILITY",
+   "isDead": false,
+   "respawnTimer": 0,
+   "scores": {
+    "kills": 1,
+    "deaths": 5,
+    "assists": 14,
+    "creepScore": 25,
+    "wardScore": 60
+   },
+   "items": [
+    {
+     "id": 1001,
+     "name": "Botas",
+     "totalGold": 300,
+     "isCompleted": false,
+     "tags": [
+      "Boots"
+     ],
+     "stats": {
+      "FlatMovementSpeedMod": 25
+     }
+    },
+    {
+     "id": 3107,
+     "name": "Redención",
+     "totalGold": 2300,
+     "isCompleted": true,
+     "tags": [
+      "SpellDamage",
+      "ManaRegen",
+      "CooldownReduction",
+      "AbilityHaste"
+     ],
+     "stats": {
+      "FlatMagicDamageMod": 30
+     }
+    },
+    {
+     "id": 3340,
+     "name": "Guardián invisible",
+     "totalGold": 0,
+     "isCompleted": false,
+     "tags": [
+      "Active",
+      "Jungle",
+      "Lane",
+      "Trinket",
+      "Vision"
+     ],
+     "stats": {}
+    }
+   ],
+   "damageType": "magic",
+   "estimatedGoldEarned": 6872.6,
+   "estimatedStats": {
+    "hp": 1568.6000000000001,
+    "armor": 86.75,
+    "magicResist": 44.235,
+    "attackDamage": 50
+   }
+  }
+ ],
+ "objectives": {
+  "dragons": {
+   "ORDER": [
+    "FIRE",
+    "HEXTECH"
+   ],
+   "CHAOS": [
+    "OCEAN"
+   ]
+  },
+  "barons": {
+   "ORDER": 1,
+   "CHAOS": 0
+  },
+  "heralds": {
+   "ORDER": 0,
+   "CHAOS": 1
+  },
+  "towers": {
+   "ORDER": 1,
+   "CHAOS": 1
+  }
+ },
+ "allyAggregates": {
+  "physicalShare": 0.44730433561382743,
+  "magicShare": 0.5526956643861726,
+  "tankinessIndex": 4613.81869128125,
+  "healingIndex": 0.5,
+  "estimatedTotalGold": 49843
+ },
+ "enemyAggregates": {
+  "physicalShare": 0.8000448363998206,
+  "magicShare": 0.1999551636001795,
+  "tankinessIndex": 4264.66409805,
+  "healingIndex": 4.5,
+  "estimatedTotalGold": 51253
+ }
+}

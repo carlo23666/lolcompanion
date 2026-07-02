@@ -14,6 +14,8 @@ import type { SessionPhase } from './session'
 export interface AppSettings {
   riotId: string | null
   platform: string
+  /** Dev tool: dump raw live snapshots to fixtures/recordings. */
+  recordLive: boolean
 }
 
 export interface IngestProgressPayload {
@@ -30,7 +32,7 @@ export interface IpcInvokeChannels {
   'app:ping': { args: []; result: { pong: true; version: string } }
   'settings:get': { args: []; result: AppSettings }
   'settings:set': {
-    args: [{ riotId: string; platform: string }]
+    args: [{ riotId: string; platform: string; recordLive: boolean }]
     result: { saved: true }
   }
   'ingest:start': { args: []; result: { started: boolean; error?: string } }

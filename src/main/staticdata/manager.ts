@@ -58,6 +58,11 @@ export class StaticDataManager {
     this.baseUrl = options.baseUrl ?? 'https://ddragon.leagueoflegends.com'
   }
 
+  /** Patch of the currently loaded data, or null before load() resolves. */
+  getLoadedPatch(): string | null {
+    return this.loaded?.patch ?? null
+  }
+
   async load(): Promise<StaticData> {
     if (this.loaded) return this.loaded
     const patch = await this.resolvePatch()

@@ -3,6 +3,7 @@ import { app } from 'electron'
 import type { GameState } from '@shared/gamestate'
 import type { AppDatabase } from '../db'
 import { LiveSessionRepo } from '../db/repos'
+import { SettingsRepo, SETTING_KEYS } from '../db/repos/settings'
 import { diffGameStates } from '../engine/diff'
 import { normalizeSnapshot } from '../engine/normalize'
 import { broadcast } from '../ipc'
@@ -32,11 +33,14 @@ export function startLiveClient(
   db: AppDatabase,
   onStateChange?: (state: 'unavailable' | 'polling') => void
 ): LiveClientPoller {
-  // Recorder is a dev-only tool: refuse to run in the packaged app.
-  const recorder =
-    process.env['RECORD_LIVE'] === '1' && !app.isPackaged
-      ? new SnapshotRecorder(join(app.getAppPath(), 'fixtures', 'recordings'))
-      : null
+  // Recorder is a dev-only tool: refuses to run in the packaged app.
+  // Enabled via RECORD_LIVE=1 or the settings toggle (Ajustes).
+  const settings = new SettingsRepo(db)
+  const recorder = app.isPackaged
+    ? null
+    : new SnapshotRecorder(join(app.getAppPath(), 'fixtures', 'recordings'))
+  const recordingEnabled = (): boolean =>
+    process.env['RECORD_LIVE'] === '1' || settings.get(SETTING_KEYS.recordLive) === '1'
 
   const persister = new LiveSessionPersister(new LiveSessionRepo(db))
 
@@ -61,7 +65,9 @@ export function startLiveClient(
     onSnapshot: (snapshot, raw) => {
       broadcast('live:snapshot', snapshot)
       persister.persist(snapshot, raw)
-      recorder?.record(raw, snapshot.gameData.gameTime)
+      if (recorder && recordingEnabled()) {
+        recorder.record(raw, snapshot.gameData.gameTime)
+      }
 
       if (staticData) {
         const state = normalizeSnapshot(snapshot, staticData)
