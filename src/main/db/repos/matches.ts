@@ -207,6 +207,46 @@ export class MatchRepo {
     return new Set(rows.map((row) => row.matchId))
   }
 
+  /** Matches joined with the owner's participant row, newest first. */
+  ownerMatches(
+    puuid: string,
+    options: { champion?: string; limit?: number } = {}
+  ): { match: MatchRow; own: ParticipantRow }[] {
+    const filter = options.champion !== undefined ? 'AND p.champion = @champion' : ''
+    const rows = this.db
+      .prepare(
+        `SELECT m.matchId AS m_matchId, m.queueId, m.patch, m.gameCreation, m.durationS, m.win AS m_win,
+                p.*
+         FROM matches m
+         JOIN participants p ON p.matchId = m.matchId
+         WHERE p.puuid = @puuid ${filter}
+         ORDER BY m.gameCreation DESC LIMIT @limit`
+      )
+      .all(
+        options.champion !== undefined
+          ? { puuid, champion: options.champion, limit: options.limit ?? 100 }
+          : { puuid, limit: options.limit ?? 100 }
+      ) as (DbParticipantRow & {
+      m_matchId: string
+      queueId: number
+      patch: string
+      gameCreation: number
+      durationS: number
+      m_win: number | null
+    })[]
+    return rows.map((row) => ({
+      match: toMatchRow({
+        matchId: row.m_matchId,
+        queueId: row.queueId,
+        patch: row.patch,
+        gameCreation: row.gameCreation,
+        durationS: row.durationS,
+        win: row.m_win
+      }),
+      own: toParticipantRow(row)
+    }))
+  }
+
   count(): number {
     const row = this.db.prepare('SELECT COUNT(*) AS n FROM matches').get() as { n: number }
     return row.n

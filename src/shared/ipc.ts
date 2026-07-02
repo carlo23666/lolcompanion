@@ -9,6 +9,7 @@
 import type { LiveClientSnapshot } from './schemas/liveclient'
 import type { ChampSelectState } from './schemas/lcu'
 import type { GameState, GameStateEvent } from './gamestate'
+import type { HistoryAggregate, HistoryDetail, HistoryRow } from './history'
 import type { Recommendation } from './recommendation'
 import type { SessionPhase } from './session'
 
@@ -43,6 +44,10 @@ export interface IpcInvokeChannels {
   }
   'ingest:start': { args: []; result: { started: boolean; error?: string } }
   'session:get': { args: []; result: SessionPhase }
+  'history:list': { args: [filter?: { champion?: string }]; result: HistoryRow[] }
+  'history:aggregates': { args: []; result: HistoryAggregate[] }
+  'history:champions': { args: []; result: string[] }
+  'history:detail': { args: [matchId: string]; result: HistoryDetail | null }
 }
 
 export interface IpcEventChannels {
@@ -54,6 +59,8 @@ export interface IpcEventChannels {
   'gamestate:update': GameState
   'gamestate:events': GameStateEvent[]
   'gamestate:recommendations': RecommendationsPayload
+  /** A finished match landed in the DB (post-game auto-ingest). */
+  'history:changed': { matchId: string }
 }
 
 export type IpcInvokeChannel = keyof IpcInvokeChannels
@@ -64,7 +71,11 @@ export const IPC_INVOKE_CHANNELS: readonly IpcInvokeChannel[] = [
   'settings:get',
   'settings:set',
   'ingest:start',
-  'session:get'
+  'session:get',
+  'history:list',
+  'history:aggregates',
+  'history:champions',
+  'history:detail'
 ]
 
 export const IPC_EVENT_CHANNELS: readonly IpcEventChannel[] = [
@@ -75,7 +86,8 @@ export const IPC_EVENT_CHANNELS: readonly IpcEventChannel[] = [
   'session:champselect',
   'gamestate:update',
   'gamestate:events',
-  'gamestate:recommendations'
+  'gamestate:recommendations',
+  'history:changed'
 ]
 
 /** Shape of the API the preload script exposes on window.api */

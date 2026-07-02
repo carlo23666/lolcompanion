@@ -16,6 +16,25 @@ let ingestRunning = false
 // One limiter per app lifetime so all Riot traffic shares the same buckets.
 const limiter = new RiotRateLimiter()
 
+/**
+ * Ready-to-use client + owner puuid, or null when the app is not configured
+ * yet (no key, no riotId, or puuid not resolved).
+ */
+export function getRiotContext(db: AppDatabase): { client: RiotClient; puuid: string } | null {
+  const settings = new SettingsRepo(db)
+  const apiKey = process.env['RIOT_API_KEY']
+  const puuid = settings.get(SETTING_KEYS.puuid)
+  if (apiKey === undefined || apiKey === '' || puuid === null || puuid === '') return null
+  const platform = settings.get(SETTING_KEYS.platform) ?? 'euw1'
+  return { client: new RiotClient({ apiKey, platform, limiter }), puuid }
+}
+
+/** Owner puuid from settings (resolved at settings save or first sync). */
+export function getOwnerPuuid(db: AppDatabase): string | null {
+  const puuid = new SettingsRepo(db).get(SETTING_KEYS.puuid)
+  return puuid === null || puuid === '' ? null : puuid
+}
+
 export function registerRiotIpc(db: AppDatabase): void {
   const settings = new SettingsRepo(db)
 
@@ -31,8 +50,21 @@ export function registerRiotIpc(db: AppDatabase): void {
     settings.set(SETTING_KEYS.platform, update.platform)
     settings.set(SETTING_KEYS.recordLive, update.recordLive ? '1' : '0')
     if (previousRiotId !== update.riotId) {
-      // riotId changed → cached puuid no longer valid.
+      // riotId changed → cached puuid no longer valid; re-resolve in the
+      // background so post-game auto-ingest works without a full sync.
       settings.set(SETTING_KEYS.puuid, '')
+      const apiKey = process.env['RIOT_API_KEY']
+      if (apiKey !== undefined && apiKey !== '' && update.riotId.includes('#')) {
+        const [gameName = '', tagLine = ''] = update.riotId.split('#', 2)
+        const client = new RiotClient({
+          apiKey,
+          platform: update.platform,
+          limiter
+        })
+        void client.accountByRiotId(gameName, tagLine).then((account) => {
+          if (account.ok) settings.set(SETTING_KEYS.puuid, account.value.puuid)
+        })
+      }
     }
     limiter.reset()
     return { saved: true as const }

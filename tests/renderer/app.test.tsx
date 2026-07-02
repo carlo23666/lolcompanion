@@ -18,6 +18,9 @@ export function stubApi(overrides: Record<string, unknown> = {}): ApiStub {
       return Promise.resolve({ riotId: null, platform: 'euw1', recordLive: false })
     }
     if (channel in overrides) return Promise.resolve(overrides[channel])
+    if (['history:list', 'history:aggregates', 'history:champions'].includes(channel)) {
+      return Promise.resolve([])
+    }
     return Promise.resolve({})
   })
   const api: RendererApi = {
@@ -56,7 +59,7 @@ describe('App shell', () => {
     render(<App />)
 
     await user.click(screen.getByRole('button', { name: /Historial/ }))
-    expect(screen.getByText(/Llega con el WP-010/)).toBeInTheDocument()
+    expect(await screen.findByText('Sin partidas guardadas')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /Ajustes/ }))
     expect(await screen.findByText('Cuenta')).toBeInTheDocument()

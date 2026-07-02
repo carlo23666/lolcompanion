@@ -2,11 +2,13 @@ import { join } from 'node:path'
 import { app, BrowserWindow } from 'electron'
 import { openDatabase, type AppDatabase } from './db'
 import { loadDotEnv } from './env'
+import { registerHistoryIpc } from './history-ipc'
 import { registerIconProtocol, registerIconScheme } from './icons'
 import { broadcast, handleInvoke } from './ipc'
 import { startLcu, type LcuConnector } from './lcu'
 import { startLiveClient, type LiveClientPoller } from './liveclient'
-import { registerRiotIpc } from './riot'
+import { PostGameIngestor } from './postgame'
+import { getRiotContext, registerRiotIpc } from './riot'
 import { SessionMachine } from './session/machine'
 import { getStaticDataManager } from './staticdata'
 
@@ -48,7 +50,20 @@ void app.whenReady().then(() => {
   registerIpcHandlers()
   registerRiotIpc(db)
 
-  const machine = new SessionMachine((phase) => broadcast('session:phase', phase))
+  registerHistoryIpc(db)
+
+  const database = db
+  const postGame = new PostGameIngestor({
+    db: database,
+    getContext: () => getRiotContext(database),
+    onStored: (matchId) => broadcast('history:changed', { matchId }),
+    log: (message) => console.log(message)
+  })
+
+  const machine = new SessionMachine((phase) => {
+    broadcast('session:phase', phase)
+    postGame.onPhase(phase)
+  })
   handleInvoke('session:get', () => machine.getPhase())
   liveClient = startLiveClient(db, (state) => machine.setLiveState(state))
   lcu = startLcu(machine)

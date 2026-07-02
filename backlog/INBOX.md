@@ -7,3 +7,4 @@ Builder sessions append here instead of expanding scope. Reviewer triages into W
 - (WP-004) Replace synthetic match/timeline fixtures with real recorded (anonymized) responses after the first owner sync.
 - (WP-004) Parse `X-Method-Rate-Limit` headers to size per-method buckets dynamically instead of conservative constants.
 - (WP-009) **ADR-006 pending**: replace the placeholder `src/main/engine/baselines/pool.json` with the owner's real champion pool (10-15 champs+roles). Schema tests will validate it.
+- (WP-010) Post-game session linking could cross-check `live_sessions.championName` against the match's owner champion before linking (guards against linking a remake/aborted session).

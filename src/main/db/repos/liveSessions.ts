@@ -42,6 +42,13 @@ export class LiveSessionRepo {
       .run(result, matchId, sessionId)
   }
 
+  /** Post-game link: attaches the published match to the live session. */
+  linkMatch(sessionId: number, link: { matchId: string; result: string; patch: string }): void {
+    this.db
+      .prepare('UPDATE live_sessions SET matchId = ?, result = ?, patch = ? WHERE id = ?')
+      .run(link.matchId, link.result, link.patch, sessionId)
+  }
+
   getSession(id: number): LiveSessionRow | null {
     const row = this.db.prepare('SELECT * FROM live_sessions WHERE id = ?').get(id) as
       | LiveSessionRow
