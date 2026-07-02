@@ -15,7 +15,8 @@ describe('LiveView', () => {
     expect(screen.getByText(/Entra en cola/)).toBeInTheDocument()
 
     rerender(<LiveView phase="postGame" gameState={null} champSelect={null} />)
-    expect(screen.getByText(/se guardará en el historial/)).toBeInTheDocument()
+    expect(screen.getByText(/Fin de la partida/)).toBeInTheDocument()
+    expect(screen.getByText(/El informe aparecerá/)).toBeInTheDocument()
 
     rerender(<LiveView phase="inGame" gameState={null} champSelect={null} />)
     expect(screen.getByText('Conectando con la partida')).toBeInTheDocument()

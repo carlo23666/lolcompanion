@@ -12,6 +12,7 @@ import {
   usePersonalCurve
 } from './LiveInsights'
 import ObjectivesRow from './ObjectivesRow'
+import PostGameReport from './PostGameReport'
 import RecommendationCard from './RecommendationCard'
 import TeamPanel from './TeamPanel'
 
@@ -134,11 +135,10 @@ export default function LiveView(props: {
         />
       )}
       {phase === 'postGame' && (
-        <EmptyState
-          icon="🏁"
-          title="Fin de la partida"
-          hint="La partida se guardará en el historial en cuanto Riot la publique."
-        />
+        <div className="flex flex-1 flex-col items-center justify-center gap-3">
+          <p className="text-sm font-medium text-slate-300">🏁 Fin de la partida</p>
+          <PostGameReport />
+        </div>
       )}
       {phase === 'champSelect' && (
         <ChampSelectPanel champSelect={props.champSelect} championNames={props.championNames} />

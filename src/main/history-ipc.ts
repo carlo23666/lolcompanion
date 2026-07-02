@@ -1,6 +1,7 @@
 import type { AppDatabase } from './db'
 import { HistoryService } from './history'
 import { handleInvoke } from './ipc'
+import { ReportService } from './report'
 import { getOwnerPuuid } from './riot'
 import { StatsService } from './stats'
 
@@ -8,6 +9,7 @@ import { StatsService } from './stats'
 export function registerHistoryIpc(db: AppDatabase): StatsService {
   const service = new HistoryService(db)
   const stats = new StatsService(db)
+  const report = new ReportService(db, stats)
   handleInvoke('history:list', (filter) => {
     const puuid = getOwnerPuuid(db)
     return puuid === null ? [] : service.list(puuid, filter?.champion)
@@ -31,6 +33,10 @@ export function registerHistoryIpc(db: AppDatabase): StatsService {
   handleInvoke('stats:curve', (champion) => {
     const puuid = getOwnerPuuid(db)
     return puuid === null ? null : stats.curve(puuid, champion)
+  })
+  handleInvoke('report:last', () => {
+    const puuid = getOwnerPuuid(db)
+    return puuid === null ? null : report.lastReport(puuid)
   })
   return stats
 }

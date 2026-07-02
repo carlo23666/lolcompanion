@@ -21,6 +21,9 @@ export function stubApi(overrides: Record<string, unknown> = {}): ApiStub {
     if (['history:list', 'history:aggregates', 'history:champions'].includes(channel)) {
       return Promise.resolve([])
     }
+    if (['history:detail', 'stats:overview', 'stats:curve', 'report:last'].includes(channel)) {
+      return Promise.resolve(null)
+    }
     return Promise.resolve({})
   })
   const api: RendererApi = {
