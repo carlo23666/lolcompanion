@@ -1,0 +1,100 @@
+{
+  "_comment": "Synthetic champ select session (shape-accurate). Identity fields ARE present here on purpose: tests assert the sanitizer strips them.",
+  "localPlayerCellId": 2,
+  "gameId": 0,
+  "hasSimultaneousBans": true,
+  "hasSimultaneousPicks": false,
+  "isCustomGame": false,
+  "isSpectating": false,
+  "counter": 5,
+  "myTeam": [
+    {
+      "assignedPosition": "top",
+      "cellId": 0,
+      "championId": 266,
+      "championPickIntent": 0,
+      "nameVisibilityType": "HIDDEN",
+      "obfuscatedPuuid": "obf-1",
+      "obfuscatedSummonerId": 901,
+      "puuid": "REAL_PUUID_SHOULD_NOT_LEAK_1",
+      "summonerId": 12345601,
+      "gameName": "REAL_NAME_SHOULD_NOT_LEAK_1",
+      "tagLine": "EUW",
+      "selectedSkinId": 266000,
+      "spell1Id": 4,
+      "spell2Id": 12,
+      "team": 1,
+      "wardSkinId": -1
+    },
+    {
+      "assignedPosition": "jungle",
+      "cellId": 1,
+      "championId": 64,
+      "championPickIntent": 0,
+      "nameVisibilityType": "HIDDEN",
+      "puuid": "REAL_PUUID_SHOULD_NOT_LEAK_2",
+      "summonerId": 12345602,
+      "gameName": "REAL_NAME_SHOULD_NOT_LEAK_2",
+      "tagLine": "EUW",
+      "spell1Id": 11,
+      "spell2Id": 4,
+      "team": 1
+    },
+    {
+      "assignedPosition": "middle",
+      "cellId": 2,
+      "championId": 0,
+      "championPickIntent": 103,
+      "nameVisibilityType": "VISIBLE",
+      "puuid": "REAL_PUUID_SHOULD_NOT_LEAK_3",
+      "summonerId": 12345603,
+      "gameName": "REAL_NAME_SHOULD_NOT_LEAK_3",
+      "tagLine": "EUW",
+      "spell1Id": 4,
+      "spell2Id": 14,
+      "team": 1
+    },
+    {
+      "assignedPosition": "bottom",
+      "cellId": 3,
+      "championId": 222,
+      "championPickIntent": 0,
+      "puuid": "REAL_PUUID_SHOULD_NOT_LEAK_4",
+      "summonerId": 12345604,
+      "gameName": "REAL_NAME_SHOULD_NOT_LEAK_4",
+      "team": 1
+    },
+    {
+      "assignedPosition": "utility",
+      "cellId": 4,
+      "championId": 412,
+      "championPickIntent": 0,
+      "puuid": "REAL_PUUID_SHOULD_NOT_LEAK_5",
+      "summonerId": 12345605,
+      "gameName": "REAL_NAME_SHOULD_NOT_LEAK_5",
+      "team": 1
+    }
+  ],
+  "theirTeam": [
+    { "cellId": 5, "championId": 157, "puuid": "", "summonerId": 0, "nameVisibilityType": "HIDDEN", "team": 2 },
+    { "cellId": 6, "championId": 238, "puuid": "", "summonerId": 0, "nameVisibilityType": "HIDDEN", "team": 2 },
+    { "cellId": 7, "championId": 0, "puuid": "", "summonerId": 0, "nameVisibilityType": "HIDDEN", "team": 2 },
+    { "cellId": 8, "championId": 51, "puuid": "", "summonerId": 0, "nameVisibilityType": "HIDDEN", "team": 2 },
+    { "cellId": 9, "championId": 89, "puuid": "", "summonerId": 0, "nameVisibilityType": "HIDDEN", "team": 2 }
+  ],
+  "bans": {
+    "myTeamBans": [266, 875],
+    "theirTeamBans": [103, 84],
+    "numBans": 10
+  },
+  "timer": {
+    "adjustedTimeLeftInPhase": 27000,
+    "internalNowInEpochMs": 1751450000000,
+    "isInfinite": false,
+    "phase": "BAN_PICK",
+    "totalTimeInPhase": 87000
+  },
+  "trades": [],
+  "pickOrderSwaps": [],
+  "actions": [[{ "actorCellId": 0, "championId": 266, "completed": true, "id": 0, "isAllyAction": true, "type": "ban" }]]
+}

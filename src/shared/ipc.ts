@@ -7,6 +7,8 @@
  * - `IpcEventChannels`: push events (main -> renderer).
  */
 import type { LiveClientSnapshot } from './schemas/liveclient'
+import type { ChampSelectState } from './schemas/lcu'
+import type { SessionPhase } from './session'
 
 export interface AppSettings {
   riotId: string | null
@@ -31,12 +33,15 @@ export interface IpcInvokeChannels {
     result: { saved: true }
   }
   'ingest:start': { args: []; result: { started: boolean; error?: string } }
+  'session:get': { args: []; result: SessionPhase }
 }
 
 export interface IpcEventChannels {
   'live:snapshot': LiveClientSnapshot
   'live:state': 'unavailable' | 'polling'
   'ingest:progress': IngestProgressPayload
+  'session:phase': SessionPhase
+  'session:champselect': ChampSelectState | null
 }
 
 export type IpcInvokeChannel = keyof IpcInvokeChannels
@@ -46,13 +51,16 @@ export const IPC_INVOKE_CHANNELS: readonly IpcInvokeChannel[] = [
   'app:ping',
   'settings:get',
   'settings:set',
-  'ingest:start'
+  'ingest:start',
+  'session:get'
 ]
 
 export const IPC_EVENT_CHANNELS: readonly IpcEventChannel[] = [
   'live:snapshot',
   'live:state',
-  'ingest:progress'
+  'ingest:progress',
+  'session:phase',
+  'session:champselect'
 ]
 
 /** Shape of the API the preload script exposes on window.api */

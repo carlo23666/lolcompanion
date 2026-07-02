@@ -23,7 +23,10 @@ function certPath(): string {
  * (live_sessions/live_snapshots) and, in dev with RECORD_LIVE=1, the fixture
  * file recorder.
  */
-export function startLiveClient(db: AppDatabase): LiveClientPoller {
+export function startLiveClient(
+  db: AppDatabase,
+  onStateChange?: (state: 'unavailable' | 'polling') => void
+): LiveClientPoller {
   // Recorder is a dev-only tool: refuse to run in the packaged app.
   const recorder =
     process.env['RECORD_LIVE'] === '1' && !app.isPackaged
@@ -42,6 +45,7 @@ export function startLiveClient(db: AppDatabase): LiveClientPoller {
     onStateChange: (state) => {
       broadcast('live:state', state)
       if (state === 'unavailable') persister.endSession()
+      onStateChange?.(state)
     },
     onValidationError: (error) => {
       console.error('[liveclient] payload failed validation:', error.message)

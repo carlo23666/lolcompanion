@@ -1,6 +1,17 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-02 — WP-005 — LCU connector + session phase state machine
+**Done:** `src/main/lcu/` wrapping league-connect 6.0.0-rc13 (only these files import it): credential discovery with `awaitConnection`, WS connect with retries, reconnect loop surviving client kills, subscriptions to `/lol-gameflow/v1/gameflow-phase` + `/lol-champ-select/v1/session`, initial phase fetched via REST (subscriptions only fire on change). `src/main/session/machine.ts`: pure `computeSessionPhase` — :2999 polling is the source of truth for `inGame`; LCU distinguishes `champSelect`/`postGame`/`clientOpen`; nothing connected → `idle`; loading screen (LCU InProgress, port down) → `clientOpen`. `SessionMachine` emits only on change → `session:phase` IPC + `session:get` invoke. Champ select sanitized in `src/shared/schemas/lcu.ts` **using plain z.object() which strips unknown keys — puuid/summonerId/gameName/tagLine/obfuscated* are actively removed** before `session:champselect` leaves main; enemy entries carry championId+cellId only. `docs/lcu-endpoints.md` written. 21 new tests (phase table incl. full cycle + client-kill recovery, sanitizer identity-stripping asserted on a fixture that contains identity fields).
+
+**Deviations:**
+- New dependency `league-connect@6.0.0-rc13` — mandated by CLAUDE.md stack; rc is the only 6.x line published.
+- Champ select fixture is synthetic (shape-accurate, WITH identity fields to prove stripping); owner should record a real session for the acceptance criterion.
+
+**Gaps (owner):** full real cycle test (launch → lobby → champ select → game → post-game, incl. client kill) needs a running LoL client; the state machine logic is fully covered by tests, the I/O wrapper is not.
+
+**Files:** src/main/lcu/{connector,index}.ts, src/main/session/machine.ts, src/shared/{session.ts,schemas/lcu.ts}, src/shared/ipc.ts, src/main/{index.ts,liveclient/index.ts}, docs/lcu-endpoints.md, fixtures/lcu/champselect-session.json, tests/main/{session-machine,lcu-champselect}.test.ts.
+
 ## 2026-07-02 — WP-004 — Riot API client + rate limiter + history ingestion
 **Done:** `src/main/riot/` — `RiotRateLimiter` (token buckets for app limits 20/1s + 100/120s AND per-method limits, fixed windows; priority queue with no head-of-line blocking across methods; `Retry-After` honored on 429 with replay through the queue so retries consume fresh tokens; 403 → persistent `RiotKeyInvalidError`, everything fails fast until `reset()`, no retry storm). Typed `RiotClient` (account-v1 by-riot-id, match-v5 ids/match/timeline, league-v4 entries by-puuid) with platform→regional routing map, zod validation of every payload (`src/shared/schemas/riot.ts`), `Result`-style returns, API key only in the `X-Riot-Token` header and never in error messages. Resumable `ingestHistory` walking matchlist newest→oldest, skipping stored ids (resume = skip, no re-download), owner-centric `matches.win`, progress via `ingest:progress` IPC. Settings (riotId/platform/puuid cache) in the meta table; `ingest:start`/`settings:get`/`settings:set` IPC; renderer settings stub with sync button + progress bar. Zero-dep `.env` loader (`src/main/env.ts`). 18 new tests (limiter with fake timers incl. burst/120s window/429 replay/method independence/priority/403; client against fixtures; ingestion store/resume/fail/cancel/maxMatches).
 
