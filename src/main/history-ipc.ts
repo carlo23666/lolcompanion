@@ -2,9 +2,12 @@ import type { AppDatabase } from './db'
 import { HistoryService } from './history'
 import { handleInvoke } from './ipc'
 import { getOwnerPuuid } from './riot'
+import { StatsService } from './stats'
 
-export function registerHistoryIpc(db: AppDatabase): void {
+/** Returns the StatsService so callers can invalidate its cache on new matches. */
+export function registerHistoryIpc(db: AppDatabase): StatsService {
   const service = new HistoryService(db)
+  const stats = new StatsService(db)
   handleInvoke('history:list', (filter) => {
     const puuid = getOwnerPuuid(db)
     return puuid === null ? [] : service.list(puuid, filter?.champion)
@@ -21,4 +24,13 @@ export function registerHistoryIpc(db: AppDatabase): void {
     const puuid = getOwnerPuuid(db)
     return puuid === null ? null : service.detail(puuid, matchId)
   })
+  handleInvoke('stats:overview', () => {
+    const puuid = getOwnerPuuid(db)
+    return puuid === null ? null : stats.overview(puuid)
+  })
+  handleInvoke('stats:curve', (champion) => {
+    const puuid = getOwnerPuuid(db)
+    return puuid === null ? null : stats.curve(puuid, champion)
+  })
+  return stats
 }

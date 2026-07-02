@@ -10,6 +10,7 @@ import type { LiveClientSnapshot } from './schemas/liveclient'
 import type { ChampSelectState } from './schemas/lcu'
 import type { GameState, GameStateEvent } from './gamestate'
 import type { HistoryAggregate, HistoryDetail, HistoryRow } from './history'
+import type { PersonalCurve, StatsOverview } from './stats'
 import type { Recommendation } from './recommendation'
 import type { SessionPhase } from './session'
 
@@ -50,6 +51,10 @@ export interface IpcInvokeChannels {
   'history:aggregates': { args: []; result: HistoryAggregate[] }
   'history:champions': { args: []; result: string[] }
   'history:detail': { args: [matchId: string]; result: HistoryDetail | null }
+  /** Personal statistics over the stored history (null until puuid resolved). */
+  'stats:overview': { args: []; result: StatsOverview | null }
+  /** Personal CS/gold laning baseline for one champion (null if <2 games). */
+  'stats:curve': { args: [champion: string]; result: PersonalCurve | null }
 }
 
 export interface IpcEventChannels {
@@ -78,7 +83,9 @@ export const IPC_INVOKE_CHANNELS: readonly IpcInvokeChannel[] = [
   'history:list',
   'history:aggregates',
   'history:champions',
-  'history:detail'
+  'history:detail',
+  'stats:overview',
+  'stats:curve'
 ]
 
 export const IPC_EVENT_CHANNELS: readonly IpcEventChannel[] = [

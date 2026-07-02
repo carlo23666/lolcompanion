@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { HistoryAggregate, HistoryDetail, HistoryRow } from '@shared/history'
+import StatsView from './StatsView'
 
 function formatDuration(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60)
@@ -76,6 +77,7 @@ function DetailDrawer(props: { detail: HistoryDetail }): React.JSX.Element {
 }
 
 export default function HistoryView(): React.JSX.Element {
+  const [tab, setTab] = useState<'partidas' | 'stats'>('partidas')
   const [rows, setRows] = useState<HistoryRow[]>([])
   const [aggregates, setAggregates] = useState<HistoryAggregate[]>([])
   const [champions, setChampions] = useState<string[]>([])
@@ -112,21 +114,42 @@ export default function HistoryView(): React.JSX.Element {
   return (
     <div className="flex h-full flex-col gap-3 p-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold">Historial</h1>
-        <select
-          aria-label="Filtrar por campeón"
-          className="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm"
-          value={filter}
-          onChange={(event) => setFilter(event.target.value)}
-        >
-          <option value="">Todos los campeones</option>
-          {champions.map((champion) => (
-            <option key={champion} value={champion}>
-              {champion}
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center gap-3">
+          <h1 className="text-lg font-bold">Historial</h1>
+          <div className="flex rounded border border-slate-700 text-xs" role="tablist">
+            {(['partidas', 'stats'] as const).map((id) => (
+              <button
+                key={id}
+                role="tab"
+                aria-selected={tab === id}
+                className={`px-2.5 py-1 ${tab === id ? 'bg-slate-700 text-slate-100' : 'text-slate-400 hover:text-slate-200'}`}
+                onClick={() => setTab(id)}
+              >
+                {id === 'partidas' ? 'Partidas' : 'Estadísticas'}
+              </button>
+            ))}
+          </div>
+        </div>
+        {tab === 'partidas' && (
+          <select
+            aria-label="Filtrar por campeón"
+            className="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm"
+            value={filter}
+            onChange={(event) => setFilter(event.target.value)}
+          >
+            <option value="">Todos los campeones</option>
+            {champions.map((champion) => (
+              <option key={champion} value={champion}>
+                {champion}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
+
+      {tab === 'stats' && <StatsView />}
+      {tab === 'partidas' && (
+        <>
 
       {aggregates.length > 0 && (
         <div className="flex flex-wrap gap-2">
@@ -198,6 +221,8 @@ export default function HistoryView(): React.JSX.Element {
             </li>
           ))}
         </ul>
+      )}
+        </>
       )}
     </div>
   )

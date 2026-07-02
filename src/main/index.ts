@@ -56,13 +56,16 @@ void app.whenReady().then(() => {
   registerIpcHandlers()
   registerRiotIpc(db)
 
-  registerHistoryIpc(db)
+  const statsService = registerHistoryIpc(db)
 
   const database = db
   const postGame = new PostGameIngestor({
     db: database,
     getContext: () => getRiotContext(database),
-    onStored: (matchId) => broadcast('history:changed', { matchId }),
+    onStored: (matchId) => {
+      statsService.invalidate()
+      broadcast('history:changed', { matchId })
+    },
     log: (message) => console.log(message)
   })
 
