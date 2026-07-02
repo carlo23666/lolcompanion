@@ -15,8 +15,8 @@ Phase 1 recommendations are deterministic rules over GameState + item math from 
 ## ADR-005 — Panel first, overlay later (ACCEPTED, provisional)
 Phase 1 renders recommendations in the app window (second monitor / alt-tab). Transparent always-on-top overlay is phase 2 (WP-012+). Rationale: overlay adds windowing complexity and fullscreen-exclusive limitations without changing the engine. REVISIT if owner plays single-monitor fullscreen — say so and we reprioritize.
 
-## ADR-006 — OPEN: owner champion pool
-The curated baseline builds (WP-009) need the owner's champion pool (10–15 champs). BLOCKS WP-009 only. Owner to provide list; store in `src/main/engine/baselines/pool.json`.
+## ADR-006 — Owner champion pool (ACCEPTED v1, 2026-07-02 — data-derived)
+The curated baseline builds (WP-009) need the owner's champion pool. Resolved by DERIVING it from the owner's own 200 ingested matches instead of hand-curation: per champion, the most frequent completed-item purchase order becomes `core`, high-frequency off-core completions become `situational`. v1 pool: Kai'Sa, Samira, Twitch, Jinx, Ezreal (BOTTOM) + Graves (JUNGLE). Effect measured by backtest over the same 100 matches: top-1 15.0%→39.5%, top-3 19.9%→49.8% (early phase 60/67%). Owner refines entries by hand as his builds evolve; behavioral tests use an injected fixed pool so editing pool.json never breaks the suite. Ezreal is thin (4 games) — treat as provisional.
 
 ## ADR-007 — OPEN: distribution ambition
 Assumed personal use only (personal API key, no code signing, no auto-update). If this changes: production key application, signing certs (NOT zero-cost), backend. Decision can be deferred until after phase 2.

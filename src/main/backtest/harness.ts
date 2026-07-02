@@ -1,4 +1,6 @@
 import type { RiotMatch, RiotTimeline } from '@shared/schemas/riot'
+import type { BaselinePool } from '@shared/schemas/baselines'
+import { loadBaselinePool } from '../engine/nextbuy'
 import { recommend } from '../engine/recommend'
 import { componentTree } from '../staticdata/itemgraph'
 import type { StaticData } from '../staticdata/manager'
@@ -60,7 +62,11 @@ function matches(
   return componentTree(staticData.itemGraph, actual).includes(recommendedItemId)
 }
 
-export function runBacktest(inputs: BacktestInput[], staticData: StaticData): BacktestReport {
+export function runBacktest(
+  inputs: BacktestInput[],
+  staticData: StaticData,
+  pool: BaselinePool = loadBaselinePool()
+): BacktestReport {
   const overall: AgreementBucket = { comparisons: 0, top1Hits: 0, top3Hits: 0 }
   const byChampion = new Map<string, AgreementBucket>()
   const byPhase: Record<'early' | 'mid' | 'late', AgreementBucket> = {
@@ -87,7 +93,7 @@ export function runBacktest(inputs: BacktestInput[], staticData: StaticData): Ba
 
       for (const frame of reconstructed) {
         if (frame.actualNextPurchase === null) continue
-        const recommendations = recommend(frame.state, staticData)
+        const recommendations = recommend(frame.state, staticData, pool)
         const withItems = recommendations.filter((rec) => rec.itemId !== null)
         if (withItems.length === 0) continue
 

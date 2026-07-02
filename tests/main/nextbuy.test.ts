@@ -14,6 +14,21 @@ import { loadFixtureStaticData } from './helpers/staticdata'
 let staticData: StaticData
 let mid: GameState
 
+/**
+ * Stable pool for behavioral tests, decoupled from the owner's real
+ * pool.json (which changes as his builds evolve). Boots → IE → Runaan → LDR.
+ */
+const TEST_POOL = baselinePoolSchema.parse({
+  champions: [
+    {
+      championId: 'Jinx',
+      role: 'BOTTOM',
+      core: [3006, 3031, 3085, 3036],
+      situational: [3026, 3139, 3153]
+    }
+  ]
+})
+
 function item(id: number): GameStateItem {
   const node = staticData.itemGraph.nodes.get(id)
   if (!node) throw new Error(`item ${String(id)} missing`)
@@ -87,7 +102,7 @@ describe('missingFor', () => {
 describe('nextBuyRecommendation', () => {
   it('empty inventory: targets the first core item at component level', () => {
     const state = selfWith('Jinx', [], 350)
-    const rec = nextBuyRecommendation(state, staticData)
+    const rec = nextBuyRecommendation(state, staticData, TEST_POOL)
     // Berserker's (1st core) costs 1100 > 350 → affordable component instead.
     expect(rec?.action).toBe('add')
     const node = staticData.itemGraph.nodes.get(rec?.itemId ?? -1)
@@ -97,7 +112,7 @@ describe('nextBuyRecommendation', () => {
 
   it('can afford the full completion → prioritize', () => {
     const state = selfWith('Jinx', [], 1200)
-    const rec = nextBuyRecommendation(state, staticData)
+    const rec = nextBuyRecommendation(state, staticData, TEST_POOL)
     expect(rec?.itemId).toBe(3006)
     expect(rec?.action).toBe('prioritize')
     expect(rec?.reasons.join(' ')).toContain('YA')
@@ -105,7 +120,7 @@ describe('nextBuyRecommendation', () => {
 
   it('skips owned core items and moves to the next one', () => {
     const state = selfWith('Jinx', [3006, 3031], 2000)
-    const rec = nextBuyRecommendation(state, staticData)
+    const rec = nextBuyRecommendation(state, staticData, TEST_POOL)
     // Next core: Runaan's (3085); 2000 < 2650 → component or delay, targeting it.
     expect(rec).not.toBeNull()
     expect(rec?.reasons.join(' ')).toContain('3º objeto')
@@ -113,17 +128,17 @@ describe('nextBuyRecommendation', () => {
 
   it('complete core build → null', () => {
     const state = selfWith('Jinx', [3006, 3031, 3085, 3036], 3000)
-    expect(nextBuyRecommendation(state, staticData)).toBeNull()
+    expect(nextBuyRecommendation(state, staticData, TEST_POOL)).toBeNull()
   })
 
   it('champion outside the pool → null', () => {
     const state = selfWith('Teemo', [], 3000)
-    expect(nextBuyRecommendation(state, staticData)).toBeNull()
+    expect(nextBuyRecommendation(state, staticData, TEST_POOL)).toBeNull()
   })
 
   it('waits when nothing useful is affordable', () => {
     const state = selfWith('Jinx', [], 100)
-    const rec = nextBuyRecommendation(state, staticData)
+    const rec = nextBuyRecommendation(state, staticData, TEST_POOL)
     expect(rec?.action).toBe('delay')
     expect(rec?.reasons.join(' ')).toContain('Guarda oro')
   })
@@ -168,7 +183,7 @@ describe('recommend (baseline + rules merged)', () => {
     if (!zed) throw new Error('Zed missing')
     zed.scores.kills = 9
     zed.scores.deaths = 2
-    const recommendations = recommend(state, staticData)
+    const recommendations = recommend(state, staticData, TEST_POOL)
     const ga = recommendations.find((rec) => rec.itemId === 3026)
     expect(ga).toBeDefined()
     expect(ga?.reasons.join(' ')).toContain('situacionales')

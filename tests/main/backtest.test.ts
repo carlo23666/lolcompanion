@@ -120,8 +120,19 @@ describe('runBacktest', () => {
   it('scores hits where the fixture follows the baseline and misses where it deviates', () => {
     // The synthetic player builds IE BEFORE boots (deviating from the
     // baseline core order), then buys Berserker's exactly when the baseline
-    // expects it. The harness must report both honestly.
-    const report = runBacktest([{ match, timeline, ownerPuuid: OWNER }], staticData)
+    // expects it. The harness must report both honestly. Uses a fixed pool
+    // (the fixture was authored against it), not the owner's evolving one.
+    const testPool = {
+      champions: [
+        {
+          championId: 'Jinx',
+          role: 'BOTTOM' as const,
+          core: [3006, 3031, 3085, 3036],
+          situational: [3026, 3139, 3153]
+        }
+      ]
+    }
+    const report = runBacktest([{ match, timeline, ownerPuuid: OWNER }], staticData, testPool)
     // Hits exist (the Berserker's window, frames 14+).
     expect(report.byPhase.mid.top1Hits).toBeGreaterThanOrEqual(3)
     // Misses exist (early frames: actual IE vs baseline boots-first).
