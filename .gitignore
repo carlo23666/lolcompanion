@@ -7,3 +7,4 @@ out/
 coverage/
 reports/
 *.log
+*.tsbuildinfo
