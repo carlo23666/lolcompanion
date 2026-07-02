@@ -1,6 +1,16 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-02 — WP-002 — Static data manager (Data Dragon)
+**Done:** `src/main/staticdata/` — `StaticDataManager` downloading item/champion/runesReforged (es_ES) for the latest patch into `<userData>/staticdata/<patch>/`, serving from cache when offline (newest cached patch) and never re-downloading a cached patch; zod schemas in `src/shared/schemas/ddragon.ts`; item graph (buildsFrom/buildsInto, total & recipe gold, purchasable, SR-only filter, component tree + upgrade-chain helpers); gold-efficiency helper with documented per-stat gold values (derived from basic items); champion stat-at-level using Riot's non-linear growth formula (`(n-1)*(0.7025+0.0175*(n-1))`, AS as % of base); hand-curated `champion-damage-profile.json` covering all 173 champions of patch 16.13.1. Lookup maps by ddragon id, display name and numeric key. Real fixture files committed under `fixtures/ddragon/16.13.1/`. 26 new tests (schemas, IE component/gold math, boots chain, stat-at-level vs hand-computed values, efficiency %, cache behavior with mocked fetch, profile completeness).
+
+**Deviations / judgment calls:**
+- Damage profile for champions released after my knowledge (Locke, Yunara, Zaahen) is a best-effort guess (physical/physical/mixed) — **owner should verify these three**. The completeness test will also fail loudly whenever a new patch adds a champion, which is the desired behavior.
+- Gold-per-stat table is constants (matching current basic items) rather than recomputed per patch; documented in `goldefficiency.ts`. Fine while basic item ratios stay stable — revisit if Riot rebalances basics.
+- Per-champion detail files (`champion/<Name>.json`) deferred until something needs spell data; base `champion.json` covers all WP-006/007 needs. Noted in INBOX.
+
+**Files:** src/main/staticdata/{manager,itemgraph,champstats,goldefficiency,index}.ts, src/main/staticdata/champion-damage-profile.json, src/shared/schemas/ddragon.ts, fixtures/ddragon/16.13.1/*, tests/main/{staticdata-*,itemgraph,champstats,goldefficiency}.test.ts.
+
 ## 2026-07-02 — WP-001 — Live Client connector + payload recorder
 **Done:** `src/main/liveclient/` — poller with `unavailable → polling` states, 2s cadence in game, exponential backoff 2→4→8→10s cap when port closed, never crashes with LoL closed; https transport with `certs/riotgames.pem` pinned as the ONLY trusted CA (downloaded from Riot's official docs; bundled via electron-builder `extraResources`); zod schema `src/shared/schemas/liveclient.ts` (loose objects: required fields validated, unknown tolerated); recorder (`RECORD_LIVE=1`, dev-only, refuses to run packaged) dumping raw snapshots to `fixtures/recordings/<timestamp>/<gametime>.json` with new-dir-on-game-reset; anonymizer `npm run fixtures:anonymize` (PLAYER_1..N consistent per session, also covers KillerName/VictimName/Assisters in the event feed, taglines → TAG); IPC `live:snapshot` + `live:state` push channels with typed `window.api.on` and preload allowlist; renderer placeholder shows game clock + player list. Official sample payload committed to `fixtures/`. 14 new tests (schema incl. malformed/passthrough cases, poller with fake timers, recorder, renderer).
 
