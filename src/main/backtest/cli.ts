@@ -17,9 +17,16 @@ export interface CliOptions {
   now?: () => Date
 }
 
-/** Default macOS userData location (the CLI runs outside Electron). */
+/** Default Electron userData location per platform (the CLI runs outside Electron). */
 function defaultUserData(): string {
-  return join(homedir(), 'Library', 'Application Support', 'lol-companion')
+  switch (process.platform) {
+    case 'win32':
+      return join(process.env['APPDATA'] ?? join(homedir(), 'AppData', 'Roaming'), 'lol-companion')
+    case 'darwin':
+      return join(homedir(), 'Library', 'Application Support', 'lol-companion')
+    default:
+      return join(process.env['XDG_CONFIG_HOME'] ?? join(homedir(), '.config'), 'lol-companion')
+  }
 }
 
 export async function runCliBacktest(options: CliOptions = {}): Promise<BacktestReport> {
