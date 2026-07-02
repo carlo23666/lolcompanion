@@ -2,8 +2,10 @@ import { join } from 'node:path'
 import { app, BrowserWindow } from 'electron'
 import { openDatabase, type AppDatabase } from './db'
 import { handleInvoke } from './ipc'
+import { startLiveClient, type LiveClientPoller } from './liveclient'
 
 let db: AppDatabase | null = null
+let liveClient: LiveClientPoller | null = null
 
 function createWindow(): void {
   const window = new BrowserWindow({
@@ -33,6 +35,7 @@ function registerIpcHandlers(): void {
 void app.whenReady().then(() => {
   db = openDatabase(join(app.getPath('userData'), 'lol-companion.db'))
   registerIpcHandlers()
+  liveClient = startLiveClient()
   createWindow()
 
   app.on('activate', () => {
@@ -45,6 +48,8 @@ app.on('window-all-closed', () => {
 })
 
 app.on('quit', () => {
+  liveClient?.stop()
+  liveClient = null
   db?.close()
   db = null
 })

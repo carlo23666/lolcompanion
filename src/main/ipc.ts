@@ -1,5 +1,10 @@
-import { ipcMain } from 'electron'
-import type { IpcInvokeChannel, IpcInvokeChannels } from '@shared/ipc'
+import { BrowserWindow, ipcMain } from 'electron'
+import type {
+  IpcEventChannel,
+  IpcEventChannels,
+  IpcInvokeChannel,
+  IpcInvokeChannels
+} from '@shared/ipc'
 
 /**
  * Typed wrapper over ipcMain.handle. All invoke handlers must be registered
@@ -15,4 +20,14 @@ export function handleInvoke<C extends IpcInvokeChannel>(
   ipcMain.handle(channel, (_event, ...args) =>
     handler(...(args as IpcInvokeChannels[C]['args']))
   )
+}
+
+/** Push a typed event to every open window. */
+export function broadcast<C extends IpcEventChannel>(
+  channel: C,
+  payload: IpcEventChannels[C]
+): void {
+  for (const window of BrowserWindow.getAllWindows()) {
+    window.webContents.send(channel, payload)
+  }
 }

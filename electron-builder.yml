@@ -1,0 +1,9 @@
+appId: dev.carlo.lol-companion
+productName: LoL Companion
+directories:
+  output: dist
+files:
+  - out/**
+extraResources:
+  - from: certs/riotgames.pem
+    to: certs/riotgames.pem

@@ -4,7 +4,7 @@ One WP per Claude Code session. Do them in order; dependencies noted.
 
 | WP | Title | Depends on | Status |
 |----|-------|-----------|--------|
-| 000 | Repo bootstrap (electron-vite, TS strict, tooling) | — | TODO |
+| 000 | Repo bootstrap (electron-vite, TS strict, tooling) | — | BUILT (pending review) |
 | 001 | Live Client connector + payload recorder | 000 | TODO |
 | 002 | Static data manager (Data Dragon) | 000 | TODO |
 | 003 | SQLite store + migrations | 000 | TODO |
