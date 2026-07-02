@@ -10,3 +10,11 @@ Builder sessions append here instead of expanding scope. Reviewer triages into W
 - (WP-010) Post-game session linking could cross-check `live_sessions.championName` against the match's owner champion before linking (guards against linking a remake/aborted session).
 - (WP-007) Owner idea from first real game (2026-07-02): a team-damage-diversification rule — when the OWN team is heavily one damage type (e.g. 2+ AP allies), suggest the owner covers the other type where his champion allows it. Doesn't exist in v1 (rules only react to the ENEMY comp); needs a spec + thresholds.
 - (WP-009) Owner feedback from first real game: with the champion not in `pool.json` the card shows nothing early-game. Consider a neutral fallback (e.g. component/spike suggestions only) or an explicit "champion sin baseline" hint so it doesn't read as broken. Real fix is ADR-006 (owner pool).
+- (owner request 2026-07-02) Feature ideas for reviewer triage, all derivable from own data / screen-visible info (Riot-compliant):
+  - Live "curva personal": compare live CS/gold/KDA at minute X vs the owner's own average on that champion (history is already stored).
+  - Enemy power-spike alerts from VISIBLE info only: completed 2nd/3rd item, levels 6/11/16.
+  - Data-driven baselines: derive per-champion core order + situationals from the owner's own stored matches (feeds ADR-006 curation).
+  - Post-game report: engine recommendations vs actual buys for the finished game (WP-011 harness reused live).
+  - Death/tilt analytics in Historial: deaths by phase, winrate by session length / consecutive games.
+  - Champ select (phase 2): enemy comp damage-profile preview + ban suggestions from own loss history.
+- (owner request 2026-07-02) Visual identity WP: current UI is generic Tailwind dark. Owner wants a distinctive look + animations. Direction to spec: hextech-inspired palette (deep navy + gold), champion-splash banner in Live, animated recommendation card (enter animation + glow pulse on top-pick change), animated counters and sparklines. Prefer CSS/Tailwind animations (zero-dep); framer-motion only with an ADR note.
