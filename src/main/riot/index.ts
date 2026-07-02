@@ -5,6 +5,7 @@ import { broadcast, handleInvoke } from '../ipc'
 import { RiotClient } from './client'
 import { ingestHistory } from './ingest'
 import { RiotRateLimiter } from './limiter'
+import { normalizeRiotId } from './riotid'
 
 export { RiotClient, RiotApiError, PLATFORM_TO_REGIONAL } from './client'
 export type { Result, RiotErrorKind } from './client'
@@ -45,17 +46,18 @@ export function registerRiotIpc(db: AppDatabase): void {
   }))
 
   handleInvoke('settings:set', (update) => {
+    const riotId = normalizeRiotId(update.riotId)
     const previousRiotId = settings.get(SETTING_KEYS.riotId)
-    settings.set(SETTING_KEYS.riotId, update.riotId)
+    settings.set(SETTING_KEYS.riotId, riotId)
     settings.set(SETTING_KEYS.platform, update.platform)
     settings.set(SETTING_KEYS.recordLive, update.recordLive ? '1' : '0')
-    if (previousRiotId !== update.riotId) {
+    if (previousRiotId !== riotId) {
       // riotId changed → cached puuid no longer valid; re-resolve in the
       // background so post-game auto-ingest works without a full sync.
       settings.set(SETTING_KEYS.puuid, '')
       const apiKey = process.env['RIOT_API_KEY']
-      if (apiKey !== undefined && apiKey !== '' && update.riotId.includes('#')) {
-        const [gameName = '', tagLine = ''] = update.riotId.split('#', 2)
+      if (apiKey !== undefined && apiKey !== '' && riotId.includes('#')) {
+        const [gameName = '', tagLine = ''] = riotId.split('#', 2)
         const client = new RiotClient({
           apiKey,
           platform: update.platform,
@@ -80,8 +82,10 @@ export function registerRiotIpc(db: AppDatabase): void {
         error: 'Falta RIOT_API_KEY en .env (ver .env.example)'
       }
     }
-    const riotId = settings.get(SETTING_KEYS.riotId)
-    if (riotId === null || !riotId.includes('#')) {
+    // Normalize on read too: values saved before this fix may still carry
+    // the invisible characters.
+    const riotId = normalizeRiotId(settings.get(SETTING_KEYS.riotId) ?? '')
+    if (riotId === '' || !riotId.includes('#')) {
       return { started: false as const, error: 'Configura tu Riot ID (nombre#TAG) primero' }
     }
     const platform = settings.get(SETTING_KEYS.platform) ?? 'euw1'

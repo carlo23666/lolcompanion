@@ -1,6 +1,13 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-02 — Real-client validation (first findings) — Riot ID sanitization fix
+**Done:** first real bug found by the Windows validation pass: Riot IDs copied from the League client carry invisible Unicode BiDi isolate characters (U+2066/U+2069 around name and tag), the app stored them raw, and account-v1 404'd → "Cuenta no encontrada" for a perfectly valid account. New `src/main/riot/riotid.ts` `normalizeRiotId()` strips all format-category characters (`\p{Cf}`, covers BiDi isolates, zero-width chars, BOM) and trims whitespace around name and tag. Applied at both boundaries in `registerRiotIpc`: `settings:set` (stores normalized, uses normalized for the changed-riotId puuid re-resolution) and `ingest:start` (normalizes on read, healing values stored before the fix). 6 new tests incl. the exact real-world captured string. `npm run check` green: **191/191**.
+
+**Validation results so far (real client/API):** app idles cleanly with LoL closed (WP-001 criterion); RIOT_API_KEY configured and verified against status-v4/account-v1 (note: freshly generated dev keys take a few minutes to activate — both return "Unknown apikey" 401 until then); owner account resolves once sanitized. Pending: full phase cycle, 200-match sync, real game recording, post-game auto-ingest.
+
+**Files:** src/main/riot/riotid.ts (new), src/main/riot/index.ts, tests/main/riotid.test.ts.
+
 ## 2026-07-02 — Windows migration — cross-platform fixes, first green check on Windows
 **Done:** the three known Windows blockers from `docs/HANDOFF.md` step 2. New zero-dep launcher `scripts/electron-node.mjs` (resolves the Electron binary via `createRequire('electron')` and spawns it with `ELECTRON_RUN_AS_NODE=1`) replaces the POSIX-only env prefix in the `test` script — chosen over adding `cross-env`, keeping the dependency list unchanged. `scripts/backtest.mjs` now spawns the Electron binary directly instead of `spawnSync('npx', …)` (which needs `shell: true` on Windows). `defaultUserData()` in `src/main/backtest/cli.ts` is platform-aware (win32 `%APPDATA%`, darwin `Library/Application Support`, linux `$XDG_CONFIG_HOME`/`.config`), matching Electron's userData defaults, dependency-free. `npm run check` green on Windows 11: typecheck + lint + **185/185 tests**. Backtest CLI smoke-tested: spawns under Electron and resolves the correct `%APPDATA%` DB path (fails with the expected "no database" — app not yet run here).
 
