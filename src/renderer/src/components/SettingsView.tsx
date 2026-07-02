@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { IngestProgressPayload } from '@shared/ipc'
+import { setSoundsEnabled } from '../sounds'
 
 const PLATFORMS = ['euw1', 'eun1', 'na1', 'kr', 'br1', 'la1', 'la2', 'jp1', 'tr1', 'ru', 'oc1']
 
@@ -7,6 +8,7 @@ export default function SettingsView(): React.JSX.Element {
   const [riotId, setRiotId] = useState('')
   const [platform, setPlatform] = useState('euw1')
   const [recordLive, setRecordLive] = useState(false)
+  const [sounds, setSounds] = useState(true)
   const [status, setStatus] = useState<string | null>(null)
   const [progress, setProgress] = useState<IngestProgressPayload | null>(null)
 
@@ -15,12 +17,19 @@ export default function SettingsView(): React.JSX.Element {
       setRiotId(settings.riotId ?? '')
       setPlatform(settings.platform)
       setRecordLive(settings.recordLive)
+      setSounds(settings.soundsEnabled)
     })
     return window.api.on('ingest:progress', setProgress)
   }, [])
 
   const save = async (): Promise<void> => {
-    await window.api.invoke('settings:set', { riotId, platform, recordLive })
+    await window.api.invoke('settings:set', {
+      riotId,
+      platform,
+      recordLive,
+      soundsEnabled: sounds
+    })
+    setSoundsEnabled(sounds)
     setStatus('Ajustes guardados')
   }
 
@@ -68,6 +77,14 @@ export default function SettingsView(): React.JSX.Element {
               onChange={(event) => setRecordLive(event.target.checked)}
             />
             Grabar partidas en vivo como fixtures (solo desarrollo)
+          </label>
+          <label className="flex items-center gap-2 text-xs text-slate-400">
+            <input
+              type="checkbox"
+              checked={sounds}
+              onChange={(event) => setSounds(event.target.checked)}
+            />
+            Sonidos (aviso de recomendación y spikes enemigos)
           </label>
           <div className="flex gap-2">
             <button

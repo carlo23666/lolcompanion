@@ -108,7 +108,7 @@ export function AlertFeed(props: { insights: Insights }): React.JSX.Element | nu
       {props.insights.alerts.slice(0, 4).map((alert) => (
         <li
           key={alert.id}
-          className={`text-xs ${alert.kind === 'spike' ? 'text-amber-300' : 'text-slate-400'}`}
+          className={`alert-in text-xs ${alert.kind === 'spike' ? 'text-amber-300' : 'text-slate-400'}`}
         >
           <span className="font-mono text-slate-600">{formatClock(alert.gameTimeS)}</span> ⚠{' '}
           {alert.text}

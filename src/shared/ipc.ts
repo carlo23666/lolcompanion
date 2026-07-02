@@ -24,6 +24,8 @@ export interface AppSettings {
   platform: string
   /** Dev tool: dump raw live snapshots to fixtures/recordings. */
   recordLive: boolean
+  /** UI sounds (recommendation chime, spike alerts). */
+  soundsEnabled: boolean
 }
 
 export interface IngestProgressPayload {
@@ -40,7 +42,7 @@ export interface IpcInvokeChannels {
   'app:ping': { args: []; result: { pong: true; version: string } }
   'settings:get': { args: []; result: AppSettings }
   'settings:set': {
-    args: [{ riotId: string; platform: string; recordLive: boolean }]
+    args: [{ riotId: string; platform: string; recordLive: boolean; soundsEnabled: boolean }]
     result: { saved: true }
   }
   'ingest:start': { args: []; result: { started: boolean; error?: string } }

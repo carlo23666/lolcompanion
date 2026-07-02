@@ -24,5 +24,6 @@ export const SETTING_KEYS = {
   riotId: 'settings.riotId',
   platform: 'settings.platform',
   puuid: 'settings.puuid',
-  recordLive: 'settings.recordLive'
+  recordLive: 'settings.recordLive',
+  soundsEnabled: 'settings.soundsEnabled'
 } as const

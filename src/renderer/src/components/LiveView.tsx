@@ -170,7 +170,7 @@ export default function LiveView(props: {
             </div>
 
             {props.insights && (
-              <div className="flex flex-col gap-1.5 rounded-lg border border-slate-800 bg-slate-900 px-4 py-2">
+              <div className="card-in flex flex-col gap-1.5 rounded-lg border border-slate-800 bg-slate-900 px-4 py-2">
                 <div className="flex items-center gap-3">
                   <LiveChips gameState={gameState} insights={props.insights} />
                   <div className="min-w-32 flex-1">

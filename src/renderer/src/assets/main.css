@@ -1,9 +1,188 @@
 @import 'tailwindcss';
 
+/*
+ * Hextech identity. All components use slate-* utilities; remapping the
+ * slate scale to League's navy palette re-skins the whole app, with gold
+ * (amber) as the accent color. Readability first: body text stays a light
+ * blue-grey, gold is reserved for accents.
+ */
+@theme {
+  --color-slate-950: #010a13; /* app background (League darkest navy) */
+  --color-slate-900: #0a1428; /* card background */
+  --color-slate-800: #12253a; /* borders, inputs, wells */
+  --color-slate-700: #2a4358; /* raised borders, buttons */
+  --color-slate-600: #46596b; /* faint text */
+  --color-slate-500: #7c8ea0; /* muted text */
+  --color-slate-400: #a7b8c9; /* secondary text */
+  --color-slate-300: #cdd9e4; /* body text */
+  --color-slate-200: #e2ebf3;
+  --color-slate-100: #f0e6d2; /* headings (League parchment) */
+  --color-amber-300: #e8c979; /* hextech gold, bright */
+  --color-amber-400: #c8aa6e; /* hextech gold */
+  --color-indigo-300: #7fd4e4; /* hextech teal replaces indigo accents */
+  --color-indigo-500: #0a9bb4;
+  --color-indigo-600: #0a7f96;
+  --color-indigo-700: #0f5c6d;
+  --color-indigo-800: #123c4a;
+}
+
 :root {
   color-scheme: dark;
 }
 
 body {
   @apply bg-slate-950 text-slate-100 antialiased;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(10, 155, 180, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 110%, rgba(200, 170, 110, 0.06), transparent);
+  background-attachment: fixed;
+}
+
+/* Hextech scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a4358;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c8aa6e;
+}
+
+/* ---------- animations ---------- */
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gold-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(200, 170, 110, 0);
+  }
+  35% {
+    box-shadow: 0 0 18px 2px rgba(200, 170, 110, 0.45);
+  }
+}
+
+@keyframes alert-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes bounce-y {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  30% {
+    transform: translateY(-7px) scaleY(1.05);
+  }
+  45% {
+    transform: translateY(0) scaleY(0.94);
+  }
+  60% {
+    transform: translateY(-3px) scaleY(1);
+  }
+}
+
+@keyframes blink {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  97% {
+    transform: scaleY(0.08);
+  }
+}
+
+@keyframes crystal-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.card-in {
+  animation: card-in 240ms ease-out both;
+}
+
+.gold-pulse {
+  animation: gold-pulse 900ms ease-out 1;
+}
+
+.alert-in {
+  animation: alert-in 200ms ease-out both;
+}
+
+/* ---------- mascot (Hexi) ---------- */
+
+.hexi {
+  animation: float-y 3.2s ease-in-out infinite;
+}
+.hexi[data-mood='hyped'] {
+  animation: bounce-y 0.9s ease-in-out infinite;
+}
+.hexi[data-mood='focused'] {
+  animation: float-y 2s ease-in-out infinite;
+}
+.hexi[data-mood='sleepy'] {
+  animation: float-y 4.5s ease-in-out infinite;
+}
+.hexi .hexi-eye {
+  transform-origin: center;
+  animation: blink 4.4s ease-in-out infinite;
+}
+.hexi[data-mood='sleepy'] .hexi-eye {
+  transform: scaleY(0.15);
+  animation: none;
+}
+.hexi .hexi-crystal {
+  animation: crystal-glow 2.6s ease-in-out infinite;
+}
+.hexi[data-mood='hyped'] .hexi-crystal {
+  animation: crystal-glow 0.7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-in,
+  .gold-pulse,
+  .alert-in,
+  .hexi,
+  .hexi .hexi-eye,
+  .hexi .hexi-crystal {
+    animation: none;
+  }
 }

@@ -33,6 +33,7 @@ export default function RecommendationCard(props: {
   const { payload } = props
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const [showHistory, setShowHistory] = useState(false)
+  const [pulse, setPulse] = useState(false)
   const lastTopRef = useRef<string>('')
 
   useEffect(() => {
@@ -40,7 +41,12 @@ export default function RecommendationCard(props: {
     if (!payload || !top) return
     const key = `${String(top.itemId ?? top.category)}:${top.action}`
     if (key !== lastTopRef.current) {
+      const isFirst = lastTopRef.current === ''
       lastTopRef.current = key
+      if (!isFirst) {
+        setPulse(true)
+        setTimeout(() => setPulse(false), 1000)
+      }
       setHistory((entries) => [
         { gameTimeS: payload.gameTimeS, title: top.itemName ?? top.category ?? '?', action: top.action },
         ...entries.slice(0, 29)
@@ -54,7 +60,9 @@ export default function RecommendationCard(props: {
   if (!top) return null
 
   return (
-    <section className="rounded-lg border border-slate-800 bg-slate-900 p-3">
+    <section
+      className={`card-in rounded-lg border bg-slate-900 p-3 ${pulse ? 'gold-pulse border-amber-400' : 'border-slate-800'}`}
+    >
       <div className="mb-2 flex items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
           Recomendación
