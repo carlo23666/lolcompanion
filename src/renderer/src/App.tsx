@@ -4,7 +4,7 @@ import Sidebar, { type ViewId } from './components/Sidebar'
 import LiveView from './components/LiveView'
 import HistoryView from './components/HistoryView'
 import SettingsView from './components/SettingsView'
-import { useIpcEvent } from './hooks'
+import { useIpcEvent, useLiveInsights } from './hooks'
 
 export default function App(): React.JSX.Element {
   const [view, setView] = useState<ViewId>('live')
@@ -13,6 +13,7 @@ export default function App(): React.JSX.Element {
   const gameState = useIpcEvent('gamestate:update')
   const champSelect = useIpcEvent('session:champselect')
   const recommendations = useIpcEvent('gamestate:recommendations')
+  const insights = useLiveInsights()
 
   useEffect(() => {
     void window.api.invoke('session:get').then(setPhase)
@@ -33,6 +34,7 @@ export default function App(): React.JSX.Element {
             champSelect={champSelect}
             recommendations={recommendations}
             championNames={championNames}
+            insights={insights}
           />
         )}
         {view === 'history' && <HistoryView />}

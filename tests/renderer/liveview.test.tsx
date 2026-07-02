@@ -52,6 +52,29 @@ describe('LiveView', () => {
     expect(screen.getByText(/157/)).toBeInTheDocument()
   })
 
+  it('in game: shows live insights (alerts, objective timers, team gold)', () => {
+    render(
+      <LiveView
+        phase="inGame"
+        gameState={mid}
+        champSelect={null}
+        insights={{
+          alerts: [
+            { id: 1, gameTimeS: 840, kind: 'spike', text: 'Zed completó Filo Duskblade — power spike' }
+          ],
+          // mid fixture is at 15:00 → dragon already up, baron in 5:00.
+          nextDragonS: 400,
+          nextBaronS: 1200
+        }}
+      />
+    )
+    expect(screen.getByText(/power spike/)).toBeInTheDocument()
+    expect(screen.getByText(/🐉 en el mapa/)).toBeInTheDocument()
+    expect(screen.getByText(/Barón en 5:00/)).toBeInTheDocument()
+    // Team gold bar shows a signed diff in thousands.
+    expect(screen.getByText(/[▲▼] \d+\.\dk/)).toBeInTheDocument()
+  })
+
   it('in game: shows clock, own gold, both teams with items and gauges', () => {
     render(<LiveView phase="inGame" gameState={mid} champSelect={null} />)
 

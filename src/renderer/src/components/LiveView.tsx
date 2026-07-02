@@ -2,7 +2,15 @@ import type { GameState } from '@shared/gamestate'
 import type { RecommendationsPayload } from '@shared/ipc'
 import type { ChampSelectState } from '@shared/schemas/lcu'
 import type { SessionPhase } from '@shared/session'
+import type { LiveInsights as LiveInsightsData } from '../hooks'
 import Gauges from './Gauges'
+import {
+  AlertFeed,
+  LiveChips,
+  PersonalCurveChip,
+  TeamGoldBar,
+  usePersonalCurve
+} from './LiveInsights'
 import ObjectivesRow from './ObjectivesRow'
 import RecommendationCard from './RecommendationCard'
 import TeamPanel from './TeamPanel'
@@ -99,8 +107,10 @@ export default function LiveView(props: {
   champSelect: ChampSelectState | null
   recommendations?: RecommendationsPayload | null
   championNames?: Record<number, string>
+  insights?: LiveInsightsData
 }): React.JSX.Element {
   const { phase, gameState } = props
+  const curve = usePersonalCurve(gameState)
 
   return (
     <div className="flex h-full flex-col gap-3 p-4">
@@ -152,11 +162,24 @@ export default function LiveView(props: {
                 {gameState.self.scores.kills}/{gameState.self.scores.deaths}/
                 {gameState.self.scores.assists}
               </span>
-              <span className="text-xs text-slate-500">
+              <PersonalCurveChip gameState={gameState} curve={curve} />
+              <span className="ml-auto text-xs text-slate-500">
                 {gameState.self.championName} · nv {gameState.self.level} · parche{' '}
                 {gameState.patch}
               </span>
             </div>
+
+            {props.insights && (
+              <div className="flex flex-col gap-1.5 rounded-lg border border-slate-800 bg-slate-900 px-4 py-2">
+                <div className="flex items-center gap-3">
+                  <LiveChips gameState={gameState} insights={props.insights} />
+                  <div className="min-w-32 flex-1">
+                    <TeamGoldBar gameState={gameState} />
+                  </div>
+                </div>
+                <AlertFeed insights={props.insights} />
+              </div>
+            )}
 
             <RecommendationCard
               payload={props.recommendations ?? null}
