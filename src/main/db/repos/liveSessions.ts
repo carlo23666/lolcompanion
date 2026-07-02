@@ -1,0 +1,84 @@
+import { gzipSync, gunzipSync } from 'node:zlib'
+import { z } from 'zod'
+import type { AppDatabase } from '../index'
+
+export interface LiveSessionRow {
+  id: number
+  startedAt: string
+  patch: string | null
+  championName: string | null
+  result: string | null
+  matchId: string | null
+}
+
+const storedJsonSchema = z.record(z.string(), z.unknown())
+
+/**
+ * live_sessions + live_snapshots. Snapshots are stored gzip-compressed: a
+ * full game at 2s cadence is ~900 snapshots × ~30KB raw JSON ≈ 27MB, which
+ * would blow the 20MB-per-game budget; gzip brings it down ~10×.
+ */
+export class LiveSessionRepo {
+  constructor(private readonly db: AppDatabase) {}
+
+  createSession(startedAt: string, championName: string | null, patch: string | null): number {
+    const result = this.db
+      .prepare('INSERT INTO live_sessions (startedAt, championName, patch) VALUES (?, ?, ?)')
+      .run(startedAt, championName, patch)
+    return Number(result.lastInsertRowid)
+  }
+
+  appendSnapshot(sessionId: number, gameTimeS: number, raw: unknown): void {
+    this.db
+      .prepare(
+        'INSERT OR REPLACE INTO live_snapshots (sessionId, gameTimeS, raw) VALUES (?, ?, ?)'
+      )
+      .run(sessionId, gameTimeS, gzipSync(JSON.stringify(raw)))
+  }
+
+  setResult(sessionId: number, result: string, matchId: string | null): void {
+    this.db
+      .prepare('UPDATE live_sessions SET result = ?, matchId = ? WHERE id = ?')
+      .run(result, matchId, sessionId)
+  }
+
+  getSession(id: number): LiveSessionRow | null {
+    const row = this.db.prepare('SELECT * FROM live_sessions WHERE id = ?').get(id) as
+      | LiveSessionRow
+      | undefined
+    return row ?? null
+  }
+
+  latestSessions(limit: number): LiveSessionRow[] {
+    return this.db
+      .prepare('SELECT * FROM live_sessions ORDER BY id DESC LIMIT ?')
+      .all(limit) as LiveSessionRow[]
+  }
+
+  /** Newest session without a linked match, for post-game linking (WP-010). */
+  latestUnlinkedSession(): LiveSessionRow | null {
+    const row = this.db
+      .prepare('SELECT * FROM live_sessions WHERE matchId IS NULL ORDER BY id DESC LIMIT 1')
+      .get() as LiveSessionRow | undefined
+    return row ?? null
+  }
+
+  getSnapshots(sessionId: number): { gameTimeS: number; raw: Record<string, unknown> }[] {
+    const rows = this.db
+      .prepare(
+        'SELECT gameTimeS, raw FROM live_snapshots WHERE sessionId = ? ORDER BY gameTimeS'
+      )
+      .all(sessionId) as { gameTimeS: number; raw: Buffer }[]
+    return rows.map((row) => ({
+      gameTimeS: row.gameTimeS,
+      raw: storedJsonSchema.parse(JSON.parse(gunzipSync(row.raw).toString('utf8')))
+    }))
+  }
+
+  snapshotCount(sessionId: number): number {
+    const row = this.db
+      .prepare('SELECT COUNT(*) AS n FROM live_snapshots WHERE sessionId = ?')
+      .get(sessionId) as { n: number }
+    return row.n
+  }
+}

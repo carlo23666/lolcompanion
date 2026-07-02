@@ -35,7 +35,7 @@ function registerIpcHandlers(): void {
 void app.whenReady().then(() => {
   db = openDatabase(join(app.getPath('userData'), 'lol-companion.db'))
   registerIpcHandlers()
-  liveClient = startLiveClient()
+  liveClient = startLiveClient(db)
   createWindow()
 
   app.on('activate', () => {

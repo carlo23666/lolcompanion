@@ -1,6 +1,17 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-02 — WP-003 — SQLite store + schema
+**Done:** migration 002 creating `matches`, `participants` (items0-6 + kda/cs/gold/damage/vision aggregates), `timelines`, `live_sessions`, `live_snapshots`, with indices on participants.champion, participants.puuid, matches.gameCreation, all STRICT tables with FK cascade. Repo layer `src/main/db/repos/` (`MatchRepo`, `TimelineRepo`, `LiveSessionRepo`) — idempotent inserts via INSERT OR IGNORE inside transactions, no SQL outside repos. Live Client wired to persist every validated snapshot into live_sessions/live_snapshots (`LiveSessionPersister`: new session on game-time reset, session closed when port drops; file recorder unchanged for fixtures). 10 new tests: round-trips for every table, idempotency, champion/recency queries, session lifecycle, and a 900-snapshot size check.
+
+**Deviations:**
+- **Snapshots stored gzip-compressed (BLOB)**: 900 × ~30KB raw JSON ≈ 27MB > the 20MB acceptance budget; gzip is lossless and brings a padded 900-snapshot game to well under 20MB (verified by test). Transparent in the repo API.
+- `live_sessions.championName` stores the champion display name (string) rather than a numeric id — that's what the Live Client exposes; `patch` stays NULL until WP-010 links the real match.
+- Raw JSON columns are re-validated on read as JSON objects only; full match-v5 zod validation happens at ingestion (WP-004) — reads shouldn't re-run 1000-line schemas on every query. Flagging for review vs the checklist wording.
+- Matches fixture in repo tests is synthetic-but-realistic; the real recorded match-v5 fixture lands with WP-004 as specced.
+
+**Files:** src/main/db/migrations/002_match_storage.sql, src/main/db/migrations/index.ts, src/main/db/repos/{matches,liveSessions,index}.ts, src/main/liveclient/{persist,index}.ts, src/main/index.ts, tests/main/{repos,live-persist}.test.ts.
+
 ## 2026-07-02 — WP-002 — Static data manager (Data Dragon)
 **Done:** `src/main/staticdata/` — `StaticDataManager` downloading item/champion/runesReforged (es_ES) for the latest patch into `<userData>/staticdata/<patch>/`, serving from cache when offline (newest cached patch) and never re-downloading a cached patch; zod schemas in `src/shared/schemas/ddragon.ts`; item graph (buildsFrom/buildsInto, total & recipe gold, purchasable, SR-only filter, component tree + upgrade-chain helpers); gold-efficiency helper with documented per-stat gold values (derived from basic items); champion stat-at-level using Riot's non-linear growth formula (`(n-1)*(0.7025+0.0175*(n-1))`, AS as % of base); hand-curated `champion-damage-profile.json` covering all 173 champions of patch 16.13.1. Lookup maps by ddragon id, display name and numeric key. Real fixture files committed under `fixtures/ddragon/16.13.1/`. 26 new tests (schemas, IE component/gold math, boots chain, stat-at-level vs hand-computed values, efficiency %, cache behavior with mocked fetch, profile completeness).
 
