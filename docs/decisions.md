@@ -12,8 +12,8 @@ Spectator-V5 was deactivated for LoL (Oct 2025). Port 2999 is the only compliant
 ## ADR-004 — Rules engine before ML (ACCEPTED)
 Phase 1 recommendations are deterministic rules over GameState + item math from Data Dragon, each with mandatory human-readable reasons. ML/win-probability models deferred to phase 3, gated on having a validated backtesting harness (WP-011).
 
-## ADR-005 — Panel first, overlay later (ACCEPTED, provisional)
-Phase 1 renders recommendations in the app window (second monitor / alt-tab). Transparent always-on-top overlay is phase 2 (WP-012+). Rationale: overlay adds windowing complexity and fullscreen-exclusive limitations without changing the engine. REVISIT if owner plays single-monitor fullscreen — say so and we reprioritize.
+## ADR-005 — Panel first, overlay later (REVISED 2026-07-02)
+Phase 1 renders recommendations in the app window (second monitor / alt-tab). REVISED at owner request: an EXPERIMENTAL overlay shipped early — small transparent always-on-top frameless window (`src/main/overlay.ts` + `?overlay=1` renderer entry) showing the compact top recommendation + latest spike alert, toggled in Ajustes, shown only during `inGame`. Known limitation (accepted): invisible over exclusive-fullscreen League; owner must play windowed/borderless. The full overlay WP (game-anchored positioning, click-through modes) remains phase 2.
 
 ## ADR-006 — Owner champion pool (ACCEPTED v1, 2026-07-02 — data-derived)
 The curated baseline builds (WP-009) need the owner's champion pool. Resolved by DERIVING it from the owner's own 200 ingested matches instead of hand-curation: per champion, the most frequent completed-item purchase order becomes `core`, high-frequency off-core completions become `situational`. v1 pool: Kai'Sa, Samira, Twitch, Jinx, Ezreal (BOTTOM) + Graves (JUNGLE). Effect measured by backtest over the same 100 matches: top-1 15.0%→39.5%, top-3 19.9%→49.8% (early phase 60/67%). Owner refines entries by hand as his builds evolve; behavioral tests use an injected fixed pool so editing pool.json never breaks the suite. Ezreal is thin (4 games) — treat as provisional.

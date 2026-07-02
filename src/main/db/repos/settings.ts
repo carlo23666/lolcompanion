@@ -25,5 +25,6 @@ export const SETTING_KEYS = {
   platform: 'settings.platform',
   puuid: 'settings.puuid',
   recordLive: 'settings.recordLive',
-  soundsEnabled: 'settings.soundsEnabled'
+  soundsEnabled: 'settings.soundsEnabled',
+  overlayEnabled: 'settings.overlayEnabled'
 } as const

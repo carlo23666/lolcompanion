@@ -9,6 +9,7 @@ export default function SettingsView(): React.JSX.Element {
   const [platform, setPlatform] = useState('euw1')
   const [recordLive, setRecordLive] = useState(false)
   const [sounds, setSounds] = useState(true)
+  const [overlay, setOverlay] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
   const [progress, setProgress] = useState<IngestProgressPayload | null>(null)
 
@@ -18,6 +19,7 @@ export default function SettingsView(): React.JSX.Element {
       setPlatform(settings.platform)
       setRecordLive(settings.recordLive)
       setSounds(settings.soundsEnabled)
+      setOverlay(settings.overlayEnabled)
     })
     return window.api.on('ingest:progress', setProgress)
   }, [])
@@ -27,7 +29,8 @@ export default function SettingsView(): React.JSX.Element {
       riotId,
       platform,
       recordLive,
-      soundsEnabled: sounds
+      soundsEnabled: sounds,
+      overlayEnabled: overlay
     })
     setSoundsEnabled(sounds)
     setStatus('Ajustes guardados')
@@ -85,6 +88,15 @@ export default function SettingsView(): React.JSX.Element {
               onChange={(event) => setSounds(event.target.checked)}
             />
             Sonidos (aviso de recomendación y spikes enemigos)
+          </label>
+          <label className="flex items-center gap-2 text-xs text-slate-400">
+            <input
+              type="checkbox"
+              checked={overlay}
+              onChange={(event) => setOverlay(event.target.checked)}
+            />
+            Overlay in-game (experimental — requiere LoL en ventana o sin bordes; se activa al
+            entrar en partida)
           </label>
           <div className="flex gap-2">
             <button

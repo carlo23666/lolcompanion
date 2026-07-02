@@ -7,6 +7,8 @@ import { registerIconProtocol, registerIconScheme } from './icons'
 import { broadcast, handleInvoke } from './ipc'
 import { startLcu, type LcuConnector } from './lcu'
 import { startLiveClient, type LiveClientPoller } from './liveclient'
+import { OverlayManager } from './overlay'
+import { SettingsRepo, SETTING_KEYS } from './db/repos/settings'
 import { PostGameIngestor } from './postgame'
 import { getRiotContext, registerRiotIpc } from './riot'
 import { SessionMachine } from './session/machine'
@@ -17,6 +19,7 @@ registerIconScheme()
 let db: AppDatabase | null = null
 let liveClient: LiveClientPoller | null = null
 let lcu: LcuConnector | null = null
+let overlay: OverlayManager | null = null
 
 function createWindow(): void {
   const window = new BrowserWindow({
@@ -69,9 +72,15 @@ void app.whenReady().then(() => {
     log: (message) => console.log(message)
   })
 
+  overlay = new OverlayManager()
   const machine = new SessionMachine((phase) => {
     broadcast('session:phase', phase)
     postGame.onPhase(phase)
+    // Experimental overlay: only while in game and enabled in Ajustes.
+    const overlayEnabled =
+      new SettingsRepo(database).get(SETTING_KEYS.overlayEnabled) === '1'
+    if (phase === 'inGame' && overlayEnabled) overlay?.show()
+    else overlay?.hide()
   })
   handleInvoke('session:get', () => machine.getPhase())
   liveClient = startLiveClient(db, (state) => machine.setLiveState(state))
@@ -89,6 +98,8 @@ app.on('window-all-closed', () => {
 })
 
 app.on('quit', () => {
+  overlay?.destroy()
+  overlay = null
   lcu?.stop()
   lcu = null
   liveClient?.stop()

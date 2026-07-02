@@ -26,6 +26,8 @@ export interface AppSettings {
   recordLive: boolean
   /** UI sounds (recommendation chime, spike alerts). */
   soundsEnabled: boolean
+  /** Experimental in-game overlay window (shows while inGame). */
+  overlayEnabled: boolean
 }
 
 export interface IngestProgressPayload {
@@ -42,7 +44,15 @@ export interface IpcInvokeChannels {
   'app:ping': { args: []; result: { pong: true; version: string } }
   'settings:get': { args: []; result: AppSettings }
   'settings:set': {
-    args: [{ riotId: string; platform: string; recordLive: boolean; soundsEnabled: boolean }]
+    args: [
+      {
+        riotId: string
+        platform: string
+        recordLive: boolean
+        soundsEnabled: boolean
+        overlayEnabled: boolean
+      }
+    ]
     result: { saved: true }
   }
   'ingest:start': { args: []; result: { started: boolean; error?: string } }
