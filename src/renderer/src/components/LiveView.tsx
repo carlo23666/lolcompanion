@@ -47,8 +47,16 @@ function EmptyState(props: { icon: string; title: string; hint: string }): React
   )
 }
 
-function ChampSelectPanel(props: { champSelect: ChampSelectState | null }): React.JSX.Element {
+function ChampSelectPanel(props: {
+  champSelect: ChampSelectState | null
+  championNames?: Record<number, string>
+}): React.JSX.Element {
   const cs = props.champSelect
+  const names = props.championNames ?? {}
+  // 0 = not picked yet ('?'); ids missing from the map (offline without
+  // cached static data) fall back to the raw number.
+  const label = (championId: number): string | null =>
+    championId === 0 ? null : (names[championId] ?? String(championId))
   if (!cs) {
     return (
       <EmptyState
@@ -70,10 +78,13 @@ function ChampSelectPanel(props: { champSelect: ChampSelectState | null }): Reac
       </p>
       <p className="text-xs text-slate-400">
         Picks aliados:{' '}
-        {cs.myTeam.map((m) => m.championId || m.championPickIntent || '?').join(', ')}
+        {cs.myTeam
+          .map((m) => label(m.championId) ?? label(m.championPickIntent) ?? '?')
+          .join(', ')}
       </p>
       <p className="text-xs text-slate-400">
-        Picks enemigos: {cs.theirTeam.map((m) => m.championId || '?').join(', ') || '—'}
+        Picks enemigos:{' '}
+        {cs.theirTeam.map((m) => label(m.championId) ?? '?').join(', ') || '—'}
       </p>
       <p className="mt-1 text-[11px] text-slate-600">
         Las recomendaciones en selección llegan en la fase 2.
@@ -87,6 +98,7 @@ export default function LiveView(props: {
   gameState: GameState | null
   champSelect: ChampSelectState | null
   recommendations?: RecommendationsPayload | null
+  championNames?: Record<number, string>
 }): React.JSX.Element {
   const { phase, gameState } = props
 
@@ -118,7 +130,9 @@ export default function LiveView(props: {
           hint="La partida se guardará en el historial en cuanto Riot la publique."
         />
       )}
-      {phase === 'champSelect' && <ChampSelectPanel champSelect={props.champSelect} />}
+      {phase === 'champSelect' && (
+        <ChampSelectPanel champSelect={props.champSelect} championNames={props.championNames} />
+      )}
 
       {phase === 'inGame' &&
         (gameState === null ? (

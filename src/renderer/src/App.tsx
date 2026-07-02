@@ -9,12 +9,16 @@ import { useIpcEvent } from './hooks'
 export default function App(): React.JSX.Element {
   const [view, setView] = useState<ViewId>('live')
   const [phase, setPhase] = useState<SessionPhase>('idle')
+  const [championNames, setChampionNames] = useState<Record<number, string>>({})
   const gameState = useIpcEvent('gamestate:update')
   const champSelect = useIpcEvent('session:champselect')
   const recommendations = useIpcEvent('gamestate:recommendations')
 
   useEffect(() => {
     void window.api.invoke('session:get').then(setPhase)
+    // Offline with no cached patch this rejects; the UI then falls back to
+    // showing numeric champion ids.
+    window.api.invoke('staticdata:championNames').then(setChampionNames, () => undefined)
     return window.api.on('session:phase', setPhase)
   }, [])
 
@@ -28,6 +32,7 @@ export default function App(): React.JSX.Element {
             gameState={gameState}
             champSelect={champSelect}
             recommendations={recommendations}
+            championNames={championNames}
           />
         )}
         {view === 'history' && <HistoryView />}

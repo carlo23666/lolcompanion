@@ -22,25 +22,34 @@ describe('LiveView', () => {
   })
 
   it('renders the champ select placeholder with own position', () => {
-    render(
+    const champSelect = {
+      localPlayerCellId: 2,
+      ownPosition: 'middle',
+      myTeam: [
+        { cellId: 0, championId: 266, championPickIntent: 0, position: 'top' },
+        { cellId: 2, championId: 0, championPickIntent: 103, position: 'middle' }
+      ],
+      theirTeam: [{ cellId: 5, championId: 157 }],
+      bans: { mine: [], theirs: [] },
+      timerPhase: 'BAN_PICK'
+    }
+    const { rerender } = render(
       <LiveView
         phase="champSelect"
         gameState={null}
-        champSelect={{
-          localPlayerCellId: 2,
-          ownPosition: 'middle',
-          myTeam: [
-            { cellId: 0, championId: 266, championPickIntent: 0, position: 'top' },
-            { cellId: 2, championId: 0, championPickIntent: 103, position: 'middle' }
-          ],
-          theirTeam: [{ cellId: 5, championId: 157 }],
-          bans: { mine: [], theirs: [] },
-          timerPhase: 'BAN_PICK'
-        }}
+        champSelect={champSelect}
+        championNames={{ 266: 'Aatrox', 103: 'Ahri', 157: 'Yasuo' }}
       />
     )
     expect(screen.getByText(/tu posición: middle/)).toBeInTheDocument()
+    // Picked champion and pick intent resolve to display names.
+    expect(screen.getByText(/Aatrox, Ahri/)).toBeInTheDocument()
+    expect(screen.getByText(/Yasuo/)).toBeInTheDocument()
+
+    // Without static data the raw ids remain visible.
+    rerender(<LiveView phase="champSelect" gameState={null} champSelect={champSelect} />)
     expect(screen.getByText(/266, 103/)).toBeInTheDocument()
+    expect(screen.getByText(/157/)).toBeInTheDocument()
   })
 
   it('in game: shows clock, own gold, both teams with items and gauges', () => {

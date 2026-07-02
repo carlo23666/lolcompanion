@@ -41,6 +41,12 @@ function createWindow(): void {
 
 function registerIpcHandlers(): void {
   handleInvoke('app:ping', () => ({ pong: true, version: app.getVersion() }))
+  handleInvoke('staticdata:championNames', async () => {
+    const data = await getStaticDataManager().load()
+    return Object.fromEntries(
+      [...data.championsByKey].map(([key, champion]) => [key, champion.name])
+    )
+  })
 }
 
 void app.whenReady().then(() => {

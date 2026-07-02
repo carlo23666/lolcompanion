@@ -44,6 +44,8 @@ export interface IpcInvokeChannels {
   }
   'ingest:start': { args: []; result: { started: boolean; error?: string } }
   'session:get': { args: []; result: SessionPhase }
+  /** Champion display names keyed by numeric champion key (LCU champ select uses keys). */
+  'staticdata:championNames': { args: []; result: Record<number, string> }
   'history:list': { args: [filter?: { champion?: string }]; result: HistoryRow[] }
   'history:aggregates': { args: []; result: HistoryAggregate[] }
   'history:champions': { args: []; result: string[] }
@@ -72,6 +74,7 @@ export const IPC_INVOKE_CHANNELS: readonly IpcInvokeChannel[] = [
   'settings:set',
   'ingest:start',
   'session:get',
+  'staticdata:championNames',
   'history:list',
   'history:aggregates',
   'history:champions',
