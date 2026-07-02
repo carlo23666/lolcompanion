@@ -21,16 +21,25 @@ export const THRESHOLDS = {
   DAMAGE_SKEW_SHARE: 0.62,
 
   /**
-   * Expected average effective HP of a NON-tank team at time t (seconds):
-   * baseline(t) = 900 + 1.9 * t. Matches the fixture curve for a squishy comp
-   * (early ~1470, mid ~2600, late ~4300).
+   * Expected average effective HP of a team at time t (seconds):
+   * baseline(t) = 900 + 2.2 * t. Recalibrated 2026-07-02 against 100 real
+   * ingested matches (per-minute median of mean enemy eHP reconstructed from
+   * timelines): min 20 ≈ 3278, min 30 ≈ 4854 — the previous 1.9/s slope
+   * (fixture-calibrated) undershot mid-late and made half of all real games
+   * trip the tank triggers. 2.2/s fits min 20-34 within ~4%; slight early
+   * overshoot is fine (anti-tank buys are never right pre-14 anyway).
    */
   TANK_BASELINE_BASE: 900,
-  TANK_BASELINE_PER_S: 1.9,
+  TANK_BASELINE_PER_S: 2.2,
   /** Team counts as tanky above baseline * this factor. */
   TANK_TEAM_FACTOR: 1.15,
-  /** A single enemy counts as a raid boss above baseline * this factor. */
-  TANK_SOLO_FACTOR: 1.45,
+  /**
+   * A single enemy counts as a raid boss above baseline * this factor.
+   * With the 2.2/s baseline, 1.55 puts the trigger between the real p50 and
+   * p90 of the tankiest enemy mid-game (fires in roughly a quarter of games
+   * at min 20 instead of half with the old 1.45 x 1.9/s pair).
+   */
+  TANK_SOLO_FACTOR: 1.55,
 
   /**
    * Fed burst threat: kills - deaths at least this AND at least MIN_KILLS.
