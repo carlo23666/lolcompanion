@@ -1,6 +1,7 @@
 import type {
   ChampSelectInsights,
   ChampSelectItemRef,
+  PickSuggestion,
   TeamDamageSplit
 } from '@shared/champselect'
 import type { ChampSelectState } from '@shared/schemas/lcu'
@@ -12,6 +13,102 @@ import type { StaticData } from './staticdata/manager'
 /** Cheap defensive components quoted in the tips. */
 const NEGATRON_CLOAK = 1057
 const CHAIN_VEST = 1031
+
+/** One stored game of the owner, as needed for pick suggestions. */
+export interface OwnerHistoryRow {
+  /** Data Dragon champion id (match-v5 championName). */
+  champion: string
+  /** match-v5 teamPosition: TOP | JUNGLE | MIDDLE | BOTTOM | UTILITY | ''. */
+  role: string
+  win: boolean
+}
+
+const MIN_GAMES_FOR_SUGGESTION = 2
+const MAX_PICK_SUGGESTIONS = 3
+
+const ROLE_LABEL: Record<string, string> = {
+  TOP: 'top',
+  JUNGLE: 'jungla',
+  MIDDLE: 'mid',
+  BOTTOM: 'ADC',
+  UTILITY: 'support'
+}
+
+/**
+ * What to pick: the owner's champions for his assigned position, ranked by
+ * his own winrate (Laplace-smoothed so 2-0 doesn't beat 15-5), skipping
+ * banned/picked champions, with a bonus when the champion's damage type
+ * complements the already-picked allies.
+ */
+export function pickSuggestions(
+  state: ChampSelectState,
+  staticData: StaticData,
+  history: OwnerHistoryRow[],
+  allySplit: TeamDamageSplit,
+  pool: BaselinePool
+): PickSuggestion[] {
+  const position = (state.ownPosition ?? '').toUpperCase()
+  const rows = position === '' ? history : history.filter((row) => row.role === position)
+
+  const byChampion = new Map<string, { games: number; wins: number }>()
+  for (const row of rows) {
+    const acc = byChampion.get(row.champion) ?? { games: 0, wins: 0 }
+    acc.games += 1
+    if (row.win) acc.wins += 1
+    byChampion.set(row.champion, acc)
+  }
+
+  // Champions already on the board (bans + both teams' picks/intents).
+  const takenKeys = [
+    ...state.bans.mine,
+    ...state.bans.theirs,
+    ...state.myTeam.flatMap((member) => [member.championId, member.championPickIntent]),
+    ...state.theirTeam.map((member) => member.championId)
+  ].filter((key) => key > 0)
+  const taken = new Set(
+    takenKeys
+      .map((key) => staticData.championsByKey.get(key)?.id)
+      .filter((id) => id !== undefined)
+  )
+
+  const wantsMagic = allySplit.picked >= 2 && allySplit.physical >= allySplit.picked - 1
+  const wantsPhysical = allySplit.picked >= 2 && allySplit.magic >= allySplit.picked - 1
+  const roleLabel = ROLE_LABEL[position] ?? 'tus partidas'
+
+  const ranked = [...byChampion.entries()]
+    .filter(([champion, acc]) => acc.games >= MIN_GAMES_FOR_SUGGESTION && !taken.has(champion))
+    .map(([champion, acc]) => {
+      const winratePct = (acc.wins / acc.games) * 100
+      // Laplace smoothing: small samples get pulled toward 50%.
+      let score = (acc.wins + 2) / (acc.games + 4)
+      const reasons = [
+        `${winratePct.toFixed(0)}% de victorias en ${String(acc.games)} partidas como ${roleLabel} (tus datos)`
+      ]
+      const damageType = staticData.damageProfile(champion)
+      if (wantsMagic && damageType !== 'physical') {
+        score += 0.06
+        reasons.push('aporta el daño mágico que le falta a tu equipo')
+      } else if (wantsPhysical && damageType !== 'magic') {
+        score += 0.06
+        reasons.push('aporta el daño físico que le falta a tu equipo')
+      }
+      if (findBaseline(pool, champion, position) !== null) {
+        score += 0.03
+        reasons.push('está en tu pool: build baseline lista')
+      }
+      const name = staticData.champions.get(champion)?.name ?? champion
+      return { championId: champion, name, games: acc.games, winratePct, reasons, score }
+    })
+    .sort((a, b) => b.score - a.score)
+
+  return ranked.slice(0, MAX_PICK_SUGGESTIONS).map(({ championId, name, games, winratePct, reasons }) => ({
+    championId,
+    name,
+    games,
+    winratePct,
+    reasons
+  }))
+}
 
 function itemRef(staticData: StaticData, id: number): ChampSelectItemRef {
   return { id, name: staticData.itemGraph.nodes.get(id)?.name ?? `objeto ${String(id)}` }
@@ -35,7 +132,8 @@ function damageSplit(staticData: StaticData, championKeys: number[]): TeamDamage
 export function champSelectInsights(
   state: ChampSelectState,
   staticData: StaticData,
-  pool: BaselinePool = loadBaselinePool()
+  pool: BaselinePool = loadBaselinePool(),
+  ownerHistory: OwnerHistoryRow[] = []
 ): ChampSelectInsights {
   const allyKeys = state.myTeam
     .map((member) => member.championId || member.championPickIntent)
@@ -105,5 +203,11 @@ export function champSelectInsights(
     }
   }
 
-  return { enemySplit, allySplit, tips, ownPlan }
+  // Pick suggestions only matter while the owner hasn't locked a champion.
+  const picks =
+    (own?.championId ?? 0) === 0
+      ? pickSuggestions(state, staticData, ownerHistory, allySplit, pool)
+      : []
+
+  return { enemySplit, allySplit, tips, picks, ownPlan }
 }

@@ -164,6 +164,39 @@ export default function ChampSelectPanel(props: {
           )}
         </div>
 
+        {insights !== null && insights.picks.length > 0 && (
+          <div className="rounded border border-indigo-500/30 bg-slate-950/60 p-2">
+            <p className="mb-1.5 text-[11px] font-semibold text-indigo-300">
+              ¿Qué te pego? Sugerencias según tus propias partidas
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {insights.picks.map((pick) => (
+                <div key={pick.championId} className="flex items-center gap-2" title={pick.reasons.join('\n')}>
+                  <img
+                    src={`ddicon://champion/${pick.championId}.png`}
+                    alt={pick.name}
+                    className="h-10 w-10 rounded border border-slate-700"
+                  />
+                  <div>
+                    <p className="text-xs font-semibold text-slate-200">{pick.name}</p>
+                    <p className="text-[11px] text-slate-400">
+                      <span
+                        className={`font-mono ${pick.winratePct >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}
+                      >
+                        {pick.winratePct.toFixed(0)}%
+                      </span>{' '}
+                      en {pick.games} partidas
+                      {pick.reasons.length > 1 && (
+                        <span className="text-slate-500"> · {pick.reasons[1]}</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {insights !== null && insights.tips.length > 0 && (
           <ul className="space-y-1 rounded border border-slate-800 bg-slate-950/60 p-2">
             {insights.tips.map((tip, index) => (

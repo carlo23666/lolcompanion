@@ -2,6 +2,7 @@ import { join } from 'node:path'
 import { app, BrowserWindow } from 'electron'
 import { champSelectInsights } from './champselect'
 import { openDatabase, type AppDatabase } from './db'
+import { MatchRepo } from './db/repos'
 import { loadDotEnv } from './env'
 import { registerHistoryIpc } from './history-ipc'
 import { registerIconProtocol, registerIconScheme } from './icons'
@@ -11,7 +12,7 @@ import { startLiveClient, type LiveClientPoller } from './liveclient'
 import { OverlayManager } from './overlay'
 import { SettingsRepo, SETTING_KEYS } from './db/repos/settings'
 import { PostGameIngestor } from './postgame'
-import { getRiotContext, registerRiotIpc } from './riot'
+import { getOwnerPuuid, getRiotContext, registerRiotIpc } from './riot'
 import { SessionMachine } from './session/machine'
 import { getStaticDataManager } from './staticdata'
 
@@ -43,7 +44,7 @@ function createWindow(): void {
   }
 }
 
-function registerIpcHandlers(): void {
+function registerIpcHandlers(db: AppDatabase): void {
   handleInvoke('app:ping', () => ({ pong: true, version: app.getVersion() }))
   handleInvoke('staticdata:championMeta', async () => {
     const data = await getStaticDataManager().load()
@@ -59,7 +60,16 @@ function registerIpcHandlers(): void {
     const data = await getStaticDataManager()
       .load()
       .catch(() => null)
-    return data === null ? null : champSelectInsights(state, data)
+    if (data === null) return null
+    // Pick suggestions come from the owner's own stored history.
+    const puuid = getOwnerPuuid(db)
+    const history =
+      puuid === null
+        ? []
+        : new MatchRepo(db)
+            .ownerMatches(puuid, { limit: 200 })
+            .map(({ own }) => ({ champion: own.champion, role: own.role, win: own.win }))
+    return champSelectInsights(state, data, undefined, history)
   })
 }
 
@@ -67,7 +77,7 @@ void app.whenReady().then(() => {
   loadDotEnv(app.getAppPath())
   db = openDatabase(join(app.getPath('userData'), 'lol-companion.db'))
   registerIconProtocol(() => getStaticDataManager().getLoadedPatch())
-  registerIpcHandlers()
+  registerIpcHandlers(db)
   registerRiotIpc(db)
 
   const statsService = registerHistoryIpc(db)

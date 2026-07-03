@@ -25,11 +25,24 @@ export interface ChampSelectItemRef {
   name: string
 }
 
+/** A champion the owner could pick, ranked from his own stored history. */
+export interface PickSuggestion {
+  /** Data Dragon id — also the portrait/splash file stem. */
+  championId: string
+  name: string
+  games: number
+  winratePct: number
+  /** Spanish, concrete: winrate line + comp/pool notes. */
+  reasons: string[]
+}
+
 export interface ChampSelectInsights {
   enemySplit: TeamDamageSplit
   allySplit: TeamDamageSplit
   /** Spanish, concrete, derived from the splits/healers. */
   tips: string[]
+  /** What to pick, from the owner's own history (empty until he has one). */
+  picks: PickSuggestion[]
   /** Owner's baseline plan for his picked champion (null if not in pool). */
   ownPlan: {
     championId: string

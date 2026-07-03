@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import { champSelectInsights } from '@main/champselect'
+import { champSelectInsights, type OwnerHistoryRow } from '@main/champselect'
 import type { StaticData } from '@main/staticdata/manager'
 import { baselinePoolSchema } from '@shared/schemas/baselines'
 import type { ChampSelectState } from '@shared/schemas/lcu'
@@ -112,6 +112,88 @@ describe('champSelectInsights', () => {
     )
     expect(insights.ownPlan?.championId).toBe('Jinx')
     expect(insights.allySplit.picked).toBe(1)
+  })
+
+  it('pick suggestions: ranked from own history in the assigned role', () => {
+    const history: OwnerHistoryRow[] = [
+      // Jinx BOTTOM: 8W/2L. Kai'Sa BOTTOM: 4W/6L. Ahri MIDDLE: 5W/0L (other role).
+      ...Array.from({ length: 10 }, (_, i) => ({
+        champion: 'Jinx',
+        role: 'BOTTOM',
+        win: i < 8
+      })),
+      ...Array.from({ length: 10 }, (_, i) => ({
+        champion: 'Kaisa',
+        role: 'BOTTOM',
+        win: i < 4
+      })),
+      ...Array.from({ length: 5 }, () => ({ champion: 'Ahri', role: 'MIDDLE', win: true }))
+    ]
+    const insights = champSelectInsights(
+      state({ localPlayerCellId: 0, ownPosition: 'bottom', myTeam: [ally(0, 0, 'bottom')] }),
+      staticData,
+      TEST_POOL,
+      history
+    )
+    // Ahri (other role) excluded; Jinx first (80% > Kai'Sa 40%).
+    expect(insights.picks.map((pick) => pick.championId)).toEqual(['Jinx', 'Kaisa'])
+    expect(insights.picks[0]?.reasons[0]).toContain('80% de victorias en 10 partidas')
+    // Jinx is in the pool → the baseline note appears.
+    expect(insights.picks[0]?.reasons.some((reason) => reason.includes('pool'))).toBe(true)
+  })
+
+  it('pick suggestions skip banned champions and disappear once locked', () => {
+    const history: OwnerHistoryRow[] = Array.from({ length: 10 }, (_, i) => ({
+      champion: 'Jinx',
+      role: 'BOTTOM',
+      win: i < 8
+    }))
+    const banned = champSelectInsights(
+      state({
+        localPlayerCellId: 0,
+        ownPosition: 'bottom',
+        myTeam: [ally(0, 0, 'bottom')],
+        bans: { mine: [], theirs: [JINX] }
+      }),
+      staticData,
+      TEST_POOL,
+      history
+    )
+    expect(banned.picks).toEqual([])
+
+    const locked = champSelectInsights(
+      state({
+        localPlayerCellId: 0,
+        ownPosition: 'bottom',
+        myTeam: [ally(0, DRAVEN, 'bottom')]
+      }),
+      staticData,
+      TEST_POOL,
+      history
+    )
+    expect(locked.picks).toEqual([])
+  })
+
+  it('pick suggestions favor the damage type the team lacks', () => {
+    const history: OwnerHistoryRow[] = [
+      // Two 50% champions in role: Draven (physical) and Ahri-as-ADC stand-in?
+      // Use Jinx (physical) vs Ziggs-like: fixture-safe → use Ahri played BOTTOM.
+      ...Array.from({ length: 6 }, (_, i) => ({ champion: 'Jinx', role: 'BOTTOM', win: i < 3 })),
+      ...Array.from({ length: 6 }, (_, i) => ({ champion: 'Ahri', role: 'BOTTOM', win: i < 3 }))
+    ]
+    // Ally comp already all-physical → the magic pick should rank first.
+    const insights = champSelectInsights(
+      state({
+        localPlayerCellId: 4,
+        ownPosition: 'bottom',
+        myTeam: [ally(0, AATROX), ally(1, YASUO), ally(2, ZED), ally(4, 0, 'bottom')]
+      }),
+      staticData,
+      TEST_POOL,
+      history
+    )
+    expect(insights.picks[0]?.championId).toBe('Ahri')
+    expect(insights.picks[0]?.reasons.some((reason) => reason.includes('daño mágico'))).toBe(true)
   })
 
   it('all-AD ally team → diversification note', () => {
