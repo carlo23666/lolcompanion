@@ -76,6 +76,21 @@ export interface IpcInvokeChannels {
   'stats:curve': { args: [champion: string]; result: PersonalCurve | null }
   /** Report for the most recent live session linked to a stored match. */
   'report:last': { args: []; result: PostGameReportResult | null }
+  /** Report for any stored match (Historial → Ver informe). */
+  'report:forMatch': { args: [matchId: string]; result: PostGameReportResult | null }
+  /** Dev-only simulation tools (empty/refused in the packaged app). */
+  'dev:replays': { args: []; result: { id: string; label: string; snapshots: number }[] }
+  'dev:replay:start': {
+    args: [id: string, intervalMs?: number]
+    result: { started: boolean; error?: string }
+  }
+  'dev:replay:stop': { args: []; result: { stopped: true } }
+  'dev:replay:status': {
+    args: []
+    result: { running: boolean; id: string | null; progressPct: number }
+  }
+  'dev:champselect:start': { args: []; result: { started: boolean } }
+  'dev:champselect:stop': { args: []; result: { stopped: true } }
 }
 
 export interface IpcEventChannels {
@@ -108,7 +123,14 @@ export const IPC_INVOKE_CHANNELS: readonly IpcInvokeChannel[] = [
   'history:detail',
   'stats:overview',
   'stats:curve',
-  'report:last'
+  'report:last',
+  'report:forMatch',
+  'dev:replays',
+  'dev:replay:start',
+  'dev:replay:stop',
+  'dev:replay:status',
+  'dev:champselect:start',
+  'dev:champselect:stop'
 ]
 
 export const IPC_EVENT_CHANNELS: readonly IpcEventChannel[] = [

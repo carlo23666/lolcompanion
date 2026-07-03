@@ -3,6 +3,7 @@ import { app, BrowserWindow } from 'electron'
 import { champSelectInsights } from './champselect'
 import { openDatabase, type AppDatabase } from './db'
 import { MatchRepo } from './db/repos'
+import { registerDevTools } from './devtools'
 import { loadDotEnv } from './env'
 import { registerHistoryIpc } from './history-ipc'
 import { registerIconProtocol, registerIconScheme } from './icons'
@@ -106,6 +107,7 @@ void app.whenReady().then(() => {
   handleInvoke('session:get', () => machine.getPhase())
   liveClient = startLiveClient(db, (state) => machine.setLiveState(state))
   lcu = startLcu(machine)
+  registerDevTools(database, machine)
 
   createWindow()
 
