@@ -16,7 +16,7 @@ export class OverlayManager {
       return
     }
     const display = screen.getPrimaryDisplay()
-    const width = 340
+    const width = 390
     const height = 150
     const window = new BrowserWindow({
       width,

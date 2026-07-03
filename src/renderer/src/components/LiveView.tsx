@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import type { GameState } from '@shared/gamestate'
 import type { RecommendationsPayload } from '@shared/ipc'
 import type { ChampSelectState } from '@shared/schemas/lcu'
@@ -20,28 +21,6 @@ function formatClock(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60)
   const seconds = Math.floor(totalSeconds % 60)
   return `${String(minutes)}:${String(seconds).padStart(2, '0')}`
-}
-
-const PHASE_LABEL: Record<SessionPhase, string> = {
-  idle: 'Cliente cerrado',
-  clientOpen: 'Cliente abierto',
-  champSelect: 'Selección de campeones',
-  inGame: 'En partida',
-  postGame: 'Partida terminada'
-}
-
-function PhaseBanner(props: { phase: SessionPhase }): React.JSX.Element {
-  const color =
-    props.phase === 'inGame'
-      ? 'bg-emerald-600/20 text-emerald-300 border-emerald-800'
-      : props.phase === 'champSelect'
-        ? 'bg-indigo-600/20 text-indigo-300 border-indigo-800'
-        : 'bg-slate-800/60 text-slate-300 border-slate-700'
-  return (
-    <div className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${color}`}>
-      {PHASE_LABEL[props.phase]}
-    </div>
-  )
 }
 
 function EmptyState(props: { icon: string; title: string; hint: string }): React.JSX.Element {
@@ -102,6 +81,33 @@ function ChampSelectPanel(props: {
   )
 }
 
+/** One-line nudge while in game if the experimental overlay is switched off. */
+function OverlayHint(props: { onOpenSettings?: () => void }): React.JSX.Element | null {
+  const [overlayEnabled, setOverlayEnabled] = useState<boolean | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    void window.api.invoke('settings:get').then((settings) => {
+      // Defensive: test stubs (and a failed invoke) may hand back null.
+      if (!cancelled && settings != null) setOverlayEnabled(settings.overlayEnabled)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  if (overlayEnabled !== false) return null
+  return (
+    <p className="card-in rounded border border-slate-800 bg-slate-900/60 px-3 py-1.5 text-[11px] text-slate-400">
+      💡 Hexi puede acompañarte dentro del juego con un overlay (LoL en ventana o sin bordes).{' '}
+      <button
+        className="text-indigo-300 underline hover:text-indigo-200"
+        onClick={props.onOpenSettings}
+      >
+        Actívalo en Ajustes
+      </button>
+    </p>
+  )
+}
+
 export default function LiveView(props: {
   phase: SessionPhase
   gameState: GameState | null
@@ -109,16 +115,14 @@ export default function LiveView(props: {
   recommendations?: RecommendationsPayload | null
   championNames?: Record<number, string>
   insights?: LiveInsightsData
+  onOpenSettings?: () => void
 }): React.JSX.Element {
   const { phase, gameState } = props
   const curve = usePersonalCurve(gameState)
 
   return (
     <div className="flex h-full flex-col gap-3 p-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold">Live</h1>
-        <PhaseBanner phase={phase} />
-      </div>
+      <h1 className="text-lg font-bold">Live</h1>
 
       {phase === 'idle' && (
         <EmptyState
@@ -153,6 +157,7 @@ export default function LiveView(props: {
           />
         ) : (
           <div className="flex flex-col gap-3 overflow-y-auto">
+            <OverlayHint onOpenSettings={props.onOpenSettings} />
             <div className="flex items-center gap-4 rounded-lg border border-slate-800 bg-slate-900 px-4 py-2 text-sm">
               <span className="font-mono text-lg">⏱ {formatClock(gameState.gameTimeS)}</span>
               <span className="font-mono text-amber-300">
