@@ -1,6 +1,11 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-03 (5) — Pick suggestions v2: matchup + team-needs signals (owner follow-up)
+**Done (1 commit; 251/251 green):** pick ranking is no longer history-only. New signals on top of the Laplace-smoothed per-role winrate: (a) **matchup component** — the owner's record with each candidate against the champions visible on the enemy team (`OwnerHistoryRow.enemyChampions`, filled from stored participants), ≥2 overlapping games required, contribution capped at ±0.125 so small samples nudge instead of dominate, surfaced as "contra campeones de esta comp: X de Y ganadas"; (b) **frontline need** — +bonus to Tank/Fighter candidates when no picked ally has those tags; (c) **anti-assassin durability** — small Tank bonus when the enemy shows ≥2 Assassin tags; plus the existing damage-type complement and pool bonuses. Every signal adds a Spanish reason line.
+**Notes:** no external tierlists/meta winrates — the zero-cost constraint forbids them, so "good vs their comp" means the owner's own matchup record + class heuristics from Data Dragon tags. `champselect:insights` now queries participants per owner match (200 sync queries per invoke, sub-ms each).
+**Files:** src/main/{champselect,index}.ts, tests/main/champselect.test.ts.
+
 ## 2026-07-03 (4) — Simulation toolkit (owner request: test without playing)
 **Done (2 commits; 249/249 green):**
 1. **Game replay** — the snapshot pipeline was extracted from `startLiveClient` into `createSnapshotProcessor(db, {persist})` and is now shared with a new `ReplayDriver` (`src/main/liveclient/replay.ts`, fake-timer tested): plays any `fixtures/recordings/<dir>` (and the bundled `fixtures/liveclient/session`) through the REAL pipeline — session machine goes inGame, Live view/engine/overlay/alerts all behave as in a real game — at x4/x8/x20 speed. Replays don't persist (no live_sessions pollution). Dev-only IPC (`dev:replays`, `dev:replay:start/stop/status`), refused/empty in the packaged app; id parsing rejects path escapes.
