@@ -5,13 +5,15 @@ import type { RecommendationsPayload } from '@shared/ipc'
 const ACTION_LABEL: Record<Recommendation['action'], string> = {
   prioritize: 'COMPRA YA',
   add: 'PRÓXIMA COMPRA',
-  delay: 'ESPERA'
+  delay: 'ESPERA',
+  replace: 'VENDE Y CAMBIA'
 }
 
 const ACTION_STYLE: Record<Recommendation['action'], string> = {
   prioritize: 'bg-emerald-600/20 text-emerald-300 border-emerald-700',
   add: 'bg-indigo-600/20 text-indigo-300 border-indigo-700',
-  delay: 'bg-amber-600/20 text-amber-300 border-amber-700'
+  delay: 'bg-amber-600/20 text-amber-300 border-amber-700',
+  replace: 'bg-rose-600/20 text-rose-300 border-rose-700'
 }
 
 function formatClock(totalSeconds: number): string {

@@ -2,7 +2,7 @@ import type { Recommendation } from '@shared/recommendation'
 import type { StaticData } from '../../staticdata/manager'
 import type { RuleOutput } from './types'
 
-const ACTION_PRIORITY = { prioritize: 0, add: 1, delay: 2 } as const
+const ACTION_PRIORITY = { prioritize: 0, replace: 0, add: 1, delay: 2 } as const
 
 /**
  * Merges RuleOutputs into ranked Recommendations:

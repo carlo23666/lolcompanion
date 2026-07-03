@@ -15,6 +15,21 @@ export function loadBaselinePool(): BaselinePool {
   return cachedPool
 }
 
+/**
+ * Magical Footwear (Inspiration, perk 8304): the shop refuses boots until the
+ * rune grants free ones (~min 12). While it's equipped and no boots are owned,
+ * a boots core slot is unpurchasable and must not pin the next-buy target.
+ */
+const MAGICAL_FOOTWEAR_RUNE_ID = 8304
+
+/** Starter/early items worth selling once the build is otherwise full. */
+const STARTER_ITEM_IDS = new Set([1054, 1055, 1056, 1082, 1083])
+
+/** Trinkets and consumables don't occupy a "real" build slot for our math. */
+function occupiesBuildSlot(item: { tags: string[] }): boolean {
+  return !item.tags.includes('Trinket') && !item.tags.includes('Consumable')
+}
+
 export function findBaseline(
   pool: BaselinePool,
   championId: string,
@@ -80,18 +95,43 @@ export function nextBuyRecommendation(
   const baseline = findBaseline(pool, state.self.championId, state.self.position)
   if (!baseline) return null
 
+  const graph = staticData.itemGraph
   const ownedCounts = new Map<number, number>()
   for (const item of state.self.items) {
     ownedCounts.set(item.id, (ownedCounts.get(item.id) ?? 0) + 1)
   }
 
+  const ownsAnyBoots = state.self.items.some((item) => item.tags.includes('Boots'))
+  const hasMagicalFootwear = state.self.runeIds.includes(MAGICAL_FOOTWEAR_RUNE_ID)
+
+  /** Finished boots other than `coreId` also satisfy a boots core slot. */
+  const consumeOtherBoots = (coreId: number): boolean => {
+    for (const [ownedId, count] of ownedCounts) {
+      if (ownedId === coreId || count <= 0) continue
+      const node = graph.nodes.get(ownedId)
+      if (node !== undefined && node.tags.includes('Boots') && node.depth >= 2) {
+        ownedCounts.set(ownedId, count - 1)
+        return true
+      }
+    }
+    return false
+  }
+
   // First core item not yet owned (consuming owned copies in order).
   let target: number | null = null
   let coreIndex = 0
+  let bootsSkippedForRune = false
   for (const [index, coreId] of baseline.core.entries()) {
     const owned = ownedCounts.get(coreId) ?? 0
     if (owned > 0) {
       ownedCounts.set(coreId, owned - 1)
+      continue
+    }
+    const isBootsSlot = graph.nodes.get(coreId)?.tags.includes('Boots') ?? false
+    if (isBootsSlot && consumeOtherBoots(coreId)) continue
+    if (isBootsSlot && hasMagicalFootwear && !ownsAnyBoots) {
+      // Unpurchasable until the rune delivers: don't stall the build on it.
+      bootsSkippedForRune = true
       continue
     }
     target = coreId
@@ -99,8 +139,6 @@ export function nextBuyRecommendation(
     break
   }
   if (target === null) return null
-
-  const graph = staticData.itemGraph
   const targetName = graph.nodes.get(target)?.name ?? `objeto ${String(target)}`
   const ordinal = ['1º', '2º', '3º', '4º', '5º', '6º'][coreIndex] ?? `${String(coreIndex + 1)}º`
   const gold = state.self.currentGold
@@ -111,8 +149,16 @@ export function nextBuyRecommendation(
     staticData
   )
 
+  const withBootsNote = (rec: Recommendation): Recommendation =>
+    bootsSkippedForRune
+      ? {
+          ...rec,
+          reasons: [...rec.reasons, 'Botas en pausa: Calzado Mágico (runa) te las dará gratis']
+        }
+      : rec
+
   if (gold >= missingGold) {
-    return {
+    return withBootsNote({
       itemId: target,
       itemName: targetName,
       category: null,
@@ -122,7 +168,7 @@ export function nextBuyRecommendation(
         `${targetName} es el ${ordinal} objeto de tu build de ${state.self.championName}`,
         `Puedes completarlo YA: te cuesta ${String(Math.round(missingGold))} de oro y llevas ${String(Math.floor(gold))}`
       ]
-    }
+    })
   }
 
   // Partial buy: most expensive affordable missing component.
@@ -133,7 +179,7 @@ export function nextBuyRecommendation(
   const component = affordable[0]
 
   if (component) {
-    return {
+    return withBootsNote({
       itemId: component.id,
       itemName: component.name,
       category: null,
@@ -143,10 +189,10 @@ export function nextBuyRecommendation(
         `${component.name} (${String(component.totalGold)} de oro) avanza tu ${ordinal} objeto: ${targetName}`,
         `A ${targetName} le faltan ${String(Math.round(missingGold))} de oro en total; llevas ${String(Math.floor(gold))}`
       ]
-    }
+    })
   }
 
-  return {
+  return withBootsNote({
     itemId: target,
     itemName: targetName,
     category: null,
@@ -155,6 +201,68 @@ export function nextBuyRecommendation(
     reasons: [
       `Guarda oro para ${targetName} (${ordinal} objeto de tu build): te faltan ${String(Math.round(missingGold - gold))}`,
       `Ninguna pieza suelta merece la pena ahora mismo (llevas ${String(Math.floor(gold))} de oro)`
+    ]
+  })
+}
+
+/**
+ * Endgame layer, once the core build is complete (nextBuyRecommendation
+ * returned null): fill the remaining slots with the champion's situational
+ * items, and when all six slots are taken but a starter item survives,
+ * recommend selling it to make room. Pure, like everything in the engine.
+ */
+export function endgameRecommendation(
+  state: GameState,
+  staticData: StaticData,
+  pool: BaselinePool = loadBaselinePool()
+): Recommendation | null {
+  const baseline = findBaseline(pool, state.self.championId, state.self.position)
+  if (!baseline) return null
+
+  const graph = staticData.itemGraph
+  const buildItems = state.self.items.filter(occupiesBuildSlot)
+  const ownedIds = new Set(buildItems.map((item) => item.id))
+  const targetNode = baseline.situational
+    .filter((id) => !ownedIds.has(id))
+    .map((id) => graph.nodes.get(id))
+    .find((node) => node !== undefined && node.availableOnSR)
+  if (!targetNode) return null
+
+  const gold = state.self.currentGold
+
+  if (buildItems.length < 6) {
+    const ownedCounts = new Map<number, number>()
+    for (const item of buildItems) {
+      ownedCounts.set(item.id, (ownedCounts.get(item.id) ?? 0) + 1)
+    }
+    const { missingGold } = missingFor(targetNode.id, ownedCounts, staticData)
+    const affordable = gold >= missingGold
+    return {
+      itemId: targetNode.id,
+      itemName: targetNode.name,
+      category: null,
+      action: affordable ? 'prioritize' : 'add',
+      score: affordable ? 75 : 60,
+      reasons: [
+        `Tu build principal de ${state.self.championName} está completa y te queda hueco: ${targetNode.name} es tu situacional`,
+        affordable
+          ? `Puedes comprarlo YA: te cuesta ${String(Math.round(missingGold))} de oro y llevas ${String(Math.floor(gold))}`
+          : `Te faltan ${String(Math.round(missingGold - gold))} de oro (cuesta ${String(Math.round(missingGold))} y llevas ${String(Math.floor(gold))})`
+      ]
+    }
+  }
+
+  const starter = buildItems.find((item) => STARTER_ITEM_IDS.has(item.id))
+  if (!starter) return null
+  return {
+    itemId: targetNode.id,
+    itemName: targetNode.name,
+    category: null,
+    action: 'replace',
+    score: 75,
+    reasons: [
+      `Inventario lleno pero sigues llevando ${starter.name}: véndelo para liberar hueco`,
+      `Con el hueco libre, compra ${targetNode.name} (${String(targetNode.totalGold)} de oro; llevas ${String(Math.floor(gold))})`
     ]
   }
 }

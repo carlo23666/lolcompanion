@@ -1,5 +1,5 @@
 /** Output of the rules engine. Reasons are mandatory — explainability is the product. */
-export type RecommendationAction = 'prioritize' | 'add' | 'delay'
+export type RecommendationAction = 'prioritize' | 'add' | 'delay' | 'replace'
 
 export interface Recommendation {
   /** Concrete item, when the rule points at one. */

@@ -3,7 +3,12 @@ import type { Recommendation } from '@shared/recommendation'
 import type { BaselinePool } from '@shared/schemas/baselines'
 import type { StaticData } from '../staticdata/manager'
 import { runEngine } from './index'
-import { findBaseline, loadBaselinePool, nextBuyRecommendation } from './nextbuy'
+import {
+  endgameRecommendation,
+  findBaseline,
+  loadBaselinePool,
+  nextBuyRecommendation
+} from './nextbuy'
 
 /**
  * Full recommendation pass: baseline next-buy + WP-007 rule adjustments.
@@ -30,7 +35,11 @@ export function recommend(
     return rec
   })
 
-  const nextBuy = nextBuyRecommendation(state, staticData, pool)
+  // Core first; once it's done, the endgame layer fills slots 5-6 and flags
+  // leftover starter items — the engine must never go silent mid-game.
+  const nextBuy =
+    nextBuyRecommendation(state, staticData, pool) ??
+    endgameRecommendation(state, staticData, pool)
   const all = nextBuy ? [nextBuy, ...ruleRecommendations] : ruleRecommendations
 
   // Dedupe by item: keep the highest score, merge every reason.
@@ -42,8 +51,12 @@ export function recommend(
       byKey.set(key, rec)
       continue
     }
+    const winner = existing.score >= rec.score ? existing : rec
     byKey.set(key, {
-      ...(existing.score >= rec.score ? existing : rec),
+      ...winner,
+      // 'replace' carries the "sell first" instruction — never lose it in a merge.
+      action:
+        existing.action === 'replace' || rec.action === 'replace' ? 'replace' : winner.action,
       score: Math.min(100, Math.max(existing.score, rec.score) + 5),
       reasons: [...new Set([...existing.reasons, ...rec.reasons])]
     })

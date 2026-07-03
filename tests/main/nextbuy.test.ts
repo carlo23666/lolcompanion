@@ -5,7 +5,12 @@ import { allGameDataSchema } from '@shared/schemas/liveclient'
 import { baselinePoolSchema } from '@shared/schemas/baselines'
 import type { GameState, GameStateItem } from '@shared/gamestate'
 import { normalizeSnapshot } from '@main/engine/normalize'
-import { loadBaselinePool, missingFor, nextBuyRecommendation } from '@main/engine/nextbuy'
+import {
+  endgameRecommendation,
+  loadBaselinePool,
+  missingFor,
+  nextBuyRecommendation
+} from '@main/engine/nextbuy'
 import { recommend } from '@main/engine/recommend'
 import type { StaticData } from '@main/staticdata/manager'
 import poolJson from '@main/engine/baselines/pool.json'
@@ -141,6 +146,90 @@ describe('nextBuyRecommendation', () => {
     const rec = nextBuyRecommendation(state, staticData, TEST_POOL)
     expect(rec?.action).toBe('delay')
     expect(rec?.reasons.join(' ')).toContain('Guarda oro')
+  })
+})
+
+describe('nextBuyRecommendation with Magical Footwear (rune 8304)', () => {
+  it('skips the boots core slot while no boots are owned and explains why', () => {
+    const state = selfWith('Jinx', [], 5000)
+    state.self.runeIds = [8304]
+    const rec = nextBuyRecommendation(state, staticData, TEST_POOL)
+    // Boots (1st core) are unpurchasable → target jumps to IE (2nd core).
+    expect(rec?.itemId).toBe(3031)
+    expect(rec?.reasons.join(' ')).toContain('Calzado Mágico')
+  })
+
+  it('resumes the boots slot once the rune granted them (upgrade advice)', () => {
+    const state = selfWith('Jinx', [2422], 5000)
+    state.self.runeIds = [8304]
+    const rec = nextBuyRecommendation(state, staticData, TEST_POOL)
+    expect(rec?.itemId).toBe(3006)
+    expect(rec?.reasons.join(' ')).not.toContain('Calzado Mágico')
+  })
+
+  it('without the rune, boots stay the first target', () => {
+    const state = selfWith('Jinx', [], 5000)
+    state.self.runeIds = []
+    const rec = nextBuyRecommendation(state, staticData, TEST_POOL)
+    expect(rec?.itemId).toBe(3006)
+  })
+})
+
+describe('nextBuyRecommendation with substitute boots', () => {
+  it('other finished boots satisfy a boots core slot', () => {
+    // Owns Mercs instead of the core Berserker's → move on to IE.
+    const state = selfWith('Jinx', [3111], 5000)
+    state.self.runeIds = []
+    const rec = nextBuyRecommendation(state, staticData, TEST_POOL)
+    expect(rec?.itemId).toBe(3031)
+  })
+})
+
+describe('endgameRecommendation (core complete)', () => {
+  const CORE = [3006, 3031, 3085, 3036]
+
+  it('free slot: recommends the first unowned situational', () => {
+    const state = selfWith('Jinx', CORE, 3200)
+    const rec = endgameRecommendation(state, staticData, TEST_POOL)
+    // 3026 (GA) costs 3200 → affordable → prioritize.
+    expect(rec?.itemId).toBe(3026)
+    expect(rec?.action).toBe('prioritize')
+    expect(rec?.reasons.join(' ')).toContain('situacional')
+  })
+
+  it('free slot without gold: still points at the situational as next buy', () => {
+    const state = selfWith('Jinx', CORE, 100)
+    const rec = endgameRecommendation(state, staticData, TEST_POOL)
+    expect(rec?.itemId).toBe(3026)
+    expect(rec?.action).toBe('add')
+  })
+
+  it('six slots with a leftover starter: recommends selling it (replace)', () => {
+    const state = selfWith('Jinx', [...CORE, 1055, 3072], 2000)
+    const rec = endgameRecommendation(state, staticData, TEST_POOL)
+    expect(rec?.action).toBe('replace')
+    expect(rec?.itemId).toBe(3026)
+    expect(rec?.reasons.join(' ')).toContain('véndelo')
+  })
+
+  it('six real slots without a starter: stays silent', () => {
+    const state = selfWith('Jinx', [...CORE, 3072, 3153], 2000)
+    // 3153 is situational-owned? no: TEST_POOL situational = [3026, 3139, 3153];
+    // owning 3153 leaves 3026 unowned but there is no slot and no starter.
+    expect(endgameRecommendation(state, staticData, TEST_POOL)).toBeNull()
+  })
+
+  it('owned situationals are excluded from the target', () => {
+    const state = selfWith('Jinx', [...CORE, 3026], 9000)
+    const rec = endgameRecommendation(state, staticData, TEST_POOL)
+    expect(rec?.itemId).toBe(3139)
+  })
+
+  it('recommend() integration: engine is not silent once the core is done', () => {
+    const state = selfWith('Jinx', [...CORE, 1055, 3072], 2000)
+    const recommendations = recommend(state, staticData, TEST_POOL)
+    const replace = recommendations.find((rec) => rec.action === 'replace')
+    expect(replace).toBeDefined()
   })
 })
 
