@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { IngestProgressPayload } from '@shared/ipc'
+import type { IngestProgressPayload, MetaStatusPayload } from '@shared/ipc'
 import { applyTheme } from '../App'
 import { setSoundsEnabled } from '../sounds'
 
@@ -16,6 +16,91 @@ const REPLAY_SPEEDS: { label: string; intervalMs: number }[] = [
   { label: 'x8', intervalMs: 250 },
   { label: 'x20', intervalMs: 100 }
 ]
+
+/**
+ * Master+ meta aggregation: start/stop the background crawler and show what
+ * has been collected. Data feeds pick suggestions and the report card.
+ */
+function MetaSection(): React.JSX.Element {
+  const [status, setStatus] = useState<MetaStatusPayload | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const refresh = (): void => {
+    void window.api.invoke('meta:status').then((payload) => {
+      if (typeof payload === 'object' && Array.isArray(payload.patches)) setStatus(payload)
+    }, () => undefined)
+  }
+
+  useEffect(() => {
+    refresh()
+    return window.api.on('meta:progress', refresh)
+  }, [])
+
+  const start = async (): Promise<void> => {
+    setError(null)
+    const result = await window.api.invoke('meta:crawl:start')
+    if (!result.started) setError(result.error ?? 'no se pudo iniciar')
+    refresh()
+  }
+
+  const stop = async (): Promise<void> => {
+    await window.api.invoke('meta:crawl:stop')
+    refresh()
+  }
+
+  const running = status?.running === true
+  const totalMatches = status?.patches.reduce((sum, patch) => sum + patch.matches, 0) ?? 0
+
+  return (
+    <section className="max-w-md rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <h2 className="mb-1 text-sm font-semibold text-slate-300">Datos meta (Master+)</h2>
+      <p className="mb-3 text-[11px] text-slate-500">
+        Rastrea partidas ranked de Master, Grandmaster y Challenger con tu clave de la API y
+        guarda solo agregados (winrates, matchups, builds). Alimenta las sugerencias de pick y
+        el informe. Déjalo en marcha en segundo plano: ~2000 partidas/hora.
+      </p>
+      <div className="flex flex-col gap-2 text-xs">
+        {totalMatches > 0 && status !== null && (
+          <p className="text-slate-400">
+            📦 {totalMatches} partidas agregadas
+            {status.patches.length > 0 && (
+              <span className="text-slate-500">
+                {' '}
+                ({status.patches.map((entry) => `parche ${entry.patch}: ${String(entry.matches)}`).join(' · ')})
+              </span>
+            )}
+          </p>
+        )}
+        {running && status !== null && (
+          <p className="text-indigo-300">
+            ⛏ Rastreando… {status.stored} nuevas esta sesión · semillas {status.seedsDone}/
+            {status.seedsTotal}
+          </p>
+        )}
+        <div className="flex gap-2">
+          {running ? (
+            <button
+              className="rounded bg-rose-700 px-3 py-1.5 hover:bg-rose-600"
+              onClick={() => void stop()}
+            >
+              Detener rastreo
+            </button>
+          ) : (
+            <button
+              className="rounded bg-indigo-700 px-3 py-1.5 hover:bg-indigo-600"
+              onClick={() => void start()}
+            >
+              ⛏ Iniciar rastreo Master+
+            </button>
+          )}
+        </div>
+        {(error !== null || status?.error != null) && (
+          <p className="text-rose-400">{error ?? status?.error}</p>
+        )}
+      </div>
+    </section>
+  )
+}
 
 /**
  * Dev-only simulation panel: replay recorded games through the real pipeline
@@ -304,6 +389,8 @@ export default function SettingsView(): React.JSX.Element {
           {status !== null && <p className="text-xs text-amber-400">{status}</p>}
         </div>
       </section>
+
+      <MetaSection />
 
       <DevToolsSection />
 

@@ -34,6 +34,20 @@ export interface AppSettings {
   theme: string
 }
 
+export interface MetaCrawlProgress {
+  running: boolean
+  processed: number
+  stored: number
+  seedsDone: number
+  seedsTotal: number
+  error: string | null
+}
+
+export interface MetaStatusPayload extends MetaCrawlProgress {
+  /** Aggregated matches per patch, newest patch first. */
+  patches: { patch: string; matches: number }[]
+}
+
 export interface IngestProgressPayload {
   fetched: number
   stored: number
@@ -91,6 +105,10 @@ export interface IpcInvokeChannels {
   }
   'dev:champselect:start': { args: []; result: { started: boolean } }
   'dev:champselect:stop': { args: []; result: { stopped: true } }
+  /** Master+ meta aggregation (crawler status/control). */
+  'meta:status': { args: []; result: MetaStatusPayload }
+  'meta:crawl:start': { args: []; result: { started: boolean; error?: string } }
+  'meta:crawl:stop': { args: []; result: { stopped: true } }
 }
 
 export interface IpcEventChannels {
@@ -104,6 +122,8 @@ export interface IpcEventChannels {
   'gamestate:recommendations': RecommendationsPayload
   /** A finished match landed in the DB (post-game auto-ingest). */
   'history:changed': { matchId: string }
+  /** Meta crawler progress ticks. */
+  'meta:progress': MetaCrawlProgress
 }
 
 export type IpcInvokeChannel = keyof IpcInvokeChannels
@@ -130,7 +150,10 @@ export const IPC_INVOKE_CHANNELS: readonly IpcInvokeChannel[] = [
   'dev:replay:stop',
   'dev:replay:status',
   'dev:champselect:start',
-  'dev:champselect:stop'
+  'dev:champselect:stop',
+  'meta:status',
+  'meta:crawl:start',
+  'meta:crawl:stop'
 ]
 
 export const IPC_EVENT_CHANNELS: readonly IpcEventChannel[] = [
@@ -142,7 +165,8 @@ export const IPC_EVENT_CHANNELS: readonly IpcEventChannel[] = [
   'gamestate:update',
   'gamestate:events',
   'gamestate:recommendations',
-  'history:changed'
+  'history:changed',
+  'meta:progress'
 ]
 
 /** Shape of the API the preload script exposes on window.api */

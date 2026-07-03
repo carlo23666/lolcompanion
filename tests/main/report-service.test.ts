@@ -171,19 +171,31 @@ describe('buildReportSummary', () => {
     expect(lines.some((line) => line.includes('3 de 4'))).toBe(true)
   })
 
-  it('caps at four lines', () => {
-    const lines = buildReportSummary({
-      ...base,
-      deaths: 12,
-      visionScore: 5,
-      csPerMin: 3,
-      damageSharePct: 40,
-      recommendedItems: [
-        { itemId: 1, itemName: null, followed: false },
-        { itemId: 2, itemName: null, followed: false },
-        { itemId: 3, itemName: null, followed: false }
-      ]
-    })
-    expect(lines.length).toBeLessThanOrEqual(4)
+  it('meta build comparison lines', () => {
+    const high = buildReportSummary(base, { overlap: 5, total: 6 })
+    expect(high.some((line) => line.includes('coincide en 5 de 6'))).toBe(true)
+    const low = buildReportSummary(base, { overlap: 1, total: 6 })
+    expect(low.some((line) => line.includes('solo coincide en 1 de 6'))).toBe(true)
+    // Middle overlap: no line (nothing remarkable).
+    expect(buildReportSummary(base, { overlap: 4, total: 6 })).toEqual([])
+  })
+
+  it('caps the summary length', () => {
+    const lines = buildReportSummary(
+      {
+        ...base,
+        deaths: 12,
+        visionScore: 5,
+        csPerMin: 3,
+        damageSharePct: 40,
+        recommendedItems: [
+          { itemId: 1, itemName: null, followed: false },
+          { itemId: 2, itemName: null, followed: false },
+          { itemId: 3, itemName: null, followed: false }
+        ]
+      },
+      { overlap: 1, total: 6 }
+    )
+    expect(lines.length).toBeLessThanOrEqual(5)
   })
 })

@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import { champSelectInsights, type OwnerHistoryRow } from '@main/champselect'
+import { champSelectInsights, type MetaSource, type OwnerHistoryRow } from '@main/champselect'
 import type { StaticData } from '@main/staticdata/manager'
 import { baselinePoolSchema } from '@shared/schemas/baselines'
 import type { ChampSelectState } from '@shared/schemas/lcu'
@@ -239,6 +239,60 @@ describe('champSelectInsights', () => {
     )
     expect(insights.picks[0]?.championId).toBe('Leona')
     expect(insights.picks[0]?.reasons.some((reason) => reason.includes('frontline'))).toBe(true)
+  })
+
+  it('pick suggestions blend Master+ winrates and lane matchups', () => {
+    const history: OwnerHistoryRow[] = [
+      // Both 50% personally over 8 games.
+      ...Array.from({ length: 8 }, (_, i) => row('Jinx', 'BOTTOM', i < 4)),
+      ...Array.from({ length: 8 }, (_, i) => row('Kaisa', 'BOTTOM', i < 4))
+    ]
+    // Meta strongly favors Kai'Sa overall and into Draven.
+    const meta: MetaSource = {
+      championWinrate: (champion) =>
+        champion === 'Kaisa' ? { games: 400, wins: 230 } : { games: 400, wins: 190 },
+      laneMatchup: (champion, _role, enemy) =>
+        champion === 'Kaisa' && enemy === 'Draven' ? { games: 60, wins: 40 } : null
+    }
+    const insights = champSelectInsights(
+      state({
+        localPlayerCellId: 0,
+        ownPosition: 'bottom',
+        myTeam: [ally(0, 0, 'bottom')],
+        theirTeam: [{ cellId: 5, championId: DRAVEN }]
+      }),
+      staticData,
+      TEST_POOL,
+      history,
+      meta
+    )
+    expect(insights.picks[0]?.championId).toBe('Kaisa')
+    const reasons = insights.picks[0]?.reasons.join(' | ') ?? ''
+    expect(reasons).toContain('Master+ este parche')
+    expect(reasons).toContain('en Master+ contra Draven')
+  })
+
+  it('meta samples below the thresholds are ignored', () => {
+    const history: OwnerHistoryRow[] = [
+      ...Array.from({ length: 8 }, (_, i) => row('Jinx', 'BOTTOM', i < 4))
+    ]
+    const meta: MetaSource = {
+      championWinrate: () => ({ games: 10, wins: 9 }), // < 30 games
+      laneMatchup: () => ({ games: 5, wins: 5 }) // < 10 games
+    }
+    const insights = champSelectInsights(
+      state({
+        localPlayerCellId: 0,
+        ownPosition: 'bottom',
+        myTeam: [ally(0, 0, 'bottom')],
+        theirTeam: [{ cellId: 5, championId: DRAVEN }]
+      }),
+      staticData,
+      TEST_POOL,
+      history,
+      meta
+    )
+    expect(insights.picks[0]?.reasons.some((reason) => reason.includes('Master+'))).toBe(false)
   })
 
   it('all-AD ally team → diversification note', () => {

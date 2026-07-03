@@ -4,11 +4,13 @@ import type {
   RecommendedItemOutcome
 } from '@shared/report'
 import type { AppDatabase } from './db'
-import { LiveSessionRepo, MatchRepo } from './db/repos'
+import { LiveSessionRepo, MatchRepo, MetaRepo } from './db/repos'
 import type { StatsService } from './stats'
 
 const MAX_RECOMMENDED_ITEMS = 10
-const MAX_SUMMARY_LINES = 4
+const MAX_SUMMARY_LINES = 5
+/** Meta build comparison needs at least this many crawled builds. */
+const META_MIN_ITEM_GAMES = 10
 
 /** Modes that never reach Riot match history — no report can exist for them. */
 function isMatchmadeMode(gameMode: string | null): boolean {
@@ -33,7 +35,9 @@ export function buildReportSummary(
     | 'damageSharePct'
     | 'avgDamageSharePct'
     | 'recommendedItems'
-  >
+  >,
+  /** Final build vs the most-bought Master+ items (null = no meta data). */
+  metaBuild: { overlap: number; total: number } | null = null
 ): string[] {
   const lines: string[] = []
 
@@ -92,6 +96,18 @@ export function buildReportSummary(
     }
   }
 
+  if (metaBuild !== null && metaBuild.total >= 3) {
+    if (metaBuild.overlap >= metaBuild.total - 1) {
+      lines.push(
+        `Tu build final coincide en ${String(metaBuild.overlap)} de ${String(metaBuild.total)} objetos con lo más comprado en Master+ con ${report.champion}`
+      )
+    } else if (metaBuild.overlap <= Math.floor(metaBuild.total / 2)) {
+      lines.push(
+        `Tu build final solo coincide en ${String(metaBuild.overlap)} de ${String(metaBuild.total)} objetos con lo más comprado en Master+ — compara tu itemización`
+      )
+    }
+  }
+
   return lines.slice(0, MAX_SUMMARY_LINES)
 }
 
@@ -105,6 +121,7 @@ export function buildReportSummary(
 export class ReportService {
   private readonly sessions: LiveSessionRepo
   private readonly matches: MatchRepo
+  private readonly meta: MetaRepo
 
   constructor(
     db: AppDatabase,
@@ -112,6 +129,7 @@ export class ReportService {
   ) {
     this.sessions = new LiveSessionRepo(db)
     this.matches = new MatchRepo(db)
+    this.meta = new MetaRepo(db)
   }
 
   lastReport(puuid: string): PostGameReportResult | null {
@@ -182,8 +200,22 @@ export class ReportService {
       recommendedItems,
       summary: []
     }
-    report.summary = buildReportSummary(report)
+    report.summary = buildReportSummary(report, this.metaBuildComparison(own, finalItems))
     return { kind: 'report', report }
+  }
+
+  /** Overlap between the final build and the Master+ most-bought items. */
+  private metaBuildComparison(
+    own: { champion: string; role: string },
+    finalItems: Set<number>
+  ): { overlap: number; total: number } | null {
+    const patch = this.meta.latestPatch()
+    if (patch === null || finalItems.size < 3) return null
+    const top = this.meta.topItems(own.champion, own.role, patch, 10)
+    if (top.length < 5 || (top[0]?.games ?? 0) < META_MIN_ITEM_GAMES) return null
+    const topIds = new Set(top.map((item) => item.itemId))
+    const overlap = [...finalItems].filter((id) => topIds.has(id)).length
+    return { overlap, total: finalItems.size }
   }
 
   private recommendedItems(

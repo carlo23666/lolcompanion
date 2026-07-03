@@ -1,8 +1,8 @@
 import { join } from 'node:path'
 import { app, BrowserWindow } from 'electron'
-import { champSelectInsights } from './champselect'
+import { champSelectInsights, type MetaSource } from './champselect'
 import { openDatabase, type AppDatabase } from './db'
-import { MatchRepo } from './db/repos'
+import { MatchRepo, MetaRepo } from './db/repos'
 import { registerDevTools } from './devtools'
 import { loadDotEnv } from './env'
 import { registerHistoryIpc } from './history-ipc'
@@ -45,6 +45,17 @@ function createWindow(): void {
   }
 }
 
+/** Master+ aggregates as a MetaSource, pinned to the newest crawled patch. */
+function metaSource(db: AppDatabase): MetaSource | null {
+  const repo = new MetaRepo(db)
+  const patch = repo.latestPatch()
+  if (patch === null) return null
+  return {
+    championWinrate: (champion, role) => repo.championWinrate(champion, role, patch),
+    laneMatchup: (champion, role, enemy) => repo.laneMatchup(champion, role, enemy, patch)
+  }
+}
+
 function registerIpcHandlers(db: AppDatabase): void {
   handleInvoke('app:ping', () => ({ pong: true, version: app.getVersion() }))
   handleInvoke('staticdata:championMeta', async () => {
@@ -78,7 +89,7 @@ function registerIpcHandlers(db: AppDatabase): void {
               .filter((participant) => participant.win !== own.win)
               .map((participant) => participant.champion)
           }))
-    return champSelectInsights(state, data, undefined, history)
+    return champSelectInsights(state, data, undefined, history, metaSource(db))
   })
 }
 

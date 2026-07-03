@@ -27,6 +27,22 @@ export interface OwnerHistoryRow {
 
 const MIN_GAMES_FOR_SUGGESTION = 2
 const MAX_PICK_SUGGESTIONS = 3
+/** Meta thresholds: below these sample sizes the aggregate says nothing. */
+const META_MIN_CHAMPION_GAMES = 30
+const META_MIN_MATCHUP_GAMES = 10
+
+/**
+ * Aggregated Master+ statistics (crawled, migration 005). Null lookups mean
+ * "no data yet" — every consumer must degrade gracefully.
+ */
+export interface MetaSource {
+  championWinrate(champion: string, role: string): { games: number; wins: number } | null
+  laneMatchup(
+    champion: string,
+    role: string,
+    enemyChampion: string
+  ): { games: number; wins: number } | null
+}
 
 const ROLE_LABEL: Record<string, string> = {
   TOP: 'top',
@@ -53,7 +69,8 @@ export function pickSuggestions(
   staticData: StaticData,
   history: OwnerHistoryRow[],
   allySplit: TeamDamageSplit,
-  pool: BaselinePool
+  pool: BaselinePool,
+  meta: MetaSource | null = null
 ): PickSuggestion[] {
   const position = (state.ownPosition ?? '').toUpperCase()
   const rows = position === '' ? history : history.filter((row) => row.role === position)
@@ -126,7 +143,38 @@ export function pickSuggestions(
         }
       }
 
-      const meta = staticData.champions.get(champion)
+      // Master+ aggregate: how the champion performs at the top right now,
+      // and specifically into the visible lane opponents.
+      const metaStat = meta?.championWinrate(champion, position)
+      if (metaStat && metaStat.games >= META_MIN_CHAMPION_GAMES) {
+        const metaWr = metaStat.wins / metaStat.games
+        score += (metaWr - 0.5) * 0.3
+        reasons.push(
+          `${(metaWr * 100).toFixed(0)}% WR en Master+ este parche (${String(metaStat.games)} partidas)`
+        )
+      }
+      if (meta && enemyChampions.length > 0) {
+        let versusGames = 0
+        let versusWins = 0
+        const versusNames: string[] = []
+        for (const enemy of enemyChampions) {
+          const matchup = meta.laneMatchup(champion, position, enemy.id)
+          if (matchup && matchup.games >= META_MIN_MATCHUP_GAMES) {
+            versusGames += matchup.games
+            versusWins += matchup.wins
+            versusNames.push(enemy.name)
+          }
+        }
+        if (versusGames > 0) {
+          const versusWr = versusWins / versusGames
+          score += (versusWr - 0.5) * 0.2
+          reasons.push(
+            `en Master+ contra ${versusNames.join('/')}: ${(versusWr * 100).toFixed(0)}% WR (${String(versusGames)} partidas)`
+          )
+        }
+      }
+
+      const champMeta = staticData.champions.get(champion)
       const damageType = staticData.damageProfile(champion)
       if (wantsMagic && damageType !== 'physical') {
         score += 0.06
@@ -135,11 +183,15 @@ export function pickSuggestions(
         score += 0.06
         reasons.push('aporta el daño físico que le falta a tu equipo')
       }
-      if (teamLacksFrontline && meta !== undefined && meta.tags.some((tag) => FRONTLINE_TAGS.has(tag))) {
+      if (
+        teamLacksFrontline &&
+        champMeta !== undefined &&
+        champMeta.tags.some((tag) => FRONTLINE_TAGS.has(tag))
+      ) {
         score += 0.05
         reasons.push('tu equipo no tiene frontline y este pick la aporta')
       }
-      if (enemyAssassins >= 2 && meta !== undefined && meta.tags.includes('Tank')) {
+      if (enemyAssassins >= 2 && champMeta !== undefined && champMeta.tags.includes('Tank')) {
         score += 0.03
         reasons.push(`${String(enemyAssassins)} asesinos enfrente: aguantas mejor sus entradas`)
       }
@@ -147,7 +199,7 @@ export function pickSuggestions(
         score += 0.03
         reasons.push('está en tu pool: build baseline lista')
       }
-      const name = meta?.name ?? champion
+      const name = champMeta?.name ?? champion
       return { championId: champion, name, games: acc.games, winratePct, reasons, score }
     })
     .sort((a, b) => b.score - a.score)
@@ -184,7 +236,8 @@ export function champSelectInsights(
   state: ChampSelectState,
   staticData: StaticData,
   pool: BaselinePool = loadBaselinePool(),
-  ownerHistory: OwnerHistoryRow[] = []
+  ownerHistory: OwnerHistoryRow[] = [],
+  meta: MetaSource | null = null
 ): ChampSelectInsights {
   const allyKeys = state.myTeam
     .map((member) => member.championId || member.championPickIntent)
@@ -257,7 +310,7 @@ export function champSelectInsights(
   // Pick suggestions only matter while the owner hasn't locked a champion.
   const picks =
     (own?.championId ?? 0) === 0
-      ? pickSuggestions(state, staticData, ownerHistory, allySplit, pool)
+      ? pickSuggestions(state, staticData, ownerHistory, allySplit, pool, meta)
       : []
 
   return { enemySplit, allySplit, tips, picks, ownPlan }
