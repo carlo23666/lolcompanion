@@ -44,7 +44,8 @@ export function registerRiotIpc(db: AppDatabase): void {
     platform: settings.get(SETTING_KEYS.platform) ?? 'euw1',
     recordLive: settings.get(SETTING_KEYS.recordLive) === '1',
     soundsEnabled: settings.get(SETTING_KEYS.soundsEnabled) !== '0',
-    overlayEnabled: settings.get(SETTING_KEYS.overlayEnabled) === '1'
+    overlayEnabled: settings.get(SETTING_KEYS.overlayEnabled) === '1',
+    theme: settings.get(SETTING_KEYS.theme) ?? 'hextech'
   }))
 
   handleInvoke('settings:set', (update) => {
@@ -55,6 +56,7 @@ export function registerRiotIpc(db: AppDatabase): void {
     settings.set(SETTING_KEYS.recordLive, update.recordLive ? '1' : '0')
     settings.set(SETTING_KEYS.soundsEnabled, update.soundsEnabled ? '1' : '0')
     settings.set(SETTING_KEYS.overlayEnabled, update.overlayEnabled ? '1' : '0')
+    settings.set(SETTING_KEYS.theme, update.theme)
     if (previousRiotId !== riotId) {
       // riotId changed → cached puuid no longer valid; re-resolve in the
       // background so post-game auto-ingest works without a full sync.

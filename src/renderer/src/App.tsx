@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import type { SessionPhase } from '@shared/session'
-import Sidebar, { type ViewId } from './components/Sidebar'
+import TopBar, { type ViewId } from './components/TopBar'
 import LiveView from './components/LiveView'
 import HistoryView from './components/HistoryView'
 import SettingsView from './components/SettingsView'
 import { useIpcEvent, useLiveInsights } from './hooks'
 import { playAlert, playRecommendation, setSoundsEnabled } from './sounds'
+
+/** Applies the selected color scheme; components restyle via CSS variables. */
+export function applyTheme(theme: string): void {
+  document.documentElement.dataset['theme'] = theme
+}
 
 export default function App(): React.JSX.Element {
   const [view, setView] = useState<ViewId>('live')
@@ -23,6 +28,7 @@ export default function App(): React.JSX.Element {
     void window.api.invoke('session:get').then(setPhase)
     void window.api.invoke('settings:get').then((settings) => {
       setSoundsEnabled(settings.soundsEnabled)
+      applyTheme(settings.theme)
     })
     // Offline with no cached patch this rejects; the UI then falls back to
     // showing numeric champion ids.
@@ -51,14 +57,14 @@ export default function App(): React.JSX.Element {
   }, [insights.alerts])
 
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-100">
-      <Sidebar
+    <div className="flex h-screen flex-col bg-slate-950 text-slate-100">
+      <TopBar
         active={view}
         onSelect={setView}
         phase={phase}
         mascotReactKey={mascotReactKey}
       />
-      <main className="min-w-0 flex-1 overflow-y-auto">
+      <main className="min-h-0 flex-1 overflow-y-auto">
         {view === 'live' && (
           <LiveView
             phase={phase}
@@ -67,6 +73,7 @@ export default function App(): React.JSX.Element {
             recommendations={recommendations}
             championNames={championNames}
             insights={insights}
+            onOpenSettings={() => setView('settings')}
           />
         )}
         {view === 'history' && <HistoryView />}

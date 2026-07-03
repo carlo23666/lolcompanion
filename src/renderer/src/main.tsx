@@ -12,6 +12,10 @@ const isOverlay = new URLSearchParams(window.location.search).has('overlay')
 if (isOverlay) {
   document.documentElement.style.background = 'transparent'
   document.body.style.background = 'transparent'
+  // The main window applies the theme in App; the overlay does it here.
+  void window.api.invoke('settings:get').then((settings) => {
+    document.documentElement.dataset['theme'] = settings.theme
+  })
 }
 
 ReactDOM.createRoot(root).render(

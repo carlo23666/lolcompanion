@@ -29,6 +29,8 @@ export interface AppSettings {
   soundsEnabled: boolean
   /** Experimental in-game overlay window (shows while inGame). */
   overlayEnabled: boolean
+  /** Color scheme id: 'hextech' (default), 'void' or 'noche'. */
+  theme: string
 }
 
 export interface IngestProgressPayload {
@@ -52,6 +54,7 @@ export interface IpcInvokeChannels {
         recordLive: boolean
         soundsEnabled: boolean
         overlayEnabled: boolean
+        theme: string
       }
     ]
     result: { saved: true }

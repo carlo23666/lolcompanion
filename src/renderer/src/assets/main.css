@@ -30,12 +30,67 @@
   color-scheme: dark;
 }
 
+/*
+ * Selectable color schemes (Ajustes → Tema). Tailwind v4 utilities read the
+ * @theme variables at runtime, so overriding them per data-theme re-skins
+ * every component. 'hextech' is the default (values above).
+ */
+html[data-theme='void'] {
+  --color-slate-950: #08040f; /* void darkest purple */
+  --color-slate-900: #140b24;
+  --color-slate-800: #241540;
+  --color-slate-700: #3b2861;
+  --color-slate-600: #5a4a7d;
+  --color-slate-500: #8b7ba8;
+  --color-slate-400: #b0a3c9;
+  --color-slate-300: #d3c9e4;
+  --color-slate-200: #e6def3;
+  --color-slate-100: #f3edfb;
+  --color-amber-300: #e879c9; /* void magenta as the accent */
+  --color-amber-400: #c95eae;
+  --color-indigo-300: #b39df1;
+  --color-indigo-500: #7d5fd6;
+  --color-indigo-600: #6647bd;
+  --color-indigo-700: #4e3396;
+  --color-indigo-800: #382469;
+}
+
+html[data-theme='noche'] {
+  --color-slate-950: #0b0e13; /* neutral graphite, minimal "pro" look */
+  --color-slate-900: #12161d;
+  --color-slate-800: #1e242e;
+  --color-slate-700: #313a47;
+  --color-slate-600: #4c5666;
+  --color-slate-500: #77828f;
+  --color-slate-400: #a0aab6;
+  --color-slate-300: #c8d0d9;
+  --color-slate-200: #dde3ea;
+  --color-slate-100: #f2f5f8;
+  --color-amber-300: #8ab4f8; /* cool blue replaces gold */
+  --color-amber-400: #6b9ce8;
+  --color-indigo-300: #8ab4f8;
+  --color-indigo-500: #4f7fd9;
+  --color-indigo-600: #3d68b8;
+  --color-indigo-700: #2e4f8e;
+  --color-indigo-800: #223a67;
+}
+
 body {
   @apply bg-slate-950 text-slate-100 antialiased;
   background-image:
     radial-gradient(ellipse 80% 50% at 50% -10%, rgba(10, 155, 180, 0.12), transparent),
     radial-gradient(ellipse 60% 40% at 90% 110%, rgba(200, 170, 110, 0.06), transparent);
   background-attachment: fixed;
+}
+
+html[data-theme='void'] body {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(125, 95, 214, 0.14), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 110%, rgba(232, 121, 201, 0.06), transparent);
+}
+
+html[data-theme='noche'] body {
+  background-image: none;
 }
 
 /* Hextech scrollbars */
@@ -145,6 +200,23 @@ body {
 
 .alert-in {
   animation: alert-in 200ms ease-out both;
+}
+
+/* Top navigation tabs: animated gold underline on the active tab. */
+.tab-underline::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--color-amber-400);
+  transform: scaleX(0);
+  transition: transform 180ms ease-out;
+}
+.tab-underline[aria-current='page']::after {
+  transform: scaleX(1);
 }
 
 /* ---------- mascot (Hexi) ---------- */
