@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { IngestProgressPayload, MetaStatusPayload } from '@shared/ipc'
 import { applyTheme } from '../App'
 import { setSoundsEnabled } from '../sounds'
+import DevScenario from './DevScenario'
 
 const PLATFORMS = ['euw1', 'eun1', 'na1', 'kr', 'br1', 'la1', 'la2', 'jp1', 'tr1', 'ru', 'oc1']
 
@@ -108,6 +109,7 @@ function MetaSection(): React.JSX.Element {
  * the packaged app (the replay list comes back empty there).
  */
 function DevToolsSection(): React.JSX.Element | null {
+  const [enabled, setEnabled] = useState(false)
   const [replays, setReplays] = useState<{ id: string; label: string }[]>([])
   const [selected, setSelected] = useState('')
   const [intervalMs, setIntervalMs] = useState(500)
@@ -117,8 +119,11 @@ function DevToolsSection(): React.JSX.Element | null {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    void window.api.invoke('dev:enabled').then((flag) => {
+      // Defensive: test stubs may return junk for unknown channels.
+      setEnabled(flag === true)
+    }, () => undefined)
     void window.api.invoke('dev:replays').then((list) => {
-      // Defensive: packaged app returns [], test stubs may return junk.
       if (!Array.isArray(list)) return
       setReplays(list)
       setSelected((current) => (current === '' ? (list[0]?.id ?? '') : current))
@@ -137,7 +142,7 @@ function DevToolsSection(): React.JSX.Element | null {
     return () => clearInterval(timer)
   }, [running])
 
-  if (replays.length === 0) return null
+  if (!enabled) return null
 
   const startReplay = async (): Promise<void> => {
     setError(null)
@@ -162,15 +167,15 @@ function DevToolsSection(): React.JSX.Element | null {
   }
 
   return (
-    <section className="max-w-md rounded-lg border border-slate-800 bg-slate-900 p-4">
+    <section className="max-w-2xl rounded-lg border border-slate-800 bg-slate-900 p-4">
       <h2 className="mb-1 text-sm font-semibold text-slate-300">
         Herramientas de prueba <span className="text-[10px] text-slate-500">(solo desarrollo)</span>
       </h2>
       <p className="mb-3 text-[11px] text-slate-500">
-        Reproduce una partida grabada por todo el pipeline real (Live, motor, overlay, alertas)
-        sin abrir LoL, o simula una selección de campeones.
+        Reproduce una partida grabada, fuerza una situación de juego hecha a medida o simula un
+        draft — todo pasa por el pipeline real (Live, motor, overlay, alertas) sin abrir LoL.
       </p>
-      <div className="flex flex-col gap-2 text-xs">
+      <div className="mb-3 flex flex-col gap-2 text-xs">
         <label className="text-slate-400">
           Partida grabada
           <select
@@ -242,6 +247,8 @@ function DevToolsSection(): React.JSX.Element | null {
         </div>
         {error !== null && <p className="text-rose-400">{error}</p>}
       </div>
+
+      <DevScenario />
     </section>
   )
 }

@@ -9,6 +9,7 @@
 import type { LiveClientSnapshot } from './schemas/liveclient'
 import type { ChampSelectState } from './schemas/lcu'
 import type { ChampionMeta, ChampSelectInsights } from './champselect'
+import type { GameScenario } from './scenario'
 import type { GameState, GameStateEvent } from './gamestate'
 import type { HistoryAggregate, HistoryDetail, HistoryRow } from './history'
 import type { PersonalCurve, StatsOverview } from './stats'
@@ -104,7 +105,26 @@ export interface IpcInvokeChannels {
     result: { running: boolean; id: string | null; progressPct: number }
   }
   'dev:champselect:start': { args: []; result: { started: boolean } }
+  /** Custom draft built in the scenario UI (dev only). */
+  'dev:champselect:custom': { args: [state: ChampSelectState]; result: { started: boolean } }
   'dev:champselect:stop': { args: []; result: { stopped: true } }
+  /** Forced in-game situations (synthetic snapshots through the real pipeline). */
+  'dev:scenario:start': {
+    args: [scenario: GameScenario]
+    result: { started: boolean; error?: string }
+  }
+  'dev:scenario:update': {
+    args: [scenario: GameScenario]
+    result: { updated: boolean; error?: string }
+  }
+  'dev:scenario:stop': { args: []; result: { stopped: true } }
+  /** True in dev builds — gates the whole simulation panel. */
+  'dev:enabled': { args: []; result: boolean }
+  /** Purchasable SR items for the scenario item pickers. */
+  'staticdata:itemCatalog': {
+    args: []
+    result: { id: number; name: string; totalGold: number }[]
+  }
   /** Master+ meta aggregation (crawler status/control). */
   'meta:status': { args: []; result: MetaStatusPayload }
   'meta:crawl:start': { args: []; result: { started: boolean; error?: string } }
@@ -150,7 +170,13 @@ export const IPC_INVOKE_CHANNELS: readonly IpcInvokeChannel[] = [
   'dev:replay:stop',
   'dev:replay:status',
   'dev:champselect:start',
+  'dev:champselect:custom',
   'dev:champselect:stop',
+  'dev:scenario:start',
+  'dev:scenario:update',
+  'dev:scenario:stop',
+  'dev:enabled',
+  'staticdata:itemCatalog',
   'meta:status',
   'meta:crawl:start',
   'meta:crawl:stop'

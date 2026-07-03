@@ -67,6 +67,13 @@ function registerIpcHandlers(db: AppDatabase): void {
       ])
     )
   })
+  handleInvoke('staticdata:itemCatalog', async () => {
+    const data = await getStaticDataManager().load()
+    return [...data.itemGraph.nodes.values()]
+      .filter((node) => node.availableOnSR)
+      .map((node) => ({ id: node.id, name: node.name, totalGold: node.totalGold }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+  })
   handleInvoke('champselect:insights', async (state) => {
     // Static data may still be downloading right after app start.
     const data = await getStaticDataManager()

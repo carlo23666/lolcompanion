@@ -1,11 +1,15 @@
 import { join } from 'node:path'
 import { app } from 'electron'
+import type { GameScenario } from '@shared/scenario'
 import type { ChampSelectState } from '@shared/schemas/lcu'
+import type { LiveClientSnapshot } from '@shared/schemas/liveclient'
 import type { AppDatabase } from './db'
+import { buildScenarioSnapshot } from './devtools-scenario'
 import { broadcast, handleInvoke } from './ipc'
 import { createSnapshotProcessor } from './liveclient'
 import { ReplayDriver } from './liveclient/replay'
 import type { SessionMachine } from './session/machine'
+import { getStaticDataManager } from './staticdata'
 
 /**
  * Canned 5v5 draft (real champion keys) to exercise the champ select panel:
@@ -52,6 +56,7 @@ export function registerDevTools(db: AppDatabase, machine: SessionMachine): void
     onDone: () => processor.reset()
   })
 
+  handleInvoke('dev:enabled', () => !packaged)
   handleInvoke('dev:replays', () => (packaged ? [] : replay.list()))
   handleInvoke('dev:replay:start', (id, intervalMs) => {
     if (packaged) return { started: false, error: 'solo disponible en desarrollo' }
@@ -69,9 +74,73 @@ export function registerDevTools(db: AppDatabase, machine: SessionMachine): void
     broadcast('session:champselect', MOCK_CHAMP_SELECT)
     return { started: true }
   })
+  handleInvoke('dev:champselect:custom', (state) => {
+    if (packaged) return { started: false }
+    broadcast('session:phase', 'champSelect')
+    broadcast('session:champselect', state)
+    return { started: true }
+  })
   handleInvoke('dev:champselect:stop', () => {
     broadcast('session:champselect', null)
     broadcast('session:phase', machine.getPhase())
+    return { stopped: true }
+  })
+
+  // ---- Forced game situations (synthetic snapshots, same pipeline) ----
+  let scenarioTimer: ReturnType<typeof setInterval> | null = null
+  let scenarioSnapshot: LiveClientSnapshot | null = null
+
+  const stopScenario = (): void => {
+    if (scenarioTimer !== null) {
+      clearInterval(scenarioTimer)
+      scenarioTimer = null
+      scenarioSnapshot = null
+      machine.setLiveState('unavailable')
+      processor.reset()
+    }
+  }
+
+  const applyScenario = async (
+    scenario: GameScenario
+  ): Promise<{ ok: boolean; error?: string }> => {
+    const data = await getStaticDataManager()
+      .load()
+      .catch(() => null)
+    if (data === null) return { ok: false, error: 'static data no disponible' }
+    const { snapshot, errors } = buildScenarioSnapshot(scenario, data)
+    if (snapshot === null) return { ok: false, error: errors.join('; ') }
+    // Keep advanced time monotonic so the diff engine sees updates, not a
+    // new game (a lower gameTime resets the session).
+    const currentTime = scenarioSnapshot?.gameData.gameTime ?? 0
+    snapshot.gameData.gameTime = Math.max(scenario.gameTimeS, currentTime)
+    scenarioSnapshot = snapshot
+    if (scenarioTimer === null) {
+      machine.setLiveState('polling')
+      scenarioTimer = setInterval(() => {
+        if (scenarioSnapshot === null) return
+        scenarioSnapshot.gameData.gameTime += 2
+        processor.process(scenarioSnapshot, scenarioSnapshot)
+      }, 2000)
+    }
+    processor.process(snapshot, snapshot)
+    return { ok: true }
+  }
+
+  handleInvoke('dev:scenario:start', async (scenario) => {
+    if (packaged) return { started: false, error: 'solo disponible en desarrollo' }
+    replay.stop() // a replay and a scenario can't both own the live state
+    const result = await applyScenario(scenario)
+    return { started: result.ok, error: result.error }
+  })
+  handleInvoke('dev:scenario:update', async (scenario) => {
+    if (packaged || scenarioTimer === null) {
+      return { updated: false, error: 'no hay situación activa' }
+    }
+    const result = await applyScenario(scenario)
+    return { updated: result.ok, error: result.error }
+  })
+  handleInvoke('dev:scenario:stop', () => {
+    stopScenario()
     return { stopped: true }
   })
 }
