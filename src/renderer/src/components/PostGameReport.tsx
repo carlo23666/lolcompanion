@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { PostGameReportResult } from '@shared/report'
+import type { PostGameReport as Report, PostGameReportResult } from '@shared/report'
 
 function StatDelta(props: {
   label: string
@@ -69,7 +69,12 @@ export default function PostGameReport(): React.JSX.Element | null {
     )
   }
 
-  const report = result.report
+  return <ReportCard report={result.report} />
+}
+
+/** Presentational report card, reused by Historial → Ver informe. */
+export function ReportCard(props: { report: Report }): React.JSX.Element {
+  const report = props.report
   const followed = report.recommendedItems.filter((item) => item.followed)
 
   return (

@@ -11,6 +11,156 @@ const THEMES: { id: string; label: string; hint: string }[] = [
   { id: 'noche', label: 'Noche', hint: 'grafito neutro + azul (minimal)' }
 ]
 
+const REPLAY_SPEEDS: { label: string; intervalMs: number }[] = [
+  { label: 'x4', intervalMs: 500 },
+  { label: 'x8', intervalMs: 250 },
+  { label: 'x20', intervalMs: 100 }
+]
+
+/**
+ * Dev-only simulation panel: replay recorded games through the real pipeline
+ * and fake a champ select, to test the whole app without playing. Hidden in
+ * the packaged app (the replay list comes back empty there).
+ */
+function DevToolsSection(): React.JSX.Element | null {
+  const [replays, setReplays] = useState<{ id: string; label: string }[]>([])
+  const [selected, setSelected] = useState('')
+  const [intervalMs, setIntervalMs] = useState(500)
+  const [running, setRunning] = useState(false)
+  const [progressPct, setProgressPct] = useState(0)
+  const [champSelectOn, setChampSelectOn] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    void window.api.invoke('dev:replays').then((list) => {
+      // Defensive: packaged app returns [], test stubs may return junk.
+      if (!Array.isArray(list)) return
+      setReplays(list)
+      setSelected((current) => (current === '' ? (list[0]?.id ?? '') : current))
+    }, () => undefined)
+  }, [])
+
+  // Progress poll while a replay runs.
+  useEffect(() => {
+    if (!running) return
+    const timer = setInterval(() => {
+      void window.api.invoke('dev:replay:status').then((status) => {
+        setProgressPct(status.progressPct)
+        if (!status.running) setRunning(false)
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [running])
+
+  if (replays.length === 0) return null
+
+  const startReplay = async (): Promise<void> => {
+    setError(null)
+    const result = await window.api.invoke('dev:replay:start', selected, intervalMs)
+    if (result.started) setRunning(true)
+    else setError(result.error ?? 'no se pudo iniciar')
+  }
+
+  const stopReplay = async (): Promise<void> => {
+    await window.api.invoke('dev:replay:stop')
+    setRunning(false)
+  }
+
+  const toggleChampSelect = async (): Promise<void> => {
+    if (champSelectOn) {
+      await window.api.invoke('dev:champselect:stop')
+      setChampSelectOn(false)
+    } else {
+      const result = await window.api.invoke('dev:champselect:start')
+      setChampSelectOn(result.started)
+    }
+  }
+
+  return (
+    <section className="max-w-md rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <h2 className="mb-1 text-sm font-semibold text-slate-300">
+        Herramientas de prueba <span className="text-[10px] text-slate-500">(solo desarrollo)</span>
+      </h2>
+      <p className="mb-3 text-[11px] text-slate-500">
+        Reproduce una partida grabada por todo el pipeline real (Live, motor, overlay, alertas)
+        sin abrir LoL, o simula una selección de campeones.
+      </p>
+      <div className="flex flex-col gap-2 text-xs">
+        <label className="text-slate-400">
+          Partida grabada
+          <select
+            className="mt-1 w-full rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-slate-100"
+            value={selected}
+            onChange={(event) => setSelected(event.target.value)}
+            disabled={running}
+          >
+            {replays.map((replay) => (
+              <option key={replay.id} value={replay.id}>
+                {replay.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="flex items-center gap-2">
+          <span className="text-slate-400">Velocidad</span>
+          {REPLAY_SPEEDS.map((speed) => (
+            <button
+              key={speed.intervalMs}
+              disabled={running}
+              onClick={() => setIntervalMs(speed.intervalMs)}
+              aria-pressed={intervalMs === speed.intervalMs}
+              className={`rounded border px-2 py-1 ${
+                intervalMs === speed.intervalMs
+                  ? 'border-amber-400 bg-amber-400/10 text-amber-300'
+                  : 'border-slate-700 bg-slate-800 text-slate-300'
+              }`}
+            >
+              {speed.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          {running ? (
+            <>
+              <button
+                className="rounded bg-rose-700 px-3 py-1.5 hover:bg-rose-600"
+                onClick={() => void stopReplay()}
+              >
+                Detener replay
+              </button>
+              <div className="h-1.5 flex-1 overflow-hidden rounded bg-slate-800">
+                <div
+                  className="h-full bg-indigo-500 transition-all"
+                  style={{ width: `${String(progressPct)}%` }}
+                />
+              </div>
+            </>
+          ) : (
+            <button
+              className="rounded bg-indigo-700 px-3 py-1.5 hover:bg-indigo-600"
+              onClick={() => void startReplay()}
+              disabled={selected === ''}
+            >
+              ▶ Reproducir en la vista Live
+            </button>
+          )}
+          <button
+            className={`rounded px-3 py-1.5 ${
+              champSelectOn
+                ? 'bg-rose-700 hover:bg-rose-600'
+                : 'bg-slate-700 hover:bg-slate-600'
+            }`}
+            onClick={() => void toggleChampSelect()}
+          >
+            {champSelectOn ? 'Terminar champ select' : 'Simular champ select'}
+          </button>
+        </div>
+        {error !== null && <p className="text-rose-400">{error}</p>}
+      </div>
+    </section>
+  )
+}
+
 export default function SettingsView(): React.JSX.Element {
   const [riotId, setRiotId] = useState('')
   const [platform, setPlatform] = useState('euw1')
@@ -154,6 +304,8 @@ export default function SettingsView(): React.JSX.Element {
           {status !== null && <p className="text-xs text-amber-400">{status}</p>}
         </div>
       </section>
+
+      <DevToolsSection />
 
       {progress !== null && (
         <section className="max-w-md rounded-lg border border-slate-800 bg-slate-900 p-4">

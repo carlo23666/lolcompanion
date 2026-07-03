@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { HistoryAggregate, HistoryDetail, HistoryRow } from '@shared/history'
+import type { PostGameReportResult } from '@shared/report'
+import { ReportCard } from './PostGameReport'
 import StatsView from './StatsView'
 
 function formatDuration(totalSeconds: number): string {
@@ -40,6 +42,14 @@ function GoldSparkline(props: { curve: number[] }): React.JSX.Element | null {
 
 function DetailDrawer(props: { detail: HistoryDetail }): React.JSX.Element {
   const { detail } = props
+  const [report, setReport] = useState<PostGameReportResult | null>(null)
+  const [reportRequested, setReportRequested] = useState(false)
+
+  const loadReport = async (): Promise<void> => {
+    setReportRequested(true)
+    setReport(await window.api.invoke('report:forMatch', detail.matchId))
+  }
+
   return (
     <div className="border-t border-slate-800 bg-slate-950/60 px-4 py-3 text-xs">
       <div className="flex flex-wrap items-center gap-4">
@@ -65,11 +75,28 @@ function DetailDrawer(props: { detail: HistoryDetail }): React.JSX.Element {
             {Math.round(detail.damage / 100) / 10}k daño · visión {detail.vision}
           </p>
         </div>
+        {!reportRequested && (
+          <button
+            className="ml-auto rounded border border-slate-700 bg-slate-800 px-2.5 py-1 text-slate-300 hover:border-slate-500"
+            onClick={() => void loadReport()}
+          >
+            Ver informe
+          </button>
+        )}
       </div>
       {detail.goldCurve.length > 1 && (
         <div className="mt-2">
           <p className="text-slate-400">Oro por minuto</p>
           <GoldSparkline curve={detail.goldCurve} />
+        </div>
+      )}
+      {reportRequested && (
+        <div className="mt-3">
+          {report?.kind === 'report' ? (
+            <ReportCard report={report.report} />
+          ) : (
+            <p className="text-slate-500">No hay informe disponible para esta partida.</p>
+          )}
         </div>
       )}
     </div>

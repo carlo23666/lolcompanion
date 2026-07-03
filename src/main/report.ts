@@ -125,10 +125,26 @@ export class ReportService {
       (candidate) => candidate.matchId !== null && candidate.matchId !== ''
     )
     if (!session || session.matchId === null) return null
+    return this.buildReport(puuid, session.matchId, session.id)
+  }
 
-    const match = this.matches.getMatch(session.matchId)
+  /**
+   * Report for any stored match (Historial → Ver informe). Recommendation
+   * outcomes appear when a live session was linked to that match.
+   */
+  forMatch(puuid: string, matchId: string): PostGameReportResult | null {
+    const session = this.sessions.sessionByMatchId(matchId)
+    return this.buildReport(puuid, matchId, session?.id ?? null)
+  }
+
+  private buildReport(
+    puuid: string,
+    matchId: string,
+    sessionId: number | null
+  ): PostGameReportResult | null {
+    const match = this.matches.getMatch(matchId)
     if (!match) return null
-    const participants = this.matches.getParticipants(session.matchId)
+    const participants = this.matches.getParticipants(matchId)
     const own = participants.find((participant) => participant.puuid === puuid)
     if (!own) return null
 
@@ -142,10 +158,11 @@ export class ReportService {
       .champions.find((stat) => stat.champion === own.champion)
 
     const finalItems = new Set(own.items.slice(0, 6).filter((id) => id > 0))
-    const recommendedItems = this.recommendedItems(session.id, finalItems)
+    const recommendedItems =
+      sessionId === null ? [] : this.recommendedItems(sessionId, finalItems)
 
     const report: PostGameReport = {
-      matchId: session.matchId,
+      matchId,
       champion: own.champion,
       win: own.win,
       durationS: match.durationS,

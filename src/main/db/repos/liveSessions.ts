@@ -71,6 +71,14 @@ export class LiveSessionRepo {
       .all(limit) as LiveSessionRow[]
   }
 
+  /** Newest session linked to a given match (report recommendations lookup). */
+  sessionByMatchId(matchId: string): LiveSessionRow | null {
+    const row = this.db
+      .prepare('SELECT * FROM live_sessions WHERE matchId = ? ORDER BY id DESC LIMIT 1')
+      .get(matchId) as LiveSessionRow | undefined
+    return row ?? null
+  }
+
   /** Newest session without a linked match, for post-game linking (WP-010). */
   latestUnlinkedSession(): LiveSessionRow | null {
     const row = this.db

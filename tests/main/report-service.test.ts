@@ -85,6 +85,33 @@ describe('ReportService', () => {
     expect(result).toEqual({ kind: 'unsupported', gameMode: 'PRACTICETOOL' })
   })
 
+  it('forMatch: report for any stored match, without needing a session', () => {
+    const result = service.forMatch(OWNER, baseMatch.metadata.matchId)
+    expect(result?.kind).toBe('report')
+    if (result?.kind !== 'report') return
+    expect(result.report.champion).toBe('Jinx')
+    expect(result.report.recommendedItems).toEqual([])
+  })
+
+  it('forMatch: includes recommendations when a session was linked', () => {
+    const sessionId = sessions.createSession('2026-07-02T20:00:00Z', 'Jinx', null, 'CLASSIC')
+    sessions.appendRecommendations(sessionId, 600, [
+      { itemId: 3031, itemName: 'IE', action: 'add', score: 50, reasons: [] }
+    ])
+    sessions.linkMatch(sessionId, {
+      matchId: baseMatch.metadata.matchId,
+      result: 'WIN',
+      patch: '16.13'
+    })
+    const result = service.forMatch(OWNER, baseMatch.metadata.matchId)
+    if (result?.kind !== 'report') throw new Error('expected report')
+    expect(result.report.recommendedItems.map((item) => item.itemId)).toEqual([3031])
+  })
+
+  it('forMatch: unknown match → null', () => {
+    expect(service.forMatch(OWNER, 'EUW1_NOPE')).toBeNull()
+  })
+
   it('sessions from before the gameMode column still report (NULL = matchmade)', () => {
     const sessionId = sessions.createSession('2026-07-02T20:00:00Z', 'Jinx', null, null)
     sessions.linkMatch(sessionId, {

@@ -38,5 +38,9 @@ export function registerHistoryIpc(db: AppDatabase): StatsService {
     const puuid = getOwnerPuuid(db)
     return puuid === null ? null : report.lastReport(puuid)
   })
+  handleInvoke('report:forMatch', (matchId) => {
+    const puuid = getOwnerPuuid(db)
+    return puuid === null ? null : report.forMatch(puuid, matchId)
+  })
   return stats
 }
