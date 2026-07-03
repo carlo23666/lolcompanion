@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
+import type { ChampionMeta } from '@shared/champselect'
 import type { GameState } from '@shared/gamestate'
 import type { RecommendationsPayload } from '@shared/ipc'
 import type { ChampSelectState } from '@shared/schemas/lcu'
 import type { SessionPhase } from '@shared/session'
 import type { LiveInsights as LiveInsightsData } from '../hooks'
+import ChampSelectPanel from './ChampSelectPanel'
 import Gauges from './Gauges'
+import HomeDashboard from './HomeDashboard'
 import {
   AlertFeed,
   LiveChips,
@@ -31,52 +34,6 @@ function EmptyState(props: { icon: string; title: string; hint: string }): React
       </span>
       <p className="text-sm font-medium text-slate-300">{props.title}</p>
       <p className="max-w-xs text-xs text-slate-500">{props.hint}</p>
-    </div>
-  )
-}
-
-function ChampSelectPanel(props: {
-  champSelect: ChampSelectState | null
-  championNames?: Record<number, string>
-}): React.JSX.Element {
-  const cs = props.champSelect
-  const names = props.championNames ?? {}
-  // 0 = not picked yet ('?'); ids missing from the map (offline without
-  // cached static data) fall back to the raw number.
-  const label = (championId: number): string | null =>
-    championId === 0 ? null : (names[championId] ?? String(championId))
-  if (!cs) {
-    return (
-      <EmptyState
-        icon="🎯"
-        title="Selección de campeones en curso"
-        hint="Esperando datos de la selección…"
-      />
-    )
-  }
-  return (
-    <div className="rounded-lg border border-slate-800 bg-slate-900 p-4 text-sm">
-      <p className="mb-2 font-semibold text-slate-300">
-        Selección de campeones
-        {cs.ownPosition !== null && cs.ownPosition !== '' && (
-          <span className="ml-2 rounded bg-indigo-600/20 px-2 py-0.5 text-xs text-indigo-300">
-            tu posición: {cs.ownPosition}
-          </span>
-        )}
-      </p>
-      <p className="text-xs text-slate-400">
-        Picks aliados:{' '}
-        {cs.myTeam
-          .map((m) => label(m.championId) ?? label(m.championPickIntent) ?? '?')
-          .join(', ')}
-      </p>
-      <p className="text-xs text-slate-400">
-        Picks enemigos:{' '}
-        {cs.theirTeam.map((m) => label(m.championId) ?? '?').join(', ') || '—'}
-      </p>
-      <p className="mt-1 text-[11px] text-slate-600">
-        Las recomendaciones en selección llegan en la fase 2.
-      </p>
     </div>
   )
 }
@@ -113,7 +70,7 @@ export default function LiveView(props: {
   gameState: GameState | null
   champSelect: ChampSelectState | null
   recommendations?: RecommendationsPayload | null
-  championNames?: Record<number, string>
+  championMeta?: Record<number, ChampionMeta>
   insights?: LiveInsightsData
   onOpenSettings?: () => void
 }): React.JSX.Element {
@@ -124,19 +81,8 @@ export default function LiveView(props: {
     <div className="flex h-full flex-col gap-3 p-4">
       <h1 className="text-lg font-bold">Live</h1>
 
-      {phase === 'idle' && (
-        <EmptyState
-          icon="💤"
-          title="Sin cliente de LoL"
-          hint="Abre el cliente de League of Legends; la app lo detecta sola."
-        />
-      )}
-      {phase === 'clientOpen' && (
-        <EmptyState
-          icon="🕹️"
-          title="Esperando partida"
-          hint="Entra en cola o carga una partida; el panel se activa automáticamente."
-        />
+      {(phase === 'idle' || phase === 'clientOpen') && (
+        <HomeDashboard phase={phase} onOpenSettings={props.onOpenSettings} />
       )}
       {phase === 'postGame' && (
         <div className="flex flex-1 flex-col items-center justify-center gap-3">
@@ -145,7 +91,7 @@ export default function LiveView(props: {
         </div>
       )}
       {phase === 'champSelect' && (
-        <ChampSelectPanel champSelect={props.champSelect} championNames={props.championNames} />
+        <ChampSelectPanel champSelect={props.champSelect} championMeta={props.championMeta} />
       )}
 
       {phase === 'inGame' &&

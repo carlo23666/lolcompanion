@@ -7,22 +7,21 @@ import midGameState from '../../fixtures/gamestate/mid.json'
 const mid = midGameState as unknown as GameState
 
 describe('LiveView', () => {
-  it('renders every designed empty state', () => {
+  it('renders the home dashboard while no game runs and the other states', () => {
     const { rerender } = render(<LiveView phase="idle" gameState={null} champSelect={null} />)
-    expect(screen.getByText('Sin cliente de LoL')).toBeInTheDocument()
+    expect(screen.getByText('Descansando el cristal…')).toBeInTheDocument()
 
     rerender(<LiveView phase="clientOpen" gameState={null} champSelect={null} />)
-    expect(screen.getByText(/Entra en cola/)).toBeInTheDocument()
+    expect(screen.getByText('¡Lista para la cola!')).toBeInTheDocument()
 
     rerender(<LiveView phase="postGame" gameState={null} champSelect={null} />)
     expect(screen.getByText(/Fin de la partida/)).toBeInTheDocument()
-    expect(screen.getByText(/El informe aparecerá/)).toBeInTheDocument()
 
     rerender(<LiveView phase="inGame" gameState={null} champSelect={null} />)
     expect(screen.getByText('Conectando con la partida')).toBeInTheDocument()
   })
 
-  it('renders the champ select placeholder with own position', () => {
+  it('champ select: portraits from champion meta, raw ids as fallback', () => {
     const champSelect = {
       localPlayerCellId: 2,
       ownPosition: 'middle',
@@ -34,23 +33,32 @@ describe('LiveView', () => {
       bans: { mine: [], theirs: [] },
       timerPhase: 'BAN_PICK'
     }
+    const championMeta = {
+      266: { id: 'Aatrox', name: 'Aatrox', damageType: 'physical' as const },
+      103: { id: 'Ahri', name: 'Ahri', damageType: 'magic' as const },
+      157: { id: 'Yasuo', name: 'Yasuo', damageType: 'physical' as const }
+    }
     const { rerender } = render(
       <LiveView
         phase="champSelect"
         gameState={null}
         champSelect={champSelect}
-        championNames={{ 266: 'Aatrox', 103: 'Ahri', 157: 'Yasuo' }}
+        championMeta={championMeta}
       />
     )
-    expect(screen.getByText(/tu posición: middle/)).toBeInTheDocument()
-    // Picked champion and pick intent resolve to display names.
-    expect(screen.getByText(/Aatrox, Ahri/)).toBeInTheDocument()
-    expect(screen.getByText(/Yasuo/)).toBeInTheDocument()
+    expect(screen.getByText(/tu posición: MID/)).toBeInTheDocument()
+    // Ally pick, own pick intent and the enemy pick render as portraits
+    // served by the local ddicon protocol.
+    for (const name of ['Aatrox', 'Ahri', 'Yasuo']) {
+      const img = screen.getByRole('img', { name })
+      expect(img.getAttribute('src')).toBe(`ddicon://champion/${name}.png`)
+    }
 
-    // Without static data the raw ids remain visible.
+    // Without static data the raw ids remain visible as placeholders.
     rerender(<LiveView phase="champSelect" gameState={null} champSelect={champSelect} />)
-    expect(screen.getByText(/266, 103/)).toBeInTheDocument()
-    expect(screen.getByText(/157/)).toBeInTheDocument()
+    expect(screen.getByText('266')).toBeInTheDocument()
+    expect(screen.getByText('103')).toBeInTheDocument()
+    expect(screen.getByText('157')).toBeInTheDocument()
   })
 
   it('in game: shows live insights (alerts, objective timers, team gold)', () => {

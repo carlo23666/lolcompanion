@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import type { ChampionMeta } from '@shared/champselect'
 import type { SessionPhase } from '@shared/session'
 import TopBar, { type ViewId } from './components/TopBar'
 import LiveView from './components/LiveView'
@@ -15,7 +16,7 @@ export function applyTheme(theme: string): void {
 export default function App(): React.JSX.Element {
   const [view, setView] = useState<ViewId>('live')
   const [phase, setPhase] = useState<SessionPhase>('idle')
-  const [championNames, setChampionNames] = useState<Record<number, string>>({})
+  const [championMeta, setChampionMeta] = useState<Record<number, ChampionMeta>>({})
   const gameState = useIpcEvent('gamestate:update')
   const champSelect = useIpcEvent('session:champselect')
   const recommendations = useIpcEvent('gamestate:recommendations')
@@ -32,7 +33,7 @@ export default function App(): React.JSX.Element {
     })
     // Offline with no cached patch this rejects; the UI then falls back to
     // showing numeric champion ids.
-    window.api.invoke('staticdata:championNames').then(setChampionNames, () => undefined)
+    window.api.invoke('staticdata:championMeta').then(setChampionMeta, () => undefined)
     return window.api.on('session:phase', setPhase)
   }, [])
 
@@ -71,7 +72,7 @@ export default function App(): React.JSX.Element {
             gameState={gameState}
             champSelect={champSelect}
             recommendations={recommendations}
-            championNames={championNames}
+            championMeta={championMeta}
             insights={insights}
             onOpenSettings={() => setView('settings')}
           />

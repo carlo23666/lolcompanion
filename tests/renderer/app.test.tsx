@@ -47,34 +47,34 @@ export function stubApi(overrides: Record<string, unknown> = {}): ApiStub {
 }
 
 describe('App shell', () => {
-  it('renders the sidebar with the three sections and Live active', async () => {
+  it('renders the top bar with the three sections and the idle dashboard', async () => {
     stubApi()
     render(<App />)
-    expect(screen.getByRole('button', { name: /Live/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Historial/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Ajustes/ })).toBeInTheDocument()
-    expect(await screen.findByText('Sin cliente de LoL')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Live' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Historial' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ajustes' })).toBeInTheDocument()
+    expect(await screen.findByText('Descansando el cristal…')).toBeInTheDocument()
   })
 
-  it('navigates between views from the sidebar', async () => {
+  it('navigates between views from the top bar', async () => {
     stubApi()
     const user = userEvent.setup()
     render(<App />)
 
-    await user.click(screen.getByRole('button', { name: /Historial/ }))
+    await user.click(screen.getByRole('button', { name: 'Historial' }))
     expect(await screen.findByText('Sin partidas guardadas')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /Ajustes/ }))
+    await user.click(screen.getByRole('button', { name: 'Ajustes' }))
     expect(await screen.findByText('Cuenta')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /Live/ }))
-    expect(screen.getByText('Sin cliente de LoL')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Live' }))
+    expect(screen.getByText('Descansando el cristal…')).toBeInTheDocument()
   })
 
-  it('updates the phase banner from session:phase events', async () => {
+  it('updates the session indicator from session:phase events', async () => {
     const stub = stubApi()
     render(<App />)
-    expect(await screen.findByText('Sin cliente de LoL')).toBeInTheDocument()
+    expect(await screen.findByText('Descansando el cristal…')).toBeInTheDocument()
     stub.emit('session:phase', 'clientOpen')
     expect(screen.getByText('Cliente abierto')).toBeInTheDocument()
     stub.emit('session:phase', 'postGame')
