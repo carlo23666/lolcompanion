@@ -1,6 +1,17 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-03 (2) — Owner visual batch — home dashboard, champ select v2 with images and comp insights
+**Done (2 commits; 239/239 green):**
+1. **Champ select v2**: new `champselect:insights` invoke — pure main-side `champSelectInsights(state, staticData, pool)` (tested): ally/enemy damage splits from champion damage profiles, Spanish tips (3+ AP → RM with the cheap component's real name, 3+ AD → armor, healers ≥2 weight → grievous wounds reminder, 4+ same-type allies → diversification note), and the owner's baseline core/situationals for his picked champion (pick intent counts). Panel shows champion portraits (allies with position badges, enemies, dimmed bans) over the own pick's splash as ambient banner. `staticdata:championNames` replaced by `staticdata:championMeta` (ddragon id + name + damageType). `ddicon://` gains a `splash` kind (jpg, patchless CDN path `cdn/img/champion/splash/`, cached under `shared/splash/` so patch bumps don't re-download).
+2. **Home dashboard** (idle/clientOpen instead of empty states): Hexi hero over the most-played champion's splash with phase-aware copy, games/streak chips, top-3 champions (portrait, games, KDA, CS/min, WR), last-game mini report (reuses `report:last`, incl. first summary line), rotating Hexi tips (9s), and a setup nudge to Ajustes when there's no history.
+
+**Deviations / notes:** all champ-select inputs are screen-visible champions only — no identities (schemas already strip them, §2 respected). Insights are advisory text, not engine Recommendations (the engine stays in-game only). Splash art is served through the existing local-cache protocol, so the CSP needed no change; first display needs the CDN once per champion.
+
+**Gaps (owner):** judge the dashboard/champ-select visuals in a real queue; ban list may include champions the meta map lacks offline (falls back to numeric placeholder); champ-select tips don't yet use the owner's per-matchup history (INBOX idea stands).
+
+**Files:** src/main/{champselect(new),icons,index}.ts, src/shared/{champselect(new),ipc}.ts, src/renderer/src/components/{ChampSelectPanel(new),HomeDashboard(new),LiveView}.tsx, src/renderer/src/App.tsx, tests/main/champselect.test.ts (new), tests/renderer/{app,liveview}.test.tsx.
+
 ## 2026-07-03 — Owner playtest feedback batch (unplanned WP, owner-directed) — engine bugs, report fixes, Hexi overlay, objective alerts, themes
 **Done (5 commits, one per group; 232/232 tests green):**
 1. **Engine: boots + endgame** (`nextbuy.ts`): (a) Magical Footwear (perk 8304, in `runeIds`) no longer stalls the next-buy on unpurchasable boots — the boots core slot is skipped with an explaining reason until the rune grants them, then resumes as upgrade advice; substitute tier-2 boots (e.g. Mercs when core says Berserker's) satisfy a boots slot. (b) New `endgameRecommendation` once the core is complete: fills free slots from the champion's situationals, and with 6 slots + a leftover starter (Doran's/Dark Seal/Cull) emits the new `replace` action ("véndelo…"). `recommend()` chains it after next-buy and preserves `replace` through dedup merges.
