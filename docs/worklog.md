@@ -1,6 +1,17 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-03 (4) — Simulation toolkit (owner request: test without playing)
+**Done (2 commits; 249/249 green):**
+1. **Game replay** — the snapshot pipeline was extracted from `startLiveClient` into `createSnapshotProcessor(db, {persist})` and is now shared with a new `ReplayDriver` (`src/main/liveclient/replay.ts`, fake-timer tested): plays any `fixtures/recordings/<dir>` (and the bundled `fixtures/liveclient/session`) through the REAL pipeline — session machine goes inGame, Live view/engine/overlay/alerts all behave as in a real game — at x4/x8/x20 speed. Replays don't persist (no live_sessions pollution). Dev-only IPC (`dev:replays`, `dev:replay:start/stop/status`), refused/empty in the packaged app; id parsing rejects path escapes.
+2. **Champ select simulation** — `dev:champselect:start/stop` broadcasts a canned 5v5 draft (real champion keys: own cell hovers Kai'Sa unlocked so both pick suggestions and the plan render; enemies 3 AD + Soraka so comp tips fire).
+3. **Report for any stored match** — `report:forMatch` IPC; `ReportService.forMatch` reuses the extracted `buildReport` (recommendation outcomes included when a live session links to the match; empty otherwise). "Ver informe" button in the Historial detail drawer renders the extracted presentational `ReportCard`. This is a normal feature (not dev-gated) — reports become browsable per match.
+4. **Ajustes → "Herramientas de prueba"** panel (auto-hidden when the replay list is empty, i.e. packaged): replay picker + speed + progress bar + stop, champ select simulate/stop toggle.
+
+**Notes:** ending a replay flips liveState to `unavailable`; with the LCU disconnected the machine lands on `idle` (not postGame), so the PostGameIngestor never fires an API call for replays. The owner has 4 real recordings under fixtures/recordings (2026-07-02/03) to replay.
+
+**Files:** src/main/liveclient/{index,replay}.ts, src/main/{devtools(new),report,history-ipc,index}.ts, src/main/db/repos/liveSessions.ts, src/shared/ipc.ts, src/renderer/src/components/{PostGameReport,HistoryView,SettingsView}.tsx, tests/main/{replay(new),report-service}.test.ts.
+
 ## 2026-07-03 (3) — Champ select pick suggestions (owner follow-up)
 **Done (1 commit; 242/242 green):** `pickSuggestions` in `src/main/champselect.ts` (pure, tested): owner's stored history filtered to his assigned position → per-champion winrate, Laplace-smoothed ranking (2-0 doesn't beat 15-5), min 2 games, top 3; excludes champions visible on the board (bans + both teams' picks/intents); +bonus and Spanish note when the champion's damage type complements the picked allies or when it's in the baseline pool. Wired into `champselect:insights` (handler now reads the owner's last 200 matches via MatchRepo); suggestions clear once the owner locks. Panel section "¿Qué te pego?" with portraits, WR and the complement note.
 **Notes:** only own history + on-screen champions (compliant). Role mapping relies on match-v5 `teamPosition` == uppercased LCU `assignedPosition`; games without position data are only used when the owner has no assigned position.
