@@ -1,5 +1,6 @@
 import { join } from 'node:path'
 import { app, BrowserWindow } from 'electron'
+import { champSelectInsights } from './champselect'
 import { openDatabase, type AppDatabase } from './db'
 import { loadDotEnv } from './env'
 import { registerHistoryIpc } from './history-ipc'
@@ -44,11 +45,21 @@ function createWindow(): void {
 
 function registerIpcHandlers(): void {
   handleInvoke('app:ping', () => ({ pong: true, version: app.getVersion() }))
-  handleInvoke('staticdata:championNames', async () => {
+  handleInvoke('staticdata:championMeta', async () => {
     const data = await getStaticDataManager().load()
     return Object.fromEntries(
-      [...data.championsByKey].map(([key, champion]) => [key, champion.name])
+      [...data.championsByKey].map(([key, champion]) => [
+        key,
+        { id: champion.id, name: champion.name, damageType: data.damageProfile(champion.id) }
+      ])
     )
+  })
+  handleInvoke('champselect:insights', async (state) => {
+    // Static data may still be downloading right after app start.
+    const data = await getStaticDataManager()
+      .load()
+      .catch(() => null)
+    return data === null ? null : champSelectInsights(state, data)
   })
 }
 

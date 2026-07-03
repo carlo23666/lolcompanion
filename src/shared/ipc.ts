@@ -8,6 +8,7 @@
  */
 import type { LiveClientSnapshot } from './schemas/liveclient'
 import type { ChampSelectState } from './schemas/lcu'
+import type { ChampionMeta, ChampSelectInsights } from './champselect'
 import type { GameState, GameStateEvent } from './gamestate'
 import type { HistoryAggregate, HistoryDetail, HistoryRow } from './history'
 import type { PersonalCurve, StatsOverview } from './stats'
@@ -61,8 +62,10 @@ export interface IpcInvokeChannels {
   }
   'ingest:start': { args: []; result: { started: boolean; error?: string } }
   'session:get': { args: []; result: SessionPhase }
-  /** Champion display names keyed by numeric champion key (LCU champ select uses keys). */
-  'staticdata:championNames': { args: []; result: Record<number, string> }
+  /** Champion meta (ddragon id, name, damage type) keyed by numeric champion key. */
+  'staticdata:championMeta': { args: []; result: Record<number, ChampionMeta> }
+  /** Comp analysis + owner plan for the current champ select (null before static data loads). */
+  'champselect:insights': { args: [state: ChampSelectState]; result: ChampSelectInsights | null }
   'history:list': { args: [filter?: { champion?: string }]; result: HistoryRow[] }
   'history:aggregates': { args: []; result: HistoryAggregate[] }
   'history:champions': { args: []; result: string[] }
@@ -97,7 +100,8 @@ export const IPC_INVOKE_CHANNELS: readonly IpcInvokeChannel[] = [
   'settings:set',
   'ingest:start',
   'session:get',
-  'staticdata:championNames',
+  'staticdata:championMeta',
+  'champselect:insights',
   'history:list',
   'history:aggregates',
   'history:champions',

@@ -1,0 +1,219 @@
+import { useEffect, useState } from 'react'
+import type { ChampionMeta, ChampSelectInsights } from '@shared/champselect'
+import type { ChampSelectState } from '@shared/schemas/lcu'
+
+const POSITION_LABEL: Record<string, string> = {
+  top: 'TOP',
+  jungle: 'JG',
+  middle: 'MID',
+  bottom: 'ADC',
+  utility: 'SUP'
+}
+
+function ChampionPortrait(props: {
+  championId: number
+  meta: Record<number, ChampionMeta>
+  size?: string
+  position?: string
+  dimmed?: boolean
+}): React.JSX.Element {
+  const meta = props.meta[props.championId]
+  const size = props.size ?? 'h-12 w-12'
+  return (
+    <div className="flex flex-col items-center gap-0.5">
+      {props.championId > 0 && meta ? (
+        <img
+          src={`ddicon://champion/${meta.id}.png`}
+          alt={meta.name}
+          title={meta.name}
+          className={`${size} rounded border border-slate-700 ${props.dimmed === true ? 'opacity-40 grayscale' : ''}`}
+        />
+      ) : (
+        <div
+          className={`${size} flex items-center justify-center rounded border border-dashed border-slate-700 bg-slate-900 text-slate-600`}
+          title={props.championId > 0 ? `campeón ${String(props.championId)}` : 'sin elegir'}
+        >
+          {props.championId > 0 ? props.championId : '?'}
+        </div>
+      )}
+      {props.position !== undefined && props.position !== '' && (
+        <span className="text-[9px] font-bold tracking-wide text-slate-500">
+          {POSITION_LABEL[props.position] ?? props.position.toUpperCase()}
+        </span>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Champ select: ally/enemy portraits, bans, comp tips from visible picks and
+ * the owner's baseline plan. Identities never appear (Riot policy §2) — only
+ * champions.
+ */
+export default function ChampSelectPanel(props: {
+  champSelect: ChampSelectState | null
+  championMeta?: Record<number, ChampionMeta>
+}): React.JSX.Element {
+  const cs = props.champSelect
+  const meta = props.championMeta ?? {}
+  const [insights, setInsights] = useState<ChampSelectInsights | null>(null)
+
+  const own = cs?.myTeam.find((member) => member.cellId === cs.localPlayerCellId)
+  const ownKey = own === undefined ? 0 : own.championId || own.championPickIntent
+  const ownMeta = ownKey > 0 ? meta[ownKey] : undefined
+
+  useEffect(() => {
+    if (!cs) return
+    let cancelled = false
+    void window.api.invoke('champselect:insights', cs).then((result) => {
+      if (!cancelled) setInsights(result)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [cs])
+
+  if (!cs) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-2 py-16 text-center">
+        <span className="text-4xl" aria-hidden>
+          🎯
+        </span>
+        <p className="text-sm font-medium text-slate-300">Selección de campeones en curso</p>
+        <p className="max-w-xs text-xs text-slate-500">Esperando datos de la selección…</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="card-in relative overflow-hidden rounded-lg border border-slate-800 bg-slate-900">
+      {/* Own pick splash as ambient banner */}
+      {ownMeta && (
+        <div className="absolute inset-0" aria-hidden>
+          <img
+            src={`ddicon://splash/${ownMeta.id}_0.jpg`}
+            alt=""
+            className="h-full w-full object-cover object-top opacity-25"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/70 to-slate-900/40" />
+        </div>
+      )}
+
+      <div className="relative flex flex-col gap-3 p-4 text-sm">
+        <div className="flex items-center justify-between">
+          <p className="font-semibold text-slate-100">
+            Selección de campeones
+            {cs.ownPosition !== null && cs.ownPosition !== '' && (
+              <span className="ml-2 rounded bg-indigo-600/20 px-2 py-0.5 text-xs text-indigo-300">
+                tu posición: {POSITION_LABEL[cs.ownPosition] ?? cs.ownPosition}
+              </span>
+            )}
+          </p>
+          {ownMeta && <p className="text-xs font-semibold text-amber-300">{ownMeta.name}</p>}
+        </div>
+
+        <div className="flex flex-wrap items-start gap-6">
+          <div>
+            <p className="mb-1 text-[11px] font-semibold tracking-wide text-sky-300 uppercase">
+              Tu equipo
+            </p>
+            <div className="flex gap-1.5">
+              {cs.myTeam.map((member) => (
+                <ChampionPortrait
+                  key={member.cellId}
+                  championId={member.championId || member.championPickIntent}
+                  meta={meta}
+                  position={member.position}
+                />
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="mb-1 text-[11px] font-semibold tracking-wide text-rose-300 uppercase">
+              Enemigos
+            </p>
+            <div className="flex gap-1.5">
+              {cs.theirTeam.length > 0 ? (
+                cs.theirTeam.map((member) => (
+                  <ChampionPortrait key={member.cellId} championId={member.championId} meta={meta} />
+                ))
+              ) : (
+                <p className="text-xs text-slate-500">Sin picks visibles todavía</p>
+              )}
+            </div>
+          </div>
+          {(cs.bans.mine.length > 0 || cs.bans.theirs.length > 0) && (
+            <div>
+              <p className="mb-1 text-[11px] font-semibold tracking-wide text-slate-500 uppercase">
+                Baneos
+              </p>
+              <div className="flex gap-1">
+                {[...cs.bans.mine, ...cs.bans.theirs]
+                  .filter((id) => id > 0)
+                  .map((id, index) => (
+                    <ChampionPortrait
+                      key={`${String(id)}-${String(index)}`}
+                      championId={id}
+                      meta={meta}
+                      size="h-7 w-7"
+                      dimmed
+                    />
+                  ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {insights !== null && insights.tips.length > 0 && (
+          <ul className="space-y-1 rounded border border-slate-800 bg-slate-950/60 p-2">
+            {insights.tips.map((tip, index) => (
+              <li key={index} className="alert-in text-xs text-slate-300">
+                💡 {tip}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {insights?.ownPlan && (
+          <div className="rounded border border-amber-400/20 bg-slate-950/60 p-2">
+            <p className="mb-1 text-[11px] font-semibold text-amber-300">
+              Tu plan con {ownMeta?.name ?? insights.ownPlan.championId} (de tus propias
+              partidas)
+            </p>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {insights.ownPlan.core.map((item, index) => (
+                <span key={item.id} className="flex items-center gap-1 text-xs text-slate-300">
+                  {index > 0 && <span className="text-slate-600">→</span>}
+                  <img
+                    src={`ddicon://item/${String(item.id)}.png`}
+                    alt={item.name}
+                    title={item.name}
+                    className="h-7 w-7 rounded border border-slate-700"
+                  />
+                </span>
+              ))}
+              {insights.ownPlan.situational.length > 0 && (
+                <>
+                  <span className="mx-1 text-[10px] text-slate-500">situacionales:</span>
+                  {insights.ownPlan.situational.map((item) => (
+                    <img
+                      key={item.id}
+                      src={`ddicon://item/${String(item.id)}.png`}
+                      alt={item.name}
+                      title={item.name}
+                      className="h-6 w-6 rounded border border-slate-800 opacity-80"
+                    />
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        <p className="text-[11px] text-slate-600">
+          Consejos derivados solo de los campeones visibles en pantalla.
+        </p>
+      </div>
+    </div>
+  )
+}
