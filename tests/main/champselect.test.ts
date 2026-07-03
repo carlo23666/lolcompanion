@@ -45,6 +45,15 @@ function ally(
   return { cellId, championId, championPickIntent: 0, position }
 }
 
+function row(
+  champion: string,
+  role: string,
+  win: boolean,
+  enemyChampions: string[] = []
+): OwnerHistoryRow {
+  return { champion, role, win, enemyChampions }
+}
+
 beforeAll(async () => {
   staticData = await loadFixtureStaticData()
 })
@@ -117,17 +126,9 @@ describe('champSelectInsights', () => {
   it('pick suggestions: ranked from own history in the assigned role', () => {
     const history: OwnerHistoryRow[] = [
       // Jinx BOTTOM: 8W/2L. Kai'Sa BOTTOM: 4W/6L. Ahri MIDDLE: 5W/0L (other role).
-      ...Array.from({ length: 10 }, (_, i) => ({
-        champion: 'Jinx',
-        role: 'BOTTOM',
-        win: i < 8
-      })),
-      ...Array.from({ length: 10 }, (_, i) => ({
-        champion: 'Kaisa',
-        role: 'BOTTOM',
-        win: i < 4
-      })),
-      ...Array.from({ length: 5 }, () => ({ champion: 'Ahri', role: 'MIDDLE', win: true }))
+      ...Array.from({ length: 10 }, (_, i) => row('Jinx', 'BOTTOM', i < 8)),
+      ...Array.from({ length: 10 }, (_, i) => row('Kaisa', 'BOTTOM', i < 4)),
+      ...Array.from({ length: 5 }, () => row('Ahri', 'MIDDLE', true))
     ]
     const insights = champSelectInsights(
       state({ localPlayerCellId: 0, ownPosition: 'bottom', myTeam: [ally(0, 0, 'bottom')] }),
@@ -143,11 +144,9 @@ describe('champSelectInsights', () => {
   })
 
   it('pick suggestions skip banned champions and disappear once locked', () => {
-    const history: OwnerHistoryRow[] = Array.from({ length: 10 }, (_, i) => ({
-      champion: 'Jinx',
-      role: 'BOTTOM',
-      win: i < 8
-    }))
+    const history: OwnerHistoryRow[] = Array.from({ length: 10 }, (_, i) =>
+      row('Jinx', 'BOTTOM', i < 8)
+    )
     const banned = champSelectInsights(
       state({
         localPlayerCellId: 0,
@@ -176,10 +175,9 @@ describe('champSelectInsights', () => {
 
   it('pick suggestions favor the damage type the team lacks', () => {
     const history: OwnerHistoryRow[] = [
-      // Two 50% champions in role: Draven (physical) and Ahri-as-ADC stand-in?
-      // Use Jinx (physical) vs Ziggs-like: fixture-safe → use Ahri played BOTTOM.
-      ...Array.from({ length: 6 }, (_, i) => ({ champion: 'Jinx', role: 'BOTTOM', win: i < 3 })),
-      ...Array.from({ length: 6 }, (_, i) => ({ champion: 'Ahri', role: 'BOTTOM', win: i < 3 }))
+      // Two 50% champions in role: Jinx (physical) vs Ahri (magic) as ADC.
+      ...Array.from({ length: 6 }, (_, i) => row('Jinx', 'BOTTOM', i < 3)),
+      ...Array.from({ length: 6 }, (_, i) => row('Ahri', 'BOTTOM', i < 3))
     ]
     // Ally comp already all-physical → the magic pick should rank first.
     const insights = champSelectInsights(
@@ -194,6 +192,53 @@ describe('champSelectInsights', () => {
     )
     expect(insights.picks[0]?.championId).toBe('Ahri')
     expect(insights.picks[0]?.reasons.some((reason) => reason.includes('daño mágico'))).toBe(true)
+  })
+
+  it('pick suggestions weigh the own record against the visible enemy comp', () => {
+    const history: OwnerHistoryRow[] = [
+      // Jinx and Kai'Sa both 50% overall — but Jinx is 4-0 vs Yasuo comps
+      // and Kai'Sa 0-3 vs them.
+      ...Array.from({ length: 4 }, () => row('Jinx', 'BOTTOM', true, ['Yasuo'])),
+      ...Array.from({ length: 4 }, () => row('Jinx', 'BOTTOM', false)),
+      ...Array.from({ length: 4 }, () => row('Kaisa', 'BOTTOM', true)),
+      ...Array.from({ length: 4 }, (_, i) => row('Kaisa', 'BOTTOM', i > 2, ['Yasuo']))
+    ]
+    const insights = champSelectInsights(
+      state({
+        localPlayerCellId: 0,
+        ownPosition: 'bottom',
+        myTeam: [ally(0, 0, 'bottom')],
+        theirTeam: [{ cellId: 5, championId: YASUO }]
+      }),
+      staticData,
+      TEST_POOL,
+      history
+    )
+    expect(insights.picks[0]?.championId).toBe('Jinx')
+    expect(
+      insights.picks[0]?.reasons.some((reason) => reason.includes('contra campeones de esta comp'))
+    ).toBe(true)
+  })
+
+  it('pick suggestions favor frontline when the team has none', () => {
+    const history: OwnerHistoryRow[] = [
+      // Leona (Tank) and Lux (Mage) both 50% as support.
+      ...Array.from({ length: 6 }, (_, i) => row('Leona', 'UTILITY', i < 3)),
+      ...Array.from({ length: 6 }, (_, i) => row('Lux', 'UTILITY', i < 3))
+    ]
+    const insights = champSelectInsights(
+      state({
+        localPlayerCellId: 4,
+        ownPosition: 'utility',
+        // Squishy allies only: Ahri, Jinx, Draven.
+        myTeam: [ally(0, AHRI), ally(1, JINX), ally(2, DRAVEN), ally(4, 0, 'utility')]
+      }),
+      staticData,
+      TEST_POOL,
+      history
+    )
+    expect(insights.picks[0]?.championId).toBe('Leona')
+    expect(insights.picks[0]?.reasons.some((reason) => reason.includes('frontline'))).toBe(true)
   })
 
   it('all-AD ally team → diversification note', () => {

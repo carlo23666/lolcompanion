@@ -21,6 +21,8 @@ export interface OwnerHistoryRow {
   /** match-v5 teamPosition: TOP | JUNGLE | MIDDLE | BOTTOM | UTILITY | ''. */
   role: string
   win: boolean
+  /** Champions on the enemy team that game (matchup component). */
+  enemyChampions: string[]
 }
 
 const MIN_GAMES_FOR_SUGGESTION = 2
@@ -34,11 +36,17 @@ const ROLE_LABEL: Record<string, string> = {
   UTILITY: 'support'
 }
 
+/** Champion classes that count as frontline for the team-needs bonus. */
+const FRONTLINE_TAGS = new Set(['Tank', 'Fighter'])
+
 /**
- * What to pick: the owner's champions for his assigned position, ranked by
- * his own winrate (Laplace-smoothed so 2-0 doesn't beat 15-5), skipping
- * banned/picked champions, with a bonus when the champion's damage type
- * complements the already-picked allies.
+ * What to pick: the owner's champions for his assigned position, ranked by a
+ * mix of signals — his own winrate (Laplace-smoothed so 2-0 doesn't beat
+ * 15-5), his own record AGAINST the visible enemy champions, whether the
+ * team lacks frontline or a damage type the pick provides, and durability
+ * versus assassin-heavy comps. Banned/picked champions are skipped. All
+ * inputs: own history + champions visible on screen (no external tierlists —
+ * zero-cost constraint).
  */
 export function pickSuggestions(
   state: ChampSelectState,
@@ -50,11 +58,12 @@ export function pickSuggestions(
   const position = (state.ownPosition ?? '').toUpperCase()
   const rows = position === '' ? history : history.filter((row) => row.role === position)
 
-  const byChampion = new Map<string, { games: number; wins: number }>()
+  const byChampion = new Map<string, { games: number; wins: number; rows: OwnerHistoryRow[] }>()
   for (const row of rows) {
-    const acc = byChampion.get(row.champion) ?? { games: 0, wins: 0 }
+    const acc = byChampion.get(row.champion) ?? { games: 0, wins: 0, rows: [] }
     acc.games += 1
     if (row.win) acc.wins += 1
+    acc.rows.push(row)
     byChampion.set(row.champion, acc)
   }
 
@@ -71,6 +80,22 @@ export function pickSuggestions(
       .filter((id) => id !== undefined)
   )
 
+  const enemyChampions = state.theirTeam
+    .map((member) => staticData.championsByKey.get(member.championId))
+    .filter((champion) => champion !== undefined)
+  const enemyIds = new Set(enemyChampions.map((champion) => champion.id))
+  const enemyAssassins = enemyChampions.filter((champion) =>
+    champion.tags.includes('Assassin')
+  ).length
+
+  // Ally classes from picked champions (own cell is unpicked at this point).
+  const allyChampions = state.myTeam
+    .map((member) => staticData.championsByKey.get(member.championId || member.championPickIntent))
+    .filter((champion) => champion !== undefined)
+  const teamLacksFrontline =
+    allyChampions.length >= 2 &&
+    !allyChampions.some((champion) => champion.tags.some((tag) => FRONTLINE_TAGS.has(tag)))
+
   const wantsMagic = allySplit.picked >= 2 && allySplit.physical >= allySplit.picked - 1
   const wantsPhysical = allySplit.picked >= 2 && allySplit.magic >= allySplit.picked - 1
   const roleLabel = ROLE_LABEL[position] ?? 'tus partidas'
@@ -84,6 +109,24 @@ export function pickSuggestions(
       const reasons = [
         `${winratePct.toFixed(0)}% de victorias en ${String(acc.games)} partidas como ${roleLabel} (tus datos)`
       ]
+
+      // Matchup component: own record with this champion AGAINST any of the
+      // enemies already visible. Small samples only nudge, never dominate.
+      if (enemyIds.size > 0) {
+        const versus = acc.rows.filter((row) =>
+          row.enemyChampions.some((enemy) => enemyIds.has(enemy))
+        )
+        if (versus.length >= 2) {
+          const versusWins = versus.filter((row) => row.win).length
+          const versusWr = versusWins / versus.length
+          score += (versusWr - 0.5) * 0.25
+          reasons.push(
+            `contra campeones de esta comp: ${String(versusWins)} de ${String(versus.length)} ganadas`
+          )
+        }
+      }
+
+      const meta = staticData.champions.get(champion)
       const damageType = staticData.damageProfile(champion)
       if (wantsMagic && damageType !== 'physical') {
         score += 0.06
@@ -92,11 +135,19 @@ export function pickSuggestions(
         score += 0.06
         reasons.push('aporta el daño físico que le falta a tu equipo')
       }
+      if (teamLacksFrontline && meta !== undefined && meta.tags.some((tag) => FRONTLINE_TAGS.has(tag))) {
+        score += 0.05
+        reasons.push('tu equipo no tiene frontline y este pick la aporta')
+      }
+      if (enemyAssassins >= 2 && meta !== undefined && meta.tags.includes('Tank')) {
+        score += 0.03
+        reasons.push(`${String(enemyAssassins)} asesinos enfrente: aguantas mejor sus entradas`)
+      }
       if (findBaseline(pool, champion, position) !== null) {
         score += 0.03
         reasons.push('está en tu pool: build baseline lista')
       }
-      const name = staticData.champions.get(champion)?.name ?? champion
+      const name = meta?.name ?? champion
       return { championId: champion, name, games: acc.games, winratePct, reasons, score }
     })
     .sort((a, b) => b.score - a.score)

@@ -62,14 +62,22 @@ function registerIpcHandlers(db: AppDatabase): void {
       .load()
       .catch(() => null)
     if (data === null) return null
-    // Pick suggestions come from the owner's own stored history.
+    // Pick suggestions come from the owner's own stored history, including
+    // the enemy team of each game for the matchup component.
     const puuid = getOwnerPuuid(db)
+    const repo = new MatchRepo(db)
     const history =
       puuid === null
         ? []
-        : new MatchRepo(db)
-            .ownerMatches(puuid, { limit: 200 })
-            .map(({ own }) => ({ champion: own.champion, role: own.role, win: own.win }))
+        : repo.ownerMatches(puuid, { limit: 200 }).map(({ match, own }) => ({
+            champion: own.champion,
+            role: own.role,
+            win: own.win,
+            enemyChampions: repo
+              .getParticipants(match.matchId)
+              .filter((participant) => participant.win !== own.win)
+              .map((participant) => participant.champion)
+          }))
     return champSelectInsights(state, data, undefined, history)
   })
 }
