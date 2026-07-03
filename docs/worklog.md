@@ -1,6 +1,11 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-03 (3) — Champ select pick suggestions (owner follow-up)
+**Done (1 commit; 242/242 green):** `pickSuggestions` in `src/main/champselect.ts` (pure, tested): owner's stored history filtered to his assigned position → per-champion winrate, Laplace-smoothed ranking (2-0 doesn't beat 15-5), min 2 games, top 3; excludes champions visible on the board (bans + both teams' picks/intents); +bonus and Spanish note when the champion's damage type complements the picked allies or when it's in the baseline pool. Wired into `champselect:insights` (handler now reads the owner's last 200 matches via MatchRepo); suggestions clear once the owner locks. Panel section "¿Qué te pego?" with portraits, WR and the complement note.
+**Notes:** only own history + on-screen champions (compliant). Role mapping relies on match-v5 `teamPosition` == uppercased LCU `assignedPosition`; games without position data are only used when the owner has no assigned position.
+**Files:** src/main/{champselect,index}.ts, src/shared/champselect.ts, src/renderer/src/components/ChampSelectPanel.tsx, tests/main/champselect.test.ts.
+
 ## 2026-07-03 (2) — Owner visual batch — home dashboard, champ select v2 with images and comp insights
 **Done (2 commits; 239/239 green):**
 1. **Champ select v2**: new `champselect:insights` invoke — pure main-side `champSelectInsights(state, staticData, pool)` (tested): ally/enemy damage splits from champion damage profiles, Spanish tips (3+ AP → RM with the cheap component's real name, 3+ AD → armor, healers ≥2 weight → grievous wounds reminder, 4+ same-type allies → diversification note), and the owner's baseline core/situationals for his picked champion (pick intent counts). Panel shows champion portraits (allies with position badges, enemies, dimmed bans) over the own pick's splash as ambient banner. `staticdata:championNames` replaced by `staticdata:championMeta` (ddragon id + name + damageType). `ddicon://` gains a `splash` kind (jpg, patchless CDN path `cdn/img/champion/splash/`, cached under `shared/splash/` so patch bumps don't re-download).
