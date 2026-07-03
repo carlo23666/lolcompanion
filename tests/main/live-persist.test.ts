@@ -51,4 +51,15 @@ describe('LiveSessionPersister', () => {
   it('extracts the own champion from the sample (identity used only for matching)', () => {
     expect(findOwnChampion(sample)).toBe('Annie')
   })
+
+  it('records the game mode on the session (Practice Tool detection)', () => {
+    const db = new Database(':memory:')
+    runMigrations(db)
+    const repo = new LiveSessionRepo(db)
+    const persister = new LiveSessionPersister(repo, () => new Date('2026-07-02T10:00:00Z'))
+
+    persister.persist(at(10), at(10))
+    const session = repo.getSession(persister.currentSessionId() ?? -1)
+    expect(session?.gameMode).toBe(sample.gameData.gameMode)
+  })
 })

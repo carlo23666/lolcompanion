@@ -150,6 +150,8 @@ export class StatsService {
       damageShare: number
       damageShareGames: number
       visionPerMin: number
+      deaths: number
+      vision: number
     }
     const byChampion = new Map<string, Acc>()
     for (const { match, own } of rows) {
@@ -161,12 +163,16 @@ export class StatsService {
         goldPerMin: 0,
         damageShare: 0,
         damageShareGames: 0,
-        visionPerMin: 0
+        visionPerMin: 0,
+        deaths: 0,
+        vision: 0
       }
       const minutes = match.durationS / 60
       acc.games += 1
       if (own.win) acc.wins += 1
       acc.kda += (own.kills + own.assists) / Math.max(1, own.deaths)
+      acc.deaths += own.deaths
+      acc.vision += own.vision
       if (minutes > 0) {
         acc.csPerMin += own.cs / minutes
         acc.goldPerMin += own.gold / minutes
@@ -191,7 +197,9 @@ export class StatsService {
         csPerMin: acc.csPerMin / acc.games,
         goldPerMin: acc.goldPerMin / acc.games,
         damageSharePct: acc.damageShareGames > 0 ? acc.damageShare / acc.damageShareGames : 0,
-        visionPerMin: acc.visionPerMin / acc.games
+        visionPerMin: acc.visionPerMin / acc.games,
+        deathsPerGame: acc.deaths / acc.games,
+        visionPerGame: acc.vision / acc.games
       }))
       .sort((a, b) => b.games - a.games)
   }

@@ -11,7 +11,7 @@ import type { ChampSelectState } from './schemas/lcu'
 import type { GameState, GameStateEvent } from './gamestate'
 import type { HistoryAggregate, HistoryDetail, HistoryRow } from './history'
 import type { PersonalCurve, StatsOverview } from './stats'
-import type { PostGameReport } from './report'
+import type { PostGameReportResult } from './report'
 import type { Recommendation } from './recommendation'
 import type { SessionPhase } from './session'
 
@@ -69,7 +69,7 @@ export interface IpcInvokeChannels {
   /** Personal CS/gold laning baseline for one champion (null if <2 games). */
   'stats:curve': { args: [champion: string]; result: PersonalCurve | null }
   /** Report for the most recent live session linked to a stored match. */
-  'report:last': { args: []; result: PostGameReport | null }
+  'report:last': { args: []; result: PostGameReportResult | null }
 }
 
 export interface IpcEventChannels {

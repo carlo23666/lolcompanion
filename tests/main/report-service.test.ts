@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import Database from 'better-sqlite3'
 import { runMigrations, type AppDatabase } from '@main/db'
 import { LiveSessionRepo, MatchRepo } from '@main/db/repos'
-import { ReportService } from '@main/report'
+import { buildReportSummary, ReportService } from '@main/report'
 import { StatsService } from '@main/stats'
 import { matchToRows } from '@main/riot/ingest'
 import { matchSchema } from '@shared/schemas/riot'
@@ -34,12 +34,12 @@ describe('ReportService', () => {
   })
 
   it('returns null while no session is linked to a match', () => {
-    sessions.createSession('2026-07-02T20:00:00Z', 'Jinx', null)
+    sessions.createSession('2026-07-02T20:00:00Z', 'Jinx', null, 'CLASSIC')
     expect(service.lastReport(OWNER)).toBeNull()
   })
 
   it('builds the report from the linked session with followed recommendations', () => {
-    const sessionId = sessions.createSession('2026-07-02T20:00:00Z', 'Jinx', null)
+    const sessionId = sessions.createSession('2026-07-02T20:00:00Z', 'Jinx', null, 'CLASSIC')
     const ownItems = baseMatch.info.participants.find((p) => p.puuid === OWNER)
     const finalItem = ownItems?.item0 ?? 0
     // One recommendation the player followed (their real item0) and one not.
@@ -53,15 +53,110 @@ describe('ReportService', () => {
       patch: '16.13'
     })
 
-    const report = service.lastReport(OWNER)
-    expect(report).not.toBeNull()
-    expect(report?.champion).toBe('Jinx')
-    expect(report?.csPerMin).toBeGreaterThan(0)
-    expect(report?.damageSharePct).toBeGreaterThan(0)
-    expect(report?.avgCsPerMin).not.toBeNull()
-    const followed = report?.recommendedItems.find((item) => item.itemId === finalItem)
-    const ignored = report?.recommendedItems.find((item) => item.itemId === 999999)
+    const result = service.lastReport(OWNER)
+    expect(result?.kind).toBe('report')
+    if (result?.kind !== 'report') return
+    const report = result.report
+    expect(report.champion).toBe('Jinx')
+    expect(report.csPerMin).toBeGreaterThan(0)
+    expect(report.damageSharePct).toBeGreaterThan(0)
+    expect(report.avgCsPerMin).not.toBeNull()
+    expect(report.avgDeaths).not.toBeNull()
+    expect(report.avgVisionScore).not.toBeNull()
+    expect(report.visionScore).toBeGreaterThanOrEqual(0)
+    const followed = report.recommendedItems.find((item) => item.itemId === finalItem)
+    const ignored = report.recommendedItems.find((item) => item.itemId === 999999)
     expect(followed?.followed).toBe(true)
     expect(ignored?.followed).toBe(false)
+  })
+
+  it('newest session in Practice Tool → unsupported, no stale fallback', () => {
+    // An older, properly linked game exists…
+    const linked = sessions.createSession('2026-07-02T20:00:00Z', 'Jinx', null, 'CLASSIC')
+    sessions.linkMatch(linked, {
+      matchId: baseMatch.metadata.matchId,
+      result: 'WIN',
+      patch: '16.13'
+    })
+    // …but the newest session is Practice Tool (never reaches match history).
+    sessions.createSession('2026-07-03T10:00:00Z', 'Jinx', null, 'PRACTICETOOL')
+
+    const result = service.lastReport(OWNER)
+    expect(result).toEqual({ kind: 'unsupported', gameMode: 'PRACTICETOOL' })
+  })
+
+  it('sessions from before the gameMode column still report (NULL = matchmade)', () => {
+    const sessionId = sessions.createSession('2026-07-02T20:00:00Z', 'Jinx', null, null)
+    sessions.linkMatch(sessionId, {
+      matchId: baseMatch.metadata.matchId,
+      result: 'WIN',
+      patch: '16.13'
+    })
+    expect(service.lastReport(OWNER)?.kind).toBe('report')
+  })
+})
+
+describe('buildReportSummary', () => {
+  const base = {
+    champion: 'Jinx',
+    deaths: 5,
+    avgDeaths: 5,
+    visionScore: 20,
+    avgVisionScore: 20,
+    csPerMin: 7,
+    avgCsPerMin: 7,
+    damageSharePct: 25,
+    avgDamageSharePct: 25,
+    recommendedItems: []
+  }
+
+  it('quiet game near the averages produces no noise', () => {
+    expect(buildReportSummary(base)).toEqual([])
+  })
+
+  it('flags dying well above the personal average', () => {
+    const lines = buildReportSummary({ ...base, deaths: 9 })
+    expect(lines.some((line) => line.includes('muerto 9'))).toBe(true)
+  })
+
+  it('praises low deaths', () => {
+    const lines = buildReportSummary({ ...base, deaths: 2 })
+    expect(lines.some((line) => line.includes('control del riesgo'))).toBe(true)
+  })
+
+  it('flags low vision score', () => {
+    const lines = buildReportSummary({ ...base, visionScore: 10 })
+    expect(lines.some((line) => line.includes('Visión baja'))).toBe(true)
+  })
+
+  it('flags low farm vs the personal average', () => {
+    const lines = buildReportSummary({ ...base, csPerMin: 5 })
+    expect(lines.some((line) => line.includes('CS/min'))).toBe(true)
+  })
+
+  it('summarizes recommendation adherence when there were enough of them', () => {
+    const items = [true, true, true, false].map((followed, index) => ({
+      itemId: index,
+      itemName: null,
+      followed
+    }))
+    const lines = buildReportSummary({ ...base, recommendedItems: items })
+    expect(lines.some((line) => line.includes('3 de 4'))).toBe(true)
+  })
+
+  it('caps at four lines', () => {
+    const lines = buildReportSummary({
+      ...base,
+      deaths: 12,
+      visionScore: 5,
+      csPerMin: 3,
+      damageSharePct: 40,
+      recommendedItems: [
+        { itemId: 1, itemName: null, followed: false },
+        { itemId: 2, itemName: null, followed: false },
+        { itemId: 3, itemName: null, followed: false }
+      ]
+    })
+    expect(lines.length).toBeLessThanOrEqual(4)
   })
 })

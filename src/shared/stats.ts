@@ -11,6 +11,9 @@ export interface ChampionStat {
   /** Owner damage as % of his team's total damage, averaged per game. */
   damageSharePct: number
   visionPerMin: number
+  deathsPerGame: number
+  /** Raw vision score averaged per game (report card comparisons). */
+  visionPerGame: number
 }
 
 /** Personal laning baseline per champion, from stored timelines. */

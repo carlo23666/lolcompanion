@@ -9,6 +9,8 @@ export interface LiveSessionRow {
   championName: string | null
   result: string | null
   matchId: string | null
+  /** Live Client gameMode (e.g. CLASSIC, PRACTICETOOL). NULL on old rows. */
+  gameMode: string | null
 }
 
 const storedJsonSchema = z.record(z.string(), z.unknown())
@@ -21,10 +23,17 @@ const storedJsonSchema = z.record(z.string(), z.unknown())
 export class LiveSessionRepo {
   constructor(private readonly db: AppDatabase) {}
 
-  createSession(startedAt: string, championName: string | null, patch: string | null): number {
+  createSession(
+    startedAt: string,
+    championName: string | null,
+    patch: string | null,
+    gameMode: string | null = null
+  ): number {
     const result = this.db
-      .prepare('INSERT INTO live_sessions (startedAt, championName, patch) VALUES (?, ?, ?)')
-      .run(startedAt, championName, patch)
+      .prepare(
+        'INSERT INTO live_sessions (startedAt, championName, patch, gameMode) VALUES (?, ?, ?, ?)'
+      )
+      .run(startedAt, championName, patch, gameMode)
     return Number(result.lastInsertRowid)
   }
 

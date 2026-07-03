@@ -24,7 +24,8 @@ export class LiveSessionPersister {
       this.sessionId = this.repo.createSession(
         this.now().toISOString(),
         findOwnChampion(snapshot),
-        null // patch unknown from Live Client; filled at post-game link (WP-010)
+        null, // patch unknown from Live Client; filled at post-game link (WP-010)
+        snapshot.gameData.gameMode
       )
     }
     this.lastGameTimeS = gameTimeS

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { PostGameReport as Report } from '@shared/report'
+import type { PostGameReportResult } from '@shared/report'
 
 function StatDelta(props: {
   label: string
@@ -7,9 +7,15 @@ function StatDelta(props: {
   average: number | null
   decimals?: number
   suffix?: string
+  /** Deaths-style metrics: staying under your average is the good outcome. */
+  lowerIsBetter?: boolean
 }): React.JSX.Element {
   const decimals = props.decimals ?? 1
-  const better = props.average !== null && props.value >= props.average
+  const better =
+    props.average !== null &&
+    (props.lowerIsBetter === true
+      ? props.value <= props.average
+      : props.value >= props.average)
   return (
     <div className="text-center">
       <p className="text-lg font-bold text-slate-100">
@@ -27,22 +33,26 @@ function StatDelta(props: {
   )
 }
 
+const UNSUPPORTED_MODE_LABEL: Record<string, string> = {
+  PRACTICETOOL: 'Herramienta de práctica'
+}
+
 /**
  * Post-game report: the finished match vs personal averages + which engine
  * recommendations were followed. Refreshes when auto-ingest links the match.
  */
 export default function PostGameReport(): React.JSX.Element | null {
-  const [report, setReport] = useState<Report | null>(null)
+  const [result, setResult] = useState<PostGameReportResult | null>(null)
 
   useEffect(() => {
     const load = (): void => {
-      void window.api.invoke('report:last').then(setReport)
+      void window.api.invoke('report:last').then(setResult)
     }
     load()
     return window.api.on('history:changed', load)
   }, [])
 
-  if (report === null) {
+  if (result === null) {
     return (
       <p className="card-in text-center text-xs text-slate-500">
         El informe aparecerá en cuanto Riot publique la partida (1-3 min)…
@@ -50,6 +60,16 @@ export default function PostGameReport(): React.JSX.Element | null {
     )
   }
 
+  if (result.kind === 'unsupported') {
+    return (
+      <p className="card-in max-w-sm text-center text-xs text-slate-500">
+        Las partidas de {UNSUPPORTED_MODE_LABEL[result.gameMode] ?? 'este modo'} no aparecen en
+        el historial de Riot, así que no hay informe para esta partida.
+      </p>
+    )
+  }
+
+  const report = result.report
   const followed = report.recommendedItems.filter((item) => item.followed)
 
   return (
@@ -74,7 +94,7 @@ export default function PostGameReport(): React.JSX.Element | null {
         </div>
       </div>
 
-      <div className="mb-3 grid grid-cols-3 gap-2 rounded border border-slate-800 bg-slate-950/50 py-2">
+      <div className="mb-3 grid grid-cols-5 gap-2 rounded border border-slate-800 bg-slate-950/50 py-2">
         <StatDelta label="CS/min" value={report.csPerMin} average={report.avgCsPerMin} />
         <StatDelta
           label="Oro/min"
@@ -83,13 +103,36 @@ export default function PostGameReport(): React.JSX.Element | null {
           decimals={0}
         />
         <StatDelta
-          label="% daño del equipo"
+          label="% daño"
           value={report.damageSharePct}
           average={report.avgDamageSharePct}
           decimals={0}
           suffix="%"
         />
+        <StatDelta
+          label="Muertes"
+          value={report.deaths}
+          average={report.avgDeaths}
+          decimals={0}
+          lowerIsBetter
+        />
+        <StatDelta
+          label="Visión"
+          value={report.visionScore}
+          average={report.avgVisionScore}
+          decimals={0}
+        />
       </div>
+
+      {report.summary.length > 0 && (
+        <ul className="mb-3 space-y-1 rounded border border-slate-800 bg-slate-950/50 p-2">
+          {report.summary.map((line, index) => (
+            <li key={index} className="text-xs text-slate-300">
+              · {line}
+            </li>
+          ))}
+        </ul>
+      )}
 
       {report.recommendedItems.length > 0 && (
         <div>
