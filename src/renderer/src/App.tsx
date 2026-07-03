@@ -39,12 +39,12 @@ export default function App(): React.JSX.Element {
     lastTopRef.current = key
   }, [recommendations])
 
-  // Blip + mascot reaction when a new spike alert lands.
+  // Blip + mascot reaction when a new spike/objective alert lands.
   useEffect(() => {
     const newest = insights.alerts[0]
     if (!newest || newest.id === lastAlertRef.current) return
     lastAlertRef.current = newest.id
-    if (newest.kind === 'spike') {
+    if (newest.kind === 'spike' || newest.kind === 'objective') {
       playAlert()
       setMascotReactKey((key) => key + 1)
     }
