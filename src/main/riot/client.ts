@@ -1,11 +1,13 @@
 import {
   accountSchema,
   leagueEntriesSchema,
+  leagueListSchema,
   matchIdsSchema,
   matchSchema,
   timelineSchema,
   type RiotAccount,
   type RiotLeagueEntry,
+  type RiotLeagueList,
   type RiotMatch,
   type RiotTimeline
 } from '@shared/schemas/riot'
@@ -84,13 +86,14 @@ export class RiotClient {
 
   matchIds(
     puuid: string,
-    options: { start?: number; count?: number } = {},
+    options: { start?: number; count?: number; queue?: number } = {},
     priority = 10
   ): Promise<Result<string[]>> {
     const params = new URLSearchParams({
       start: String(options.start ?? 0),
       count: String(options.count ?? 100)
     })
+    if (options.queue !== undefined) params.set('queue', String(options.queue))
     const path = `/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids?${params.toString()}`
     return this.get('match-v5.ids', this.regional, path, matchIdsSchema, priority)
   }
@@ -108,6 +111,15 @@ export class RiotClient {
   leagueEntries(puuid: string, priority = 5): Promise<Result<RiotLeagueEntry[]>> {
     const path = `/lol/league/v4/entries/by-puuid/${encodeURIComponent(puuid)}`
     return this.get('league-v4.entries', this.platform, path, leagueEntriesSchema, priority)
+  }
+
+  /** Master+ league lists — seed players for the meta crawler (ranked solo). */
+  apexLeague(
+    tier: 'challenger' | 'grandmaster' | 'master',
+    priority = 20
+  ): Promise<Result<RiotLeagueList>> {
+    const path = `/lol/league/v4/${tier}leagues/by-queue/RANKED_SOLO_5x5`
+    return this.get(`league-v4.${tier}`, this.platform, path, leagueListSchema, priority)
   }
 
   private async get<S extends z.ZodType>(

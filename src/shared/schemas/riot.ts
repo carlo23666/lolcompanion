@@ -100,6 +100,13 @@ export const timelineSchema = z.looseObject({
   })
 })
 
+/** Apex league list (challenger/grandmaster/master): seed players for the
+ * meta crawler. Only puuid is consumed; identity fields are never stored. */
+export const leagueListSchema = z.looseObject({
+  tier: z.string().optional(),
+  entries: z.array(z.looseObject({ puuid: z.string().optional() }))
+})
+
 export const leagueEntrySchema = z.looseObject({
   queueType: z.string(),
   tier: z.string().optional(),
@@ -118,3 +125,4 @@ export type RiotTimeline = z.infer<typeof timelineSchema>
 export type RiotTimelineFrame = z.infer<typeof timelineFrameSchema>
 export type RiotTimelineEvent = z.infer<typeof timelineEventSchema>
 export type RiotLeagueEntry = z.infer<typeof leagueEntrySchema>
+export type RiotLeagueList = z.infer<typeof leagueListSchema>

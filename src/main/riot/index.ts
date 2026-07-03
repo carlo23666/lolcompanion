@@ -1,10 +1,11 @@
 import type { AppDatabase } from '../db'
-import { MatchRepo, TimelineRepo } from '../db/repos'
+import { MatchRepo, MetaRepo, TimelineRepo } from '../db/repos'
 import { SettingsRepo, SETTING_KEYS } from '../db/repos/settings'
 import { broadcast, handleInvoke } from '../ipc'
 import { RiotClient } from './client'
 import { ingestHistory } from './ingest'
 import { RiotRateLimiter } from './limiter'
+import { MetaCrawler } from './metacrawler'
 import { normalizeRiotId } from './riotid'
 
 export { RiotClient, RiotApiError, PLATFORM_TO_REGIONAL } from './client'
@@ -16,6 +17,8 @@ export type { IngestProgress } from './ingest'
 let ingestRunning = false
 // One limiter per app lifetime so all Riot traffic shares the same buckets.
 const limiter = new RiotRateLimiter()
+// One meta crawler per app lifetime (background, lowest priority).
+let metaCrawler: MetaCrawler | null = null
 
 /**
  * Ready-to-use client + owner puuid, or null when the app is not configured
@@ -133,5 +136,38 @@ export function registerRiotIpc(db: AppDatabase): void {
       })
 
     return { started: true as const }
+  })
+
+  const metaRepo = new MetaRepo(db)
+  handleInvoke('meta:status', () => ({
+    ...(metaCrawler?.status() ?? {
+      running: false,
+      processed: 0,
+      stored: 0,
+      seedsDone: 0,
+      seedsTotal: 0,
+      error: null
+    }),
+    patches: metaRepo.status()
+  }))
+
+  handleInvoke('meta:crawl:start', () => {
+    const apiKey = process.env['RIOT_API_KEY']
+    if (apiKey === undefined || apiKey === '') {
+      return { started: false, error: 'Falta RIOT_API_KEY en .env (ver .env.example)' }
+    }
+    const platform = settings.get(SETTING_KEYS.platform) ?? 'euw1'
+    metaCrawler ??= new MetaCrawler({
+      client: new RiotClient({ apiKey, platform, limiter }),
+      repo: metaRepo,
+      onProgress: (status) => broadcast('meta:progress', status),
+      log: (message) => console.log(message)
+    })
+    return metaCrawler.start()
+  })
+
+  handleInvoke('meta:crawl:stop', () => {
+    metaCrawler?.stop()
+    return { stopped: true as const }
   })
 }
