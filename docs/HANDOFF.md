@@ -1,108 +1,268 @@
-# HANDOFF — resume point after phase 1 build (2026-07-02)
+# HANDOFF — project guide, roadmap & ideas (2026-07-06)
 
-Read this first when resuming work in a new Claude Code session. Then:
-`CLAUDE.md` (rules) → `docs/worklog.md` (what happened, per WP) → `backlog/INBOX.md` (discovered work).
+This is the master handoff for **any** AI model or human resuming work on LoL Companion.
+The previous version of this file (the macOS→Windows migration guide) is fully done — see git
+history if you need it.
 
-## Where the project stands
+## 0. How to use this document (instructions for the AI session)
 
-All 12 phase-1 work packages (WP-000 → WP-011) are **built and committed**, one commit per WP,
-`npm run check` green (185 tests / 28 files, typecheck + lint + vitest). Statuses in
-`backlog/README.md` are **BUILT (pending review)** — the reviewer loop in `docs/review-process.md`
-has NOT run yet. Built entirely on macOS; never yet run against a real League client.
+Reading order for a fresh session:
 
-### What the app can do right now
+1. `CLAUDE.md` — hard rules and stack. **Non-negotiable, overrides anything below.**
+2. This file — current state, roadmap, design direction.
+3. `docs/worklog.md` — chronological truth of what was built and why (newest first).
+4. `backlog/INBOX.md` — discovered work waiting for triage.
+5. `docs/architecture.md`, `docs/decisions.md` (ADRs), `docs/review-process.md` — background.
 
-- **Session tracking**: detects `idle → clientOpen → champSelect → inGame → postGame` by combining
-  the LCU websocket (league-connect) with port-2999 availability. Survives client kills/restarts.
-- **Live game**: polls the Live Client Data API every 2s (pinned Riot cert, exponential backoff),
-  validates with zod, persists gzip'd snapshots to SQLite, optionally records raw fixtures to disk
-  (Ajustes toggle or `RECORD_LIVE=1`; anonymize with `npm run fixtures:anonymize`).
-- **GameState + engine**: normalizes snapshots into a single GameState (item graph resolution,
-  documented gold/damage-split/tankiness/healing estimators), computes semantic diffs, and runs a
-  pure sync engine: 5 rules (antiheal, armor-vs-mr, anti-tank, anti-burst, spike-now) + baseline
-  next-buy from `src/main/engine/baselines/pool.json`, merged and ranked, every recommendation
-  with Spanish reasons. <50ms per pass (tested).
-- **UI** (dark, Spanish): sidebar Live/Historial/Ajustes. Live panel: phase banner, both teams with
-  items/KDA/death timers, enemy damage-split + tankiness gauges, objectives row, recommendation
-  card with in-game audit history. Designed empty states for every phase. Icons via local
-  `ddicon://` cache (lazy per-icon download, then offline).
-- **Match history**: manual sync of last 200 matches (rate-limited: 20/1s + 100/120s + per-method,
-  Retry-After honored, resumable) + automatic post-game ingestion with retry (30s→120s schedule)
-  linking the finished match to the live session. Historial view: filterable list, winrate/CS-min
-  aggregate chips, detail drawer with final build + gold sparkline. Works offline once stored.
-- **Backtesting**: `npm run backtest -- --champion X --last 50` reconstructs GameStates from stored
-  timelines (exact gold, items from purchase events), replays the engine, reports top-1/top-3
-  agreement by champion/phase + worst disagreements, dumps JSON to `reports/`.
+Working style that has worked well with the owner (Carlo):
 
-### Verified vs pending verification
+- **One focused batch per session.** Either a Work Package from `backlog/`, or an owner-directed
+  feature batch ("owner request" in the worklog). Never mix unrelated changes in one commit;
+  one commit per logical group so anything can be reverted alone.
+- **Always finish with:** all tests green (`npm run check`), a worklog entry (date, what, deviations,
+  gaps, files), and INBOX notes for anything discovered but out of scope.
+- **The owner tests in real games** and reports back in the next session. Design for that loop:
+  make feedback easy to act on (auditable reasons on every recommendation, replay/scenario tools).
+- **The owner sometimes asks for features that violate Riot policy** (he has asked twice for enemy
+  cooldown/flash tracking, once framed as "log ally pings"). Decline politely, cite CLAUDE.md §Hard
+  rules, offer the nearest compliant alternative, and record it in the worklog/INBOX. Do not be
+  clever about laundering banned data through a different source — the rule is about the
+  *information*, not the API.
+- Code, comments, docs in English. **Every user-facing string in Spanish.**
+- Zero-cost constraint stands (ADR-002): no paid services, no backend, no paid signing certs.
 
-Everything above is covered by tests against fixtures. **But most fixtures are synthetic**
-(shape-accurate, built from the real Data Dragon patch): the app has never seen a real running
-game, a real champ select, or a real Riot API response. That's the main purpose of the Windows move.
+## 1. Current state — what the app does today (v0.1.0)
 
-## First session on Windows — do this in order
+All phase-1 WPs (000–011) plus several owner-directed batches are built, committed, and green
+(275+ tests at last count). Validated against real games on Windows 11 since 2026-07-02.
 
-1. **Clone + install**: `git clone https://github.com/carlo23666/lolcompanion.git`, `npm install`
-   (postinstall rebuilds better-sqlite3 for the Electron ABI automatically).
-2. **Fix Windows incompatibilities** (small, known, blocking `npm run check`):
-   - `package.json` `test` script uses POSIX env syntax
-     (`ELECTRON_RUN_AS_NODE=1 electron …`) — breaks on cmd/PowerShell. Add `cross-env`
-     (devDependency, note it in the worklog) or convert to a small Node launcher script.
-   - `src/main/backtest/cli.ts` `defaultUserData()` hardcodes the macOS path
-     (`~/Library/Application Support/lol-companion`). Add the Windows equivalent
-     (`%APPDATA%/lol-companion`) — keep it dependency-free.
-   - `scripts/backtest.mjs` uses `spawnSync('npx', …)` which on Windows needs
-     `shell: true` (or resolve `npx.cmd`).
-   - Run `npm run check` until green; commit as a `fix:` WP-agnostic commit with worklog note.
-3. **Configure**: copy `.env.example` → `.env`, add `RIOT_API_KEY`
-   (https://developer.riotgames.com, personal key). In Ajustes: Riot ID (nombre#TAG) + region.
-4. **First real validation pass** (this closes most pending acceptance criteria — log results in
-   `docs/worklog.md`):
-   - `npm run dev` with the LoL client closed → app stays idle, no error spam (WP-001).
-   - Open client → lobby → champ select → game → post-game: phases must track correctly (WP-005);
-     kill the client mid-cycle once, it must reconnect.
-   - Play ≥1 game with recording ON → real payload parses with zero zod errors (or list failing
-     fields in the worklog) → `npm run fixtures:anonymize` → commit early/mid/late snapshots,
-     replacing/augmenting the synthetic ones in `fixtures/liveclient/` (WP-001, WP-006).
-   - Sync full history (200 matches, zero 429s expected in the log; kill mid-sync once and
-     verify resume) (WP-004). Consider re-recording `fixtures/riot/` from a real response.
-   - Finish a game → appears in Historial within 5 min without manual action (WP-010).
-   - Judge recommendations in ≥3 real games; capture feedback in the worklog (WP-009).
-5. **Backtest on real data**: `npm run backtest -- --last 100` → bring the report to the reviewer;
-   drive ONE tuning pass of `src/main/engine/rules/thresholds.ts` from it (WP-011 criterion —
-   deliberately not done against synthetic data, it would be circular).
+**Pipeline**: LCU websocket + Live Client API (:2999, pinned cert) + Riot Web API →
+zod validation → normalized `GameState` → pure rules engine → explained recommendations
+(Spanish reasons, mandatory) → React UI + experimental in-game overlay. Everything persisted
+in SQLite (better-sqlite3, main process only).
 
-## Open decisions & known gaps
+By area:
 
-- **ADR-006 (blocking real usefulness of WP-009)**: `src/main/engine/baselines/pool.json` is a
-  PLACEHOLDER pool (Jinx/Ahri/Malphite/Vi/Leona). Owner must provide his real 10–15 champion pool
-  (champion + role); schema tests validate it automatically. Baselines should then be curated
-  per champion (core order + situationals).
-- **ADR-007 (open)**: personal use assumed — no code signing, no distribution, personal API key.
-- `backlog/INBOX.md` items (reviewer triages): per-champion ddragon detail files on demand;
-  verify damage profiles of Locke/Yunara/Zaahen; derive gold-per-stat table per patch; real
-  recorded API fixtures; dynamic per-method rate limits from response headers; champion
-  cross-check on post-game session linking.
-- Review checklist deviations flagged in the worklog for the reviewer, most notably:
-  Live Client transport skips hostname verification ONLY for the pinned-CA loopback connection
-  (`src/main/liveclient/transport.ts`, documented rationale); icons hit the CDN once each before
-  being cached; JSON columns are structurally (not schema-) validated on read.
+- **Session machine**: `idle → clientOpen → champSelect → inGame → postGame`, survives client
+  kills, distinguishes loading screen. Live view, dashboard and overlay react to phase.
+- **Rules engine** (pure, <50ms): antiheal, armor-vs-mr, anti-tank (eHP baseline), anti-burst,
+  spike-now, baseline next-buy from the owner's data-derived pool (ADR-006), Magical Footwear
+  aware, endgame layer (fill slots, sell starter). Backtested on real games: top-3 ~50% agreement.
+- **Champ select**: comp analysis (damage splits, tips), pick suggestions ranked by owner winrate
+  (Laplace-smoothed) + matchup record vs visible enemies + team-needs heuristics + **Master+ meta
+  blend** (champion WR ±0.15, lane matchup ±0.10, each a labeled reason).
+- **Meta pipeline** (2026-07-04): background crawler seeded from apex leagues, walks ranked
+  matches at lowest limiter priority, stores only aggregates per patch (champion WR by role,
+  lane matchups, final-build frequencies) in migration-005 tables. Ajustes panel to start/stop.
+  ~1.7k matches/h within the personal-key rate limit.
+- **History & stats**: 200-match sync + post-game auto-ingest (retry schedule), Historial with
+  detail drawer + per-match report, Estadísticas (curves, streaks, tilt, matchups, weekday WR).
+- **Post-game report**: vs personal averages, deaths/vision, recommendation adherence, meta-build
+  comparison line, Spanish summary. Browsable for any stored match.
+- **Live insights**: personal CS curve chip, enemy spike alerts (visible info only), objective
+  timers + objective-window alerts, dead-gold reminder.
+- **Identity/UX**: hextech/void/noche themes (CSS variables), Hexi mascot (SVG sprite, moods,
+  speech bubbles, overlay presence), WebAudio sounds, top-bar navigation, home dashboard with
+  champion splash. All icons/splash served from the local `ddicon://` cache.
+- **Dev toolkit** (dev-only, hidden when packaged): replay recorded games through the real
+  pipeline at x4–x20, simulate champ select, **scenario builder** (force any game situation or
+  draft — `docs/worklog.md` 2026-07-04), backtest CLI (`npm run backtest -- --last 100`).
+- **Distribution** (2026-07-06): `npm run dist` builds a per-user NSIS installer
+  (`dist/LoL Companion-<version>-setup.exe`), icon generated by `scripts/make-icon.mjs`.
+  API key can now be entered in Ajustes (safeStorage-encrypted in SQLite; dev `.env` still wins).
 
-## Phase 2 (do not start without reviewer sign-off — see backlog/README.md)
+## 2. Codebase map
 
-Draft order from the original plan: overlay window (transparent, always-on-top; revisit ADR-005
-if playing single-monitor fullscreen) → champ select recommendations over the LCU →
-rune auto-import (`/lol-perks/v1/pages`, endpoint already listed in docs/lcu-endpoints.md).
-Phase 3 ideas parked: high-elo mining via GitHub Actions, personal analytics, ML win-probability
-(gated on a validated backtest baseline).
+```
+src/main/                 Electron main — owns ALL I/O
+  index.ts                bootstrap, window, IPC registration, wiring
+  session/machine.ts      phase state machine (pure computeSessionPhase + emitter)
+  liveclient/             :2999 poller, transport (pinned cert), persister, recorder, replay driver
+  lcu/                    league-connect wrapper (nothing else imports it)
+  riot/                   client, limiter (token buckets), ingest, metacrawler, meta-aggregate,
+                          riotid (Unicode sanitizer), apikey (safeStorage codec + env precedence)
+  engine/                 PURE: normalize (snapshot→GameState), diff, rules/, nextbuy, recommend,
+                          baselines/pool.json (owner pool, ADR-006)
+  db/                     migrations (numbered SQL), repos (only place with SQL)
+  staticdata/             Data Dragon manager, item graph, champ stats, damage profiles
+  stats.ts / report.ts / history.ts / postgame.ts / champselect.ts   read-side services
+  devtools.ts / devtools-scenario.ts   dev-only simulation IPC
+  overlay.ts / icons.ts   overlay window, ddicon:// protocol
+src/shared/               types + zod schemas + typed IPC contract (ipc.ts is the single source)
+src/renderer/src/         React 18 + Tailwind; components/, hooks.ts (all IPC via window.api)
+tests/                    vitest; main (node) + renderer (jsdom) projects; fixtures/ are real
+                          anonymized payloads where possible
+scripts/                  electron-node launcher, backtest, anonymizer, make-icon
+```
 
-## Environment notes (macOS side, for reference)
+Key invariants (break nothing here without an ADR):
 
-- Node 25 / npm 11 on the Mac; Electron 43 bundles Node 24. Single-ABI strategy: everything
-  (tests, backtest CLI) runs through Electron's Node. Vite pinned ^7 (electron-vite 5 requirement),
-  React 18 per CLAUDE.md, TypeScript 6 (no `baseUrl`).
-- The GitHub remote is HTTPS (`https://github.com/carlo23666/lolcompanion.git`); the Mac's SSH key
-  belongs to a different GitHub account (carlo-mgd), so keep HTTPS on the Mac. On Windows,
-  authenticate as carlo23666 (browser credential manager or a PAT).
-- CI (`.github/workflows/check.yml`) runs `npm run check` on ubuntu — first push after the
-  Windows fixes should confirm it's green (never yet observed running).
+- Engine stays **pure and synchronous**; connectors map INTO `GameState`, engine reads FROM it.
+- Every `Recommendation` carries `reasons: string[]` — a recommendation without a reason is a bug.
+- All external payloads go through zod at the boundary; identity fields are **stripped** in
+  champ select schemas (Riot policy §2).
+- Riot API traffic all flows through the ONE shared `RiotRateLimiter` (owner traffic priority 0,
+  meta crawler priority 50).
+- The API key: env or safeStorage-encrypted setting; never logged, never sent to the renderer
+  (only `apiKeySet: boolean` crosses IPC).
+
+## 3. Known gaps & bugs (triage candidates, roughly by value)
+
+1. **Loading-screen zod spam** (INBOX 2026-07-04): partial :2999 payloads during load logged
+   full zod errors every 2s (~7.7k lines). Detect the partial shape as a `loading` state,
+   surface "Cargando partida…", rate-limit validation logging to once per streak.
+2. **Startup catch-up ingest** (INBOX 2026-07-02): if the client closes right after a game the
+   postGame phase never fires and the match only arrives via manual sync. On app start (or on
+   regaining API context), fetch the last few matchIds and ingest missing ones.
+3. **Report card v2 leftovers**: build-order score (buy order vs recommendation timeline —
+   needs purchase timestamps, live_recommendations already stores when each rec fired) and
+   build-vs-enemy-comp score (rerun rules on final state).
+4. **Team-damage-diversification rule**: when the OWN team stacks one damage type, suggest the
+   owner covers the other where his champion allows. Needs spec + thresholds.
+5. **Meta crawler operational polish**: it only runs while the app is open and the owner clicks
+   start — consider auto-start on app launch (setting), backoff when the key expired, and a
+   "crawl tonight" scheduler. Also: per-method rate limits are conservative constants; parse
+   `X-Method-Rate-Limit` headers instead.
+6. **Post-game linking cross-check** (INBOX): verify `live_sessions.championName` matches the
+   match's owner champion before linking.
+7. **Ezreal baseline is provisional** (4 games, ADR-006); pool refresh from newest matches is
+   manual — a "regenerate pool from my latest N matches" button in Ajustes would close the loop.
+8. **Overlay in exclusive fullscreen** is invisible (accepted limitation, ADR-005) — revisit if
+   the owner switches to single-monitor; a game-anchored overlay WP remains unspecced.
+
+## 4. Roadmap
+
+### 4.1 Near term (1–3 sessions each)
+
+- Fix the two top INBOX items (loading state, catch-up ingest) — small, high annoyance-relief.
+- **Friends beta hardening** (now that the installer exists):
+  - First-run experience: a guided setup card (key → Riot ID → sync) instead of expecting people
+    to find Ajustes. Detect "no key" and point at developer.riotgames.com with steps in Spanish.
+  - Dev keys expire every 24h — surface key expiry clearly (the 403 path already exists: show a
+    Spanish banner "tu clave ha caducado, genera otra" instead of a silent failure).
+  - A `docs/INSTALAR.md` one-pager to send to friends (created alongside this handoff).
+  - Consider applying for a **production API key** (free, but requires a small application to
+    Riot describing the product; removes the 24h expiry and raises limits). This is the single
+    biggest quality-of-life for non-technical friends. ADR-007 territory — record the decision.
+- **Meta v2**: aggregate item *order* (first/second/third completed), not just final builds —
+  the engine's next-buy could then blend meta order with the personal pool for champions the
+  owner has few games on; runes aggregates (match-v5 carries perks) → rune page suggestion in
+  champ select (display only; auto-import via LCU `/lol-perks/v1/pages` is phase-2 listed).
+- **Ban suggestions**: blend owner loss-rate vs champion (existing) with Master+ presence —
+  "te sugiero banear X: te gana el 70% y es top meta".
+
+### 4.2 Mid term
+
+- **Draft assistant v3**: full-draft awareness — suggest picks not only for the owner's role
+  but flag comp holes as the draft evolves; win-condition summary at draft end ("vuestro plan:
+  peel para Jinx, cuidado min 8-14 con Elise").
+- **Vision/macro coaching post-game**: ward timings vs match timeline events, death heatmap by
+  minute bucket (data already stored in timelines).
+- **Per-patch pool drift**: alert when the owner's core build diverges from the Master+ build
+  for his champ ("los Master+ ya no compran X, prueban Y") — the data is already in
+  `meta_champion_items`.
+- **Session coach**: the stats service already computes tilt indicators (WR games 1-2 vs 3+);
+  surface a gentle "llevas 3 seguidas, ¿descanso?" nudge — owner liked this idea.
+- **Auto-update**: electron-updater with GitHub Releases (free, works unsigned with a warning).
+  Without it, friends stay on stale versions forever. Pairs with a version check + "nueva
+  versión disponible" toast as a cheaper first step.
+
+### 4.3 Long term / phase 3 (each needs an ADR)
+
+- **ML win-probability / recommendation ranking** (ADR-004 gate): the backtest harness is the
+  evaluation function; only start when a rules-engine ceiling is demonstrated with data.
+- **Backend** (only if distribution grows beyond friends): shared meta aggregates served from a
+  free-tier worker so every install doesn't crawl independently. Riot production key + ToS review
+  first.
+- **Voice hints in game** (WebSpeech/local TTS, Spanish): Hexi speaks the top recommendation.
+  Cheap to prototype with the existing alert stream; gate behind a setting, default off.
+
+## 5. Visual identity & personality — direction for the next designer-model
+
+The owner's standing feedback: the UI is *better* after the hextech pass + themes + Hexi, but
+still "needs a lot of improvement and personality". Treat visual work as a first-class WP, not
+polish. What exists: three CSS-variable themes, Hexi (SVG mascot with moods/phrases), entrance
+animations, gold glow on top-pick change, WebAudio chimes, top-bar nav, splash-art banners.
+
+Concrete directions to explore (owner has approved the *spirit* of these):
+
+1. **Commit to hextech as THE identity** — the three themes dilute effort; make `hextech`
+  excellent first. Reference: League client's magic-tech language — beveled gold frames, glowing
+  filigree corners, dark blue-black depth, teal energy accents. CSS `clip-path` hexagonal
+  card corners, layered `box-shadow` glows, subtle animated gradient "energy" borders on the
+  active recommendation. Zero-dep (CSS only) keeps the constraint.
+2. **Motion with meaning**: today's animations are entrances. The interesting moments are
+  *changes*: recommendation rank swaps (FLIP animations), gold counting up (animated numbers),
+  a spike alert should *interrupt* (screen-edge pulse), objective countdowns should breathe as
+  they approach zero. `prefers-reduced-motion` stays respected.
+3. **Hexi as a character, not a sticker**: idle blink/float loops, a distinct "thinking" pose
+  while the engine has no output, celebration on victory report, a worried pose on losing streaks
+  (stats service knows). Give Hexi a small phrase bank per context (es-ES, humor over corporate).
+  The owner explicitly enjoys Hexi — invest here.
+4. **Data-viz language**: the gauges/sparklines are generic. A hextech gauge (hex-segmented arc),
+  gold sparkline with area glow, damage-split bar as two energy beams meeting at the split point.
+  Small, reusable SVG components — keep them presentational (props in, no IPC inside).
+5. **Layout rhythm**: the Live view is a grid of boxes with equal visual weight. Establish
+  hierarchy: the recommendation card is the hero (bigger, centered, glowing), teams/objectives
+  are ambient context (dimmer, compact). The owner reads the app on a second monitor mid-game —
+  optimize for 2-second glances: bigger numbers, fewer words, stronger color coding.
+6. **Sound design**: current chimes are synthesized sine blips. A tiny set of richer cues
+  (recommendation ready / spike / objective window / victory) still WebAudio-synthesized but with
+  envelopes+harmonics, volume setting, and per-category toggles.
+7. **Onboarding personality**: the friends build will be someone's first contact — Hexi should
+  walk the first-run setup ("¡Hola! Soy Hexi. Necesito una llave para mirar tus partidas…").
+
+Practical notes: all of this is renderer-only (no engine changes), test with the replay/scenario
+tools instead of real games, screenshot before/after for the worklog. Tailwind 4 + CSS variables
+are already set up for theming; framer-motion is allowed ONLY with an ADR (prefer CSS).
+
+## 6. Operating the dev toolkit (how to test without playing)
+
+- **Replay a real game**: Ajustes → Herramientas de prueba → pick a recording (4 committed under
+  `fixtures/recordings/`) → x8. Drives the REAL pipeline (engine, alerts, overlay, Hexi).
+- **Force a situation**: scenario builder (same panel) — set minute/gold/items/champions for all
+  10 players, "Aplicar cambios" re-emits and fires diff events (spike alerts etc.).
+- **Fake champ select**: one click; or build a custom draft (partial picks, bans, intent).
+- **Backtest**: `npm run backtest '--' --last 100` (PowerShell needs the quoted `--`).
+- **Meta crawler**: Ajustes → Datos meta → start; watch counts per patch. It shares the limiter,
+  so a history sync will slow it down (by design).
+
+## 7. Gotchas for AI sessions (learned the hard way)
+
+- **Tests run under Electron's Node** (`scripts/electron-node.mjs`, ELECTRON_RUN_AS_NODE=1):
+  `import { app } from 'electron'` in test-reachable code returns undefined members — keep
+  electron imports out of pure modules; inject (see `riot/apikey.ts` codec pattern).
+- **better-sqlite3 is compiled for Electron's ABI** (postinstall). If node_modules breaks:
+  `npx electron-builder install-app-deps`. System-Node scripts can't open the DB.
+- **PowerShell strips a bare `--`** in `npm run x -- --flag`: quote it (`'--'`) or use Git Bash.
+- **Riot IDs from the client carry invisible BiDi characters** — always through
+  `normalizeRiotId` (`src/main/riot/riotid.ts`).
+- **Dev API keys 401 for a few minutes after generation** ("Unknown apikey") — wait, don't debug.
+- **zod schemas deliberately strip identity fields** in champ select — never "fix" that.
+- **Never log the API key**, never send it to the renderer, never commit `.env`.
+- The session machine treats **:2999 as the source of truth for inGame** — LCU can lie during
+  loading screens; don't reorder that logic.
+- Spawn constants (dragon/baron timers) are game knowledge that drifts per patch — they live in
+  documented constants (`hooks.ts`), check them after big patches.
+- New champions make the damage-profile completeness test fail **loudly on purpose** — add the
+  profile, verify vs real builds if unsure (the Locke incident: a wrong guess = 0% agreement).
+- `fixtures/recordings/` is untracked by default decision? — NO: recordings are committed after
+  anonymization (`npm run fixtures:anonymize`). Check `git status` before assuming.
+
+## 8. Riot policy quick reference (§ CLAUDE.md, expanded with precedent)
+
+Declined and must stay declined (owner asked, twice):
+- Enemy cooldown/flash/ultimate tracking in ANY form, including manual click-to-track and
+  ally-ping parsing. Banned by Riot (March 2025).
+
+Fine and shipped: everything derived from screen-visible info (enemy items/levels from the
+scoreboard, own runes, event feed deaths), the owner's own history, and anonymous aggregates
+(the meta crawler stores no identities). When in doubt: "could the player see this on screen
+right now?" — if no, don't build it.
+
+## 9. State of this handoff's session (2026-07-06)
+
+Done this session: API key entry in Ajustes (safeStorage), NSIS installer (`npm run dist`),
+generated app icon, this document, `docs/INSTALAR.md`. See the worklog entry for files/details.
+
+Torch passed. Cuida a Hexi. 🔷
