@@ -220,29 +220,52 @@ export default function ChampSelectPanel(props: {
         {insights !== null && insights.picks.length > 0 && (
           <div className="rounded border border-indigo-500/30 bg-slate-950/60 p-2">
             <p className="mb-1.5 text-[11px] font-semibold text-indigo-300">
-              ¿Qué te pego? Sugerencias según tus propias partidas
+              ¿Qué te pego? Tus partidas + datos Master+ + encaje de kit
             </p>
-            <div className="flex flex-wrap gap-3">
-              {insights.picks.map((pick) => (
-                <div key={pick.championId} className="flex items-center gap-2" title={pick.reasons.join('\n')}>
+            <div className="flex flex-col gap-2">
+              {insights.picks.map((pick, index) => (
+                <div
+                  key={pick.championId}
+                  className={`flex items-start gap-2 rounded p-1.5 ${
+                    index === 0 ? 'bg-indigo-500/10' : ''
+                  }`}
+                  title={pick.reasons.join('\n')}
+                >
                   <img
                     src={`ddicon://champion/${pick.championId}.png`}
                     alt={pick.name}
                     className="h-10 w-10 rounded border border-slate-700"
                   />
-                  <div>
-                    <p className="text-xs font-semibold text-slate-200">{pick.name}</p>
-                    <p className="text-[11px] text-slate-400">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-slate-200">
+                      {pick.name}{' '}
                       <span
                         className={`font-mono ${pick.winratePct >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}
                       >
                         {pick.winratePct.toFixed(0)}%
                       </span>{' '}
-                      en {pick.games} partidas
-                      {pick.reasons.length > 1 && (
-                        <span className="text-slate-500"> · {pick.reasons[1]}</span>
-                      )}
+                      <span className="font-normal text-slate-500">
+                        en {pick.games} partidas
+                      </span>
                     </p>
+                    <ul className="mt-0.5 space-y-px">
+                      {/* reasons[0] repeats the WR shown above — list the rest. */}
+                      {pick.reasons.slice(1, 5).map((reason, reasonIndex) => (
+                        <li
+                          key={reasonIndex}
+                          className={`truncate text-[11px] ${
+                            reason.includes('Master+')
+                              ? 'text-amber-300/90'
+                              : reason.startsWith('ojo:') || reason.includes('te costará')
+                                ? 'text-rose-300/90'
+                                : 'text-slate-400'
+                          }`}
+                          title={reason}
+                        >
+                          · {reason}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               ))}
