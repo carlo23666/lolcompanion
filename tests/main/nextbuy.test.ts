@@ -9,7 +9,9 @@ import {
   endgameRecommendation,
   loadBaselinePool,
   missingFor,
-  nextBuyRecommendation
+  nextBuyRecommendation,
+  resolveBaseline,
+  type MetaItemsInput
 } from '@main/engine/nextbuy'
 import { recommend } from '@main/engine/recommend'
 import type { StaticData } from '@main/staticdata/manager'
@@ -146,6 +148,72 @@ describe('nextBuyRecommendation', () => {
     const rec = nextBuyRecommendation(state, staticData, TEST_POOL)
     expect(rec?.action).toBe('delay')
     expect(rec?.reasons.join(' ')).toContain('Guarda oro')
+  })
+})
+
+describe('meta fallback baseline (Master+ items)', () => {
+  // Kraken (3153-like) → use real SR items: IE 3031, Runaan 3085, LDR 3036, boots 3006, GA 3026, QSS 3139.
+  const META: MetaItemsInput = {
+    games: 120,
+    items: [
+      { itemId: 3031, games: 100, wins: 55 },
+      { itemId: 3085, games: 90, wins: 50 },
+      { itemId: 3006, games: 85, wins: 47 },
+      { itemId: 3036, games: 60, wins: 33 },
+      { itemId: 3026, games: 40, wins: 22 },
+      { itemId: 3139, games: 20, wins: 11 }
+    ]
+  }
+
+  it('champion outside the pool but with meta data → Master+ build advice', () => {
+    const state = selfWith('Teemo', [], 1200)
+    const rec = nextBuyRecommendation(state, staticData, TEST_POOL, META)
+    expect(rec).not.toBeNull()
+    expect(rec?.reasons.join(' ')).toContain('Master+')
+  })
+
+  it('pool baseline wins over meta when both exist', () => {
+    const state = selfWith('Jinx', [], 1200)
+    const rec = nextBuyRecommendation(state, staticData, TEST_POOL, META)
+    expect(rec?.reasons.join(' ')).toContain('tu build')
+    expect(rec?.reasons.join(' ')).not.toContain('Master+')
+  })
+
+  it('thin samples are rejected (champion games and per-item games gates)', () => {
+    const state = selfWith('Teemo', [], 1200)
+    expect(
+      resolveBaseline(state, staticData, TEST_POOL, { ...META, games: 10 })
+    ).toBeNull()
+    expect(
+      resolveBaseline(state, staticData, TEST_POOL, {
+        games: 120,
+        items: META.items.map((entry) => ({ ...entry, games: 2 }))
+      })
+    ).toBeNull()
+  })
+
+  it('meta core keeps only completed SR items, top 5 by frequency', () => {
+    const state = selfWith('Teemo', [], 1200)
+    const withJunk: MetaItemsInput = {
+      games: 120,
+      items: [
+        { itemId: 1038, games: 100, wins: 50 }, // component (depth 1) → out
+        { itemId: 3363, games: 100, wins: 50 }, // trinket → out
+        ...META.items
+      ]
+    }
+    const baseline = resolveBaseline(state, staticData, TEST_POOL, withJunk)
+    expect(baseline?.source).toBe('meta')
+    expect(baseline?.core).toEqual([3031, 3085, 3006, 3036, 3026])
+    expect(baseline?.situational).toEqual([3139])
+  })
+
+  it('recommend() flows the meta baseline end to end', () => {
+    const state = selfWith('Teemo', [], 5000)
+    const recs = recommend(state, staticData, TEST_POOL, META)
+    const top = recs[0]
+    expect(top?.itemId).toBe(3031)
+    expect(top?.reasons.join(' ')).toContain('Master+')
   })
 })
 

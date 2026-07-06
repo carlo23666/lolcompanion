@@ -3,11 +3,11 @@ import { app } from 'electron'
 import type { GameState } from '@shared/gamestate'
 import type { LiveClientSnapshot } from '@shared/schemas/liveclient'
 import type { AppDatabase } from '../db'
-import { LiveSessionRepo } from '../db/repos'
+import { LiveSessionRepo, MetaRepo } from '../db/repos'
 import { SettingsRepo, SETTING_KEYS } from '../db/repos/settings'
 import { diffGameStates } from '../engine/diff'
 import { normalizeSnapshot } from '../engine/normalize'
-import { recommend } from '../engine/recommend'
+import { recommend, type MetaItemsInput } from '../engine/recommend'
 import { broadcast } from '../ipc'
 import { getStaticDataManager } from '../staticdata'
 import type { StaticData } from '../staticdata/manager'
@@ -61,6 +61,19 @@ export function createSnapshotProcessor(
   let previousState: GameState | null = null
   let lastPersistedTop = ''
 
+  // Master+ items for the own champion+role — backs the build advice when
+  // the champion has no pool.json entry. One lookup per champion+role.
+  let metaKey = ''
+  let metaItems: MetaItemsInput | undefined
+  const lookupMetaItems = (champion: string, role: string): MetaItemsInput | undefined => {
+    const repo = new MetaRepo(db)
+    const patch = repo.latestPatch()
+    if (patch === null) return undefined
+    const winrate = repo.championWinrate(champion, role, patch)
+    if (winrate === null) return undefined
+    return { items: repo.topItems(champion, role, patch, 12), games: winrate.games }
+  }
+
   return {
     process(snapshot, raw): void {
       broadcast('live:snapshot', snapshot)
@@ -76,7 +89,12 @@ export function createSnapshotProcessor(
       }
       previousState = state
 
-      const recommendations = recommend(state, staticData)
+      const key = `${state.self.championId}|${state.self.position}`
+      if (key !== metaKey) {
+        metaKey = key
+        metaItems = lookupMetaItems(state.self.championId, state.self.position)
+      }
+      const recommendations = recommend(state, staticData, undefined, metaItems)
       broadcast('gamestate:recommendations', {
         gameTimeS: state.gameTimeS,
         recommendations
@@ -101,6 +119,9 @@ export function createSnapshotProcessor(
       persister?.endSession()
       previousState = null
       lastPersistedTop = ''
+      // Re-query next game: the crawler may have aggregated more since.
+      metaKey = ''
+      metaItems = undefined
     }
   }
 }

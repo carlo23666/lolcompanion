@@ -40,6 +40,58 @@ export function findBaseline(
   return entries.find((entry) => entry.role === role) ?? entries[0] ?? null
 }
 
+/**
+ * Master+ item aggregates for the OWN champion+role, passed in by the caller
+ * (the engine stays pure — no DB access here). Fallback build source for
+ * champions outside the owner's pool.json.
+ */
+export interface MetaItemsInput {
+  /** Most-bought completed items, most games first (meta_champion_items). */
+  items: { itemId: number; games: number; wins: number }[]
+  /** Aggregated games for the champion+role (sample-size gate). */
+  games: number
+}
+
+// Sample gates: below these the "meta build" is noise, better to say nothing.
+const META_MIN_CHAMP_GAMES = 20
+const META_MIN_ITEM_GAMES = 5
+
+export interface EffectiveBaseline {
+  core: number[]
+  situational: number[]
+  /** Reason wording differs: "tu build" (pool) vs "build Master+" (meta). */
+  source: 'pool' | 'meta'
+}
+
+/**
+ * The build the engine advises from: the owner's pool entry when it exists,
+ * otherwise a synthetic baseline from Master+ frequencies — frequency order
+ * approximates build order (final-build data has no timestamps).
+ */
+export function resolveBaseline(
+  state: GameState,
+  staticData: StaticData,
+  pool: BaselinePool,
+  meta?: MetaItemsInput
+): EffectiveBaseline | null {
+  const own = findBaseline(pool, state.self.championId, state.self.position)
+  if (own) return { core: own.core, situational: own.situational, source: 'pool' }
+  if (!meta || meta.games < META_MIN_CHAMP_GAMES) return null
+  const usable = meta.items.filter((entry) => {
+    if (entry.games < META_MIN_ITEM_GAMES) return false
+    const node = staticData.itemGraph.nodes.get(entry.itemId)
+    return (
+      node !== undefined && node.availableOnSR && node.depth >= 2 && occupiesBuildSlot(node)
+    )
+  })
+  if (usable.length < 3) return null
+  return {
+    core: usable.slice(0, 5).map((entry) => entry.itemId),
+    situational: usable.slice(5, 8).map((entry) => entry.itemId),
+    source: 'meta'
+  }
+}
+
 interface MissingBreakdown {
   /** Gold still needed to finish the item given owned components. */
   missingGold: number
@@ -90,9 +142,10 @@ export function missingFor(
 export function nextBuyRecommendation(
   state: GameState,
   staticData: StaticData,
-  pool: BaselinePool = loadBaselinePool()
+  pool: BaselinePool = loadBaselinePool(),
+  meta?: MetaItemsInput
 ): Recommendation | null {
-  const baseline = findBaseline(pool, state.self.championId, state.self.position)
+  const baseline = resolveBaseline(state, staticData, pool, meta)
   if (!baseline) return null
 
   const graph = staticData.itemGraph
@@ -142,6 +195,10 @@ export function nextBuyRecommendation(
   const targetName = graph.nodes.get(target)?.name ?? `objeto ${String(target)}`
   const ordinal = ['1º', '2º', '3º', '4º', '5º', '6º'][coreIndex] ?? `${String(coreIndex + 1)}º`
   const gold = state.self.currentGold
+  const buildLabel =
+    baseline.source === 'pool'
+      ? `${ordinal} objeto de tu build de ${state.self.championName}`
+      : `${ordinal} objeto más comprado en Master+ con ${state.self.championName} este parche`
 
   const { missingGold, missingComponents } = missingFor(
     target,
@@ -165,7 +222,7 @@ export function nextBuyRecommendation(
       action: 'prioritize',
       score: 80,
       reasons: [
-        `${targetName} es el ${ordinal} objeto de tu build de ${state.self.championName}`,
+        `${targetName} es el ${buildLabel}`,
         `Puedes completarlo YA: te cuesta ${String(Math.round(missingGold))} de oro y llevas ${String(Math.floor(gold))}`
       ]
     })
@@ -186,7 +243,7 @@ export function nextBuyRecommendation(
       action: 'add',
       score: 65,
       reasons: [
-        `${component.name} (${String(component.totalGold)} de oro) avanza tu ${ordinal} objeto: ${targetName}`,
+        `${component.name} (${String(component.totalGold)} de oro) avanza el ${buildLabel}: ${targetName}`,
         `A ${targetName} le faltan ${String(Math.round(missingGold))} de oro en total; llevas ${String(Math.floor(gold))}`
       ]
     })
@@ -199,7 +256,7 @@ export function nextBuyRecommendation(
     action: 'delay',
     score: 50,
     reasons: [
-      `Guarda oro para ${targetName} (${ordinal} objeto de tu build): te faltan ${String(Math.round(missingGold - gold))}`,
+      `Guarda oro para ${targetName} (${buildLabel}): te faltan ${String(Math.round(missingGold - gold))}`,
       `Ninguna pieza suelta merece la pena ahora mismo (llevas ${String(Math.floor(gold))} de oro)`
     ]
   })
@@ -214,9 +271,10 @@ export function nextBuyRecommendation(
 export function endgameRecommendation(
   state: GameState,
   staticData: StaticData,
-  pool: BaselinePool = loadBaselinePool()
+  pool: BaselinePool = loadBaselinePool(),
+  meta?: MetaItemsInput
 ): Recommendation | null {
-  const baseline = findBaseline(pool, state.self.championId, state.self.position)
+  const baseline = resolveBaseline(state, staticData, pool, meta)
   if (!baseline) return null
 
   const graph = staticData.itemGraph
@@ -237,6 +295,10 @@ export function endgameRecommendation(
     }
     const { missingGold } = missingFor(targetNode.id, ownedCounts, staticData)
     const affordable = gold >= missingGold
+    const situationalLabel =
+      baseline.source === 'pool'
+        ? `${targetNode.name} es tu situacional`
+        : `${targetNode.name} es compra habitual en Master+ con ${state.self.championName}`
     return {
       itemId: targetNode.id,
       itemName: targetNode.name,
@@ -244,7 +306,7 @@ export function endgameRecommendation(
       action: affordable ? 'prioritize' : 'add',
       score: affordable ? 75 : 60,
       reasons: [
-        `Tu build principal de ${state.self.championName} está completa y te queda hueco: ${targetNode.name} es tu situacional`,
+        `Tu build principal de ${state.self.championName} está completa y te queda hueco: ${situationalLabel}`,
         affordable
           ? `Puedes comprarlo YA: te cuesta ${String(Math.round(missingGold))} de oro y llevas ${String(Math.floor(gold))}`
           : `Te faltan ${String(Math.round(missingGold - gold))} de oro (cuesta ${String(Math.round(missingGold))} y llevas ${String(Math.floor(gold))})`

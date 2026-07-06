@@ -5,22 +5,28 @@ import type { StaticData } from '../staticdata/manager'
 import { runEngine } from './index'
 import {
   endgameRecommendation,
-  findBaseline,
   loadBaselinePool,
-  nextBuyRecommendation
+  nextBuyRecommendation,
+  resolveBaseline,
+  type MetaItemsInput
 } from './nextbuy'
+
+export type { MetaItemsInput } from './nextbuy'
 
 /**
  * Full recommendation pass: baseline next-buy + WP-007 rule adjustments.
  * Rule items that sit in the champion's situational slots get a boost.
- * Pure and synchronous.
+ * `meta` (optional, Master+ aggregates for the own champion+role) backs the
+ * build advice when the champion is outside the owner's pool. Pure and
+ * synchronous — the caller does any DB lookups.
  */
 export function recommend(
   state: GameState,
   staticData: StaticData,
-  pool: BaselinePool = loadBaselinePool()
+  pool: BaselinePool = loadBaselinePool(),
+  meta?: MetaItemsInput
 ): Recommendation[] {
-  const baseline = findBaseline(pool, state.self.championId, state.self.position)
+  const baseline = resolveBaseline(state, staticData, pool, meta)
   const ruleRecommendations = runEngine(state, staticData).map((rec) => {
     if (rec.itemId !== null && baseline?.situational.includes(rec.itemId) === true) {
       return {
@@ -28,7 +34,9 @@ export function recommend(
         score: Math.min(100, rec.score + 10),
         reasons: [
           ...rec.reasons,
-          `${rec.itemName ?? 'Este objeto'} está en tus situacionales de ${state.self.championName}`
+          baseline.source === 'pool'
+            ? `${rec.itemName ?? 'Este objeto'} está en tus situacionales de ${state.self.championName}`
+            : `${rec.itemName ?? 'Este objeto'} es compra habitual en Master+ con ${state.self.championName}`
         ]
       }
     }
@@ -38,8 +46,8 @@ export function recommend(
   // Core first; once it's done, the endgame layer fills slots 5-6 and flags
   // leftover starter items — the engine must never go silent mid-game.
   const nextBuy =
-    nextBuyRecommendation(state, staticData, pool) ??
-    endgameRecommendation(state, staticData, pool)
+    nextBuyRecommendation(state, staticData, pool, meta) ??
+    endgameRecommendation(state, staticData, pool, meta)
   const all = nextBuy ? [nextBuy, ...ruleRecommendations] : ruleRecommendations
 
   // Dedupe by item: keep the highest score, merge every reason.
