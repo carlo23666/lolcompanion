@@ -64,8 +64,8 @@ export default function RecommendationCard(props: {
   return (
     // Outer wrapper owns the pulse shadow (the hex clip would cut it off).
     <div className={`card-in rounded-lg ${pulse ? 'gold-pulse' : ''}`}>
-      <section className="hex-card energy-border bg-slate-900 p-3.5">
-      <div className="mb-2 flex items-center justify-between">
+      <section className="hex-card energy-border bg-slate-900 p-4">
+      <div className="mb-2.5 flex items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">
           ◆ Recomendación
         </h3>
@@ -77,55 +77,76 @@ export default function RecommendationCard(props: {
         </button>
       </div>
 
-      <div className="flex items-start gap-3">
-        {top.itemId !== null && (
-          <img
-            src={`ddicon://item/${String(top.itemId)}.png`}
-            alt={top.itemName ?? ''}
-            className="h-14 w-14 rounded border border-amber-400/50 shadow-[0_0_12px_rgba(200,170,110,0.25)]"
-          />
-        )}
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="text-lg leading-tight font-semibold text-slate-100">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[auto_minmax(0,1fr)_220px]">
+        <div className="flex flex-col items-center gap-1.5">
+          {top.itemId !== null && (
+            <img
+              src={`ddicon://item/${String(top.itemId)}.png`}
+              alt={top.itemName ?? ''}
+              className="h-16 w-16 rounded border border-amber-400/50 shadow-[0_0_14px_rgba(200,170,110,0.3)]"
+            />
+          )}
+          <span
+            className={`rounded border px-1.5 py-0.5 text-[10px] font-bold whitespace-nowrap ${ACTION_STYLE[top.action]}`}
+          >
+            {ACTION_LABEL[top.action]}
+          </span>
+        </div>
+
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-baseline gap-2">
+            <p className="text-xl leading-tight font-semibold text-slate-100">
               {top.itemName ?? top.category}
             </p>
             <span
-              className={`rounded border px-1.5 py-0.5 text-[10px] font-bold ${ACTION_STYLE[top.action]}`}
+              className="text-[11px] text-slate-500"
+              style={{ fontVariantNumeric: 'tabular-nums' }}
             >
-              {ACTION_LABEL[top.action]}
+              puntuación {top.score}
             </span>
-            <span className="text-[11px] text-slate-500">puntuación {top.score}</span>
           </div>
-          <ul className="mt-1 space-y-0.5">
+          <ul className="mt-1.5 space-y-1">
             {top.reasons.slice(0, 3).map((reason, index) => (
-              <li key={index} className="text-xs text-slate-300">
+              <li
+                key={index}
+                className={`text-xs leading-snug ${
+                  reason.includes('Master+') ? 'text-amber-300/90' : 'text-slate-300'
+                }`}
+              >
                 · {reason}
               </li>
             ))}
           </ul>
         </div>
-      </div>
 
-      {rest.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5 border-t border-slate-800 pt-2">
-          {rest.slice(0, 3).map((rec, index) => (
-            <span
-              key={index}
-              className="flex items-center gap-1 rounded bg-slate-800 px-1.5 py-0.5 text-[11px] text-slate-300"
-            >
-              {rec.itemId !== null && (
-                <img
-                  src={`ddicon://item/${String(rec.itemId)}.png`}
-                  alt=""
-                  className="h-4 w-4 rounded-sm"
-                />
-              )}
-              {rec.itemName ?? rec.category} · {rec.score}
-            </span>
-          ))}
-        </div>
-      )}
+        {rest.length > 0 && (
+          <div className="flex flex-col gap-1.5 md:border-l md:border-slate-800 md:pl-4">
+            <p className="text-[10px] font-semibold tracking-widest text-slate-500 uppercase">
+              Alternativas
+            </p>
+            {rest.slice(0, 3).map((rec, index) => (
+              <div key={index} className="flex items-center gap-2">
+                {rec.itemId !== null && (
+                  <img
+                    src={`ddicon://item/${String(rec.itemId)}.png`}
+                    alt=""
+                    className="h-7 w-7 rounded-sm border border-slate-700"
+                  />
+                )}
+                <span className="min-w-0 flex-1 truncate text-xs text-slate-300">
+                  {rec.itemName ?? rec.category}
+                </span>
+                <span
+                  className="text-[11px] text-slate-500"
+                  style={{ fontVariantNumeric: 'tabular-nums' }}
+                >
+                  {rec.score}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {showHistory && history.length > 0 && (
         <ul className="mt-2 max-h-40 space-y-0.5 overflow-y-auto border-t border-slate-800 pt-2">

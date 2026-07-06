@@ -12,3 +12,6 @@ coverage/
 reports/
 *.log
 *.tsbuildinfo
+
+# browser-preview icon cache (copied from userData by the preview setup)
+src/renderer/public/ddcache/

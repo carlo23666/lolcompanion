@@ -274,4 +274,12 @@ Roadmap deltas: §4.1's "meta v2 item order" now has a concrete INBOX note (craw
 aggregate purchase order); overlay-Tab-expand is documented as declined-without-ADR
 (INBOX); coach extensions (draft commentary, streaming) listed in INBOX.
 
-Torch passed. Cuida a Hexi. 🔷
+**Design work MUST use the browser preview harness** (added 2026-07-06): run `npm run dev`,
+copy `%APPDATA%/lol-companion/staticdata/icons` → `src/renderer/public/ddcache` (gitignored),
+then open `http://localhost:5173/?phase=inGame|champSelect|idle&theme=recreativa|sakura|cabina`
+in a browser — `src/renderer/src/mockapi.ts` fakes `window.api` with fixture data. Screenshot,
+judge, iterate; never ship CSS you haven't seen rendered. The owner benchmarks against Blitz-level
+polish: max-w-6xl centered content, labeled stat blocks with tabular numerals, champion/item art
+everywhere, eyebrow labels — density over air.
+
+Torch passed. Cuida a la mascota (Bitxo, Kumo o Byte, según el tema). 🔷

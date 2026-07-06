@@ -260,10 +260,11 @@ export default function ChampSelectPanel(props: {
           )}
         </div>
 
+        <div className="grid grid-cols-1 items-start gap-3 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         {insights !== null && insights.picks.length > 0 && (
-          <div className="rounded border border-indigo-500/30 bg-slate-950/60 p-2">
-            <p className="mb-1.5 text-[11px] font-semibold text-indigo-300">
-              ¿Qué te pego? Tus partidas + datos Master+ + encaje de kit
+          <div className="rounded border border-indigo-500/30 bg-slate-950/60 p-2.5">
+            <p className="mb-2 text-[10px] font-semibold tracking-widest text-indigo-300 uppercase">
+              ¿Qué te pego? · tus partidas + Master+ + kit
             </p>
             <div className="flex flex-col gap-2">
               {insights.picks.map((pick, index) => (
@@ -315,14 +316,20 @@ export default function ChampSelectPanel(props: {
         )}
 
         {insights !== null && insights.tips.length > 0 && (
-          <ul className="space-y-1 rounded border border-slate-800 bg-slate-950/60 p-2">
-            {insights.tips.map((tip, index) => (
-              <li key={index} className="alert-in text-xs text-slate-300">
-                💡 {tip}
-              </li>
-            ))}
-          </ul>
+          <div className="rounded border border-slate-800 bg-slate-950/60 p-2.5">
+            <p className="mb-2 text-[10px] font-semibold tracking-widest text-slate-400 uppercase">
+              Plan de compra contra esta comp
+            </p>
+            <ul className="space-y-1.5">
+              {insights.tips.map((tip, index) => (
+                <li key={index} className="alert-in text-xs leading-snug text-slate-300">
+                  💡 {tip}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
+        </div>
 
         {insights?.ownPlan && (
           <div className="rounded border border-amber-400/20 bg-slate-950/60 p-2">

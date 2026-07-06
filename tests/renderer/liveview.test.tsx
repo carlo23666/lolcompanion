@@ -94,7 +94,8 @@ describe('LiveView', () => {
     // Teams: self highlighted among allies, 5 enemies with items.
     expect(screen.getByRole('heading', { name: 'Tu equipo' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Enemigos' })).toBeInTheDocument()
-    expect(screen.getByText('Jinx')).toBeInTheDocument()
+    // Jinx appears in the HUD strip AND her team row.
+    expect(screen.getAllByText('Jinx').length).toBeGreaterThanOrEqual(2)
     expect(screen.getByText('Aatrox')).toBeInTheDocument()
 
     // Item icons come from the local ddicon protocol, never the CDN.

@@ -1,6 +1,13 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-06 (9) — Screenshot-driven pro polish + BROWSER PREVIEW HARNESS (owner: "aim at Blitz")
+**Done (check green, 309):** first design pass done with EYES — the app was screenshotted and iterated against real renders.
+1. **Browser preview harness** (design tool, dev-only, permanent): `src/renderer/src/mockapi.ts` fills `window.api` with fixture-backed data when the preload is absent, so `http://localhost:5173/?phase=inGame|champSelect|idle&theme=recreativa|sakura|cabina` renders any state in a plain browser. Icons: copy `%APPDATA%/lol-companion/staticdata/icons` → `src/renderer/public/ddcache` (gitignored) — the mock rewrites `ddicon://` to it. `.claude/launch.json` starts the server; screenshots via a read-tier browser grant. THIS is how visual work should be done from now on.
+2. **Findings from the first real screenshots**: content stretched edge-to-edge on 2560px (the "empty" feeling), recommendation card 80% dead space, status row microscopic. Fixes: `max-w-6xl` centered content on all views; status row → HUD strip (champion portrait + TIEMPO/ORO/KDA/CS labeled blocks, tabular-nums, 20px numerals); recommendation card → 3-zone grid (icon+action | reasons | ALTERNATIVAS rail with icons+scores, Master+ reasons gold); champ select picks+tips → 2-column grid with uppercase eyebrow labels.
+3. Verified per-theme shells render as designed (arcade marquee+coin strip; sakura notebook rail with Kumo; icons/splashes live).
+**Files:** src/renderer/src/{mockapi(new),main}.tsx|ts, src/renderer/src/components/{LiveView,RecommendationCard,ChampSelectPanel,HistoryView,SettingsView}.tsx, .claude/launch.json (new), .gitignore, tests/renderer/{recommendation-card,liveview}.test.tsx.
+
 ## 2026-07-06 (8) — Structural per-identity redesign: shells, grids, control chrome (owner: "not just colors")
 **Done (check green, 309):** the identities now differ in STRUCTURE, not just skin.
 1. **Per-theme app shells** (`Shell.tsx` replaces TopBar): Recreativa = arcade cabinet (marquee header with pixel-font nav buttons, coin-slot status strip at the BOTTOM: phase + "INSERT COIN · 1UP"); Sakura = notebook (washi bookmark tabs in a LEFT rail, mascot hanging at the rail's foot); Cabina = cockpit (narrow icon instrument rail left + telemetry readout strip top). Nav buttons keep accessible names (Live/Historial/Ajustes) in all three (uppercase via CSS only).

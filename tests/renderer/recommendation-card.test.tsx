@@ -43,9 +43,11 @@ describe('RecommendationCard', () => {
     expect(icon.getAttribute('src')).toBe('ddicon://item/3123.png')
   })
 
-  it('lists secondary recommendations as chips', () => {
+  it('lists secondary recommendations in the alternatives rail', () => {
     render(<RecommendationCard payload={payload} currentGold={1250} />)
-    expect(screen.getByText(/Ángel de la guarda · 55/)).toBeInTheDocument()
+    expect(screen.getByText('Alternativas')).toBeInTheDocument()
+    expect(screen.getByText('Ángel de la guarda')).toBeInTheDocument()
+    expect(screen.getByText('55')).toBeInTheDocument()
   })
 
   it('records an auditable history when the top recommendation changes', async () => {

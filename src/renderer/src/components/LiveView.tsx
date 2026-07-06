@@ -83,20 +83,47 @@ function InGameLayout(props: {
   const theme = useTheme()
   const { gameState, curve } = props
 
+  const stat = (label: string, value: React.ReactNode, accent = false): React.JSX.Element => (
+    <div className="flex flex-col px-4 first:pl-0">
+      <span className="text-[10px] font-semibold tracking-widest text-slate-500 uppercase">
+        {label}
+      </span>
+      <span
+        className={`text-xl leading-tight font-semibold ${accent ? 'text-amber-300' : 'text-slate-100'}`}
+        style={{ fontVariantNumeric: 'tabular-nums' }}
+      >
+        {value}
+      </span>
+    </div>
+  )
   const statusBar = (
-    <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-800 bg-slate-900 px-4 py-2 text-sm">
-      <span className="font-mono text-lg">⏱ {formatClock(gameState.gameTimeS)}</span>
-      <span className="font-mono text-amber-300">
-        💰 <AnimatedNumber value={Math.round(gameState.self.currentGold)} />
-      </span>
-      <span className="font-mono text-slate-300">
-        {gameState.self.scores.kills}/{gameState.self.scores.deaths}/
-        {gameState.self.scores.assists}
-      </span>
-      <PersonalCurveChip gameState={gameState} curve={curve} />
-      <span className="ml-auto text-xs text-slate-500">
-        {gameState.self.championName} · nv {gameState.self.level} · parche {gameState.patch}
-      </span>
+    <div className="flex items-center rounded-lg border border-slate-800 bg-slate-900 px-4 py-2.5">
+      <div className="mr-4 flex items-center gap-2.5 border-r border-slate-800 pr-4">
+        <img
+          src={`ddicon://champion/${gameState.self.championId}.png`}
+          alt={gameState.self.championName}
+          className="h-10 w-10 rounded border border-amber-400/40"
+        />
+        <div>
+          <p className="text-sm leading-tight font-semibold text-slate-100">
+            {gameState.self.championName}
+          </p>
+          <p className="text-[11px] text-slate-500">nivel {gameState.self.level}</p>
+        </div>
+      </div>
+      <div className="flex divide-x divide-slate-800">
+        {stat('Tiempo', formatClock(gameState.gameTimeS))}
+        {stat('Oro', <AnimatedNumber value={Math.round(gameState.self.currentGold)} />, true)}
+        {stat(
+          'KDA',
+          `${String(gameState.self.scores.kills)}/${String(gameState.self.scores.deaths)}/${String(gameState.self.scores.assists)}`
+        )}
+        {stat('CS', gameState.self.scores.creepScore)}
+      </div>
+      <div className="ml-4">
+        <PersonalCurveChip gameState={gameState} curve={curve} />
+      </div>
+      <span className="ml-auto text-[11px] text-slate-600">parche {gameState.patch}</span>
     </div>
   )
   const hero = (
@@ -199,8 +226,9 @@ export default function LiveView(props: {
 
   return (
     // min-h-full (not h-full): the view must be able to GROW past the
-    // viewport so <main>'s scrollbar reaches everything (owner bug report).
-    <div className="flex min-h-full flex-col gap-3 p-4">
+    // viewport so <main>'s scrollbar reaches everything. max-w keeps the
+    // content composed on wide monitors instead of stretched and empty.
+    <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-3 p-4">
       <h1 className="text-lg font-bold">Live</h1>
 
       {(phase === 'idle' || phase === 'clientOpen') && (

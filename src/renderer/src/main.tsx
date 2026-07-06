@@ -7,6 +7,13 @@ import './assets/main.css'
 const root = document.getElementById('root')
 if (!root) throw new Error('#root element missing in index.html')
 
+// Browser preview (design tool): without the Electron preload there is no
+// window.api — install the fixture-backed mock so the UI renders standalone.
+if (window.api === undefined && import.meta.env.DEV) {
+  const { installMockApi } = await import('./mockapi')
+  installMockApi()
+}
+
 // The overlay window loads the same renderer with ?overlay=1.
 const isOverlay = new URLSearchParams(window.location.search).has('overlay')
 if (isOverlay) {
