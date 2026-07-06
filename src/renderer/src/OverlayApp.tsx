@@ -12,6 +12,8 @@ const ACTION_LABEL: Record<string, string> = {
 }
 
 const ALERT_SHOW_MS = 6000
+// Coach tips are full sentences — give them time to be read.
+const COACH_SHOW_MS = 12000
 
 function formatClock(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60)
@@ -93,14 +95,17 @@ export default function OverlayApp(): React.JSX.Element | null {
   const [pinned, setPinned] = useState(false)
   const lastAlertIdRef = useRef(0)
 
-  // A new spike/objective alert takes over the bubble for a few seconds.
+  // A new spike/objective/coach alert takes over the bubble for a few seconds.
   useEffect(() => {
     const newest = insights.alerts[0]
     if (!newest || newest.id === lastAlertIdRef.current) return
     lastAlertIdRef.current = newest.id
-    if (newest.kind !== 'spike' && newest.kind !== 'objective') return
+    if (newest.kind !== 'spike' && newest.kind !== 'objective' && newest.kind !== 'coach') return
     setActiveAlert(newest)
-    const timer = setTimeout(() => setActiveAlert(null), ALERT_SHOW_MS)
+    const timer = setTimeout(
+      () => setActiveAlert(null),
+      newest.kind === 'coach' ? COACH_SHOW_MS : ALERT_SHOW_MS
+    )
     return () => clearTimeout(timer)
   }, [insights.alerts])
 
@@ -146,15 +151,24 @@ export default function OverlayApp(): React.JSX.Element | null {
           {activeAlert !== null ? (
             <div
               className={`alert-in min-w-0 flex-1 rounded-lg border bg-slate-950/90 px-2.5 py-1.5 shadow-lg backdrop-blur-sm ${
-                activeAlert.kind === 'objective' ? 'border-emerald-500/60' : 'border-amber-400/60'
+                activeAlert.kind === 'objective'
+                  ? 'border-emerald-500/60'
+                  : activeAlert.kind === 'coach'
+                    ? 'border-indigo-500/60'
+                    : 'border-amber-400/60'
               }`}
             >
               <p
                 className={`text-xs font-semibold ${
-                  activeAlert.kind === 'objective' ? 'text-emerald-300' : 'text-amber-300'
+                  activeAlert.kind === 'objective'
+                    ? 'text-emerald-300'
+                    : activeAlert.kind === 'coach'
+                      ? 'text-indigo-300'
+                      : 'text-amber-300'
                 }`}
               >
-                {activeAlert.kind === 'objective' ? '🎯' : '⚠'} {activeAlert.text}
+                {activeAlert.kind === 'objective' ? '🎯' : activeAlert.kind === 'coach' ? '🔮' : '⚠'}{' '}
+                {activeAlert.text}
               </p>
             </div>
           ) : top ? (

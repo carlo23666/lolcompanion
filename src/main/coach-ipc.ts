@@ -19,6 +19,7 @@ export function registerCoachIpc(db: AppDatabase): void {
     return {
       enabled: settings.get(SETTING_KEYS.coachEnabled) === '1',
       model: settings.get(SETTING_KEYS.coachModel) ?? DEFAULT_COACH_MODEL,
+      liveEnabled: settings.get(SETTING_KEYS.coachLive) === '1',
       ...status
     }
   })
@@ -26,6 +27,7 @@ export function registerCoachIpc(db: AppDatabase): void {
   handleInvoke('coach:configure', (config) => {
     settings.set(SETTING_KEYS.coachEnabled, config.enabled ? '1' : '0')
     settings.set(SETTING_KEYS.coachModel, config.model)
+    settings.set(SETTING_KEYS.coachLive, config.liveEnabled ? '1' : '0')
     return { saved: true as const }
   })
 

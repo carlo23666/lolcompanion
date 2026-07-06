@@ -56,9 +56,10 @@ export default function App(): React.JSX.Element {
     const newest = insights.alerts[0]
     if (!newest || newest.id === lastAlertRef.current) return
     lastAlertRef.current = newest.id
-    if (newest.kind === 'spike' || newest.kind === 'objective') {
+    if (newest.kind === 'spike' || newest.kind === 'objective' || newest.kind === 'coach') {
+      // Coach tips stay silent — Hexi reacting is enough mid-game.
       if (newest.kind === 'objective') playObjective()
-      else playAlert()
+      else if (newest.kind === 'spike') playAlert()
       setMascotReactKey((key) => key + 1)
     }
   }, [insights.alerts])

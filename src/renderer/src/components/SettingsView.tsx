@@ -109,6 +109,7 @@ function MetaSection(): React.JSX.Element {
  */
 function CoachSection(): React.JSX.Element {
   const [enabled, setEnabled] = useState(false)
+  const [liveEnabled, setLiveEnabled] = useState(false)
   const [model, setModel] = useState('gemma3:4b')
   const [available, setAvailable] = useState(false)
   const [models, setModels] = useState<string[]>([])
@@ -117,6 +118,7 @@ function CoachSection(): React.JSX.Element {
   useEffect(() => {
     void window.api.invoke('coach:status').then((status) => {
       setEnabled(status.enabled === true)
+      setLiveEnabled(status.liveEnabled === true)
       if (typeof status.model === 'string') setModel(status.model)
       setAvailable(status.available === true)
       if (Array.isArray(status.models)) setModels(status.models)
@@ -124,7 +126,7 @@ function CoachSection(): React.JSX.Element {
   }, [])
 
   const save = async (): Promise<void> => {
-    await window.api.invoke('coach:configure', { enabled, model })
+    await window.api.invoke('coach:configure', { enabled, model, liveEnabled })
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -153,7 +155,17 @@ function CoachSection(): React.JSX.Element {
             checked={enabled}
             onChange={(event) => setEnabled(event.target.checked)}
           />
-          Activar análisis de Hexi en el informe de partida
+          Activar análisis de Hexi (informe de partida y champ select)
+        </label>
+        <label className="flex items-center gap-2 text-slate-400">
+          <input
+            type="checkbox"
+            checked={liveEnabled}
+            disabled={!enabled}
+            onChange={(event) => setLiveEnabled(event.target.checked)}
+          />
+          Consejos EN PARTIDA (~1 por minuto): Hexi sugiere macro en el overlay — visión antes
+          de objetivos, cuándo forzar, cuándo jugar seguro
         </label>
         <label className="text-slate-400">
           Modelo

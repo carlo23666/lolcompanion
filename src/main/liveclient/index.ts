@@ -1,7 +1,9 @@
 import { join } from 'node:path'
 import { app } from 'electron'
-import type { GameState } from '@shared/gamestate'
+import type { GameState, GameStateEvent } from '@shared/gamestate'
 import type { LiveClientSnapshot } from '@shared/schemas/liveclient'
+import { DEFAULT_COACH_MODEL, generateCoachAdvice } from '../coach'
+import { LiveCoach } from '../coach-live'
 import type { AppDatabase } from '../db'
 import { LiveSessionRepo, MetaRepo } from '../db/repos'
 import { SettingsRepo, SETTING_KEYS } from '../db/repos/settings'
@@ -61,6 +63,22 @@ export function createSnapshotProcessor(
   let previousState: GameState | null = null
   let lastPersistedTop = ''
 
+  // Live macro coach: Hexi speaks a short local-AI tip every ~60s in game.
+  // Also runs during replays/scenarios, which is how the owner tests it.
+  const coachSettings = new SettingsRepo(db)
+  const liveCoach = new LiveCoach({
+    isEnabled: () =>
+      coachSettings.get(SETTING_KEYS.coachEnabled) === '1' &&
+      coachSettings.get(SETTING_KEYS.coachLive) === '1',
+    generate: (prompt) =>
+      generateCoachAdvice(
+        coachSettings.get(SETTING_KEYS.coachModel) ?? DEFAULT_COACH_MODEL,
+        prompt
+      ),
+    onTip: (tip) => broadcast('coach:tip', tip),
+    log: (message) => console.log(message)
+  })
+
   // Master+ items for the own champion+role — backs the build advice when
   // the champion has no pool.json entry. One lookup per champion+role.
   let metaKey = ''
@@ -83,8 +101,9 @@ export function createSnapshotProcessor(
       const state = normalizeSnapshot(snapshot, staticData)
       if (!state) return
       broadcast('gamestate:update', state)
+      let events: GameStateEvent[] = []
       if (previousState && previousState.gameTimeS < state.gameTimeS) {
-        const events = diffGameStates(previousState, state)
+        events = diffGameStates(previousState, state)
         if (events.length > 0) broadcast('gamestate:events', events)
       }
       previousState = state
@@ -99,6 +118,7 @@ export function createSnapshotProcessor(
         gameTimeS: state.gameTimeS,
         recommendations
       })
+      liveCoach.onGameState(state, events, recommendations[0] ?? null)
       // Persist for post-game auditing/backtesting, but only when the
       // recommended set actually changes (not every 2s tick).
       const sessionId = persister?.currentSessionId() ?? null
@@ -119,6 +139,7 @@ export function createSnapshotProcessor(
       persister?.endSession()
       previousState = null
       lastPersistedTop = ''
+      liveCoach.reset()
       // Re-query next game: the crawler may have aggregated more since.
       metaKey = ''
       metaItems = undefined

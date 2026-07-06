@@ -14,8 +14,9 @@ export function useIpcEvent<C extends IpcEventChannel>(
 export interface LiveAlert {
   id: number
   gameTimeS: number
-  /** 'spike' = enemy power spike, 'objective' = window to play, 'info' = neutral. */
-  kind: 'spike' | 'objective' | 'info'
+  /** 'spike' = enemy power spike, 'objective' = window to play,
+   * 'coach' = local-AI macro tip, 'info' = neutral. */
+  kind: 'spike' | 'objective' | 'coach' | 'info'
   text: string
 }
 
@@ -175,9 +176,19 @@ export function useLiveInsights(): LiveInsights {
         nextBaronS: baronTaken ? now + BARON_RESPAWN_S : previous.nextBaronS
       }))
     })
+    const offCoach = window.api.on('coach:tip', (tip) => {
+      setInsights((previous) => ({
+        ...previous,
+        alerts: [
+          { id: idRef.current++, gameTimeS: tip.gameTimeS, kind: 'coach' as const, text: tip.text },
+          ...previous.alerts
+        ].slice(0, MAX_ALERTS)
+      }))
+    })
     return () => {
       offState()
       offEvents()
+      offCoach()
     }
   }, [])
 

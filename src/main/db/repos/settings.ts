@@ -33,7 +33,8 @@ export const SETTING_KEYS = {
   soundMuted: 'settings.soundMuted',
   overlayEnabled: 'settings.overlayEnabled',
   theme: 'settings.theme',
-  /** Local-AI coach over Ollama (see main/coach.ts). */
+  /** Local-AI coach over Ollama (see main/coach.ts, main/coach-live.ts). */
   coachEnabled: 'settings.coachEnabled',
-  coachModel: 'settings.coachModel'
+  coachModel: 'settings.coachModel',
+  coachLive: 'settings.coachLive'
 } as const

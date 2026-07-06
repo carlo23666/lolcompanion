@@ -91,10 +91,17 @@ export interface IpcInvokeChannels {
   /** Local-AI coach (Ollama): availability + configuration. */
   'coach:status': {
     args: []
-    result: { enabled: boolean; model: string; available: boolean; models: string[] }
+    result: {
+      enabled: boolean
+      model: string
+      available: boolean
+      models: string[]
+      /** In-game macro tips (Hexi in the overlay, ~1/min). */
+      liveEnabled: boolean
+    }
   }
   'coach:configure': {
-    args: [config: { enabled: boolean; model: string }]
+    args: [config: { enabled: boolean; model: string; liveEnabled: boolean }]
     result: { saved: true }
   }
   /** Spanish coaching prose for a post-game report (facts passed in, localhost-only). */
@@ -175,6 +182,8 @@ export interface IpcEventChannels {
   'history:changed': { matchId: string }
   /** Meta crawler progress ticks. */
   'meta:progress': MetaCrawlProgress
+  /** Live macro tip from the local-AI coach (Hexi speaks it in the overlay). */
+  'coach:tip': { gameTimeS: number; text: string }
 }
 
 export type IpcInvokeChannel = keyof IpcInvokeChannels
@@ -228,7 +237,8 @@ export const IPC_EVENT_CHANNELS: readonly IpcEventChannel[] = [
   'gamestate:events',
   'gamestate:recommendations',
   'history:changed',
-  'meta:progress'
+  'meta:progress',
+  'coach:tip'
 ]
 
 /** Shape of the API the preload script exposes on window.api */

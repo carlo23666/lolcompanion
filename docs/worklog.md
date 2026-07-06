@@ -1,6 +1,11 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-06 (6) — Live AI coach: Hexi real-time macro tips in game (owner request)
+**Done (check green, 304):** `LiveCoach` (`src/main/coach-live.ts`, pure facts/prompt + injected generator, fully tested): every ~60s of game time (≥min 3, throttled, one in flight, goes quiet after 3 Ollama failures) it serializes SCREEN-VISIBLE facts — minute, own KDA/CS/level/gold, both teams' estimated gold, dragon/Barón spawn countdowns (event-tracked, same constants as the renderer hook), last-45s events (deaths, enemy spikes ≥2400g, objectives), engine top recommendation — into a Spanish prompt (≤22 palabras, una frase, anti-hallucination) and broadcasts `coach:tip`. Hexi delivers it: overlay bubble takeover (indigo, 12s) + 🔮 entry in the alert feed + mascot reaction (no sound — deliberate). Gated by new `settings.coachLive` (Ajustes checkbox under the coach panel, requires the master coach toggle). Runs through the shared snapshot processor, so REPLAYS exercise it — that's the test path without playing.
+**Notes:** wave/minion state is NOT in the Live Client API, so "freeze/push the wave" style advice comes from the model reasoning over timing facts (objective spawns, gold in pocket), never from invented wave data; the prompt forbids inventing. Riot §4 respected: every input is on the player's screen.
+**Files:** src/main/{coach-live(new),coach-ipc}.ts, src/main/liveclient/index.ts, src/main/db/repos/settings.ts, src/shared/ipc.ts, src/renderer/src/{hooks.ts,App.tsx,OverlayApp.tsx}, src/renderer/src/components/{LiveInsights,SettingsView}.tsx, tests/main/coach-live.test.ts (new).
+
 ## 2026-07-06 (5) — Champ select: role-less meta fix, coach draft advice, unpicked-ADC tip (owner feedback round 2)
 **Done (check green, 298):** owner reported no Master+ reasons, no AI, and tank armor advice while unpicked.
 1. **Meta with no assigned position**: verified the crawler data is fine (13.8k matches on 16.13; Kaisa BOTTOM 1809 games) — the lookups missed because blind pick/custom sims carry no `ownPosition` and meta tables are role-keyed. `pickSuggestions` now infers each candidate's role as the mode of the owner's own games with that champion when the position is empty.

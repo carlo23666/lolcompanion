@@ -113,11 +113,13 @@ export function AlertFeed(props: { insights: Insights }): React.JSX.Element | nu
               ? 'text-amber-300'
               : alert.kind === 'objective'
                 ? 'text-emerald-300'
-                : 'text-slate-400'
+                : alert.kind === 'coach'
+                  ? 'text-indigo-300'
+                  : 'text-slate-400'
           }`}
         >
           <span className="font-mono text-slate-600">{formatClock(alert.gameTimeS)}</span>{' '}
-          {alert.kind === 'objective' ? '🎯' : '⚠'} {alert.text}
+          {alert.kind === 'objective' ? '🎯' : alert.kind === 'coach' ? '🔮' : '⚠'} {alert.text}
         </li>
       ))}
     </ul>
