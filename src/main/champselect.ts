@@ -5,14 +5,24 @@ import type {
   TeamDamageSplit
 } from '@shared/champselect'
 import type { ChampSelectState } from '@shared/schemas/lcu'
+import { championTraitsSchema, type ChampionTraits } from '@shared/schemas/traits'
 import { findBaseline, loadBaselinePool } from './engine/nextbuy'
 import { HEALER_CHAMPION_WEIGHTS } from './engine/normalize'
+import { ARMOR_SQUISHY, MR_SQUISHY } from './engine/rules/armor-vs-mr'
 import type { BaselinePool } from '@shared/schemas/baselines'
 import type { StaticData } from './staticdata/manager'
+import traitsJson from './staticdata/champion-traits.json'
 
 /** Cheap defensive components quoted in the tips. */
 const NEGATRON_CLOAK = 1057
 const CHAIN_VEST = 1031
+
+/** Parsed once; bundled JSON, so this stays pure (no runtime I/O). */
+let cachedTraits: ChampionTraits | null = null
+export function loadChampionTraits(): ChampionTraits {
+  cachedTraits ??= championTraitsSchema.parse(traitsJson)
+  return cachedTraits
+}
 
 /** One stored game of the owner, as needed for pick suggestions. */
 export interface OwnerHistoryRow {
@@ -104,6 +114,8 @@ export function pickSuggestions(
   const enemyAssassins = enemyChampions.filter((champion) =>
     champion.tags.includes('Assassin')
   ).length
+  const enemyTanks = enemyChampions.filter((champion) => champion.tags.includes('Tank')).length
+  const allTraits = loadChampionTraits()
 
   // Ally classes from picked champions (own cell is unpicked at this point).
   const allyChampions = state.myTeam
@@ -195,6 +207,36 @@ export function pickSuggestions(
         score += 0.03
         reasons.push(`${String(enemyAssassins)} asesinos enfrente: aguantas mejor sus entradas`)
       }
+
+      // Curated kit traits (mobility / tank-shred): a champion missing from
+      // the table simply gets no signal. Nudges, capped below the WR signals.
+      const traits = allTraits[champion]
+      if (traits !== undefined && enemyAssassins >= 2) {
+        if (traits.mobility >= 2) {
+          score += 0.05
+          reasons.push(
+            `${String(enemyAssassins)} asesinos enfrente: tu movilidad te deja reposicionarte cuando saltan`
+          )
+        } else if (traits.mobility === 0) {
+          score -= 0.05
+          reasons.push(
+            `ojo: pick inmóvil contra ${String(enemyAssassins)} asesinos — dependerás del peel de tu equipo`
+          )
+        }
+      }
+      if (traits !== undefined && enemyTanks >= 2) {
+        if (traits.antiTank >= 2) {
+          score += 0.06
+          reasons.push(
+            `${String(enemyTanks)} tanques enfrente: tu daño por % de vida los derrite`
+          )
+        } else if (traits.antiTank === 0) {
+          score -= 0.04
+          reasons.push(
+            `${String(enemyTanks)} tanques enfrente y a este pick le cuesta matarlos — plantéate un anti-tanques`
+          )
+        }
+      }
       if (findBaseline(pool, champion, position) !== null) {
         score += 0.03
         reasons.push('está en tu pool: build baseline lista')
@@ -247,19 +289,54 @@ export function champSelectInsights(
   const allySplit = damageSplit(staticData, allyKeys)
   const enemySplit = damageSplit(staticData, enemyKeys)
 
+  // Own champion (pick or intent) up front: defensive tips depend on class —
+  // an ADC must not be told to buy tank armor (owner feedback 2026-07-06).
+  const own = state.myTeam.find((member) => member.cellId === state.localPlayerCellId)
+  const ownKey = own === undefined ? 0 : own.championId || own.championPickIntent
+  const ownChampion = ownKey > 0 ? staticData.championsByKey.get(ownKey) : undefined
+  const ownIsSquishy =
+    ownChampion !== undefined &&
+    !ownChampion.tags.includes('Tank') &&
+    !ownChampion.tags.includes('Fighter')
+
   const tips: string[] = []
+
+  /** Carry-appropriate defensive options, filtered by the own damage type. */
+  const squishyOptions = (options: readonly number[]): string => {
+    const profile = ownChampion === undefined ? 'mixed' : staticData.damageProfile(ownChampion.id)
+    // GA suits physical carries, Zhonya suits AP — mixed/unknown lists both.
+    const filtered =
+      options === ARMOR_SQUISHY && profile === 'physical'
+        ? [ARMOR_SQUISHY[0]]
+        : options === ARMOR_SQUISHY && profile === 'magic'
+          ? [ARMOR_SQUISHY[1]]
+          : [...options]
+    return filtered.map((id) => itemRef(staticData, id).name).join(' / ')
+  }
 
   if (enemySplit.picked >= 2) {
     if (enemySplit.magic >= 3) {
-      const cloak = itemRef(staticData, NEGATRON_CLOAK)
-      tips.push(
-        `Comp enemiga muy AP (${String(enemySplit.magic)} de ${String(enemySplit.picked)}): planea resistencia mágica — ${cloak.name} es la pieza barata`
-      )
+      const heavy = `Comp enemiga muy AP (${String(enemySplit.magic)} de ${String(enemySplit.picked)})`
+      if (ownIsSquishy) {
+        tips.push(
+          `${heavy}: como carry no compres RM de tanque — ${squishyOptions(MR_SQUISHY)} encajan contigo (${itemRef(staticData, NEGATRON_CLOAK).name} es la pieza barata)`
+        )
+      } else {
+        tips.push(
+          `${heavy}: planea resistencia mágica — ${itemRef(staticData, NEGATRON_CLOAK).name} es la pieza barata`
+        )
+      }
     } else if (enemySplit.physical >= 3) {
-      const vest = itemRef(staticData, CHAIN_VEST)
-      tips.push(
-        `Comp enemiga muy AD (${String(enemySplit.physical)} de ${String(enemySplit.picked)}): planea armadura — ${vest.name} es la pieza barata`
-      )
+      const heavy = `Comp enemiga muy AD (${String(enemySplit.physical)} de ${String(enemySplit.picked)})`
+      if (ownIsSquishy) {
+        tips.push(
+          `${heavy}: como carry no compres armadura de tanque — ${squishyOptions(ARMOR_SQUISHY)} encaja contigo (${itemRef(staticData, CHAIN_VEST).name} es la pieza barata)`
+        )
+      } else {
+        tips.push(
+          `${heavy}: planea armadura — ${itemRef(staticData, CHAIN_VEST).name} es la pieza barata`
+        )
+      }
     } else if (enemySplit.picked >= 4) {
       tips.push('Daño enemigo mixto: la vida rinde más que apilar una sola resistencia')
     }
@@ -290,9 +367,6 @@ export function champSelectInsights(
   }
 
   // Owner plan: his picked champion (or intent) against the baseline pool.
-  const own = state.myTeam.find((member) => member.cellId === state.localPlayerCellId)
-  const ownKey = own === undefined ? 0 : own.championId || own.championPickIntent
-  const ownChampion = ownKey > 0 ? staticData.championsByKey.get(ownKey) : undefined
   let ownPlan: ChampSelectInsights['ownPlan'] = null
   if (ownChampion) {
     const role = (state.ownPosition ?? '').toUpperCase()

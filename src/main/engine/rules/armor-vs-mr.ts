@@ -2,11 +2,12 @@ import { THRESHOLDS } from './thresholds'
 import { availableOptions, clampScore, itemName, ownsAny, pct } from './helpers'
 import type { Rule, RuleOutput } from './types'
 
-/** Defensive options per (damage type to resist, own class). */
-const ARMOR_TANK = [3075, 3143, 3110] as const // Thornmail, Randuin, Frozen Heart
-const ARMOR_SQUISHY = [3026, 3157] as const // Guardian Angel, Zhonya
-const MR_TANK = [3065, 4401] as const // Spirit Visage, Force of Nature
-const MR_SQUISHY = [3102, 2504] as const // Banshee, Kaenic Rookern
+/** Defensive options per (damage type to resist, own class). Exported so the
+ * champ-select tips advise the SAME items the in-game rule will push. */
+export const ARMOR_TANK = [3075, 3143, 3110] as const // Thornmail, Randuin, Frozen Heart
+export const ARMOR_SQUISHY = [3026, 3157] as const // Guardian Angel, Zhonya
+export const MR_TANK = [3065, 4401] as const // Spirit Visage, Force of Nature
+export const MR_SQUISHY = [3102, 2504] as const // Banshee, Kaenic Rookern
 
 function isTanky(tags: string[]): boolean {
   return tags.includes('Tank') || tags.includes('Fighter')

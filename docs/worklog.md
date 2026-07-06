@@ -1,6 +1,13 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-06 (4) — Champ select: class-aware defense tips + kit-trait pick signals (owner feedback)
+**Done (check green, 295):** owner (ADC) got tank-armor advice from the comp tip and pick ranking ignored kit fit vs the enemy comp.
+1. **Class-aware tips**: when the own pick/intent is squishy (no Tank/Fighter tag), heavy-AD/AP tips now advise the SAME per-class options as the in-game armor-vs-mr rule (constants exported): GA for physical carries / Zhonya for AP (both when mixed), Banshee/Kaenic for MR — "como carry no compres armadura de tanque…". Tanks/unpicked keep the generic cheap-component tip.
+2. **Kit traits**: new hand-curated `src/main/staticdata/champion-traits.json` (25 entries: marksmen + Graves; schema `src/shared/schemas/traits.ts`; mobility 0-2, antiTank 0-2; missing entry = no signal). pickSuggestions: vs ≥2 enemy Assassins → +0.05 mobility 2 / −0.05 mobility 0 (warning reason "pick inmóvil… dependerás del peel"); vs ≥2 enemy Tanks → +0.06 antiTank 2 ("tu daño por % de vida los derrite") / −0.04 antiTank 0. Validity test asserts every curated id exists in the patch.
+**Notes:** traits are game knowledge (curated like champion-damage-profile.json) — owner should sanity-check values for HIS champions; new/reworked champions simply lack entries until curated. Yunara (post-2025) deliberately omitted (kit unknown).
+**Files:** src/main/{champselect}.ts, src/main/engine/rules/armor-vs-mr.ts (exports), src/main/staticdata/champion-traits.json (new), src/shared/schemas/traits.ts (new), tests/main/champselect.test.ts.
+
 ## 2026-07-06 (3) — 1.0.1: window icon + no menu bar (owner feedback on 1.0.0)
 **Done:** the runtime window showed Electron's default icon (only the exe had ours) and the default File/Edit/View menu. Icon now lives COMMITTED at `resources/icon.png` (make-icon.mjs writes there; electron-builder `icon:` updated; `?asset` import + `*.png?asset` declaration) and is set on the BrowserWindow. `Menu.setApplicationMenu(null)` removes the bar app-wide; since that kills menu shortcuts, dev builds re-add F12 (devtools) and F5 (reload) via `before-input-event`. Version 1.0.1, installer rebuilt, released.
 **Files:** src/main/{index,modules.d}.ts, scripts/make-icon.mjs, electron-builder.yml, .gitignore, resources/icon.png (new), package.json.

@@ -1,5 +1,10 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import { champSelectInsights, type MetaSource, type OwnerHistoryRow } from '@main/champselect'
+import {
+  champSelectInsights,
+  loadChampionTraits,
+  type MetaSource,
+  type OwnerHistoryRow
+} from '@main/champselect'
 import type { StaticData } from '@main/staticdata/manager'
 import { baselinePoolSchema } from '@shared/schemas/baselines'
 import type { ChampSelectState } from '@shared/schemas/lcu'
@@ -305,5 +310,82 @@ describe('champSelectInsights', () => {
     )
     expect(insights.allySplit.physical).toBeGreaterThanOrEqual(4)
     expect(insights.tips.some((tip) => tip.includes('casi todo AD'))).toBe(true)
+  })
+})
+
+// Malphite 54, Leona 89 (numeric ddragon keys).
+const MALPHITE = 54
+const LEONA = 89
+
+describe('champion traits (owner feedback 2026-07-06)', () => {
+  it('every curated champion id exists in the current patch', () => {
+    for (const championId of Object.keys(loadChampionTraits())) {
+      expect(staticData.champions.has(championId), `traits: ${championId}`).toBe(true)
+    }
+  })
+
+  it('AD-heavy comp with own ADC picked → carry defense, not tank armor', () => {
+    const insights = champSelectInsights(
+      state({
+        localPlayerCellId: 0,
+        ownPosition: 'bottom',
+        myTeam: [ally(0, JINX, 'bottom')],
+        theirTeam: [AATROX, YASUO, ZED, DRAVEN].map((id, i) => ({ cellId: i, championId: id }))
+      }),
+      staticData,
+      TEST_POOL
+    )
+    const armorTip = insights.tips.find((tip) => tip.includes('muy AD'))
+    const gaName = staticData.itemGraph.nodes.get(3026)?.name ?? 'GA'
+    expect(armorTip).toContain('carry')
+    expect(armorTip).toContain(gaName)
+    // Jinx deals physical damage: the AP option (Zhonya) must not be offered.
+    const zhonyaName = staticData.itemGraph.nodes.get(3157)?.name ?? 'Zhonya'
+    expect(armorTip).not.toContain(zhonyaName)
+  })
+
+  it('tanky enemy comp → the tank-shredder outranks the equal-WR immobile ADC', () => {
+    const history: OwnerHistoryRow[] = [
+      ...Array.from({ length: 6 }, (_, i) => row('Vayne', 'BOTTOM', i < 3)),
+      ...Array.from({ length: 6 }, (_, i) => row('Jinx', 'BOTTOM', i < 3))
+    ]
+    const insights = champSelectInsights(
+      state({
+        localPlayerCellId: 0,
+        ownPosition: 'bottom',
+        myTeam: [ally(0, 0, 'bottom')],
+        theirTeam: [MALPHITE, LEONA].map((id, i) => ({ cellId: i, championId: id }))
+      }),
+      staticData,
+      TEST_POOL,
+      history
+    )
+    expect(insights.picks[0]?.championId).toBe('Vayne')
+    expect(insights.picks[0]?.reasons.some((reason) => reason.includes('tanques'))).toBe(true)
+    // The immobile low-shred pick carries the warning, not silence.
+    const jinx = insights.picks.find((pick) => pick.championId === 'Jinx')
+    expect(jinx?.reasons.some((reason) => reason.includes('cuesta matarlos'))).toBe(true)
+  })
+
+  it('assassin-heavy comp → mobility outranks the equal-WR immobile ADC', () => {
+    const history: OwnerHistoryRow[] = [
+      ...Array.from({ length: 6 }, (_, i) => row('Ezreal', 'BOTTOM', i < 3)),
+      ...Array.from({ length: 6 }, (_, i) => row('Jinx', 'BOTTOM', i < 3))
+    ]
+    const insights = champSelectInsights(
+      state({
+        localPlayerCellId: 0,
+        ownPosition: 'bottom',
+        myTeam: [ally(0, 0, 'bottom')],
+        theirTeam: [ZED, AHRI].map((id, i) => ({ cellId: i, championId: id }))
+      }),
+      staticData,
+      TEST_POOL,
+      history
+    )
+    expect(insights.picks[0]?.championId).toBe('Ezreal')
+    expect(insights.picks[0]?.reasons.some((reason) => reason.includes('movilidad'))).toBe(true)
+    const jinx = insights.picks.find((pick) => pick.championId === 'Jinx')
+    expect(jinx?.reasons.some((reason) => reason.includes('inmóvil'))).toBe(true)
   })
 })
