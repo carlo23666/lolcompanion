@@ -34,7 +34,7 @@ export const DEFAULT_METHOD_LIMITS: Record<string, RateLimit[]> = {
 
 export class RiotKeyInvalidError extends Error {
   constructor() {
-    super('Riot API key rejected (403). Check RIOT_API_KEY in .env')
+    super('Riot API key rejected (403). Update the key in Ajustes (or RIOT_API_KEY in .env)')
     this.name = 'RiotKeyInvalidError'
   }
 }

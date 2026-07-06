@@ -33,6 +33,8 @@ export interface AppSettings {
   overlayEnabled: boolean
   /** Color scheme id: 'hextech' (default), 'void' or 'noche'. */
   theme: string
+  /** Whether a Riot API key is configured (env or stored). The key itself never crosses IPC. */
+  apiKeySet: boolean
 }
 
 export interface MetaCrawlProgress {
@@ -71,6 +73,8 @@ export interface IpcInvokeChannels {
         soundsEnabled: boolean
         overlayEnabled: boolean
         theme: string
+        /** New Riot API key to store; undefined = keep current, '' = clear. */
+        apiKey?: string
       }
     ]
     result: { saved: true }

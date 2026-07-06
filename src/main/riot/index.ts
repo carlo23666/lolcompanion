@@ -1,7 +1,9 @@
+import { safeStorage } from 'electron'
 import type { AppDatabase } from '../db'
 import { MatchRepo, MetaRepo, TimelineRepo } from '../db/repos'
 import { SettingsRepo, SETTING_KEYS } from '../db/repos/settings'
 import { broadcast, handleInvoke } from '../ipc'
+import { createSafeStorageCodec, hasApiKey, resolveApiKey, storeApiKey } from './apikey'
 import { RiotClient } from './client'
 import { ingestHistory } from './ingest'
 import { RiotRateLimiter } from './limiter'
@@ -19,6 +21,10 @@ let ingestRunning = false
 const limiter = new RiotRateLimiter()
 // One meta crawler per app lifetime (background, lowest priority).
 let metaCrawler: MetaCrawler | null = null
+// safeStorage is ready once the app is (all callers run post app.whenReady).
+const keyCodec = createSafeStorageCodec(safeStorage)
+
+const MISSING_KEY_ERROR = 'Falta la clave de la API de Riot (Ajustes → Cuenta)'
 
 /**
  * Ready-to-use client + owner puuid, or null when the app is not configured
@@ -26,9 +32,9 @@ let metaCrawler: MetaCrawler | null = null
  */
 export function getRiotContext(db: AppDatabase): { client: RiotClient; puuid: string } | null {
   const settings = new SettingsRepo(db)
-  const apiKey = process.env['RIOT_API_KEY']
+  const apiKey = resolveApiKey(settings, keyCodec)
   const puuid = settings.get(SETTING_KEYS.puuid)
-  if (apiKey === undefined || apiKey === '' || puuid === null || puuid === '') return null
+  if (apiKey === null || puuid === null || puuid === '') return null
   const platform = settings.get(SETTING_KEYS.platform) ?? 'euw1'
   return { client: new RiotClient({ apiKey, platform, limiter }), puuid }
 }
@@ -48,7 +54,9 @@ export function registerRiotIpc(db: AppDatabase): void {
     recordLive: settings.get(SETTING_KEYS.recordLive) === '1',
     soundsEnabled: settings.get(SETTING_KEYS.soundsEnabled) !== '0',
     overlayEnabled: settings.get(SETTING_KEYS.overlayEnabled) === '1',
-    theme: settings.get(SETTING_KEYS.theme) ?? 'hextech'
+    theme: settings.get(SETTING_KEYS.theme) ?? 'hextech',
+    // Only the flag crosses IPC — the key itself never reaches the renderer.
+    apiKeySet: hasApiKey(settings, keyCodec)
   }))
 
   handleInvoke('settings:set', (update) => {
@@ -60,12 +68,16 @@ export function registerRiotIpc(db: AppDatabase): void {
     settings.set(SETTING_KEYS.soundsEnabled, update.soundsEnabled ? '1' : '0')
     settings.set(SETTING_KEYS.overlayEnabled, update.overlayEnabled ? '1' : '0')
     settings.set(SETTING_KEYS.theme, update.theme)
-    if (previousRiotId !== riotId) {
-      // riotId changed → cached puuid no longer valid; re-resolve in the
-      // background so post-game auto-ingest works without a full sync.
-      settings.set(SETTING_KEYS.puuid, '')
-      const apiKey = process.env['RIOT_API_KEY']
-      if (apiKey !== undefined && apiKey !== '' && riotId.includes('#')) {
+    // undefined = leave the stored key untouched; '' clears it.
+    if (update.apiKey !== undefined) storeApiKey(settings, keyCodec, update.apiKey)
+    const puuid = settings.get(SETTING_KEYS.puuid)
+    if (previousRiotId !== riotId) settings.set(SETTING_KEYS.puuid, '')
+    if (previousRiotId !== riotId || ((puuid === null || puuid === '') && update.apiKey !== undefined)) {
+      // riotId changed (or a key just arrived for an unresolved account) →
+      // re-resolve the puuid in the background so post-game auto-ingest
+      // works without a full sync.
+      const apiKey = resolveApiKey(settings, keyCodec)
+      if (apiKey !== null && riotId.includes('#')) {
         const [gameName = '', tagLine = ''] = riotId.split('#', 2)
         const client = new RiotClient({
           apiKey,
@@ -84,12 +96,9 @@ export function registerRiotIpc(db: AppDatabase): void {
   handleInvoke('ingest:start', async () => {
     if (ingestRunning) return { started: false as const, error: 'Sincronización ya en curso' }
 
-    const apiKey = process.env['RIOT_API_KEY']
-    if (apiKey === undefined || apiKey === '') {
-      return {
-        started: false as const,
-        error: 'Falta RIOT_API_KEY en .env (ver .env.example)'
-      }
+    const apiKey = resolveApiKey(settings, keyCodec)
+    if (apiKey === null) {
+      return { started: false as const, error: MISSING_KEY_ERROR }
     }
     // Normalize on read too: values saved before this fix may still carry
     // the invisible characters.
@@ -152,9 +161,9 @@ export function registerRiotIpc(db: AppDatabase): void {
   }))
 
   handleInvoke('meta:crawl:start', () => {
-    const apiKey = process.env['RIOT_API_KEY']
-    if (apiKey === undefined || apiKey === '') {
-      return { started: false, error: 'Falta RIOT_API_KEY en .env (ver .env.example)' }
+    const apiKey = resolveApiKey(settings, keyCodec)
+    if (apiKey === null) {
+      return { started: false, error: MISSING_KEY_ERROR }
     }
     const platform = settings.get(SETTING_KEYS.platform) ?? 'euw1'
     metaCrawler ??= new MetaCrawler({

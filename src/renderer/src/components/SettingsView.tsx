@@ -255,6 +255,8 @@ function DevToolsSection(): React.JSX.Element | null {
 
 export default function SettingsView(): React.JSX.Element {
   const [riotId, setRiotId] = useState('')
+  const [apiKeyInput, setApiKeyInput] = useState('')
+  const [apiKeySet, setApiKeySet] = useState(false)
   const [platform, setPlatform] = useState('euw1')
   const [recordLive, setRecordLive] = useState(false)
   const [sounds, setSounds] = useState(true)
@@ -266,6 +268,7 @@ export default function SettingsView(): React.JSX.Element {
   useEffect(() => {
     void window.api.invoke('settings:get').then((settings) => {
       setRiotId(settings.riotId ?? '')
+      setApiKeySet(settings.apiKeySet === true)
       setPlatform(settings.platform)
       setRecordLive(settings.recordLive)
       setSounds(settings.soundsEnabled)
@@ -281,14 +284,21 @@ export default function SettingsView(): React.JSX.Element {
   }
 
   const save = async (): Promise<void> => {
+    const trimmedKey = apiKeyInput.trim()
     await window.api.invoke('settings:set', {
       riotId,
       platform,
       recordLive,
       soundsEnabled: sounds,
       overlayEnabled: overlay,
-      theme
+      theme,
+      // Only send a key when the user typed one — undefined keeps the stored one.
+      ...(trimmedKey === '' ? {} : { apiKey: trimmedKey })
     })
+    if (trimmedKey !== '') {
+      setApiKeySet(true)
+      setApiKeyInput('')
+    }
     setSoundsEnabled(sounds)
     setStatus('Ajustes guardados')
   }
@@ -315,6 +325,22 @@ export default function SettingsView(): React.JSX.Element {
               onChange={(event) => setRiotId(event.target.value)}
               placeholder="Ejemplo#EUW"
             />
+          </label>
+          <label className="text-xs text-slate-400">
+            Clave de la API de Riot{' '}
+            {apiKeySet && <span className="text-emerald-400">✓ guardada</span>}
+            <input
+              type="password"
+              autoComplete="off"
+              className="mt-1 w-full rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-sm text-slate-100"
+              value={apiKeyInput}
+              onChange={(event) => setApiKeyInput(event.target.value)}
+              placeholder={apiKeySet ? '(sin cambios — escribe para reemplazarla)' : 'RGAPI-…'}
+            />
+            <span className="mt-1 block text-[11px] text-slate-600">
+              Genera una gratis en developer.riotgames.com (las claves de desarrollo caducan cada
+              24 h). Se guarda cifrada en este equipo y nunca sale de él.
+            </span>
           </label>
           <label className="text-xs text-slate-400">
             Región

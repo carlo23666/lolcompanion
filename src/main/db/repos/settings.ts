@@ -22,6 +22,8 @@ export class SettingsRepo {
 
 export const SETTING_KEYS = {
   riotId: 'settings.riotId',
+  /** Riot API key stored from Ajustes (safeStorage-encrypted, see riot/apikey.ts). */
+  apiKey: 'settings.apiKey',
   platform: 'settings.platform',
   puuid: 'settings.puuid',
   recordLive: 'settings.recordLive',
