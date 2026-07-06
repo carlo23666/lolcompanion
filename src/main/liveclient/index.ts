@@ -69,7 +69,7 @@ export function createSnapshotProcessor(
   const liveCoach = new LiveCoach({
     isEnabled: () =>
       coachSettings.get(SETTING_KEYS.coachEnabled) === '1' &&
-      coachSettings.get(SETTING_KEYS.coachLive) === '1',
+      coachSettings.get(SETTING_KEYS.coachLive) !== '0',
     generate: (prompt) =>
       generateWithInstalledModel(
         coachSettings.get(SETTING_KEYS.coachModel) ?? DEFAULT_COACH_MODEL,

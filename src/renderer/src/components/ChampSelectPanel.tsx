@@ -1,18 +1,42 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ChampionMeta, ChampSelectInsights } from '@shared/champselect'
 import type { ChampSelectState } from '@shared/schemas/lcu'
 import { HexiSprite } from './Mascot'
 
+/** Debounce so a burst of draft updates (pick + ban + intent) costs ONE run. */
+const DRAFT_ANALYZE_DEBOUNCE_MS = 1500
+
 /**
  * Local-AI draft advice (Ollama): renders nothing unless the coach is enabled
- * AND reachable. On demand — local models take seconds and champ select is
- * time-boxed, so it never fires automatically.
+ * AND reachable. Thinks CONTINUOUSLY — every meaningful draft change (picks,
+ * bans, tips) re-runs the analysis, debounced, one request in flight; the
+ * previous advice stays visible while Hexi recalculates.
  */
 function CoachDraft(props: { insights: ChampSelectInsights }): React.JSX.Element | null {
   const [ready, setReady] = useState(false)
   const [thinking, setThinking] = useState(false)
   const [advice, setAdvice] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const insightsRef = useRef(props.insights)
+  insightsRef.current = props.insights
+  const inFlightRef = useRef(false)
+  const rerunRef = useRef(false)
+  const lastAnalyzedRef = useRef('')
+
+  // What "the draft changed" means: visible champions, bans (via tips),
+  // splits and the suggestion list — NOT reference identity (insights are
+  // re-fetched every LCU tick even when nothing moved).
+  const fingerprint = useMemo(
+    () =>
+      JSON.stringify({
+        picks: props.insights.picks.map((pick) => pick.championId),
+        tips: props.insights.tips,
+        enemy: props.insights.enemySplit,
+        ally: props.insights.allySplit,
+        plan: props.insights.ownPlan?.championId ?? null
+      }),
+    [props.insights]
+  )
 
   useEffect(() => {
     void window.api
@@ -20,33 +44,51 @@ function CoachDraft(props: { insights: ChampSelectInsights }): React.JSX.Element
       .then((status) => setReady(status.enabled && status.available), () => undefined)
   }, [])
 
-  if (!ready) return null
+  useEffect(() => {
+    if (!ready || fingerprint === lastAnalyzedRef.current) return
+    const analyze = async (): Promise<void> => {
+      if (inFlightRef.current) {
+        rerunRef.current = true
+        return
+      }
+      inFlightRef.current = true
+      lastAnalyzedRef.current = fingerprint
+      setThinking(true)
+      setError(null)
+      const result = await window.api.invoke('coach:draft', insightsRef.current)
+      inFlightRef.current = false
+      setThinking(false)
+      if (result.ok && result.text !== undefined) setAdvice(result.text)
+      else setError(result.error ?? 'error desconocido')
+      if (rerunRef.current) {
+        // The draft moved while the model was thinking — go again with the
+        // latest state.
+        rerunRef.current = false
+        lastAnalyzedRef.current = ''
+        void analyze()
+      }
+    }
+    const timer = setTimeout(() => void analyze(), DRAFT_ANALYZE_DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  }, [fingerprint, ready])
 
-  const analyze = async (): Promise<void> => {
-    setThinking(true)
-    setError(null)
-    const result = await window.api.invoke('coach:draft', props.insights)
-    setThinking(false)
-    if (result.ok && result.text !== undefined) setAdvice(result.text)
-    else setError(result.error ?? 'error desconocido')
-  }
+  if (!ready) return null
 
   return (
     <div className="rounded border border-indigo-800/60 bg-slate-950/60 p-2">
       <div className="flex items-start gap-2">
         <HexiSprite mood={thinking ? 'focused' : 'idle'} className="h-8 w-8 shrink-0" />
         <div className="min-w-0 flex-1">
+          <p className="mb-0.5 text-[10px] font-semibold tracking-wide text-indigo-300 uppercase">
+            🔮 Hexi analiza el draft{' '}
+            {thinking && <span className="animate-pulse text-slate-500">recalculando…</span>}
+          </p>
           {advice !== null ? (
             <p className="text-xs leading-relaxed whitespace-pre-wrap text-slate-300">{advice}</p>
-          ) : thinking ? (
-            <p className="text-xs text-slate-500">Hexi está analizando el draft…</p>
           ) : (
-            <button
-              className="rounded bg-indigo-700 px-2.5 py-1 text-xs hover:bg-indigo-600"
-              onClick={() => void analyze()}
-            >
-              🔮 Consejo de Hexi (IA local)
-            </button>
+            <p className="text-xs text-slate-500">
+              {thinking ? 'Pensando…' : 'Esperando cambios en el draft…'}
+            </p>
           )}
           {error !== null && <p className="mt-1 text-[11px] text-rose-400">{error}</p>}
         </div>

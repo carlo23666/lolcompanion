@@ -80,7 +80,9 @@ export default function LiveView(props: {
   const curve = usePersonalCurve(gameState)
 
   return (
-    <div className="flex h-full flex-col gap-3 p-4">
+    // min-h-full (not h-full): the view must be able to GROW past the
+    // viewport so <main>'s scrollbar reaches everything (owner bug report).
+    <div className="flex min-h-full flex-col gap-3 p-4">
       <h1 className="text-lg font-bold">Live</h1>
 
       {(phase === 'idle' || phase === 'clientOpen') && (
@@ -112,7 +114,7 @@ export default function LiveView(props: {
             />
           )
         ) : (
-          <div className="flex flex-col gap-3 overflow-y-auto">
+          <div className="flex flex-col gap-3">
             <OverlayHint onOpenSettings={props.onOpenSettings} />
             <div className="flex items-center gap-4 rounded-lg border border-slate-800 bg-slate-900 px-4 py-2 text-sm">
               <span className="font-mono text-lg">⏱ {formatClock(gameState.gameTimeS)}</span>

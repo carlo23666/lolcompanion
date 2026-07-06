@@ -139,7 +139,7 @@ export default function HistoryView(): React.JSX.Element {
   }
 
   return (
-    <div className="flex h-full flex-col gap-3 p-4">
+    <div className="flex min-h-full flex-col gap-3 p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-lg font-bold">Historial</h1>

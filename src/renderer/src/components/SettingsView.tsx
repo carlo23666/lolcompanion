@@ -439,7 +439,7 @@ export default function SettingsView(): React.JSX.Element {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 p-4">
+    <div className="flex min-h-full flex-col gap-4 p-4">
       <h1 className="text-lg font-bold">Ajustes</h1>
 
       <section className="max-w-md rounded-lg border border-slate-800 bg-slate-900 p-4">

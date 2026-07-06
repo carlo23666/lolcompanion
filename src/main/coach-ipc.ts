@@ -19,7 +19,8 @@ export function registerCoachIpc(db: AppDatabase): void {
     return {
       enabled: settings.get(SETTING_KEYS.coachEnabled) === '1',
       model: settings.get(SETTING_KEYS.coachModel) ?? DEFAULT_COACH_MODEL,
-      liveEnabled: settings.get(SETTING_KEYS.coachLive) === '1',
+      // Default ON: with the coach active, every surface works without clicks.
+      liveEnabled: settings.get(SETTING_KEYS.coachLive) !== '0',
       ...status
     }
   })
