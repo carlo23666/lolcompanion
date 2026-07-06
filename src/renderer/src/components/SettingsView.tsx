@@ -115,19 +115,24 @@ function CoachSection(): React.JSX.Element {
   const [models, setModels] = useState<string[]>([])
   const [saved, setSaved] = useState(false)
 
-  useEffect(() => {
+  const refresh = (keepSelection = false): void => {
     void window.api.invoke('coach:status').then((status) => {
       setEnabled(status.enabled === true)
       setLiveEnabled(status.liveEnabled === true)
-      if (typeof status.model === 'string') setModel(status.model)
+      if (!keepSelection && typeof status.model === 'string') setModel(status.model)
       setAvailable(status.available === true)
       if (Array.isArray(status.models)) setModels(status.models)
     }, () => undefined)
+  }
+
+  useEffect(() => {
+    refresh()
   }, [])
 
   const save = async (): Promise<void> => {
     await window.api.invoke('coach:configure', { enabled, model, liveEnabled })
     setSaved(true)
+    refresh(true)
     setTimeout(() => setSaved(false), 2000)
   }
 
@@ -140,15 +145,25 @@ function CoachSection(): React.JSX.Element {
         recomendaciones no depende de esto.
       </p>
       <div className="flex flex-col gap-2 text-xs">
-        {available ? (
-          <p className="text-emerald-400">✓ Ollama detectado ({models.length} modelos)</p>
-        ) : (
-          <p className="text-slate-500">
-            Ollama no detectado. Instálalo gratis desde{' '}
-            <span className="text-indigo-300">ollama.com</span> y ejecuta{' '}
-            <code className="rounded bg-slate-800 px-1">ollama pull gemma3:4b</code>
-          </p>
-        )}
+        <div className="flex items-center gap-2">
+          {available ? (
+            <p className="text-emerald-400">✓ Ollama detectado ({models.length} modelos)</p>
+          ) : (
+            <p className="text-slate-500">
+              Ollama no detectado. Instálalo gratis desde{' '}
+              <span className="text-indigo-300">ollama.com</span> y ejecuta{' '}
+              <code className="rounded bg-slate-800 px-1">ollama pull gemma3:4b</code>
+            </p>
+          )}
+          <button
+            type="button"
+            title="Volver a consultar Ollama (tras instalar o borrar modelos)"
+            className="rounded border border-slate-700 bg-slate-800 px-2 py-0.5 hover:border-slate-500"
+            onClick={() => refresh(true)}
+          >
+            ↻
+          </button>
+        </div>
         <label className="flex items-center gap-2 text-slate-400">
           <input
             type="checkbox"
@@ -175,7 +190,9 @@ function CoachSection(): React.JSX.Element {
               value={model}
               onChange={(event) => setModel(event.target.value)}
             >
-              {!models.includes(model) && <option value={model}>{model}</option>}
+              {!models.includes(model) && (
+                <option value={model}>{model} (no instalado — se usará otro)</option>
+              )}
               {models.map((name) => (
                 <option key={name} value={name}>
                   {name}

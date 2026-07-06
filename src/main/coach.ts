@@ -105,6 +105,26 @@ export function buildDraftPrompt(insights: ChampSelectInsights): string {
   ].join('\n')
 }
 
+/**
+ * The saved model when it's still installed, otherwise the first available
+ * one — heals the "deleted the model the settings point at" state without
+ * user action. Falls back to the saved name when Ollama lists nothing.
+ */
+export function resolveModel(saved: string, available: string[]): string {
+  if (available.includes(saved)) return saved
+  return available[0] ?? saved
+}
+
+/** generateCoachAdvice, with the model resolved against what Ollama has NOW. */
+export async function generateWithInstalledModel(
+  savedModel: string,
+  prompt: string,
+  url?: string
+): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
+  const status = await ollamaStatus(url)
+  return generateCoachAdvice(resolveModel(savedModel, status.models), prompt, url)
+}
+
 export async function generateCoachAdvice(
   model: string,
   prompt: string,

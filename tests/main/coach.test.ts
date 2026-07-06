@@ -1,7 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ChampSelectInsights } from '@shared/champselect'
 import type { PostGameReport } from '@shared/report'
-import { buildCoachPrompt, buildDraftPrompt, generateCoachAdvice, ollamaStatus } from '@main/coach'
+import {
+  buildCoachPrompt,
+  buildDraftPrompt,
+  generateCoachAdvice,
+  ollamaStatus,
+  resolveModel
+} from '@main/coach'
 
 const report: PostGameReport = {
   matchId: 'EUW1_1',
@@ -66,6 +72,16 @@ describe('buildDraftPrompt', () => {
     expect(prompt).toContain('Ángel de la Guarda')
     expect(prompt).toContain('PROHIBIDO mencionar')
     expect(prompt).toContain('selección de campeones')
+  })
+})
+
+describe('resolveModel', () => {
+  it('keeps the saved model while installed, falls back when deleted', () => {
+    expect(resolveModel('gemma3:4b', ['gemma3:4b', 'gemma3:12b'])).toBe('gemma3:4b')
+    // The owner-hit case: saved model deleted, another one installed.
+    expect(resolveModel('gemma3:4b', ['gemma3:12b'])).toBe('gemma3:12b')
+    // Nothing installed: keep the name so the error mentions it.
+    expect(resolveModel('gemma3:4b', [])).toBe('gemma3:4b')
   })
 })
 

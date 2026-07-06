@@ -5,7 +5,7 @@ import {
   buildCoachPrompt,
   buildDraftPrompt,
   DEFAULT_COACH_MODEL,
-  generateCoachAdvice,
+  generateWithInstalledModel,
   ollamaStatus
 } from './coach'
 
@@ -36,7 +36,7 @@ export function registerCoachIpc(db: AppDatabase): void {
       return { ok: false as const, error: 'Coach desactivado (Ajustes)' }
     }
     const model = settings.get(SETTING_KEYS.coachModel) ?? DEFAULT_COACH_MODEL
-    return generateCoachAdvice(model, buildCoachPrompt(report))
+    return generateWithInstalledModel(model, buildCoachPrompt(report))
   })
 
   handleInvoke('coach:draft', async (insights) => {
@@ -44,6 +44,6 @@ export function registerCoachIpc(db: AppDatabase): void {
       return { ok: false as const, error: 'Coach desactivado (Ajustes)' }
     }
     const model = settings.get(SETTING_KEYS.coachModel) ?? DEFAULT_COACH_MODEL
-    return generateCoachAdvice(model, buildDraftPrompt(insights))
+    return generateWithInstalledModel(model, buildDraftPrompt(insights))
   })
 }

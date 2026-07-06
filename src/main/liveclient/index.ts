@@ -2,7 +2,7 @@ import { join } from 'node:path'
 import { app } from 'electron'
 import type { GameState, GameStateEvent } from '@shared/gamestate'
 import type { LiveClientSnapshot } from '@shared/schemas/liveclient'
-import { DEFAULT_COACH_MODEL, generateCoachAdvice } from '../coach'
+import { DEFAULT_COACH_MODEL, generateWithInstalledModel } from '../coach'
 import { LiveCoach } from '../coach-live'
 import type { AppDatabase } from '../db'
 import { LiveSessionRepo, MetaRepo } from '../db/repos'
@@ -71,7 +71,7 @@ export function createSnapshotProcessor(
       coachSettings.get(SETTING_KEYS.coachEnabled) === '1' &&
       coachSettings.get(SETTING_KEYS.coachLive) === '1',
     generate: (prompt) =>
-      generateCoachAdvice(
+      generateWithInstalledModel(
         coachSettings.get(SETTING_KEYS.coachModel) ?? DEFAULT_COACH_MODEL,
         prompt
       ),
