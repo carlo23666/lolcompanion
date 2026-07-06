@@ -1,6 +1,13 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-06 (5) — Champ select: role-less meta fix, coach draft advice, unpicked-ADC tip (owner feedback round 2)
+**Done (check green, 298):** owner reported no Master+ reasons, no AI, and tank armor advice while unpicked.
+1. **Meta with no assigned position**: verified the crawler data is fine (13.8k matches on 16.13; Kaisa BOTTOM 1809 games) — the lookups missed because blind pick/custom sims carry no `ownPosition` and meta tables are role-keyed. `pickSuggestions` now infers each candidate's role as the mode of the owner's own games with that champion when the position is empty.
+2. **Coach in champ select**: new `coach:draft` invoke + `buildDraftPrompt` (facts: splits, tips, ranked picks with reasons, own plan; anti-hallucination frame, ≤4 frases). ChampSelectPanel gains an on-demand "🔮 Consejo de Hexi" button (never automatic — local latency vs draft timer); hidden unless the coach is enabled AND Ollama answers.
+3. **Unpicked-ADC tip**: while the own champion is unknown, assigned position BOTTOM now counts as squishy carry (GA phrasing; ADC damage assumed physical).
+**Files:** src/main/{champselect,coach,coach-ipc}.ts, src/shared/ipc.ts, src/renderer/src/components/ChampSelectPanel.tsx, tests/main/{champselect,coach}.test.ts.
+
 ## 2026-07-06 (4) — Champ select: class-aware defense tips + kit-trait pick signals (owner feedback)
 **Done (check green, 295):** owner (ADC) got tank-armor advice from the comp tip and pick ranking ignored kit fit vs the enemy comp.
 1. **Class-aware tips**: when the own pick/intent is squishy (no Tank/Fighter tag), heavy-AD/AP tips now advise the SAME per-class options as the in-game armor-vs-mr rule (constants exported): GA for physical carries / Zhonya for AP (both when mixed), Banshee/Kaenic for MR — "como carry no compres armadura de tanque…". Tanks/unpicked keep the generic cheap-component tip.

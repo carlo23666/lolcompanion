@@ -1,6 +1,59 @@
 import { useEffect, useState } from 'react'
 import type { ChampionMeta, ChampSelectInsights } from '@shared/champselect'
 import type { ChampSelectState } from '@shared/schemas/lcu'
+import { HexiSprite } from './Mascot'
+
+/**
+ * Local-AI draft advice (Ollama): renders nothing unless the coach is enabled
+ * AND reachable. On demand — local models take seconds and champ select is
+ * time-boxed, so it never fires automatically.
+ */
+function CoachDraft(props: { insights: ChampSelectInsights }): React.JSX.Element | null {
+  const [ready, setReady] = useState(false)
+  const [thinking, setThinking] = useState(false)
+  const [advice, setAdvice] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    void window.api
+      .invoke('coach:status')
+      .then((status) => setReady(status.enabled && status.available), () => undefined)
+  }, [])
+
+  if (!ready) return null
+
+  const analyze = async (): Promise<void> => {
+    setThinking(true)
+    setError(null)
+    const result = await window.api.invoke('coach:draft', props.insights)
+    setThinking(false)
+    if (result.ok && result.text !== undefined) setAdvice(result.text)
+    else setError(result.error ?? 'error desconocido')
+  }
+
+  return (
+    <div className="rounded border border-indigo-800/60 bg-slate-950/60 p-2">
+      <div className="flex items-start gap-2">
+        <HexiSprite mood={thinking ? 'focused' : 'idle'} className="h-8 w-8 shrink-0" />
+        <div className="min-w-0 flex-1">
+          {advice !== null ? (
+            <p className="text-xs leading-relaxed whitespace-pre-wrap text-slate-300">{advice}</p>
+          ) : thinking ? (
+            <p className="text-xs text-slate-500">Hexi está analizando el draft…</p>
+          ) : (
+            <button
+              className="rounded bg-indigo-700 px-2.5 py-1 text-xs hover:bg-indigo-600"
+              onClick={() => void analyze()}
+            >
+              🔮 Consejo de Hexi (IA local)
+            </button>
+          )}
+          {error !== null && <p className="mt-1 text-[11px] text-rose-400">{error}</p>}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const POSITION_LABEL: Record<string, string> = {
   top: 'TOP',
@@ -241,6 +294,10 @@ export default function ChampSelectPanel(props: {
               )}
             </div>
           </div>
+        )}
+
+        {insights !== null && (insights.picks.length > 0 || insights.tips.length > 0) && (
+          <CoachDraft insights={insights} />
         )}
 
         <p className="text-[11px] text-slate-600">

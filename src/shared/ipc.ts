@@ -102,6 +102,11 @@ export interface IpcInvokeChannels {
     args: [report: PostGameReport]
     result: { ok: boolean; text?: string; error?: string }
   }
+  /** Spanish draft advice from the current champ-select insights. */
+  'coach:draft': {
+    args: [insights: ChampSelectInsights]
+    result: { ok: boolean; text?: string; error?: string }
+  }
   'session:get': { args: []; result: SessionPhase }
   /** Champion meta (ddragon id, name, damage type) keyed by numeric champion key. */
   'staticdata:championMeta': { args: []; result: Record<number, ChampionMeta> }
@@ -209,7 +214,8 @@ export const IPC_INVOKE_CHANNELS: readonly IpcInvokeChannel[] = [
   'overlay:interactive',
   'coach:status',
   'coach:configure',
-  'coach:analyze'
+  'coach:analyze',
+  'coach:draft'
 ]
 
 export const IPC_EVENT_CHANNELS: readonly IpcEventChannel[] = [

@@ -129,10 +129,32 @@ export function pickSuggestions(
   const wantsPhysical = allySplit.picked >= 2 && allySplit.magic >= allySplit.picked - 1
   const roleLabel = ROLE_LABEL[position] ?? 'tus partidas'
 
+  // Meta tables are keyed by role. Without an assigned position (blind pick,
+  // custom games) fall back to the role the owner most plays that champion
+  // in — otherwise every Master+ lookup silently misses (owner report).
+  const inferRole = (rows: OwnerHistoryRow[]): string => {
+    if (position !== '') return position
+    const counts = new Map<string, number>()
+    for (const historyRow of rows) {
+      if (historyRow.role === '') continue
+      counts.set(historyRow.role, (counts.get(historyRow.role) ?? 0) + 1)
+    }
+    let best = ''
+    let bestCount = 0
+    for (const [role, count] of counts) {
+      if (count > bestCount) {
+        best = role
+        bestCount = count
+      }
+    }
+    return best
+  }
+
   const ranked = [...byChampion.entries()]
     .filter(([champion, acc]) => acc.games >= MIN_GAMES_FOR_SUGGESTION && !taken.has(champion))
     .map(([champion, acc]) => {
       const winratePct = (acc.wins / acc.games) * 100
+      const metaRole = inferRole(acc.rows)
       // Laplace smoothing: small samples get pulled toward 50%.
       let score = (acc.wins + 2) / (acc.games + 4)
       const reasons = [
@@ -157,7 +179,7 @@ export function pickSuggestions(
 
       // Master+ aggregate: how the champion performs at the top right now,
       // and specifically into the visible lane opponents.
-      const metaStat = meta?.championWinrate(champion, position)
+      const metaStat = meta?.championWinrate(champion, metaRole)
       if (metaStat && metaStat.games >= META_MIN_CHAMPION_GAMES) {
         const metaWr = metaStat.wins / metaStat.games
         score += (metaWr - 0.5) * 0.3
@@ -170,7 +192,7 @@ export function pickSuggestions(
         let versusWins = 0
         const versusNames: string[] = []
         for (const enemy of enemyChampions) {
-          const matchup = meta.laneMatchup(champion, position, enemy.id)
+          const matchup = meta.laneMatchup(champion, metaRole, enemy.id)
           if (matchup && matchup.games >= META_MIN_MATCHUP_GAMES) {
             versusGames += matchup.games
             versusWins += matchup.wins
@@ -291,19 +313,27 @@ export function champSelectInsights(
 
   // Own champion (pick or intent) up front: defensive tips depend on class —
   // an ADC must not be told to buy tank armor (owner feedback 2026-07-06).
+  // While still unpicked, the assigned BOTTOM role already implies a carry.
   const own = state.myTeam.find((member) => member.cellId === state.localPlayerCellId)
   const ownKey = own === undefined ? 0 : own.championId || own.championPickIntent
   const ownChampion = ownKey > 0 ? staticData.championsByKey.get(ownKey) : undefined
+  const ownPosition = (state.ownPosition ?? '').toUpperCase()
   const ownIsSquishy =
-    ownChampion !== undefined &&
-    !ownChampion.tags.includes('Tank') &&
-    !ownChampion.tags.includes('Fighter')
+    ownChampion !== undefined
+      ? !ownChampion.tags.includes('Tank') && !ownChampion.tags.includes('Fighter')
+      : ownPosition === 'BOTTOM'
 
   const tips: string[] = []
 
   /** Carry-appropriate defensive options, filtered by the own damage type. */
   const squishyOptions = (options: readonly number[]): string => {
-    const profile = ownChampion === undefined ? 'mixed' : staticData.damageProfile(ownChampion.id)
+    // Unpicked as BOTTOM: physical is the overwhelming default for ADCs.
+    const profile =
+      ownChampion === undefined
+        ? ownPosition === 'BOTTOM'
+          ? 'physical'
+          : 'mixed'
+        : staticData.damageProfile(ownChampion.id)
     // GA suits physical carries, Zhonya suits AP — mixed/unknown lists both.
     const filtered =
       options === ARMOR_SQUISHY && profile === 'physical'

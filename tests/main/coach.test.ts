@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { ChampSelectInsights } from '@shared/champselect'
 import type { PostGameReport } from '@shared/report'
-import { buildCoachPrompt, generateCoachAdvice, ollamaStatus } from '@main/coach'
+import { buildCoachPrompt, buildDraftPrompt, generateCoachAdvice, ollamaStatus } from '@main/coach'
 
 const report: PostGameReport = {
   matchId: 'EUW1_1',
@@ -39,6 +40,32 @@ describe('buildCoachPrompt', () => {
     expect(prompt).toContain('Filo Infinito')
     expect(prompt).toContain('PROHIBIDO inventar')
     expect(prompt).toContain('español')
+  })
+})
+
+describe('buildDraftPrompt', () => {
+  it('embeds picks, tips and the anti-hallucination frame', () => {
+    const insights: ChampSelectInsights = {
+      enemySplit: { physical: 3, magic: 1, mixed: 0, picked: 4 },
+      allySplit: { physical: 2, magic: 1, mixed: 0, picked: 3 },
+      tips: ['Comp enemiga muy AD: Ángel de la Guarda encaja contigo'],
+      picks: [
+        {
+          championId: 'Kaisa',
+          name: "Kai'Sa",
+          games: 20,
+          winratePct: 60,
+          reasons: ['60% de victorias', '2 tanques enfrente: tu daño por % de vida los derrite']
+        }
+      ],
+      ownPlan: null
+    }
+    const prompt = buildDraftPrompt(insights)
+    expect(prompt).toContain("Kai'Sa")
+    expect(prompt).toContain('% de vida')
+    expect(prompt).toContain('Ángel de la Guarda')
+    expect(prompt).toContain('PROHIBIDO mencionar')
+    expect(prompt).toContain('selección de campeones')
   })
 })
 

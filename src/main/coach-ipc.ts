@@ -3,6 +3,7 @@ import { SettingsRepo, SETTING_KEYS } from './db/repos/settings'
 import { handleInvoke } from './ipc'
 import {
   buildCoachPrompt,
+  buildDraftPrompt,
   DEFAULT_COACH_MODEL,
   generateCoachAdvice,
   ollamaStatus
@@ -34,5 +35,13 @@ export function registerCoachIpc(db: AppDatabase): void {
     }
     const model = settings.get(SETTING_KEYS.coachModel) ?? DEFAULT_COACH_MODEL
     return generateCoachAdvice(model, buildCoachPrompt(report))
+  })
+
+  handleInvoke('coach:draft', async (insights) => {
+    if (settings.get(SETTING_KEYS.coachEnabled) !== '1') {
+      return { ok: false as const, error: 'Coach desactivado (Ajustes)' }
+    }
+    const model = settings.get(SETTING_KEYS.coachModel) ?? DEFAULT_COACH_MODEL
+    return generateCoachAdvice(model, buildDraftPrompt(insights))
   })
 }

@@ -367,6 +367,43 @@ describe('champion traits (owner feedback 2026-07-06)', () => {
     expect(jinx?.reasons.some((reason) => reason.includes('cuesta matarlos'))).toBe(true)
   })
 
+  it('no assigned position (blind pick): meta lookups use the most-played role', () => {
+    const history: OwnerHistoryRow[] = Array.from({ length: 8 }, (_, i) =>
+      row('Kaisa', 'BOTTOM', i < 4)
+    )
+    const meta: MetaSource = {
+      championWinrate: (champion, role) =>
+        champion === 'Kaisa' && role === 'BOTTOM' ? { games: 1800, wins: 900 } : null,
+      laneMatchup: () => null
+    }
+    const insights = champSelectInsights(
+      state({ localPlayerCellId: 0, ownPosition: null, myTeam: [ally(0, 0)] }),
+      staticData,
+      TEST_POOL,
+      history,
+      meta
+    )
+    expect(insights.picks[0]?.championId).toBe('Kaisa')
+    expect(insights.picks[0]?.reasons.some((reason) => reason.includes('Master+'))).toBe(true)
+  })
+
+  it('unpicked but assigned BOTTOM: the armor tip already speaks carry', () => {
+    const insights = champSelectInsights(
+      state({
+        localPlayerCellId: 0,
+        ownPosition: 'bottom',
+        myTeam: [ally(0, 0, 'bottom')],
+        theirTeam: [AATROX, YASUO, ZED, DRAVEN].map((id, i) => ({ cellId: i, championId: id }))
+      }),
+      staticData,
+      TEST_POOL
+    )
+    const armorTip = insights.tips.find((tip) => tip.includes('muy AD'))
+    const gaName = staticData.itemGraph.nodes.get(3026)?.name ?? 'GA'
+    expect(armorTip).toContain('carry')
+    expect(armorTip).toContain(gaName)
+  })
+
   it('assassin-heavy comp → mobility outranks the equal-WR immobile ADC', () => {
     const history: OwnerHistoryRow[] = [
       ...Array.from({ length: 6 }, (_, i) => row('Ezreal', 'BOTTOM', i < 3)),

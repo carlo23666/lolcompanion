@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { ChampSelectInsights } from '@shared/champselect'
 import type { PostGameReport } from '@shared/report'
 
 /**
@@ -69,6 +70,38 @@ export function buildCoachPrompt(report: PostGameReport): string {
     '1-2 frases sobre lo mejor y lo peor comparado con sus medias personales,',
     '1 frase sobre si siguió las recomendaciones de compra,',
     'y cierra con UN consejo concreto y accionable para la próxima partida.'
+  ].join('\n')
+}
+
+/** Champ-select facts (comp analysis + ranked picks), anti-hallucination framed. */
+export function buildDraftPrompt(insights: ChampSelectInsights): string {
+  const facts = {
+    danoEnemigo: insights.enemySplit,
+    danoAliado: insights.allySplit,
+    avisosAutomaticos: insights.tips,
+    picksSugeridos: insights.picks.map((pick) => ({
+      campeon: pick.name,
+      winratePropio: `${pick.winratePct.toFixed(0)}% en ${String(pick.games)} partidas`,
+      razones: pick.reasons
+    })),
+    buildPlaneada: insights.ownPlan
+      ? {
+          campeon: insights.ownPlan.championId,
+          core: insights.ownPlan.core.map((item) => item.name),
+          situacionales: insights.ownPlan.situational.map((item) => item.name)
+        }
+      : null
+  }
+  return [
+    'Eres Hexi, el espíritu hextech que acompaña a un jugador de League of Legends.',
+    'El jugador está en la selección de campeones. Usa EXCLUSIVAMENTE los datos del JSON.',
+    'PROHIBIDO mencionar campeones, objetos o cifras que no aparezcan en los datos.',
+    '',
+    `DATOS: ${JSON.stringify(facts)}`,
+    '',
+    'Escribe en español, tono cercano (tutéale), SIN markdown, máximo 4 frases:',
+    'si hay picks sugeridos, cuál encaja mejor con esta partida y por qué (apóyate en las razones);',
+    'después la amenaza o plan de compra más importante según los avisos automáticos.'
   ].join('\n')
 }
 
