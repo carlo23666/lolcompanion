@@ -14,6 +14,19 @@ import type { PostGameReport } from '@shared/report'
 const OLLAMA_URL = 'http://127.0.0.1:11434'
 export const DEFAULT_COACH_MODEL = 'gemma3:4b'
 
+/**
+ * Hexi's voice, shared by every prompt. Gamer/geek registers well with the
+ * owner; the champion in the data is always THE PLAYER — second person only.
+ */
+export const HEXI_PERSONA = [
+  'Eres Hexi, un espíritu hextech coach de League of Legends con alma gamer:',
+  'tono cercano y un punto friki/weeb (puedes soltar jerga como GG, diff, all-in,',
+  'farmear, tiltear, "ez" — con gracia y sin pasarte, máximo una expresión por respuesta).',
+  'El campeón que aparece en los datos ES EL JUGADOR con quien hablas:',
+  'dirígete SIEMPRE a él/ella de tú ("tienes", "compra", "fuerza"),',
+  'NUNCA en tercera persona ni llamándole por el nombre del campeón.'
+].join('\n')
+
 const tagsSchema = z.object({
   models: z.array(z.object({ name: z.string() }))
 })
@@ -60,13 +73,13 @@ export function buildCoachPrompt(report: PostGameReport): string {
     conclusionesAutomaticas: report.summary
   }
   return [
-    'Eres Hexi, el espíritu hextech que acompaña a un jugador de League of Legends.',
+    HEXI_PERSONA,
     'Analiza SU partida usando EXCLUSIVAMENTE los datos del JSON siguiente.',
     'PROHIBIDO inventar cifras, objetos o eventos que no estén en los datos.',
     '',
     `DATOS: ${JSON.stringify(facts)}`,
     '',
-    'Escribe en español, tono cercano y directo (tutéale), SIN markdown, máximo 5 frases:',
+    'Escribe en español, SIN markdown, máximo 5 frases:',
     '1-2 frases sobre lo mejor y lo peor comparado con sus medias personales,',
     '1 frase sobre si siguió las recomendaciones de compra,',
     'y cierra con UN consejo concreto y accionable para la próxima partida.'
@@ -93,13 +106,13 @@ export function buildDraftPrompt(insights: ChampSelectInsights): string {
       : null
   }
   return [
-    'Eres Hexi, el espíritu hextech que acompaña a un jugador de League of Legends.',
+    HEXI_PERSONA,
     'El jugador está en la selección de campeones. Usa EXCLUSIVAMENTE los datos del JSON.',
     'PROHIBIDO mencionar campeones, objetos o cifras que no aparezcan en los datos.',
     '',
     `DATOS: ${JSON.stringify(facts)}`,
     '',
-    'Escribe en español, tono cercano (tutéale), SIN markdown, máximo 4 frases:',
+    'Escribe en español, SIN markdown, máximo 4 frases:',
     'si hay picks sugeridos, cuál encaja mejor con esta partida y por qué (apóyate en las razones);',
     'después la amenaza o plan de compra más importante según los avisos automáticos.'
   ].join('\n')

@@ -70,5 +70,29 @@ export function recommend(
     })
   }
 
-  return [...byKey.values()].sort((a, b) => b.score - a.score)
+  // Master+ item winrate annotation: whenever an advised item has enough
+  // sample on the OWN champion+role, say how it performs at the top — this
+  // also surfaces meta data for pool champions (owner request 2026-07-06).
+  const annotated = [...byKey.values()]
+  if (meta !== undefined) {
+    const statById = new Map(meta.items.map((entry) => [entry.itemId, entry]))
+    for (const [index, rec] of annotated.entries()) {
+      if (rec.itemId === null) continue
+      const stat = statById.get(rec.itemId)
+      if (stat === undefined || stat.games < META_ITEM_REASON_MIN_GAMES) continue
+      const wr = Math.round((stat.wins / stat.games) * 100)
+      annotated[index] = {
+        ...rec,
+        reasons: [
+          ...rec.reasons,
+          `en Master+ con ${state.self.championName}: ${String(wr)}% WR llevando este objeto (${String(stat.games)} partidas)`
+        ]
+      }
+    }
+  }
+
+  return annotated.sort((a, b) => b.score - a.score)
 }
+
+/** Below this sample the per-item Master+ WR is noise, not a signal. */
+const META_ITEM_REASON_MIN_GAMES = 10

@@ -59,6 +59,28 @@ describe('OverlayApp', () => {
     expect(screen.getByText('COMPRA YA')).toBeInTheDocument()
   })
 
+  it('a coach tip makes Hexi walk in with the message, then leave', () => {
+    vi.useFakeTimers()
+    try {
+      const stub = stubOverlayApi()
+      render(<OverlayApp />)
+      stub.emit('coach:tip', { gameTimeS: 700, text: 'Pon visión en el río, el dragón sale ya.' })
+      expect(screen.getByTestId('coach-walk')).toBeInTheDocument()
+      expect(screen.getByText(/Pon visión en el río/)).toBeInTheDocument()
+
+      act(() => {
+        vi.advanceTimersByTime(11_000) // stay elapsed → leaving
+      })
+      expect(screen.getByTestId('coach-walk').className).toContain('hexi-walk-out')
+      act(() => {
+        vi.advanceTimersByTime(1500) // walk-out done → gone
+      })
+      expect(screen.queryByTestId('coach-walk')).not.toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it('expands the stats panel on hover, requests interactivity, and pins', async () => {
     const stub = stubOverlayApi()
     const user = userEvent.setup()

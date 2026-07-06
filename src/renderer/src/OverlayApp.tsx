@@ -12,8 +12,9 @@ const ACTION_LABEL: Record<string, string> = {
 }
 
 const ALERT_SHOW_MS = 6000
-// Coach tips are full sentences — give them time to be read.
-const COACH_SHOW_MS = 12000
+// Walk-in Hexi: enter, speak, leave (full sentences need reading time).
+const COACH_STAY_MS = 10_500
+const COACH_LEAVE_MS = 1300
 
 function formatClock(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60)
@@ -68,9 +69,7 @@ function RecommendationRow(props: { rec: Recommendation; hero: boolean }): React
           </span>
         </p>
         {hero && rec.reasons[0] !== undefined && (
-          <p className="truncate text-[10px] text-slate-400" title={rec.reasons.join('\n')}>
-            {rec.reasons[0]}
-          </p>
+          <p className="truncate text-[10px] text-slate-400">{rec.reasons[0]}</p>
         )}
       </div>
     </div>
@@ -95,19 +94,31 @@ export default function OverlayApp(): React.JSX.Element | null {
   const [pinned, setPinned] = useState(false)
   const lastAlertIdRef = useRef(0)
 
-  // A new spike/objective/coach alert takes over the bubble for a few seconds.
+  // A new spike/objective alert takes over the bubble for a few seconds.
+  // Coach tips get their own walk-in Hexi instead (too much in one place).
   useEffect(() => {
     const newest = insights.alerts[0]
     if (!newest || newest.id === lastAlertIdRef.current) return
     lastAlertIdRef.current = newest.id
-    if (newest.kind !== 'spike' && newest.kind !== 'objective' && newest.kind !== 'coach') return
+    if (newest.kind !== 'spike' && newest.kind !== 'objective') return
     setActiveAlert(newest)
-    const timer = setTimeout(
-      () => setActiveAlert(null),
-      newest.kind === 'coach' ? COACH_SHOW_MS : ALERT_SHOW_MS
-    )
+    const timer = setTimeout(() => setActiveAlert(null), ALERT_SHOW_MS)
     return () => clearTimeout(timer)
   }, [insights.alerts])
+
+  // Coach tip lifecycle: walk in → speak → walk out.
+  const [walkTip, setWalkTip] = useState<{ text: string; leaving: boolean } | null>(null)
+  useEffect(
+    () => window.api.on('coach:tip', (tip) => setWalkTip({ text: tip.text, leaving: false })),
+    []
+  )
+  useEffect(() => {
+    if (walkTip === null) return
+    const timer = walkTip.leaving
+      ? setTimeout(() => setWalkTip(null), COACH_LEAVE_MS)
+      : setTimeout(() => setWalkTip((current) => (current ? { ...current, leaving: true } : null)), COACH_STAY_MS)
+    return () => clearTimeout(timer)
+  }, [walkTip])
 
   const top = recommendations?.recommendations[0]
   const expanded = hovered || pinned
@@ -118,7 +129,7 @@ export default function OverlayApp(): React.JSX.Element | null {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col justify-start bg-transparent p-1">
+    <div className="relative flex h-screen w-screen flex-col justify-start bg-transparent p-1">
       <div
         onMouseEnter={() => {
           setHovered(true)
@@ -151,24 +162,15 @@ export default function OverlayApp(): React.JSX.Element | null {
           {activeAlert !== null ? (
             <div
               className={`alert-in min-w-0 flex-1 rounded-lg border bg-slate-950/90 px-2.5 py-1.5 shadow-lg backdrop-blur-sm ${
-                activeAlert.kind === 'objective'
-                  ? 'border-emerald-500/60'
-                  : activeAlert.kind === 'coach'
-                    ? 'border-indigo-500/60'
-                    : 'border-amber-400/60'
+                activeAlert.kind === 'objective' ? 'border-emerald-500/60' : 'border-amber-400/60'
               }`}
             >
               <p
                 className={`text-xs font-semibold ${
-                  activeAlert.kind === 'objective'
-                    ? 'text-emerald-300'
-                    : activeAlert.kind === 'coach'
-                      ? 'text-indigo-300'
-                      : 'text-amber-300'
+                  activeAlert.kind === 'objective' ? 'text-emerald-300' : 'text-amber-300'
                 }`}
               >
-                {activeAlert.kind === 'objective' ? '🎯' : activeAlert.kind === 'coach' ? '🔮' : '⚠'}{' '}
-                {activeAlert.text}
+                {activeAlert.kind === 'objective' ? '🎯' : '⚠'} {activeAlert.text}
               </p>
             </div>
           ) : top ? (
@@ -188,12 +190,7 @@ export default function OverlayApp(): React.JSX.Element | null {
                   </span>
                 </p>
                 {top.reasons[0] !== undefined && (
-                  <p
-                    className="truncate text-[11px] text-slate-400"
-                    title={top.reasons.join('\n')}
-                  >
-                    {top.reasons[0]}
-                  </p>
+                  <p className="truncate text-[11px] text-slate-400">{top.reasons[0]}</p>
                 )}
               </div>
             </div>
@@ -275,6 +272,26 @@ export default function OverlayApp(): React.JSX.Element | null {
           </div>
         )}
       </div>
+
+      {/* Walk-in Hexi: enters from the right edge, delivers the macro tip,
+          walks out. Separate from the alert bubble so the tip never competes
+          with recommendations for the same spot. */}
+      {walkTip !== null && (
+        <div
+          data-testid="coach-walk"
+          className={`pointer-events-none absolute right-1 bottom-1 flex max-w-[370px] items-end gap-1.5 ${
+            walkTip.leaving ? 'hexi-walk-out' : 'hexi-walk-in'
+          }`}
+        >
+          <div className="min-w-0 rounded-lg rounded-br-none border border-indigo-500/60 bg-slate-950/95 px-3 py-2 shadow-xl backdrop-blur-sm">
+            <p className="text-xs leading-snug font-medium text-indigo-200">🔮 {walkTip.text}</p>
+          </div>
+          <HexiSprite
+            mood="hyped"
+            className="h-14 w-14 shrink-0 drop-shadow-[0_0_8px_rgba(127,212,228,0.6)]"
+          />
+        </div>
+      )}
     </div>
   )
 }

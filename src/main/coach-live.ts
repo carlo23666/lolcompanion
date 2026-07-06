@@ -1,5 +1,6 @@
 import type { GameState, GameStateEvent } from '@shared/gamestate'
 import type { Recommendation } from '@shared/recommendation'
+import { HEXI_PERSONA } from './coach'
 
 /**
  * Live macro coach: every ~60s of game time, the local model (Ollama) turns
@@ -58,8 +59,8 @@ export interface LiveFacts {
 
 export function buildLiveCoachPrompt(facts: LiveFacts): string {
   return [
-    'Eres Hexi, el espíritu hextech que acompaña a un jugador de League of Legends EN PLENA PARTIDA.',
-    'Con los DATOS (JSON) da UN único consejo de macro para ESTE momento.',
+    HEXI_PERSONA,
+    'Estáis EN PLENA PARTIDA. Con los DATOS (JSON) da UN único consejo de macro para ESTE momento.',
     'Tipos de consejo según lo que digan los datos: poner visión antes de que salga un objetivo;',
     'jugar agresivo si hay ventaja de oro o enemigos muertos; jugar seguro si vais por detrás o',
     'hay spikes enemigos recientes; preparar/empujar la oleada antes de volver a base; completar la próxima compra.',
@@ -67,7 +68,7 @@ export function buildLiveCoachPrompt(facts: LiveFacts): string {
     '',
     `DATOS: ${JSON.stringify(facts)}`,
     '',
-    'Responde en español, tuteo, UNA sola frase de máximo 22 palabras, sin markdown ni comillas.'
+    'Responde en español, UNA sola frase de máximo 22 palabras, sin markdown ni comillas.'
   ].join('\n')
 }
 

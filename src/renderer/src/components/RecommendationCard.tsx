@@ -112,7 +112,6 @@ export default function RecommendationCard(props: {
           {rest.slice(0, 3).map((rec, index) => (
             <span
               key={index}
-              title={rec.reasons.join('\n')}
               className="flex items-center gap-1 rounded bg-slate-800 px-1.5 py-0.5 text-[11px] text-slate-300"
             >
               {rec.itemId !== null && (

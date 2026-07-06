@@ -167,6 +167,36 @@ html[data-theme='noche'] body {
   animation: energy-rotate 5s linear infinite;
 }
 
+/* Walk-in Hexi: the coach tip enters from off-screen right, stays, leaves. */
+@keyframes hexi-walk-in {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  45% {
+    opacity: 1;
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes hexi-walk-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(130%);
+    opacity: 0;
+  }
+}
+.hexi-walk-in {
+  animation: hexi-walk-in 900ms ease-out both;
+}
+.hexi-walk-out {
+  animation: hexi-walk-out 1200ms ease-in both;
+}
+
 /* Live objective chip breathing while the objective is up. */
 @keyframes objective-breath {
   0%,
@@ -329,7 +359,9 @@ html[data-theme='noche'] body {
   .hexi .hexi-eye,
   .hexi .hexi-crystal,
   .energy-border::before,
-  .objective-live {
+  .objective-live,
+  .hexi-walk-in,
+  .hexi-walk-out {
     animation: none;
   }
 }

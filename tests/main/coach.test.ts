@@ -46,6 +46,9 @@ describe('buildCoachPrompt', () => {
     expect(prompt).toContain('Filo Infinito')
     expect(prompt).toContain('PROHIBIDO inventar')
     expect(prompt).toContain('español')
+    // Persona: gamer voice, second person, never the champion's name.
+    expect(prompt).toContain('gamer')
+    expect(prompt).toContain('NUNCA en tercera persona')
   })
 })
 

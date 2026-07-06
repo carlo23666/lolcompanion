@@ -271,7 +271,6 @@ export default function ChampSelectPanel(props: {
                   className={`flex items-start gap-2 rounded p-1.5 ${
                     index === 0 ? 'bg-indigo-500/10' : ''
                   }`}
-                  title={pick.reasons.join('\n')}
                 >
                   <img
                     src={`ddicon://champion/${pick.championId}.png`}
@@ -295,14 +294,13 @@ export default function ChampSelectPanel(props: {
                       {pick.reasons.slice(1, 5).map((reason, reasonIndex) => (
                         <li
                           key={reasonIndex}
-                          className={`truncate text-[11px] ${
+                          className={`text-[11px] ${
                             reason.includes('Master+')
                               ? 'text-amber-300/90'
                               : reason.startsWith('ojo:') || reason.includes('te costará')
                                 ? 'text-rose-300/90'
                                 : 'text-slate-400'
                           }`}
-                          title={reason}
                         >
                           · {reason}
                         </li>

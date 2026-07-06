@@ -215,6 +215,29 @@ describe('meta fallback baseline (Master+ items)', () => {
     expect(top?.itemId).toBe(3031)
     expect(top?.reasons.join(' ')).toContain('Master+')
   })
+
+  it('pool champions get Master+ item WR annotations too', () => {
+    // Jinx IS in TEST_POOL (own baseline wins) — but the advised item still
+    // gets its Master+ winrate line when the sample is big enough.
+    const state = selfWith('Jinx', [3006], 5000) // boots owned → next core: IE 3031
+    const recs = recommend(state, staticData, TEST_POOL, {
+      games: 500,
+      items: [{ itemId: 3031, games: 400, wins: 232 }] // 58%
+    })
+    const top = recs[0]
+    expect(top?.itemId).toBe(3031)
+    expect(top?.reasons.join(' ')).toContain('tu build') // pool baseline, not meta build
+    expect(top?.reasons.join(' ')).toContain('58% WR llevando este objeto')
+  })
+
+  it('thin per-item samples add no annotation', () => {
+    const state = selfWith('Jinx', [3006], 5000)
+    const recs = recommend(state, staticData, TEST_POOL, {
+      games: 500,
+      items: [{ itemId: 3031, games: 4, wins: 4 }]
+    })
+    expect(recs[0]?.reasons.join(' ')).not.toContain('llevando este objeto')
+  })
 })
 
 describe('nextBuyRecommendation with Magical Footwear (rune 8304)', () => {
