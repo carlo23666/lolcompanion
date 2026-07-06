@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Database from 'better-sqlite3'
 import { runMigrations, type AppDatabase } from '@main/db'
 import { LiveSessionRepo, MatchRepo, TimelineRepo } from '@main/db/repos'
-import { PostGameIngestor } from '@main/postgame'
+import { catchUpMissedMatches, PostGameIngestor } from '@main/postgame'
 import type { RiotClient } from '@main/riot/client'
 import { matchSchema, timelineSchema, type RiotMatch, type RiotTimeline } from '@shared/schemas/riot'
 
@@ -162,5 +162,64 @@ describe('PostGameIngestor', () => {
     ingestor.onPhase('inGame')
     await vi.advanceTimersByTimeAsync(5000)
     expect(calls.ids).toBe(0)
+  })
+})
+
+describe('catchUpMissedMatches', () => {
+  let db: AppDatabase
+
+  beforeEach(() => {
+    db = new Database(':memory:')
+    db.pragma('foreign_keys = ON')
+    runMigrations(db)
+  })
+  afterEach(() => db.close())
+
+  function catchUpClient(ids: string[]): { client: RiotClient; fetched: string[] } {
+    const fetched: string[] = []
+    const client = {
+      matchIds: () => Promise.resolve({ ok: true as const, value: ids }),
+      match: (matchId: string): Promise<{ ok: true; value: RiotMatch }> => {
+        fetched.push(matchId)
+        return Promise.resolve({
+          ok: true as const,
+          value: {
+            ...baseMatch,
+            metadata: { ...baseMatch.metadata, matchId }
+          }
+        })
+      },
+      timeline: (): Promise<{ ok: true; value: RiotTimeline }> =>
+        Promise.resolve({ ok: true as const, value: baseTimeline })
+    }
+    return { client: client as unknown as RiotClient, fetched }
+  }
+
+  it('ingests only the matches missing from the DB', async () => {
+    const missedId = 'EUW1_7000000099'
+    const { client, fetched } = catchUpClient([missedId, baseMatch.metadata.matchId])
+
+    const first = await catchUpMissedMatches({
+      db,
+      getContext: () => ({ client, puuid: OWNER })
+    })
+    expect(first.sort()).toEqual([baseMatch.metadata.matchId, missedId].sort())
+    expect(new MatchRepo(db).hasMatch(missedId)).toBe(true)
+    expect(new TimelineRepo(db).hasTimeline(missedId)).toBe(true)
+
+    // Second run: everything already stored → nothing fetched or ingested.
+    fetched.length = 0
+    const second = await catchUpMissedMatches({
+      db,
+      getContext: () => ({ client, puuid: OWNER })
+    })
+    expect(second).toEqual([])
+    expect(fetched).toEqual([])
+  })
+
+  it('is a silent no-op without API context', async () => {
+    const stored = await catchUpMissedMatches({ db, getContext: () => null })
+    expect(stored).toEqual([])
+    expect(new MatchRepo(db).count()).toBe(0)
   })
 })

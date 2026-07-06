@@ -12,7 +12,7 @@ import { startLcu, type LcuConnector } from './lcu'
 import { startLiveClient, type LiveClientPoller } from './liveclient'
 import { OverlayManager } from './overlay'
 import { SettingsRepo, SETTING_KEYS } from './db/repos/settings'
-import { PostGameIngestor } from './postgame'
+import { catchUpMissedMatches, PostGameIngestor } from './postgame'
 import { getOwnerPuuid, getRiotContext, registerRiotIpc } from './riot'
 import { SessionMachine } from './session/machine'
 import { getStaticDataManager } from './staticdata'
@@ -119,6 +119,24 @@ void app.whenReady().then(() => {
     },
     log: (message) => console.log(message)
   })
+
+  // Catch up on matches finished while the app (or client) was closed —
+  // delayed so startup traffic (static data, LCU) settles first.
+  setTimeout(() => {
+    void catchUpMissedMatches({
+      db: database,
+      getContext: () => getRiotContext(database),
+      onStored: (matchId) => {
+        statsService.invalidate()
+        broadcast('history:changed', { matchId })
+      },
+      log: (message) => console.log(message)
+    }).catch((error: unknown) => {
+      console.log(
+        `[catchup] failed: ${error instanceof Error ? error.message : String(error)}`
+      )
+    })
+  }, 10_000)
 
   overlay = new OverlayManager()
   const machine = new SessionMachine((phase) => {

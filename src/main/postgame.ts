@@ -18,6 +18,56 @@ export interface PostGameIngestorOptions {
 const DEFAULT_DELAYS = [30_000, 60_000, 60_000, 60_000, 120_000]
 
 /**
+ * Startup catch-up: if the client was closed right after a game, the
+ * postGame phase never fires and the match would only arrive via manual
+ * sync. Fetch the newest few matchIds and ingest any that are missing.
+ * Silent no-op without API context. Returns the stored matchIds.
+ */
+export async function catchUpMissedMatches(options: {
+  db: AppDatabase
+  getContext: () => { client: RiotClient; puuid: string } | null
+  /** How many recent matches to check. Default 5. */
+  count?: number
+  onStored?: (matchId: string) => void
+  log?: (message: string) => void
+}): Promise<string[]> {
+  const context = options.getContext()
+  if (!context) return []
+  const { client, puuid } = context
+  const matchRepo = new MatchRepo(options.db)
+  const timelineRepo = new TimelineRepo(options.db)
+  const stored: string[] = []
+
+  const ids = await client.matchIds(puuid, { start: 0, count: options.count ?? 5 }, 1)
+  if (!ids.ok) {
+    options.log?.(`[catchup] matchIds failed: ${ids.error.message}`)
+    return []
+  }
+  for (const matchId of ids.value) {
+    if (matchRepo.hasMatch(matchId)) continue
+    const match = await client.match(matchId, 1)
+    if (!match.ok) {
+      options.log?.(`[catchup] match ${matchId} failed: ${match.error.message}`)
+      continue
+    }
+    const { row, participants } = matchToRows(match.value)
+    const own = participants.find((participant) => participant.puuid === puuid)
+    row.win = own?.win ?? null
+    matchRepo.insertMatch(row, match.value, participants)
+    if (!timelineRepo.hasTimeline(matchId)) {
+      const timeline = await client.timeline(matchId, 1)
+      if (timeline.ok) timelineRepo.insertTimeline(matchId, timeline.value)
+    }
+    stored.push(matchId)
+    options.onStored?.(matchId)
+  }
+  if (stored.length > 0) {
+    options.log?.(`[catchup] ingested ${String(stored.length)} missed match(es)`)
+  }
+  return stored
+}
+
+/**
  * Watches for the postGame phase and pulls the just-finished match
  * (match-v5 + timeline) into the DB, linking it to the live session.
  */
