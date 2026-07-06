@@ -260,9 +260,18 @@ scoreboard, own runes, event feed deaths), the owner's own history, and anonymou
 (the meta crawler stores no identities). When in doubt: "could the player see this on screen
 right now?" — if no, don't build it.
 
-## 9. State of this handoff's session (2026-07-06)
+## 9. State at handoff (2026-07-06, release 1.0.0)
 
-Done this session: API key entry in Ajustes (safeStorage), NSIS installer (`npm run dist`),
-generated app icon, this document, `docs/INSTALAR.md`. See the worklog entry for files/details.
+Same-day addendum — a second owner-directed batch shipped after this document was first
+written (see worklog 2026-07-06 (2)): loading-screen state, startup catch-up ingest,
+**Master+ meta items backing the engine's build advice off-pool**, sound settings
+(volume + categories + objective horn), **overlay v2** (click-through window,
+hover/pin-expanded stats panel), the hextech visual pass (hero card, energy border,
+animated gold), and the **optional local-AI coach over Ollama** (post-game narrative,
+`src/main/coach.ts`). Version bumped to **1.0.0**, pushed and tagged.
+
+Roadmap deltas: §4.1's "meta v2 item order" now has a concrete INBOX note (crawler must
+aggregate purchase order); overlay-Tab-expand is documented as declined-without-ADR
+(INBOX); coach extensions (draft commentary, streaming) listed in INBOX.
 
 Torch passed. Cuida a Hexi. 🔷

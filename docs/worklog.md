@@ -1,6 +1,19 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-06 (2) — Release 1.0.0 batch (owner-directed): pending fixes, overlay v2, visuals, sounds, meta-in-engine, local-AI coach
+**Done (7 commits, one per group; check green):**
+1. **Loading state** — partial :2999 payloads → `loading` live state (machine: inGame; Live shows "Cargando partida…"); validation errors once per streak (was ~7.7k lines/load).
+2. **Catch-up ingest** — `catchUpMissedMatches` on app start (10s delay): newest 5 matchIds, missing ones ingested + timelines, Historial refreshes (closes the close-client-right-after-game gap).
+3. **Meta in the engine** — `resolveBaseline`: pool entry, else synthetic baseline from `meta_champion_items` (≥20 champ games, ≥5/item, completed SR items; top-5 core + 3 situational; frequency ≈ order). Reasons labeled ("más comprado en Master+" vs "tu build"). Lookup lives in the live pipeline (one repo query per champion+role) — engine stays pure.
+4. **Sound settings** — Ajustes panel: volume 0-100 (60 = old level), per-category toggles (recomendación/spike/objetivo), preview button; new objective horn cue (was reusing the spike blip).
+5. **Overlay v2** — window click-through by default (`setIgnoreMouseEvents(true, {forward})`), interactive only while hovered (`overlay:interactive` invoke). Hover expands a panel: top-3 recs, dragon/Barón countdown chips, KDA/CS/gold + personal curve, team gold, last alerts; 📌 pins. **Tab-expand declined** (globalShortcut steals the key from the game; native hook = new dep) → INBOX.
+6. **Visual pass** — recommendation card is the Live hero: hex-cut corners, rotating gold-teal energy border (@property conic), glowing icon, moved above insights; gold counts up (`AnimatedNumber`); `objective-live` breathing; reduced-motion respected.
+7. **Local-AI coach (owner request "gemini flash local")** — Gemini is cloud-only; implemented the local equivalent via **Ollama** (localhost:11434, free): Ajustes panel (detect server, enable, model pick, default gemma3:4b), report card gains "Análisis de Hexi" — report facts serialized into a Spanish prompt with an anti-hallucination frame, ≤5 sentences out. Narrative only; the pure engine remains the sole recommendation source. Degrades silently without Ollama. `coach-ipc.ts` split from `coach.ts` so the pure part tests without electron.
+**Also:** version → 1.0.0, installer rebuilt, pushed to GitHub + tag v1.0.0 (owner authorized push).
+**Gaps (owner):** judge overlay hover/pin + visuals in a real game; coach quality depends on the pulled model (try `gemma3:4b` first); meta-items order is frequency-based until the crawler aggregates purchase order (INBOX).
+**Files:** src/main/{liveclient/poller,liveclient/index,session/machine,postgame,overlay,coach(new),coach-ipc(new),index}.ts, src/main/engine/{nextbuy,recommend}.ts, src/main/db/repos/settings.ts, src/shared/ipc.ts, src/renderer/src/{App,OverlayApp,sounds}.ts(x), src/renderer/src/components/{LiveView,RecommendationCard,SettingsView,PostGameReport,AnimatedNumber(new)}.tsx, src/renderer/src/assets/main.css, tests/main/{liveclient-poller,postgame,nextbuy,coach(new)}.test.ts, tests/renderer/overlay.test.tsx (new), backlog/INBOX.md, package.json.
+
 ## 2026-07-06 — Installer + API key in Ajustes + master handoff (owner request: distribute to friends)
 **Done (session-final; check green):**
 1. **API key from the UI** (`src/main/riot/apikey.ts`, tested with injected codec): friends'

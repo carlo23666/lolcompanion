@@ -10,7 +10,7 @@ Builder sessions append here instead of expanding scope. Reviewer triages into W
 - (WP-010) Post-game session linking could cross-check `live_sessions.championName` against the match's owner champion before linking (guards against linking a remake/aborted session).
 - (WP-007) Owner idea from first real game (2026-07-02): a team-damage-diversification rule — when the OWN team is heavily one damage type (e.g. 2+ AP allies), suggest the owner covers the other type where his champion allows it. Doesn't exist in v1 (rules only react to the ENEMY comp); needs a spec + thresholds.
 - (WP-009) Owner feedback from first real game: with the champion not in `pool.json` the card shows nothing early-game. Consider a neutral fallback (e.g. component/spike suggestions only) or an explicit "champion sin baseline" hint so it doesn't read as broken. Real fix is ADR-006 (owner pool).
-- (WP-010, real-usage gap 2026-07-02) Owner closed the League client right after the game ended → LCU dropped, session machine went inGame→idle without ever reporting `postGame` → PostGameIngestor never armed and the match only arrives via manual sync. Add a catch-up: on app start (or on regaining API context), fetch the latest few matchIds and ingest any missing ones newer than the newest stored match.
+- ~~(WP-010, real-usage gap 2026-07-02) Owner closed the client right after the game → match only arrived via manual sync.~~ RESOLVED 2026-07-06: `catchUpMissedMatches` on app start (10s delay) ingests the newest 5 missing matches.
 - (owner request 2026-07-02) Feature ideas for reviewer triage, all derivable from own data / screen-visible info (Riot-compliant):
   - Live "curva personal": compare live CS/gold/KDA at minute X vs the owner's own average on that champion (history is already stored).
   - Enemy power-spike alerts from VISIBLE info only: completed 2nd/3rd item, levels 6/11/16.
@@ -35,7 +35,14 @@ Feature requests (all screen-visible/own-data → compliant):
 
 - (owner question 2026-07-04) **Meta-stats crawler (the op.gg approach)**: no free meta API exists — aggregate ourselves via the Riot API like every stats site did originally. Background crawler within app rate limits (~2k matches/h, seeded from players in the owner's own matches → same region/elo), SQLite aggregates: champion+role+patch winrate/pickrate, and matchup tables scoped to the owner's pool champions only (keeps required volume small). Blend into pick suggestions as a third signal tier: personal record → own-elo aggregate → class heuristics, each labeled in reasons. Prereq: register a personal (non-expiring) API key. Needs: crawl scheduler with resume/dedup, respect for the existing limiter, patch-scoped invalidation.
 
-- (real-usage observation 2026-07-04) **Loading-screen payloads spam the log**: while a game loads, `:2999` answers with partial players (`championName` undefined, `runes: null`); the poller correctly stays in polling-and-waiting, but `onValidationError` prints the full zod error dump every 2s (~7.7k log lines in one loading screen). Improve: detect the partial-payload shape as a distinct `loading` state (could even surface "Cargando partida…" in the UI instead of "Conectando"), and rate-limit/summarize validation logging to once per streak.
+- ~~(real-usage observation 2026-07-04) **Loading-screen payloads spam the log**~~ RESOLVED 2026-07-06: distinct `loading` state ("Cargando partida…" in Live), validation errors report once per streak.
+
+## 2026-07-06 (release 1.0 session)
+
+- **Overlay expand-on-Tab**: requested; not implementable cleanly — Electron `globalShortcut` would STEAL the Tab key from the game, and polling global key state needs a native input-hook dependency (e.g. uiohook-napi, would need an Electron-ABI build + policy review for input monitoring). Shipped hover-to-expand + 📌 pin instead. Revisit only with an explicit ADR.
+- **Coach extension ideas**: the Ollama coach only narrates post-game reports; candidates: champ-select draft commentary (facts already in ChampSelectInsights), a weekly "estado de tu clima competitivo" from StatsService, streaming responses for faster perceived latency (`stream: true`).
+- **Meta-baseline order**: the meta fallback build uses final-item frequency as build ORDER — real order needs purchase-timestamp aggregation in the crawler (meta_champion_items has no order data). Worth a migration when the crawler next evolves.
+- **Sound settings don't reach the overlay window** (it never plays sounds today anyway); if overlay sounds ever land, configureSounds must run there too.
 
 Declined (Riot policy — hard rule 1, do NOT promote to a WP):
 - Enemy flash/summoner-cooldown timers (manual, ally-ping-derived, or otherwise) were requested and declined: enemy cooldown tracking of any kind is banned by Riot (March 2025), regardless of data source.
