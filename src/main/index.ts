@@ -1,5 +1,6 @@
 import { join } from 'node:path'
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, Menu } from 'electron'
+import appIcon from '../../resources/icon.png?asset'
 import { champSelectInsights, type MetaSource } from './champselect'
 import { registerCoachIpc } from './coach-ipc'
 import { openDatabase, type AppDatabase } from './db'
@@ -30,6 +31,7 @@ function createWindow(): void {
     width: 1100,
     height: 750,
     title: 'LoL Companion',
+    icon: appIcon,
     backgroundColor: '#0f1117',
     webPreferences: {
       preload: join(import.meta.dirname, '../preload/index.mjs'),
@@ -38,6 +40,16 @@ function createWindow(): void {
       sandbox: false
     }
   })
+
+  // The application menu is removed (setApplicationMenu(null)), which also
+  // removes its shortcuts — keep the two a developer actually needs.
+  if (!app.isPackaged) {
+    window.webContents.on('before-input-event', (_event, input) => {
+      if (input.type !== 'keyDown') return
+      if (input.key === 'F12') window.webContents.toggleDevTools()
+      if (input.key === 'F5') window.webContents.reload()
+    })
+  }
 
   if (process.env['ELECTRON_RENDERER_URL']) {
     void window.loadURL(process.env['ELECTRON_RENDERER_URL'])
@@ -102,6 +114,8 @@ function registerIpcHandlers(db: AppDatabase): void {
 }
 
 void app.whenReady().then(() => {
+  // No File/Edit/View bar — the app is a single-window dashboard.
+  Menu.setApplicationMenu(null)
   loadDotEnv(app.getAppPath())
   db = openDatabase(join(app.getPath('userData'), 'lol-companion.db'))
   registerIconProtocol(() => getStaticDataManager().getLoadedPatch())

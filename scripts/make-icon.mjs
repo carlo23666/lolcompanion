@@ -1,7 +1,8 @@
-// Generates build/icon.png (256x256) — the app/installer icon.
+// Generates resources/icon.png (256x256) — the app/installer/window icon.
 // Zero-dep PNG encoder (node:zlib deflate + hand-rolled chunks) drawing the
 // hextech mark: gold hexagon ring + teal inner crystal on deep navy.
-// Rerun after tweaking: node scripts/make-icon.mjs
+// The output is COMMITTED (the main process imports it as ?asset for the
+// runtime window icon); rerun after tweaking: node scripts/make-icon.mjs
 import { Buffer } from 'node:buffer'
 import { deflateSync } from 'node:zlib'
 import { mkdirSync, writeFileSync } from 'node:fs'
@@ -115,7 +116,7 @@ const png = Buffer.concat([
   chunk('IEND', Buffer.alloc(0))
 ])
 
-const outPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'build', 'icon.png')
+const outPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'resources', 'icon.png')
 mkdirSync(dirname(outPath), { recursive: true })
 writeFileSync(outPath, png)
 console.log(`wrote ${outPath} (${png.length} bytes)`)

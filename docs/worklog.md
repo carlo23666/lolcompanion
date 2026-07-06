@@ -1,6 +1,10 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-06 (3) — 1.0.1: window icon + no menu bar (owner feedback on 1.0.0)
+**Done:** the runtime window showed Electron's default icon (only the exe had ours) and the default File/Edit/View menu. Icon now lives COMMITTED at `resources/icon.png` (make-icon.mjs writes there; electron-builder `icon:` updated; `?asset` import + `*.png?asset` declaration) and is set on the BrowserWindow. `Menu.setApplicationMenu(null)` removes the bar app-wide; since that kills menu shortcuts, dev builds re-add F12 (devtools) and F5 (reload) via `before-input-event`. Version 1.0.1, installer rebuilt, released.
+**Files:** src/main/{index,modules.d}.ts, scripts/make-icon.mjs, electron-builder.yml, .gitignore, resources/icon.png (new), package.json.
+
 ## 2026-07-06 (2) — Release 1.0.0 batch (owner-directed): pending fixes, overlay v2, visuals, sounds, meta-in-engine, local-AI coach
 **Done (7 commits, one per group; check green):**
 1. **Loading state** — partial :2999 payloads → `loading` live state (machine: inGame; Live shows "Cargando partida…"); validation errors once per streak (was ~7.7k lines/load).
