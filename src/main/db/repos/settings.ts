@@ -32,5 +32,8 @@ export const SETTING_KEYS = {
   /** Comma-separated disabled categories (default: none disabled). */
   soundMuted: 'settings.soundMuted',
   overlayEnabled: 'settings.overlayEnabled',
-  theme: 'settings.theme'
+  theme: 'settings.theme',
+  /** Local-AI coach over Ollama (see main/coach.ts). */
+  coachEnabled: 'settings.coachEnabled',
+  coachModel: 'settings.coachModel'
 } as const

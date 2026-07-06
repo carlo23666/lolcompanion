@@ -104,6 +104,95 @@ function MetaSection(): React.JSX.Element {
 }
 
 /**
+ * Local-AI coach (Ollama): free local models narrate the post-game report.
+ * Purely optional — the app never requires it.
+ */
+function CoachSection(): React.JSX.Element {
+  const [enabled, setEnabled] = useState(false)
+  const [model, setModel] = useState('gemma3:4b')
+  const [available, setAvailable] = useState(false)
+  const [models, setModels] = useState<string[]>([])
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    void window.api.invoke('coach:status').then((status) => {
+      setEnabled(status.enabled === true)
+      if (typeof status.model === 'string') setModel(status.model)
+      setAvailable(status.available === true)
+      if (Array.isArray(status.models)) setModels(status.models)
+    }, () => undefined)
+  }, [])
+
+  const save = async (): Promise<void> => {
+    await window.api.invoke('coach:configure', { enabled, model })
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  return (
+    <section className="max-w-md rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <h2 className="mb-1 text-sm font-semibold text-slate-300">Coach IA local (experimental)</h2>
+      <p className="mb-3 text-[11px] text-slate-500">
+        Usa un modelo de IA gratuito ejecutándose EN TU PC (via Ollama) para comentar tus
+        informes de partida en lenguaje natural. Nada sale de tu equipo. El motor de
+        recomendaciones no depende de esto.
+      </p>
+      <div className="flex flex-col gap-2 text-xs">
+        {available ? (
+          <p className="text-emerald-400">✓ Ollama detectado ({models.length} modelos)</p>
+        ) : (
+          <p className="text-slate-500">
+            Ollama no detectado. Instálalo gratis desde{' '}
+            <span className="text-indigo-300">ollama.com</span> y ejecuta{' '}
+            <code className="rounded bg-slate-800 px-1">ollama pull gemma3:4b</code>
+          </p>
+        )}
+        <label className="flex items-center gap-2 text-slate-400">
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={(event) => setEnabled(event.target.checked)}
+          />
+          Activar análisis de Hexi en el informe de partida
+        </label>
+        <label className="text-slate-400">
+          Modelo
+          {models.length > 0 ? (
+            <select
+              className="mt-1 w-full rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-slate-100"
+              value={model}
+              onChange={(event) => setModel(event.target.value)}
+            >
+              {!models.includes(model) && <option value={model}>{model}</option>}
+              {models.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              className="mt-1 w-full rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-slate-100"
+              value={model}
+              onChange={(event) => setModel(event.target.value)}
+            />
+          )}
+        </label>
+        <div className="flex items-center gap-2">
+          <button
+            className="rounded bg-slate-700 px-3 py-1.5 hover:bg-slate-600"
+            onClick={() => void save()}
+          >
+            Guardar
+          </button>
+          {saved && <span className="text-amber-400">Guardado</span>}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/**
  * Dev-only simulation panel: replay recorded games through the real pipeline
  * and fake a champ select, to test the whole app without playing. Hidden in
  * the packaged app (the replay list comes back empty there).
@@ -489,6 +578,8 @@ export default function SettingsView(): React.JSX.Element {
       </section>
 
       <MetaSection />
+
+      <CoachSection />
 
       <DevToolsSection />
 

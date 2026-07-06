@@ -1,5 +1,62 @@
 import { useEffect, useState } from 'react'
 import type { PostGameReport as Report, PostGameReportResult } from '@shared/report'
+import { HexiSprite } from './Mascot'
+
+/**
+ * Optional local-AI commentary (Ollama). Renders nothing unless the coach is
+ * enabled in Ajustes AND Ollama answers on localhost — zero noise otherwise.
+ */
+function CoachSection(props: { report: Report }): React.JSX.Element | null {
+  const [ready, setReady] = useState(false)
+  const [thinking, setThinking] = useState(false)
+  const [advice, setAdvice] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setAdvice(null)
+    setError(null)
+    void window.api
+      .invoke('coach:status')
+      .then((status) => setReady(status.enabled && status.available), () => undefined)
+  }, [props.report.matchId])
+
+  if (!ready) return null
+
+  const analyze = async (): Promise<void> => {
+    setThinking(true)
+    setError(null)
+    const result = await window.api.invoke('coach:analyze', props.report)
+    setThinking(false)
+    if (result.ok && result.text !== undefined) setAdvice(result.text)
+    else setError(result.error ?? 'error desconocido')
+  }
+
+  return (
+    <div className="mt-3 rounded border border-indigo-800/60 bg-slate-950/50 p-2.5">
+      <div className="flex items-start gap-2">
+        <HexiSprite mood={thinking ? 'focused' : 'idle'} className="h-9 w-9 shrink-0" />
+        <div className="min-w-0 flex-1">
+          <p className="mb-1 text-[11px] font-semibold tracking-wide text-indigo-300 uppercase">
+            Análisis de Hexi (IA local)
+          </p>
+          {advice !== null ? (
+            <p className="text-xs leading-relaxed whitespace-pre-wrap text-slate-300">{advice}</p>
+          ) : thinking ? (
+            <p className="text-xs text-slate-500">Hexi está pensando… (modelo local, dale unos segundos)</p>
+          ) : (
+            <button
+              className="rounded bg-indigo-700 px-2.5 py-1 text-xs hover:bg-indigo-600"
+              onClick={() => void analyze()}
+            >
+              🔮 Analizar mi partida
+            </button>
+          )}
+          {error !== null && <p className="mt-1 text-[11px] text-rose-400">{error}</p>}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function StatDelta(props: {
   label: string
@@ -166,6 +223,8 @@ export function ReportCard(props: { report: Report }): React.JSX.Element {
           </div>
         </div>
       )}
+
+      <CoachSection report={report} />
     </section>
   )
 }

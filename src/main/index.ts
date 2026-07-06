@@ -1,6 +1,7 @@
 import { join } from 'node:path'
 import { app, BrowserWindow } from 'electron'
 import { champSelectInsights, type MetaSource } from './champselect'
+import { registerCoachIpc } from './coach-ipc'
 import { openDatabase, type AppDatabase } from './db'
 import { MatchRepo, MetaRepo } from './db/repos'
 import { registerDevTools } from './devtools'
@@ -106,6 +107,7 @@ void app.whenReady().then(() => {
   registerIconProtocol(() => getStaticDataManager().getLoadedPatch())
   registerIpcHandlers(db)
   registerRiotIpc(db)
+  registerCoachIpc(db)
 
   const statsService = registerHistoryIpc(db)
 

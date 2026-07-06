@@ -13,7 +13,7 @@ import type { GameScenario } from './scenario'
 import type { GameState, GameStateEvent } from './gamestate'
 import type { HistoryAggregate, HistoryDetail, HistoryRow } from './history'
 import type { PersonalCurve, StatsOverview } from './stats'
-import type { PostGameReportResult } from './report'
+import type { PostGameReport, PostGameReportResult } from './report'
 import type { Recommendation } from './recommendation'
 import type { SessionPhase } from './session'
 
@@ -88,6 +88,20 @@ export interface IpcInvokeChannels {
   'ingest:start': { args: []; result: { started: boolean; error?: string } }
   /** Overlay hover: true = accept mouse input, false = click-through to the game. */
   'overlay:interactive': { args: [interactive: boolean]; result: { ok: true } }
+  /** Local-AI coach (Ollama): availability + configuration. */
+  'coach:status': {
+    args: []
+    result: { enabled: boolean; model: string; available: boolean; models: string[] }
+  }
+  'coach:configure': {
+    args: [config: { enabled: boolean; model: string }]
+    result: { saved: true }
+  }
+  /** Spanish coaching prose for a post-game report (facts passed in, localhost-only). */
+  'coach:analyze': {
+    args: [report: PostGameReport]
+    result: { ok: boolean; text?: string; error?: string }
+  }
   'session:get': { args: []; result: SessionPhase }
   /** Champion meta (ddragon id, name, damage type) keyed by numeric champion key. */
   'staticdata:championMeta': { args: []; result: Record<number, ChampionMeta> }
@@ -192,7 +206,10 @@ export const IPC_INVOKE_CHANNELS: readonly IpcInvokeChannel[] = [
   'meta:status',
   'meta:crawl:start',
   'meta:crawl:stop',
-  'overlay:interactive'
+  'overlay:interactive',
+  'coach:status',
+  'coach:configure',
+  'coach:analyze'
 ]
 
 export const IPC_EVENT_CHANNELS: readonly IpcEventChannel[] = [
