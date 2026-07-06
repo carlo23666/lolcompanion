@@ -77,6 +77,7 @@ export function createSnapshotProcessor(
         prompt
       ),
     onTip: (tip) => broadcast('coach:tip', tip),
+    onDirection: (tip) => broadcast('coach:direction', tip),
     personaName: () => mascotNameFor(coachSettings.get(SETTING_KEYS.theme)),
     log: (message) => console.log(message)
   })

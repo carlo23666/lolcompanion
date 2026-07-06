@@ -16,19 +16,19 @@ export const THEMES: AppTheme[] = [
   {
     id: 'recreativa',
     label: 'Recreativa',
-    hint: 'salón arcade: píxeles, fichas doradas y CRT teal',
+    hint: 'azul pizarra · dorado + teal · mascota Bitxo (ajolote píxel)',
     mascot: 'Bitxo'
   },
   {
     id: 'sakura',
-    label: 'Tinta y sakura',
-    hint: 'cuaderno de dojo: índigo tinta, rosa sakura, sellos dorados',
+    label: 'Sakura',
+    hint: 'índigo tinta · rosa + oro · mascota Kumo (kitsune)',
     mascot: 'Kumo'
   },
   {
     id: 'cabina',
     label: 'Cabina',
-    hint: 'consola de vuelo: instrumentos ámbar sobre verde abisal',
+    hint: 'verde abisal · ámbar + hielo · mascota Byte (dron)',
     mascot: 'Byte'
   }
 ]

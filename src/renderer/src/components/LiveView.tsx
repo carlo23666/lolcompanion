@@ -4,10 +4,30 @@ import type { GameState } from '@shared/gamestate'
 import type { RecommendationsPayload } from '@shared/ipc'
 import type { ChampSelectState } from '@shared/schemas/lcu'
 import type { SessionPhase } from '@shared/session'
-import type { LiveInsights as LiveInsightsData } from '../hooks'
+import { useIpcEvent, type LiveInsights as LiveInsightsData } from '../hooks'
 import AnimatedNumber from './AnimatedNumber'
 import ChampSelectPanel from './ChampSelectPanel'
-import { useTheme } from './Mascot'
+import { HexiSprite, useMascotName } from './Mascot'
+
+/** Role-aware strategic read from the local-AI coach (slow cadence). */
+function GameDirectionPanel(): React.JSX.Element | null {
+  const direction = useIpcEvent('coach:direction')
+  const mascot = useMascotName()
+  if (direction === null) return null
+  return (
+    <section className="card-in rounded-lg border border-indigo-800/60 bg-slate-900 p-3.5">
+      <div className="flex items-start gap-2.5">
+        <HexiSprite mood="focused" className="h-9 w-9 shrink-0" />
+        <div className="min-w-0 flex-1">
+          <p className="mb-1 text-[10px] font-semibold tracking-widest text-indigo-300 uppercase">
+            Plan de partida · {mascot}
+          </p>
+          <p className="text-xs leading-relaxed text-slate-300">{direction.text}</p>
+        </div>
+      </div>
+    </section>
+  )
+}
 import Gauges from './Gauges'
 import HomeDashboard from './HomeDashboard'
 import {
@@ -69,9 +89,10 @@ function OverlayHint(props: { onOpenSettings?: () => void }): React.JSX.Element 
 }
 
 /**
- * In-game layout, arranged per identity: Recreativa stacks like an arcade
- * screen list; Sakura reads as a centered notebook scroll; Cabina splits
- * into a two-column cockpit (advice console right, instruments left).
+ * In-game layout (one professional arrangement for every identity):
+ * HUD strip on top, then a two-column console on wide windows — advice
+ * (recommendation, plan, alerts) left, instruments (teams, gauges,
+ * objectives) right. Stacks on narrow windows.
  */
 function InGameLayout(props: {
   gameState: GameState
@@ -80,7 +101,6 @@ function InGameLayout(props: {
   insights?: LiveInsightsData
   onOpenSettings?: () => void
 }): React.JSX.Element {
-  const theme = useTheme()
   const { gameState, curve } = props
 
   const stat = (label: string, value: React.ReactNode, accent = false): React.JSX.Element => (
@@ -154,59 +174,25 @@ function InGameLayout(props: {
     <ObjectivesRow objectives={gameState.objectives} selfTeam={gameState.self.team} />
   )
   const hint = <OverlayHint onOpenSettings={props.onOpenSettings} />
-
-  if (theme === 'cabina') {
-    return (
-      <div className="flex flex-col gap-3">
-        {hint}
-        {statusBar}
-        <div className="grid grid-cols-1 items-start gap-3 xl:grid-cols-[minmax(0,5fr)_minmax(0,4fr)]">
-          <div className="flex flex-col gap-3">
-            <div className="flex gap-3 opacity-90">
-              {allies}
-              {enemies}
-            </div>
-            {gauges}
-            {objectives}
-          </div>
-          <div className="flex flex-col gap-3">
-            {hero}
-            {insightsRow}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (theme === 'sakura') {
-    return (
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
-        {hint}
-        {statusBar}
-        {hero}
-        {insightsRow}
-        <div className="flex flex-col gap-3 opacity-90">
-          {allies}
-          {enemies}
-        </div>
-        {gauges}
-        {objectives}
-      </div>
-    )
-  }
+  const direction = <GameDirectionPanel />
 
   return (
     <div className="flex flex-col gap-3">
       {hint}
       {statusBar}
-      {hero}
-      {insightsRow}
-      <div className="flex gap-3 opacity-90">
-        {allies}
-        {enemies}
+      <div className="grid grid-cols-1 items-start gap-3 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+        <div className="flex flex-col gap-3">
+          {hero}
+          {direction}
+          {insightsRow}
+        </div>
+        <div className="flex flex-col gap-3">
+          {allies}
+          {enemies}
+          {gauges}
+          {objectives}
+        </div>
       </div>
-      {gauges}
-      {objectives}
     </div>
   )
 }

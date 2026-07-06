@@ -320,6 +320,10 @@ export function installMockApi(): void {
         () => emit('coach:tip', { gameTimeS: mid.gameTimeS, text: 'Su jungla está muerto y el dragón sale en 40s: forzadlo ya, ez.' }),
         2500
       )
+      emit('coach:direction', {
+        gameTimeS: mid.gameTimeS,
+        text: 'Vais 0.9k por detrás pero tu bot está fuerte: juega con Leona, no te acerques a Zed sin visión y agrupad para el dragón del minuto 16. Si cae, empujad mid con el heraldo.'
+      })
     }
     if (phase === 'champSelect') emit('session:champselect', MOCK_CHAMP_SELECT)
   }, 300)

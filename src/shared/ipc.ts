@@ -182,8 +182,10 @@ export interface IpcEventChannels {
   'history:changed': { matchId: string }
   /** Meta crawler progress ticks. */
   'meta:progress': MetaCrawlProgress
-  /** Live macro tip from the local-AI coach (Hexi speaks it in the overlay). */
+  /** Live macro tip from the local-AI coach (the mascot speaks it in the overlay). */
   'coach:tip': { gameTimeS: number; text: string }
+  /** Role-aware strategic read of the game (Live panel, slower cadence). */
+  'coach:direction': { gameTimeS: number; text: string }
 }
 
 export type IpcInvokeChannel = keyof IpcInvokeChannels
@@ -238,7 +240,8 @@ export const IPC_EVENT_CHANNELS: readonly IpcEventChannel[] = [
   'gamestate:recommendations',
   'history:changed',
   'meta:progress',
-  'coach:tip'
+  'coach:tip',
+  'coach:direction'
 ]
 
 /** Shape of the API the preload script exposes on window.api */

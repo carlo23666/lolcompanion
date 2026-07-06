@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { GameState, GameStateEvent } from '@shared/gamestate'
 import { buildLiveCoachPrompt, LiveCoach, type LiveCoachTip } from '@main/coach-live'
+// (direction prompts are exercised through the class; builder export not needed here)
 import midGameState from '../../fixtures/gamestate/mid.json'
 
 const mid = midGameState as unknown as GameState
@@ -109,6 +110,40 @@ describe('LiveCoach', () => {
     coach.onGameState(stateAt(600), [], null)
     await flush()
     expect(tips[0]?.text).toBe('Pon visión en el río.')
+  })
+})
+
+describe('direction track (strategic read)', () => {
+  it('fires on its own slower cadence with role guidance and all visible players', async () => {
+    const prompts: string[] = []
+    const directions: LiveCoachTip[] = []
+    const coach = new LiveCoach({
+      isEnabled: () => true,
+      generate: (prompt) => {
+        prompts.push(prompt)
+        return Promise.resolve({ ok: true, text: 'Plan de prueba.' })
+      },
+      onTip: () => undefined,
+      onDirection: (tip) => directions.push(tip),
+      intervalS: 10_000, // effectively disable the fast track
+      directionIntervalS: 150
+    })
+    coach.onGameState(stateAt(600), [], null)
+    await flush()
+    coach.onGameState(stateAt(700), [], null) // < 150s later: throttled
+    await flush()
+    coach.onGameState(stateAt(760), [], null) // past the interval
+    await flush()
+
+    const directionPrompts = prompts.filter((prompt) => prompt.includes('LECTURA ESTRATÉGICA'))
+    expect(directionPrompts.length).toBe(2)
+    expect(directions.length).toBe(2)
+    // Role guidance for the fixture's own position and the full scoreboard.
+    const prompt = directionPrompts[0] ?? ''
+    expect(prompt).toContain('jugadores')
+    expect(prompt).toContain('aliados')
+    expect(prompt).toContain('enemigos')
+    expect(prompt).toContain('PROHIBIDO inventar')
   })
 })
 
