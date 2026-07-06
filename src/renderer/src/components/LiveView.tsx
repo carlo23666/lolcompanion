@@ -5,6 +5,7 @@ import type { RecommendationsPayload } from '@shared/ipc'
 import type { ChampSelectState } from '@shared/schemas/lcu'
 import type { SessionPhase } from '@shared/session'
 import type { LiveInsights as LiveInsightsData } from '../hooks'
+import AnimatedNumber from './AnimatedNumber'
 import ChampSelectPanel from './ChampSelectPanel'
 import Gauges from './Gauges'
 import HomeDashboard from './HomeDashboard'
@@ -116,7 +117,7 @@ export default function LiveView(props: {
             <div className="flex items-center gap-4 rounded-lg border border-slate-800 bg-slate-900 px-4 py-2 text-sm">
               <span className="font-mono text-lg">⏱ {formatClock(gameState.gameTimeS)}</span>
               <span className="font-mono text-amber-300">
-                💰 {Math.round(gameState.self.currentGold)}
+                💰 <AnimatedNumber value={Math.round(gameState.self.currentGold)} />
               </span>
               <span className="font-mono text-slate-300">
                 {gameState.self.scores.kills}/{gameState.self.scores.deaths}/
@@ -128,6 +129,12 @@ export default function LiveView(props: {
                 {gameState.patch}
               </span>
             </div>
+
+            {/* Hero: the recommendation is what the owner glances at mid-game. */}
+            <RecommendationCard
+              payload={props.recommendations ?? null}
+              currentGold={gameState.self.currentGold}
+            />
 
             {props.insights && (
               <div className="card-in flex flex-col gap-1.5 rounded-lg border border-slate-800 bg-slate-900 px-4 py-2">
@@ -141,12 +148,8 @@ export default function LiveView(props: {
               </div>
             )}
 
-            <RecommendationCard
-              payload={props.recommendations ?? null}
-              currentGold={gameState.self.currentGold}
-            />
-
-            <div className="flex gap-3">
+            {/* Ambient context: teams and gauges sit visually below the advice. */}
+            <div className="flex gap-3 opacity-90">
               <TeamPanel
                 title="Tu equipo"
                 accent="ally"

@@ -109,6 +109,79 @@ html[data-theme='noche'] body {
   background: #c8aa6e;
 }
 
+/* ---------- hextech card language ---------- */
+
+/*
+ * Hex-cut corners: the hextech signature. Box-shadows get clipped away, so
+ * anything needing an outer glow wraps this in a plain container that owns
+ * the shadow.
+ */
+.hex-card {
+  clip-path: polygon(
+    12px 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    12px 100%,
+    0 calc(100% - 12px),
+    0 12px
+  );
+}
+
+/* Rotating energy seam around the hero card (gold → teal spark). */
+@property --eb-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes energy-rotate {
+  to {
+    --eb-angle: 360deg;
+  }
+}
+
+.energy-border {
+  position: relative;
+}
+.energy-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1.5px;
+  pointer-events: none;
+  background: conic-gradient(
+    from var(--eb-angle),
+    rgba(200, 170, 110, 0.15) 0%,
+    rgba(200, 170, 110, 0.9) 10%,
+    rgba(127, 212, 228, 0.7) 22%,
+    rgba(200, 170, 110, 0.15) 38%,
+    rgba(200, 170, 110, 0.15) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: energy-rotate 5s linear infinite;
+}
+
+/* Live objective chip breathing while the objective is up. */
+@keyframes objective-breath {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 8px currentColor;
+  }
+}
+.objective-live {
+  animation: objective-breath 1.6s ease-in-out infinite;
+}
+
 /* ---------- animations ---------- */
 
 @keyframes card-in {
@@ -254,7 +327,9 @@ html[data-theme='noche'] body {
   .alert-in,
   .hexi,
   .hexi .hexi-eye,
-  .hexi .hexi-crystal {
+  .hexi .hexi-crystal,
+  .energy-border::before,
+  .objective-live {
     animation: none;
   }
 }

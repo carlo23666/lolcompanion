@@ -62,12 +62,12 @@ export default function RecommendationCard(props: {
   if (!top) return null
 
   return (
-    <section
-      className={`card-in rounded-lg border bg-slate-900 p-3 ${pulse ? 'gold-pulse border-amber-400' : 'border-slate-800'}`}
-    >
+    // Outer wrapper owns the pulse shadow (the hex clip would cut it off).
+    <div className={`card-in rounded-lg ${pulse ? 'gold-pulse' : ''}`}>
+      <section className="hex-card energy-border bg-slate-900 p-3.5">
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-          Recomendación
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">
+          ◆ Recomendación
         </h3>
         <button
           className="text-[11px] text-slate-500 hover:text-slate-300"
@@ -82,12 +82,14 @@ export default function RecommendationCard(props: {
           <img
             src={`ddicon://item/${String(top.itemId)}.png`}
             alt={top.itemName ?? ''}
-            className="h-12 w-12 rounded border border-slate-700"
+            className="h-14 w-14 rounded border border-amber-400/50 shadow-[0_0_12px_rgba(200,170,110,0.25)]"
           />
         )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="font-semibold text-slate-100">{top.itemName ?? top.category}</p>
+            <p className="text-lg leading-tight font-semibold text-slate-100">
+              {top.itemName ?? top.category}
+            </p>
             <span
               className={`rounded border px-1.5 py-0.5 text-[10px] font-bold ${ACTION_STYLE[top.action]}`}
             >
@@ -138,6 +140,7 @@ export default function RecommendationCard(props: {
           ))}
         </ul>
       )}
-    </section>
+      </section>
+    </div>
   )
 }
