@@ -198,10 +198,69 @@ export function installMockApi(): void {
           return respond({ games: 20, wins: 12, winratePct: 60, csPerMin: 7.1 })
         case 'history:champions':
           return respond(['Kaisa', 'Jinx', 'Samira'])
-        case 'stats:overview':
+        case 'stats:overview': {
+          const champ = (
+            champion: string,
+            games: number,
+            winratePct: number,
+            kda: number
+          ): Record<string, unknown> => ({
+            champion,
+            games,
+            winratePct,
+            kda,
+            csPerMin: 7.1,
+            goldPerMin: 410,
+            damageSharePct: 29,
+            visionPerMin: 0.6,
+            deathsPerGame: 4.6,
+            visionPerGame: 16
+          })
+          return respond({
+            totalGames: 87,
+            champions: [
+              champ('Kaisa', 24, 58, 3.4),
+              champ('Jinx', 31, 52, 3.1),
+              champ('Samira', 14, 43, 2.6)
+            ],
+            streaks: { current: 3, bestWin: 6, worstLoss: -4 },
+            durations: [],
+            firstDragon: null,
+            worstMatchups: [],
+            bestMatchups: [],
+            weekdays: []
+          })
+        }
+        case 'report:last':
+          return respond({
+            kind: 'report',
+            report: {
+              matchId: 'EUW1_7000000123',
+              champion: 'Kaisa',
+              win: true,
+              durationS: 1927,
+              kills: 11,
+              deaths: 3,
+              assists: 8,
+              csPerMin: 7.8,
+              goldPerMin: 445,
+              damageSharePct: 33,
+              visionScore: 18,
+              avgCsPerMin: 7.1,
+              avgGoldPerMin: 410,
+              avgDamageSharePct: 29,
+              avgDeaths: 4.6,
+              avgVisionScore: 16,
+              recommendedItems: [
+                { itemId: 3031, itemName: 'Filo Infinito', followed: true },
+                { itemId: 3036, itemName: 'Recordatorio Mortal', followed: true },
+                { itemId: 3026, itemName: 'Ángel de la Guarda', followed: false }
+              ],
+              summary: ['Farmeaste 0.7 CS/min por encima de tu media — GG de granja']
+            }
+          })
         case 'stats:curve':
         case 'history:detail':
-        case 'report:last':
           return respond(null)
         case 'dev:enabled':
           return respond(false)
