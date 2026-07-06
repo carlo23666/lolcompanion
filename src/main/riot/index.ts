@@ -48,11 +48,26 @@ export function getOwnerPuuid(db: AppDatabase): string | null {
 export function registerRiotIpc(db: AppDatabase): void {
   const settings = new SettingsRepo(db)
 
+  const readSoundVolume = (): number => {
+    const raw = Number(settings.get(SETTING_KEYS.soundVolume) ?? '60')
+    return Number.isFinite(raw) ? Math.min(100, Math.max(0, Math.round(raw))) : 60
+  }
+  const readSoundCategories = (): { recommendation: boolean; spike: boolean; objective: boolean } => {
+    const muted = new Set((settings.get(SETTING_KEYS.soundMuted) ?? '').split(','))
+    return {
+      recommendation: !muted.has('recommendation'),
+      spike: !muted.has('spike'),
+      objective: !muted.has('objective')
+    }
+  }
+
   handleInvoke('settings:get', () => ({
     riotId: settings.get(SETTING_KEYS.riotId),
     platform: settings.get(SETTING_KEYS.platform) ?? 'euw1',
     recordLive: settings.get(SETTING_KEYS.recordLive) === '1',
     soundsEnabled: settings.get(SETTING_KEYS.soundsEnabled) !== '0',
+    soundVolume: readSoundVolume(),
+    soundCategories: readSoundCategories(),
     overlayEnabled: settings.get(SETTING_KEYS.overlayEnabled) === '1',
     theme: settings.get(SETTING_KEYS.theme) ?? 'hextech',
     // Only the flag crosses IPC — the key itself never reaches the renderer.
@@ -66,6 +81,16 @@ export function registerRiotIpc(db: AppDatabase): void {
     settings.set(SETTING_KEYS.platform, update.platform)
     settings.set(SETTING_KEYS.recordLive, update.recordLive ? '1' : '0')
     settings.set(SETTING_KEYS.soundsEnabled, update.soundsEnabled ? '1' : '0')
+    settings.set(
+      SETTING_KEYS.soundVolume,
+      String(Math.min(100, Math.max(0, Math.round(update.soundVolume))))
+    )
+    settings.set(
+      SETTING_KEYS.soundMuted,
+      (['recommendation', 'spike', 'objective'] as const)
+        .filter((category) => !update.soundCategories[category])
+        .join(',')
+    )
     settings.set(SETTING_KEYS.overlayEnabled, update.overlayEnabled ? '1' : '0')
     settings.set(SETTING_KEYS.theme, update.theme)
     // undefined = leave the stored key untouched; '' clears it.

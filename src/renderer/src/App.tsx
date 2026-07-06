@@ -6,7 +6,7 @@ import LiveView from './components/LiveView'
 import HistoryView from './components/HistoryView'
 import SettingsView from './components/SettingsView'
 import { useIpcEvent, useLiveInsights } from './hooks'
-import { playAlert, playRecommendation, setSoundsEnabled } from './sounds'
+import { configureSounds, playAlert, playObjective, playRecommendation } from './sounds'
 
 /** Applies the selected color scheme; components restyle via CSS variables. */
 export function applyTheme(theme: string): void {
@@ -29,7 +29,11 @@ export default function App(): React.JSX.Element {
   useEffect(() => {
     void window.api.invoke('session:get').then(setPhase)
     void window.api.invoke('settings:get').then((settings) => {
-      setSoundsEnabled(settings.soundsEnabled)
+      configureSounds({
+        enabled: settings.soundsEnabled,
+        ...(typeof settings.soundVolume === 'number' ? { volume: settings.soundVolume } : {}),
+        ...(settings.soundCategories != null ? { categories: settings.soundCategories } : {})
+      })
       applyTheme(settings.theme)
     })
     // Offline with no cached patch this rejects; the UI then falls back to
@@ -53,7 +57,8 @@ export default function App(): React.JSX.Element {
     if (!newest || newest.id === lastAlertRef.current) return
     lastAlertRef.current = newest.id
     if (newest.kind === 'spike' || newest.kind === 'objective') {
-      playAlert()
+      if (newest.kind === 'objective') playObjective()
+      else playAlert()
       setMascotReactKey((key) => key + 1)
     }
   }, [insights.alerts])

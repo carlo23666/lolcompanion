@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { IngestProgressPayload, MetaStatusPayload } from '@shared/ipc'
 import { applyTheme } from '../App'
-import { setSoundsEnabled } from '../sounds'
+import { configureSounds, playPreview, type SoundCategories } from '../sounds'
 import DevScenario from './DevScenario'
 
 const PLATFORMS = ['euw1', 'eun1', 'na1', 'kr', 'br1', 'la1', 'la2', 'jp1', 'tr1', 'ru', 'oc1']
@@ -260,6 +260,12 @@ export default function SettingsView(): React.JSX.Element {
   const [platform, setPlatform] = useState('euw1')
   const [recordLive, setRecordLive] = useState(false)
   const [sounds, setSounds] = useState(true)
+  const [soundVolume, setSoundVolume] = useState(60)
+  const [soundCategories, setSoundCategories] = useState<SoundCategories>({
+    recommendation: true,
+    spike: true,
+    objective: true
+  })
   const [overlay, setOverlay] = useState(false)
   const [theme, setTheme] = useState('hextech')
   const [status, setStatus] = useState<string | null>(null)
@@ -272,6 +278,8 @@ export default function SettingsView(): React.JSX.Element {
       setPlatform(settings.platform)
       setRecordLive(settings.recordLive)
       setSounds(settings.soundsEnabled)
+      if (typeof settings.soundVolume === 'number') setSoundVolume(settings.soundVolume)
+      if (settings.soundCategories != null) setSoundCategories(settings.soundCategories)
       setOverlay(settings.overlayEnabled)
       setTheme(settings.theme)
     })
@@ -290,6 +298,8 @@ export default function SettingsView(): React.JSX.Element {
       platform,
       recordLive,
       soundsEnabled: sounds,
+      soundVolume,
+      soundCategories,
       overlayEnabled: overlay,
       theme,
       // Only send a key when the user typed one — undefined keeps the stored one.
@@ -299,7 +309,7 @@ export default function SettingsView(): React.JSX.Element {
       setApiKeySet(true)
       setApiKeyInput('')
     }
-    setSoundsEnabled(sounds)
+    configureSounds({ enabled: sounds, volume: soundVolume, categories: soundCategories })
     setStatus('Ajustes guardados')
   }
 
@@ -364,14 +374,69 @@ export default function SettingsView(): React.JSX.Element {
             />
             Grabar partidas en vivo como fixtures (solo desarrollo)
           </label>
-          <label className="flex items-center gap-2 text-xs text-slate-400">
-            <input
-              type="checkbox"
-              checked={sounds}
-              onChange={(event) => setSounds(event.target.checked)}
-            />
-            Sonidos (aviso de recomendación y spikes enemigos)
-          </label>
+          <fieldset className="rounded border border-slate-800 bg-slate-950/40 p-2 text-xs text-slate-400">
+            <legend className="px-1">Sonidos</legend>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={sounds}
+                onChange={(event) => setSounds(event.target.checked)}
+              />
+              Activar sonidos
+            </label>
+            <div className={sounds ? 'mt-2 flex flex-col gap-1.5' : 'mt-2 flex flex-col gap-1.5 opacity-40'}>
+              <label className="flex items-center gap-2">
+                Volumen
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={soundVolume}
+                  disabled={!sounds}
+                  onChange={(event) => setSoundVolume(Number(event.target.value))}
+                  className="flex-1 accent-amber-400"
+                />
+                <span className="w-8 text-right font-mono">{soundVolume}</span>
+              </label>
+              {(
+                [
+                  { key: 'recommendation', label: 'Nueva recomendación (campanita)' },
+                  { key: 'spike', label: 'Power-spike enemigo (doble aviso)' },
+                  { key: 'objective', label: 'Ventana de objetivo (cuerno)' }
+                ] as const
+              ).map((category) => (
+                <label key={category.key} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    disabled={!sounds}
+                    checked={soundCategories[category.key]}
+                    onChange={(event) =>
+                      setSoundCategories((current) => ({
+                        ...current,
+                        [category.key]: event.target.checked
+                      }))
+                    }
+                  />
+                  {category.label}
+                </label>
+              ))}
+              <button
+                type="button"
+                disabled={!sounds}
+                className="self-start rounded border border-slate-700 bg-slate-800 px-2 py-1 hover:border-slate-500"
+                onClick={() => {
+                  configureSounds({
+                    enabled: sounds,
+                    volume: soundVolume,
+                    categories: soundCategories
+                  })
+                  playPreview()
+                }}
+              >
+                🔊 Probar
+              </button>
+            </div>
+          </fieldset>
           <label className="flex items-center gap-2 text-xs text-slate-400">
             <input
               type="checkbox"

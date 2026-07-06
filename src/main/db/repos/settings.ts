@@ -28,6 +28,9 @@ export const SETTING_KEYS = {
   puuid: 'settings.puuid',
   recordLive: 'settings.recordLive',
   soundsEnabled: 'settings.soundsEnabled',
+  soundVolume: 'settings.soundVolume',
+  /** Comma-separated disabled categories (default: none disabled). */
+  soundMuted: 'settings.soundMuted',
   overlayEnabled: 'settings.overlayEnabled',
   theme: 'settings.theme'
 } as const

@@ -29,6 +29,10 @@ export interface AppSettings {
   recordLive: boolean
   /** UI sounds (recommendation chime, spike alerts). */
   soundsEnabled: boolean
+  /** Master volume 0-100 (60 = original level). */
+  soundVolume: number
+  /** Per-category sound toggles. */
+  soundCategories: { recommendation: boolean; spike: boolean; objective: boolean }
   /** Experimental in-game overlay window (shows while inGame). */
   overlayEnabled: boolean
   /** Color scheme id: 'hextech' (default), 'void' or 'noche'. */
@@ -71,6 +75,8 @@ export interface IpcInvokeChannels {
         platform: string
         recordLive: boolean
         soundsEnabled: boolean
+        soundVolume: number
+        soundCategories: { recommendation: boolean; spike: boolean; objective: boolean }
         overlayEnabled: boolean
         theme: string
         /** New Riot API key to store; undefined = keep current, '' = clear. */
