@@ -139,6 +139,10 @@ void app.whenReady().then(() => {
   }, 10_000)
 
   overlay = new OverlayManager()
+  handleInvoke('overlay:interactive', (interactive) => {
+    overlay?.setInteractive(interactive)
+    return { ok: true as const }
+  })
   const machine = new SessionMachine((phase) => {
     broadcast('session:phase', phase)
     postGame.onPhase(phase)

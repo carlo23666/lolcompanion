@@ -86,6 +86,8 @@ export interface IpcInvokeChannels {
     result: { saved: true }
   }
   'ingest:start': { args: []; result: { started: boolean; error?: string } }
+  /** Overlay hover: true = accept mouse input, false = click-through to the game. */
+  'overlay:interactive': { args: [interactive: boolean]; result: { ok: true } }
   'session:get': { args: []; result: SessionPhase }
   /** Champion meta (ddragon id, name, damage type) keyed by numeric champion key. */
   'staticdata:championMeta': { args: []; result: Record<number, ChampionMeta> }
@@ -189,7 +191,8 @@ export const IPC_INVOKE_CHANNELS: readonly IpcInvokeChannel[] = [
   'staticdata:itemCatalog',
   'meta:status',
   'meta:crawl:start',
-  'meta:crawl:stop'
+  'meta:crawl:stop',
+  'overlay:interactive'
 ]
 
 export const IPC_EVENT_CHANNELS: readonly IpcEventChannel[] = [
