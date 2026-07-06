@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ChampionMeta, ChampSelectInsights } from '@shared/champselect'
 import type { ChampSelectState } from '@shared/schemas/lcu'
-import { HexiSprite } from './Mascot'
+import { HexiSprite, useMascotName } from './Mascot'
 
 /** Debounce so a burst of draft updates (pick + ban + intent) costs ONE run. */
 const DRAFT_ANALYZE_DEBOUNCE_MS = 1500
@@ -13,6 +13,7 @@ const DRAFT_ANALYZE_DEBOUNCE_MS = 1500
  * previous advice stays visible while Hexi recalculates.
  */
 function CoachDraft(props: { insights: ChampSelectInsights }): React.JSX.Element | null {
+  const mascot = useMascotName()
   const [ready, setReady] = useState(false)
   const [thinking, setThinking] = useState(false)
   const [advice, setAdvice] = useState<string | null>(null)
@@ -80,7 +81,7 @@ function CoachDraft(props: { insights: ChampSelectInsights }): React.JSX.Element
         <HexiSprite mood={thinking ? 'focused' : 'idle'} className="h-8 w-8 shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="mb-0.5 text-[10px] font-semibold tracking-wide text-indigo-300 uppercase">
-            🔮 Hexi analiza el draft{' '}
+            🔮 {mascot} analiza el draft{' '}
             {thinking && <span className="animate-pulse text-slate-500">recalculando…</span>}
           </p>
           {advice !== null ? (

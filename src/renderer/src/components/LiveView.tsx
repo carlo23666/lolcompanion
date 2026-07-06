@@ -55,7 +55,8 @@ function OverlayHint(props: { onOpenSettings?: () => void }): React.JSX.Element 
   if (overlayEnabled !== false) return null
   return (
     <p className="card-in rounded border border-slate-800 bg-slate-900/60 px-3 py-1.5 text-[11px] text-slate-400">
-      💡 Hexi puede acompañarte dentro del juego con un overlay (LoL en ventana o sin bordes).{' '}
+      💡 Tu mascota puede acompañarte dentro del juego con un overlay (LoL en ventana o sin
+      bordes).{' '}
       <button
         className="text-indigo-300 underline hover:text-indigo-200"
         onClick={props.onOpenSettings}

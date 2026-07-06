@@ -1,16 +1,11 @@
 import { useEffect, useState } from 'react'
 import type { IngestProgressPayload, MetaStatusPayload } from '@shared/ipc'
+import { DEFAULT_THEME, THEMES } from '@shared/themes'
 import { applyTheme } from '../App'
 import { configureSounds, playPreview, type SoundCategories } from '../sounds'
 import DevScenario from './DevScenario'
 
 const PLATFORMS = ['euw1', 'eun1', 'na1', 'kr', 'br1', 'la1', 'la2', 'jp1', 'tr1', 'ru', 'oc1']
-
-const THEMES: { id: string; label: string; hint: string }[] = [
-  { id: 'hextech', label: 'Hextech', hint: 'azul marino + dorado (clásico)' },
-  { id: 'void', label: 'Vacío', hint: 'púrpura profundo + magenta' },
-  { id: 'noche', label: 'Noche', hint: 'grafito neutro + azul (minimal)' }
-]
 
 const REPLAY_SPEEDS: { label: string; intervalMs: number }[] = [
   { label: 'x4', intervalMs: 500 },
@@ -170,7 +165,7 @@ function CoachSection(): React.JSX.Element {
             checked={enabled}
             onChange={(event) => setEnabled(event.target.checked)}
           />
-          Activar análisis de Hexi (informe de partida y champ select)
+          Activar análisis de la mascota (informe de partida y champ select)
         </label>
         <label className="flex items-center gap-2 text-slate-400">
           <input
@@ -179,8 +174,8 @@ function CoachSection(): React.JSX.Element {
             disabled={!enabled}
             onChange={(event) => setLiveEnabled(event.target.checked)}
           />
-          Consejos EN PARTIDA (~1 por minuto): Hexi sugiere macro en el overlay — visión antes
-          de objetivos, cuándo forzar, cuándo jugar seguro
+          Consejos EN PARTIDA (~1 por minuto): la mascota sugiere macro en el overlay — visión
+          antes de objetivos, cuándo forzar, cuándo jugar seguro
         </label>
         <label className="text-slate-400">
           Modelo
@@ -385,7 +380,7 @@ export default function SettingsView(): React.JSX.Element {
     objective: true
   })
   const [overlay, setOverlay] = useState(false)
-  const [theme, setTheme] = useState('hextech')
+  const [theme, setTheme] = useState(DEFAULT_THEME)
   const [status, setStatus] = useState<string | null>(null)
   const [progress, setProgress] = useState<IngestProgressPayload | null>(null)
 
@@ -561,8 +556,8 @@ export default function SettingsView(): React.JSX.Element {
               checked={overlay}
               onChange={(event) => setOverlay(event.target.checked)}
             />
-            Overlay in-game con Hexi (experimental — requiere LoL en ventana o sin bordes; se
-            activa al entrar en partida)
+            Overlay in-game con la mascota (experimental — requiere LoL en ventana o sin
+            bordes; se activa al entrar en partida)
           </label>
           <fieldset className="text-xs text-slate-400">
             <legend className="mb-1">Tema</legend>

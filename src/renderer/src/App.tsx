@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChampionMeta } from '@shared/champselect'
 import type { SessionPhase } from '@shared/session'
+import { normalizeTheme } from '@shared/themes'
 import TopBar, { type ViewId } from './components/TopBar'
 import LiveView from './components/LiveView'
 import HistoryView from './components/HistoryView'
@@ -8,9 +9,12 @@ import SettingsView from './components/SettingsView'
 import { useIpcEvent, useLiveInsights } from './hooks'
 import { configureSounds, playAlert, playObjective, playRecommendation } from './sounds'
 
-/** Applies the selected color scheme; components restyle via CSS variables. */
+/** Applies the selected identity; components restyle via CSS variables and
+ * mascots listen for the change event to swap sprites live. */
 export function applyTheme(theme: string): void {
-  document.documentElement.dataset['theme'] = theme
+  const normalized = normalizeTheme(theme)
+  document.documentElement.dataset['theme'] = normalized
+  window.dispatchEvent(new CustomEvent('app-theme', { detail: normalized }))
 }
 
 export default function App(): React.JSX.Element {

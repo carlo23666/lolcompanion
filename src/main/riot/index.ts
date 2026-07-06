@@ -9,6 +9,7 @@ import { ingestHistory } from './ingest'
 import { RiotRateLimiter } from './limiter'
 import { MetaCrawler } from './metacrawler'
 import { normalizeRiotId } from './riotid'
+import { normalizeTheme } from '@shared/themes'
 
 export { RiotClient, RiotApiError, PLATFORM_TO_REGIONAL } from './client'
 export type { Result, RiotErrorKind } from './client'
@@ -69,7 +70,7 @@ export function registerRiotIpc(db: AppDatabase): void {
     soundVolume: readSoundVolume(),
     soundCategories: readSoundCategories(),
     overlayEnabled: settings.get(SETTING_KEYS.overlayEnabled) === '1',
-    theme: settings.get(SETTING_KEYS.theme) ?? 'hextech',
+    theme: normalizeTheme(settings.get(SETTING_KEYS.theme)),
     // Only the flag crosses IPC — the key itself never reaches the renderer.
     apiKeySet: hasApiKey(settings, keyCodec)
   }))

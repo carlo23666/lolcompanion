@@ -1,99 +1,147 @@
 @import 'tailwindcss';
 
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('./fonts/press-start-2p.woff2') format('woff2');
+  font-display: swap;
+}
+
 /*
- * Hextech identity. All components use slate-* utilities; remapping the
- * slate scale to League's navy palette re-skins the whole app, with gold
- * (amber) as the accent color. Readability first: body text stays a light
- * blue-grey, gold is reserved for accents.
+ * Three OWN identities (Ajustes → Tema), each a full visual language:
+ * palette, typography, corner radius and panel framing — all CSS variables,
+ * so switching re-skins every component live. Default: 'recreativa'.
+ * Mascots follow the theme too (Mascot.tsx).
  */
 @theme {
-  --color-slate-950: #010a13; /* app background (League darkest navy) */
-  --color-slate-900: #0a1428; /* card background */
-  --color-slate-800: #12253a; /* borders, inputs, wells */
-  --color-slate-700: #2a4358; /* raised borders, buttons */
-  --color-slate-600: #46596b; /* faint text */
-  --color-slate-500: #7c8ea0; /* muted text */
-  --color-slate-400: #a7b8c9; /* secondary text */
-  --color-slate-300: #cdd9e4; /* body text */
-  --color-slate-200: #e2ebf3;
-  --color-slate-100: #f0e6d2; /* headings (League parchment) */
-  --color-amber-300: #e8c979; /* hextech gold, bright */
-  --color-amber-400: #c8aa6e; /* hextech gold */
-  --color-indigo-300: #7fd4e4; /* hextech teal replaces indigo accents */
-  --color-indigo-500: #0a9bb4;
-  --color-indigo-600: #0a7f96;
-  --color-indigo-700: #0f5c6d;
-  --color-indigo-800: #123c4a;
+  /* — Recreativa: personal arcade. Ink blue, coin gold, CRT teal. — */
+  --color-slate-950: #101223; /* room in the dark */
+  --color-slate-900: #161a2e; /* cabinet panel */
+  --color-slate-800: #232849; /* inset screen */
+  --color-slate-700: #39406b;
+  --color-slate-600: #565d85;
+  --color-slate-500: #8188ac;
+  --color-slate-400: #a6acc9;
+  --color-slate-300: #cdd2e6;
+  --color-slate-200: #e0e4f1;
+  --color-slate-100: #f2f4fb;
+  --color-amber-300: #ffd576; /* coin gold bright */
+  --color-amber-400: #ffc857; /* coin gold */
+  --color-indigo-300: #63e5d2; /* CRT teal */
+  --color-indigo-500: #35d0ba;
+  --color-indigo-600: #22ad9a;
+  --color-indigo-700: #1b8577;
+  --color-indigo-800: #14574f;
 }
 
 :root {
   color-scheme: dark;
+  --font-display: 'Press Start 2P', ui-monospace, monospace;
+  /* Pixel corners: nothing is round in an arcade. */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
 }
 
-/*
- * Selectable color schemes (Ajustes → Tema). Tailwind v4 utilities read the
- * @theme variables at runtime, so overriding them per data-theme re-skins
- * every component. 'hextech' is the default (values above).
- */
-html[data-theme='void'] {
-  --color-slate-950: #08040f; /* void darkest purple */
-  --color-slate-900: #140b24;
-  --color-slate-800: #241540;
-  --color-slate-700: #3b2861;
-  --color-slate-600: #5a4a7d;
-  --color-slate-500: #8b7ba8;
-  --color-slate-400: #b0a3c9;
-  --color-slate-300: #d3c9e4;
-  --color-slate-200: #e6def3;
-  --color-slate-100: #f3edfb;
-  --color-amber-300: #e879c9; /* void magenta as the accent */
-  --color-amber-400: #c95eae;
-  --color-indigo-300: #b39df1;
-  --color-indigo-500: #7d5fd6;
-  --color-indigo-600: #6647bd;
-  --color-indigo-700: #4e3396;
-  --color-indigo-800: #382469;
+html[data-theme='sakura'] {
+  --color-slate-950: #14121f; /* ink indigo */
+  --color-slate-900: #1c1930;
+  --color-slate-800: #2b2647;
+  --color-slate-700: #453d6b;
+  --color-slate-600: #635a8c;
+  --color-slate-500: #8a82ae;
+  --color-slate-400: #aba4c9;
+  --color-slate-300: #cfc9e2;
+  --color-slate-200: #e2def0;
+  --color-slate-100: #f4efea; /* washi paper headings */
+  --color-amber-300: #e8c88a; /* gold seal */
+  --color-amber-400: #d9b36c;
+  --color-indigo-300: #f2a7c3; /* sakura pink */
+  --color-indigo-500: #db6d99;
+  --color-indigo-600: #c25580;
+  --color-indigo-700: #943d60;
+  --color-indigo-800: #632840;
+  --font-display: 'Yu Gothic UI', 'Meiryo UI', 'Segoe UI', sans-serif;
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
 }
 
-html[data-theme='noche'] {
-  --color-slate-950: #0b0e13; /* neutral graphite, minimal "pro" look */
-  --color-slate-900: #12161d;
-  --color-slate-800: #1e242e;
-  --color-slate-700: #313a47;
-  --color-slate-600: #4c5666;
-  --color-slate-500: #77828f;
-  --color-slate-400: #a0aab6;
-  --color-slate-300: #c8d0d9;
-  --color-slate-200: #dde3ea;
-  --color-slate-100: #f2f5f8;
-  --color-amber-300: #8ab4f8; /* cool blue replaces gold */
-  --color-amber-400: #6b9ce8;
-  --color-indigo-300: #8ab4f8;
-  --color-indigo-500: #4f7fd9;
-  --color-indigo-600: #3d68b8;
-  --color-indigo-700: #2e4f8e;
-  --color-indigo-800: #223a67;
+html[data-theme='cabina'] {
+  --color-slate-950: #0a1517; /* abyssal green-black */
+  --color-slate-900: #0e1b1e;
+  --color-slate-800: #16292c;
+  --color-slate-700: #24413f;
+  --color-slate-600: #3a5b58;
+  --color-slate-500: #587873;
+  --color-slate-400: #7fa8a0;
+  --color-slate-300: #b7cfc9;
+  --color-slate-200: #d2e2dd;
+  --color-slate-100: #ecf3f0;
+  --color-amber-300: #ffc670; /* instrument amber */
+  --color-amber-400: #ffb454;
+  --color-indigo-300: #9bd1e5; /* ice HUD blue */
+  --color-indigo-500: #5fa8c7;
+  --color-indigo-600: #4a8ca8;
+  --color-indigo-700: #38677d;
+  --color-indigo-800: #274757;
+  --font-display: 'Cascadia Code', 'Consolas', ui-monospace, monospace;
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 3px;
+  --radius-xl: 4px;
+  --radius-2xl: 4px;
+}
+
+/* Display type: each identity speaks through its headings. Pixel type is
+ * physically larger per point — recreativa headings shrink to compensate. */
+h1,
+legend {
+  font-family: var(--font-display);
+}
+:root h1,
+html[data-theme='recreativa'] h1 {
+  font-size: 13px;
+  line-height: 1.8;
+  letter-spacing: 0.5px;
+}
+html[data-theme='sakura'] h1,
+html[data-theme='cabina'] h1 {
+  font-size: 1.125rem;
+  letter-spacing: 1px;
 }
 
 body {
   @apply bg-slate-950 text-slate-100 antialiased;
+  /* Recreativa: teal CRT glow + scanlines. */
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(10, 155, 180, 0.12), transparent),
-    radial-gradient(ellipse 60% 40% at 90% 110%, rgba(200, 170, 110, 0.06), transparent);
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(53, 208, 186, 0.1), transparent),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 3px);
   background-attachment: fixed;
 }
 
-html[data-theme='void'] body {
+html[data-theme='sakura'] body {
+  /* Ink wash + drifting sakura light. */
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(125, 95, 214, 0.14), transparent),
-    radial-gradient(ellipse 60% 40% at 90% 110%, rgba(232, 121, 201, 0.06), transparent);
+    radial-gradient(ellipse 60% 45% at 85% -5%, rgba(242, 167, 195, 0.13), transparent),
+    radial-gradient(ellipse 50% 40% at 5% 105%, rgba(217, 179, 108, 0.07), transparent);
 }
 
-html[data-theme='noche'] body {
-  background-image: none;
+html[data-theme='cabina'] body {
+  /* Instrument grid, barely there. */
+  background-image:
+    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(155, 209, 229, 0.07), transparent),
+    repeating-linear-gradient(90deg, rgba(155, 209, 229, 0.03) 0 1px, transparent 1px 48px),
+    repeating-linear-gradient(0deg, rgba(155, 209, 229, 0.03) 0 1px, transparent 1px 48px);
 }
 
-/* Hextech scrollbars */
+/* Themed scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -102,31 +150,56 @@ html[data-theme='noche'] body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a4358;
-  border-radius: 4px;
+  background: var(--color-slate-700);
+  border-radius: var(--radius-sm);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #c8aa6e;
+  background: var(--color-amber-400);
 }
 
-/* ---------- hextech card language ---------- */
+/* ---------- per-identity hero-card language ---------- */
 
 /*
- * Hex-cut corners: the hextech signature. Box-shadows get clipped away, so
- * anything needing an outer glow wraps this in a plain container that owns
- * the shadow.
+ * .hex-card is the hero panel treatment; each identity reinterprets it.
+ * Recreativa: stepped pixel corners (clip-path — outer shadows go on a
+ * wrapper). Sakura: soft panel with a gold seal edge. Cabina: instrument
+ * bezel with a hairline amber inset.
  */
 .hex-card {
   clip-path: polygon(
-    12px 0,
-    calc(100% - 12px) 0,
-    100% 12px,
-    100% calc(100% - 12px),
-    calc(100% - 12px) 100%,
-    12px 100%,
-    0 calc(100% - 12px),
-    0 12px
+    0 8px,
+    4px 8px,
+    4px 4px,
+    8px 4px,
+    8px 0,
+    calc(100% - 8px) 0,
+    calc(100% - 8px) 4px,
+    calc(100% - 4px) 4px,
+    calc(100% - 4px) 8px,
+    100% 8px,
+    100% calc(100% - 8px),
+    calc(100% - 4px) calc(100% - 8px),
+    calc(100% - 4px) calc(100% - 4px),
+    calc(100% - 8px) calc(100% - 4px),
+    calc(100% - 8px) 100%,
+    8px 100%,
+    8px calc(100% - 4px),
+    4px calc(100% - 4px),
+    4px calc(100% - 8px),
+    0 calc(100% - 8px)
   );
+}
+
+html[data-theme='sakura'] .hex-card {
+  clip-path: none;
+  border-left: 3px solid var(--color-amber-400);
+  border-radius: var(--radius-lg);
+}
+
+html[data-theme='cabina'] .hex-card {
+  clip-path: none;
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 0 0 1px rgba(255, 180, 84, 0.45);
 }
 
 /* Rotating energy seam around the hero card (gold → teal spark). */
@@ -144,6 +217,12 @@ html[data-theme='noche'] body {
 
 .energy-border {
   position: relative;
+}
+/* The rotating seam is Recreativa's move; the other identities frame the
+ * hero with their own edge treatments instead. */
+html[data-theme='sakura'] .energy-border::before,
+html[data-theme='cabina'] .energy-border::before {
+  display: none;
 }
 .energy-border::before {
   content: '';
@@ -322,10 +401,94 @@ html[data-theme='noche'] body {
   transform: scaleX(1);
 }
 
-/* ---------- mascot (Hexi) ---------- */
+/* ---------- mascot sprite cycles (per identity) ---------- */
+
+/* Bitxo (recreativa): true sprite animation — two pixel frames swapped with
+ * steps(1), like a SNES walk cycle. Idle shuffles slowly; hyped runs. */
+@keyframes px-frame-a {
+  0%,
+  49.9% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes px-frame-b {
+  0%,
+  49.9% {
+    opacity: 0;
+  }
+  50%,
+  100% {
+    opacity: 1;
+  }
+}
+.px-a {
+  animation: px-frame-a 0.9s steps(1) infinite;
+}
+.px-b {
+  animation: px-frame-b 0.9s steps(1) infinite;
+}
+.hexi[data-mood='hyped'] .px-a {
+  animation-duration: 0.35s;
+}
+.hexi[data-mood='hyped'] .px-b {
+  animation-duration: 0.35s;
+}
+.hexi[data-mood='sleepy'] .px-a,
+.hexi[data-mood='sleepy'] .px-b {
+  animation: none;
+}
+.hexi[data-mood='sleepy'] .px-b {
+  opacity: 0;
+}
+
+/* Kumo (sakura): brush-spirit — the tail sways, the body keeps the float. */
+@keyframes tail-sway {
+  0%,
+  100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+}
+.kumo-tail {
+  transform-origin: 80% 80%;
+  animation: tail-sway 1.6s ease-in-out infinite;
+}
+.hexi[data-mood='hyped'] .kumo-tail {
+  animation-duration: 0.5s;
+}
+
+/* Byte (cabina): copilot drone — the visor light scans left-right. */
+@keyframes visor-scan {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+}
+.byte-eye {
+  animation: visor-scan 2.2s ease-in-out infinite;
+}
+.hexi[data-mood='hyped'] .byte-eye {
+  animation-duration: 0.6s;
+}
+
+/* ---------- mascot (shared float/bob) ---------- */
 
 .hexi {
   animation: float-y 3.2s ease-in-out infinite;
+}
+.hexi > svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 .hexi[data-mood='hyped'] {
   animation: bounce-y 0.9s ease-in-out infinite;
@@ -361,7 +524,11 @@ html[data-theme='noche'] body {
   .energy-border::before,
   .objective-live,
   .hexi-walk-in,
-  .hexi-walk-out {
+  .hexi-walk-out,
+  .px-a,
+  .px-b,
+  .kumo-tail,
+  .byte-eye {
     animation: none;
   }
 }

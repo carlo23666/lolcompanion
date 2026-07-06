@@ -15,17 +15,20 @@ const OLLAMA_URL = 'http://127.0.0.1:11434'
 export const DEFAULT_COACH_MODEL = 'gemma3:4b'
 
 /**
- * Hexi's voice, shared by every prompt. Gamer/geek registers well with the
- * owner; the champion in the data is always THE PLAYER — second person only.
+ * The mascot's voice, shared by every prompt. Gamer/geek registers well with
+ * the owner; the champion in the data is always THE PLAYER — second person
+ * only. The name follows the active identity (Bitxo · Kumo · Byte).
  */
-export const HEXI_PERSONA = [
-  'Eres Hexi, un espíritu hextech coach de League of Legends con alma gamer:',
-  'tono cercano y un punto friki/weeb (puedes soltar jerga como GG, diff, all-in,',
-  'farmear, tiltear, "ez" — con gracia y sin pasarte, máximo una expresión por respuesta).',
-  'El campeón que aparece en los datos ES EL JUGADOR con quien hablas:',
-  'dirígete SIEMPRE a él/ella de tú ("tienes", "compra", "fuerza"),',
-  'NUNCA en tercera persona ni llamándole por el nombre del campeón.'
-].join('\n')
+export function buildPersona(name: string): string {
+  return [
+    `Eres ${name}, la mascota coach de League of Legends de este jugador, con alma gamer:`,
+    'tono cercano y un punto friki/weeb (puedes soltar jerga como GG, diff, all-in,',
+    'farmear, tiltear, "ez" — con gracia y sin pasarte, máximo una expresión por respuesta).',
+    'El campeón que aparece en los datos ES EL JUGADOR con quien hablas:',
+    'dirígete SIEMPRE a él/ella de tú ("tienes", "compra", "fuerza"),',
+    'NUNCA en tercera persona ni llamándole por el nombre del campeón.'
+  ].join('\n')
+}
 
 const tagsSchema = z.object({
   models: z.array(z.object({ name: z.string() }))
@@ -50,7 +53,7 @@ export async function ollamaStatus(url: string = OLLAMA_URL): Promise<OllamaStat
 }
 
 /** The report's facts, serialized for the model, with an anti-hallucination frame. */
-export function buildCoachPrompt(report: PostGameReport): string {
+export function buildCoachPrompt(report: PostGameReport, personaName = 'Bitxo'): string {
   const facts = {
     campeon: report.champion,
     resultado: report.win ? 'victoria' : 'derrota',
@@ -73,7 +76,7 @@ export function buildCoachPrompt(report: PostGameReport): string {
     conclusionesAutomaticas: report.summary
   }
   return [
-    HEXI_PERSONA,
+    buildPersona(personaName),
     'Analiza SU partida usando EXCLUSIVAMENTE los datos del JSON siguiente.',
     'PROHIBIDO inventar cifras, objetos o eventos que no estén en los datos.',
     '',
@@ -87,7 +90,7 @@ export function buildCoachPrompt(report: PostGameReport): string {
 }
 
 /** Champ-select facts (comp analysis + ranked picks), anti-hallucination framed. */
-export function buildDraftPrompt(insights: ChampSelectInsights): string {
+export function buildDraftPrompt(insights: ChampSelectInsights, personaName = 'Bitxo'): string {
   const facts = {
     danoEnemigo: insights.enemySplit,
     danoAliado: insights.allySplit,
@@ -106,7 +109,7 @@ export function buildDraftPrompt(insights: ChampSelectInsights): string {
       : null
   }
   return [
-    HEXI_PERSONA,
+    buildPersona(personaName),
     'El jugador está en la selección de campeones. Usa EXCLUSIVAMENTE los datos del JSON.',
     'PROHIBIDO mencionar campeones, objetos o cifras que no aparezcan en los datos.',
     '',

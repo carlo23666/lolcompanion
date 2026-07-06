@@ -1,6 +1,7 @@
 import { join } from 'node:path'
 import { app } from 'electron'
 import type { GameState, GameStateEvent } from '@shared/gamestate'
+import { mascotNameFor } from '@shared/themes'
 import type { LiveClientSnapshot } from '@shared/schemas/liveclient'
 import { DEFAULT_COACH_MODEL, generateWithInstalledModel } from '../coach'
 import { LiveCoach } from '../coach-live'
@@ -76,6 +77,7 @@ export function createSnapshotProcessor(
         prompt
       ),
     onTip: (tip) => broadcast('coach:tip', tip),
+    personaName: () => mascotNameFor(coachSettings.get(SETTING_KEYS.theme)),
     log: (message) => console.log(message)
   })
 

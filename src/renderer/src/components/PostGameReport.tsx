@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { PostGameReport as Report, PostGameReportResult } from '@shared/report'
-import { HexiSprite } from './Mascot'
+import { HexiSprite, useMascotName } from './Mascot'
 
 /**
  * Optional local-AI commentary (Ollama). Renders nothing unless the coach is
@@ -8,6 +8,7 @@ import { HexiSprite } from './Mascot'
  * report — no clicks needed (owner request 2026-07-06).
  */
 function CoachSection(props: { report: Report }): React.JSX.Element | null {
+  const mascot = useMascotName()
   const [ready, setReady] = useState(false)
   const [thinking, setThinking] = useState(false)
   const [advice, setAdvice] = useState<string | null>(null)
@@ -43,14 +44,14 @@ function CoachSection(props: { report: Report }): React.JSX.Element | null {
         <HexiSprite mood={thinking ? 'focused' : 'idle'} className="h-9 w-9 shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="mb-1 text-[11px] font-semibold tracking-wide text-indigo-300 uppercase">
-            Análisis de Hexi (IA local)
+            Análisis de {mascot} (IA local)
           </p>
           {advice !== null ? (
             <p className="text-xs leading-relaxed whitespace-pre-wrap text-slate-300">{advice}</p>
           ) : (
             <p className="text-xs text-slate-500">
               {thinking
-                ? 'Hexi está pensando… (modelo local, dale unos segundos)'
+                ? `${mascot} está pensando… (modelo local, dale unos segundos)`
                 : 'Preparando análisis…'}
             </p>
           )}

@@ -1,3 +1,4 @@
+import { mascotNameFor } from '@shared/themes'
 import type { AppDatabase } from './db'
 import { SettingsRepo, SETTING_KEYS } from './db/repos/settings'
 import { handleInvoke } from './ipc'
@@ -37,7 +38,8 @@ export function registerCoachIpc(db: AppDatabase): void {
       return { ok: false as const, error: 'Coach desactivado (Ajustes)' }
     }
     const model = settings.get(SETTING_KEYS.coachModel) ?? DEFAULT_COACH_MODEL
-    return generateWithInstalledModel(model, buildCoachPrompt(report))
+    const persona = mascotNameFor(settings.get(SETTING_KEYS.theme))
+    return generateWithInstalledModel(model, buildCoachPrompt(report, persona))
   })
 
   handleInvoke('coach:draft', async (insights) => {
@@ -45,6 +47,7 @@ export function registerCoachIpc(db: AppDatabase): void {
       return { ok: false as const, error: 'Coach desactivado (Ajustes)' }
     }
     const model = settings.get(SETTING_KEYS.coachModel) ?? DEFAULT_COACH_MODEL
-    return generateWithInstalledModel(model, buildDraftPrompt(insights))
+    const persona = mascotNameFor(settings.get(SETTING_KEYS.theme))
+    return generateWithInstalledModel(model, buildDraftPrompt(insights, persona))
   })
 }

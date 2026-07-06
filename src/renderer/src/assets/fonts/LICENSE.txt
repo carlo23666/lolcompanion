@@ -1,0 +1,3 @@
+press-start-2p.woff2 — "Press Start 2P" by CodeMan38 (cody@zone38.net).
+Licensed under the SIL Open Font License 1.1 (https://openfontlicense.org).
+Bundled locally so the packaged app never hits a font CDN at runtime.

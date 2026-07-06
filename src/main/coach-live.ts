@@ -1,6 +1,6 @@
 import type { GameState, GameStateEvent } from '@shared/gamestate'
 import type { Recommendation } from '@shared/recommendation'
-import { HEXI_PERSONA } from './coach'
+import { buildPersona } from './coach'
 
 /**
  * Live macro coach: every ~60s of game time, the local model (Ollama) turns
@@ -57,9 +57,9 @@ export interface LiveFacts {
   proximaCompra: string | null
 }
 
-export function buildLiveCoachPrompt(facts: LiveFacts): string {
+export function buildLiveCoachPrompt(facts: LiveFacts, personaName = 'Bitxo'): string {
   return [
-    HEXI_PERSONA,
+    buildPersona(personaName),
     'Estáis EN PLENA PARTIDA. Con los DATOS (JSON) da UN único consejo de macro para ESTE momento.',
     'Tipos de consejo según lo que digan los datos: poner visión antes de que salga un objetivo;',
     'jugar agresivo si hay ventaja de oro o enemigos muertos; jugar seguro si vais por detrás o',
@@ -84,6 +84,8 @@ export interface LiveCoachOptions {
   isEnabled(): boolean
   generate(prompt: string): Promise<{ ok: true; text: string } | { ok: false; error: string }>
   onTip(tip: LiveCoachTip): void
+  /** Mascot/persona name for the prompt (follows the active theme). */
+  personaName?: () => string
   intervalS?: number
   log?: (message: string) => void
 }
@@ -181,7 +183,10 @@ export class LiveCoach {
     if (state.gameTimeS - this.lastTipAtS < this.intervalS) return
     this.inFlight = true
     this.lastTipAtS = state.gameTimeS
-    const prompt = buildLiveCoachPrompt(this.buildFacts(state, topRecommendation))
+    const prompt = buildLiveCoachPrompt(
+      this.buildFacts(state, topRecommendation),
+      this.options.personaName?.() ?? 'Bitxo'
+    )
     const atS = state.gameTimeS
     void this.options.generate(prompt).then((result) => {
       this.inFlight = false
