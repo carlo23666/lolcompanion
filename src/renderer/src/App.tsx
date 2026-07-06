@@ -18,6 +18,7 @@ export default function App(): React.JSX.Element {
   const [phase, setPhase] = useState<SessionPhase>('idle')
   const [championMeta, setChampionMeta] = useState<Record<number, ChampionMeta>>({})
   const gameState = useIpcEvent('gamestate:update')
+  const liveState = useIpcEvent('live:state')
   const champSelect = useIpcEvent('session:champselect')
   const recommendations = useIpcEvent('gamestate:recommendations')
   const insights = useLiveInsights()
@@ -69,6 +70,7 @@ export default function App(): React.JSX.Element {
         {view === 'live' && (
           <LiveView
             phase={phase}
+            liveState={liveState}
             gameState={gameState}
             champSelect={champSelect}
             recommendations={recommendations}

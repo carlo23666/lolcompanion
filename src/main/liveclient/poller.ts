@@ -1,7 +1,22 @@
 import { allGameDataSchema, type LiveClientSnapshot } from '@shared/schemas/liveclient'
 import type { FetchAllGameData } from './transport'
 
-export type LiveClientState = 'unavailable' | 'polling'
+export type LiveClientState = 'unavailable' | 'loading' | 'polling'
+
+/**
+ * Loading-screen payloads are game-shaped (gameData + allPlayers present)
+ * but partial (championName undefined, runes null). Only consulted AFTER
+ * schema validation failed, so a fully valid payload never lands here.
+ */
+function looksLikeLoadingScreen(raw: unknown): boolean {
+  if (typeof raw !== 'object' || raw === null) return false
+  const candidate = raw as { allPlayers?: unknown; gameData?: unknown }
+  return (
+    Array.isArray(candidate.allPlayers) &&
+    typeof candidate.gameData === 'object' &&
+    candidate.gameData !== null
+  )
+}
 
 export interface LiveClientPollerOptions {
   transport: FetchAllGameData
@@ -34,6 +49,9 @@ export class LiveClientPoller {
   private timer: ReturnType<typeof setTimeout> | null = null
   private running = false
   private inFlight = false
+  // One validation report per failure streak — a loading screen answers with
+  // partial payloads every 2s and used to dump ~7.7k log lines per load.
+  private validationReported = false
 
   constructor(options: LiveClientPollerOptions) {
     this.transport = options.transport
@@ -83,19 +101,26 @@ export class LiveClientPoller {
       if (parsed.success) {
         this.setState('polling')
         this.currentDelay = this.intervalMs
+        this.validationReported = false
         this.onSnapshot(parsed.data, raw)
       } else {
-        // Reachable but malformed: stay in polling cadence, report the error.
-        this.setState('polling')
+        // Reachable but malformed: loading screens serve partial payloads
+        // (distinct `loading` state); anything else stays in polling cadence.
+        // Either way report once per streak, not every 2s.
+        this.setState(looksLikeLoadingScreen(raw) ? 'loading' : 'polling')
         this.currentDelay = this.intervalMs
-        this.onValidationError?.(new Error(parsed.error.message), raw)
+        if (!this.validationReported) {
+          this.validationReported = true
+          this.onValidationError?.(new Error(parsed.error.message), raw)
+        }
       }
       this.schedule(this.currentDelay)
     } catch {
       // Port closed or request failed → no game. Back off exponentially:
       // wait currentDelay now, double it for the next failure (2→4→8→10 cap).
-      const wasPolling = this.state === 'polling'
+      const wasPolling = this.state !== 'unavailable'
       this.setState('unavailable')
+      this.validationReported = false
       const delay = wasPolling ? this.intervalMs : this.currentDelay
       this.currentDelay = Math.min(delay * 2, this.maxBackoffMs)
       this.schedule(delay)

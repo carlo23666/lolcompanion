@@ -137,7 +137,7 @@ export interface IpcInvokeChannels {
 
 export interface IpcEventChannels {
   'live:snapshot': LiveClientSnapshot
-  'live:state': 'unavailable' | 'polling'
+  'live:state': 'unavailable' | 'loading' | 'polling'
   'ingest:progress': IngestProgressPayload
   'session:phase': SessionPhase
   'session:champselect': ChampSelectState | null

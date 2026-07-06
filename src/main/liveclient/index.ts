@@ -112,7 +112,7 @@ export function createSnapshotProcessor(
  */
 export function startLiveClient(
   db: AppDatabase,
-  onStateChange?: (state: 'unavailable' | 'polling') => void
+  onStateChange?: (state: 'unavailable' | 'loading' | 'polling') => void
 ): LiveClientPoller {
   // Recorder is a dev-only tool: refuses to run in the packaged app.
   // Enabled via RECORD_LIVE=1 or the settings toggle (Ajustes).

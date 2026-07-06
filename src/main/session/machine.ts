@@ -28,17 +28,19 @@ export function groupLcuPhase(lcuPhase: string): LcuPhaseGroup {
 export interface SessionInputs {
   lcuConnected: boolean
   lcuPhase: string | null
-  liveState: 'unavailable' | 'polling'
+  liveState: 'unavailable' | 'loading' | 'polling'
 }
 
 /**
  * Pure phase computation:
  * - :2999 answering → inGame, whatever LCU thinks (source of truth).
+ *   `loading` (port up, partial payloads) counts: the game is seconds away
+ *   and the Live view shows "Cargando partida…".
  * - no LCU and no game → idle (app works with LoL closed).
  * - loading screen (LCU says InProgress but :2999 not up yet) → clientOpen.
  */
 export function computeSessionPhase(inputs: SessionInputs): SessionPhase {
-  if (inputs.liveState === 'polling') return 'inGame'
+  if (inputs.liveState === 'polling' || inputs.liveState === 'loading') return 'inGame'
   if (!inputs.lcuConnected) return 'idle'
   switch (groupLcuPhase(inputs.lcuPhase ?? '')) {
     case 'champSelect':
@@ -73,7 +75,7 @@ export class SessionMachine {
     this.update({ lcuPhase })
   }
 
-  setLiveState(liveState: 'unavailable' | 'polling'): void {
+  setLiveState(liveState: 'unavailable' | 'loading' | 'polling'): void {
     this.update({ liveState })
   }
 

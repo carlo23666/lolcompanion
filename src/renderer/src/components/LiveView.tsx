@@ -67,6 +67,7 @@ function OverlayHint(props: { onOpenSettings?: () => void }): React.JSX.Element 
 
 export default function LiveView(props: {
   phase: SessionPhase
+  liveState?: 'unavailable' | 'loading' | 'polling' | null
   gameState: GameState | null
   champSelect: ChampSelectState | null
   recommendations?: RecommendationsPayload | null
@@ -96,11 +97,19 @@ export default function LiveView(props: {
 
       {phase === 'inGame' &&
         (gameState === null ? (
-          <EmptyState
-            icon="⏳"
-            title="Conectando con la partida"
-            hint="Leyendo datos del juego (puerto 2999)…"
-          />
+          props.liveState === 'loading' ? (
+            <EmptyState
+              icon="🌀"
+              title="Cargando partida"
+              hint="La pantalla de carga está en marcha; los datos llegan al aparecer en la Grieta."
+            />
+          ) : (
+            <EmptyState
+              icon="⏳"
+              title="Conectando con la partida"
+              hint="Leyendo datos del juego (puerto 2999)…"
+            />
+          )
         ) : (
           <div className="flex flex-col gap-3 overflow-y-auto">
             <OverlayHint onOpenSettings={props.onOpenSettings} />

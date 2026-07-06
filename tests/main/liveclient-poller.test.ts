@@ -110,6 +110,62 @@ describe('LiveClientPoller', () => {
     expect(validationErrors).toHaveBeenCalledTimes(1)
   })
 
+  it('detects loading-screen payloads as a distinct loading state', async () => {
+    // Game-shaped but partial: players without championName, runes null.
+    const loadingPayload = {
+      gameData: { gameTime: 0.05 },
+      allPlayers: [{ riotIdGameName: 'PLAYER_1', runes: null }],
+      events: { Events: [] }
+    }
+    let loading = true
+    const transport = vi
+      .fn()
+      .mockImplementation(() => Promise.resolve(loading ? loadingPayload : sample))
+    const states: LiveClientState[] = []
+    const poller = new LiveClientPoller({
+      transport,
+      onSnapshot: vi.fn(),
+      onStateChange: (s) => states.push(s)
+    })
+
+    poller.start()
+    await vi.advanceTimersByTimeAsync(4000)
+    expect(poller.getState()).toBe('loading')
+    loading = false
+    await vi.advanceTimersByTimeAsync(2000)
+    poller.stop()
+
+    expect(states).toEqual(['loading', 'polling'])
+  })
+
+  it('reports one validation error per failure streak, not per tick', async () => {
+    let malformed = true
+    const transport = vi
+      .fn()
+      .mockImplementation(() => Promise.resolve(malformed ? { not: 'allgamedata' } : sample))
+    const validationErrors = vi.fn()
+    const poller = new LiveClientPoller({
+      transport,
+      onSnapshot: vi.fn(),
+      onValidationError: validationErrors
+    })
+
+    poller.start()
+    await vi.advanceTimersByTimeAsync(10_000) // 6 malformed ticks
+    expect(validationErrors).toHaveBeenCalledTimes(1)
+
+    malformed = true
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(validationErrors).toHaveBeenCalledTimes(1) // same streak
+
+    malformed = false
+    await vi.advanceTimersByTimeAsync(2000) // success resets the streak
+    malformed = true
+    await vi.advanceTimersByTimeAsync(2000)
+    poller.stop()
+    expect(validationErrors).toHaveBeenCalledTimes(2)
+  })
+
   it('stops scheduling after stop()', async () => {
     const transport = vi.fn().mockResolvedValue(sample)
     const poller = new LiveClientPoller({ transport, onSnapshot: vi.fn() })
