@@ -7,6 +7,7 @@ import type { SessionPhase } from '@shared/session'
 import type { LiveInsights as LiveInsightsData } from '../hooks'
 import AnimatedNumber from './AnimatedNumber'
 import ChampSelectPanel from './ChampSelectPanel'
+import { useTheme } from './Mascot'
 import Gauges from './Gauges'
 import HomeDashboard from './HomeDashboard'
 import {
@@ -67,6 +68,122 @@ function OverlayHint(props: { onOpenSettings?: () => void }): React.JSX.Element 
   )
 }
 
+/**
+ * In-game layout, arranged per identity: Recreativa stacks like an arcade
+ * screen list; Sakura reads as a centered notebook scroll; Cabina splits
+ * into a two-column cockpit (advice console right, instruments left).
+ */
+function InGameLayout(props: {
+  gameState: GameState
+  curve: ReturnType<typeof usePersonalCurve>
+  recommendations: RecommendationsPayload | null
+  insights?: LiveInsightsData
+  onOpenSettings?: () => void
+}): React.JSX.Element {
+  const theme = useTheme()
+  const { gameState, curve } = props
+
+  const statusBar = (
+    <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-800 bg-slate-900 px-4 py-2 text-sm">
+      <span className="font-mono text-lg">⏱ {formatClock(gameState.gameTimeS)}</span>
+      <span className="font-mono text-amber-300">
+        💰 <AnimatedNumber value={Math.round(gameState.self.currentGold)} />
+      </span>
+      <span className="font-mono text-slate-300">
+        {gameState.self.scores.kills}/{gameState.self.scores.deaths}/
+        {gameState.self.scores.assists}
+      </span>
+      <PersonalCurveChip gameState={gameState} curve={curve} />
+      <span className="ml-auto text-xs text-slate-500">
+        {gameState.self.championName} · nv {gameState.self.level} · parche {gameState.patch}
+      </span>
+    </div>
+  )
+  const hero = (
+    <RecommendationCard payload={props.recommendations} currentGold={gameState.self.currentGold} />
+  )
+  const insightsRow = props.insights ? (
+    <div className="card-in flex flex-col gap-1.5 rounded-lg border border-slate-800 bg-slate-900 px-4 py-2">
+      <div className="flex items-center gap-3">
+        <LiveChips gameState={gameState} insights={props.insights} />
+        <div className="min-w-32 flex-1">
+          <TeamGoldBar gameState={gameState} />
+        </div>
+      </div>
+      <AlertFeed insights={props.insights} />
+    </div>
+  ) : null
+  const allies = (
+    <TeamPanel
+      title="Tu equipo"
+      accent="ally"
+      players={[gameState.self, ...gameState.allies]}
+      selfChampion={gameState.self.championName}
+    />
+  )
+  const enemies = <TeamPanel title="Enemigos" accent="enemy" players={gameState.enemies} />
+  const gauges = <Gauges aggregates={gameState.enemyAggregates} gameTimeS={gameState.gameTimeS} />
+  const objectives = (
+    <ObjectivesRow objectives={gameState.objectives} selfTeam={gameState.self.team} />
+  )
+  const hint = <OverlayHint onOpenSettings={props.onOpenSettings} />
+
+  if (theme === 'cabina') {
+    return (
+      <div className="flex flex-col gap-3">
+        {hint}
+        {statusBar}
+        <div className="grid grid-cols-1 items-start gap-3 xl:grid-cols-[minmax(0,5fr)_minmax(0,4fr)]">
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-3 opacity-90">
+              {allies}
+              {enemies}
+            </div>
+            {gauges}
+            {objectives}
+          </div>
+          <div className="flex flex-col gap-3">
+            {hero}
+            {insightsRow}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (theme === 'sakura') {
+    return (
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
+        {hint}
+        {statusBar}
+        {hero}
+        {insightsRow}
+        <div className="flex flex-col gap-3 opacity-90">
+          {allies}
+          {enemies}
+        </div>
+        {gauges}
+        {objectives}
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      {hint}
+      {statusBar}
+      {hero}
+      {insightsRow}
+      <div className="flex gap-3 opacity-90">
+        {allies}
+        {enemies}
+      </div>
+      {gauges}
+      {objectives}
+    </div>
+  )
+}
+
 export default function LiveView(props: {
   phase: SessionPhase
   liveState?: 'unavailable' | 'loading' | 'polling' | null
@@ -115,56 +232,13 @@ export default function LiveView(props: {
             />
           )
         ) : (
-          <div className="flex flex-col gap-3">
-            <OverlayHint onOpenSettings={props.onOpenSettings} />
-            <div className="flex items-center gap-4 rounded-lg border border-slate-800 bg-slate-900 px-4 py-2 text-sm">
-              <span className="font-mono text-lg">⏱ {formatClock(gameState.gameTimeS)}</span>
-              <span className="font-mono text-amber-300">
-                💰 <AnimatedNumber value={Math.round(gameState.self.currentGold)} />
-              </span>
-              <span className="font-mono text-slate-300">
-                {gameState.self.scores.kills}/{gameState.self.scores.deaths}/
-                {gameState.self.scores.assists}
-              </span>
-              <PersonalCurveChip gameState={gameState} curve={curve} />
-              <span className="ml-auto text-xs text-slate-500">
-                {gameState.self.championName} · nv {gameState.self.level} · parche{' '}
-                {gameState.patch}
-              </span>
-            </div>
-
-            {/* Hero: the recommendation is what the owner glances at mid-game. */}
-            <RecommendationCard
-              payload={props.recommendations ?? null}
-              currentGold={gameState.self.currentGold}
-            />
-
-            {props.insights && (
-              <div className="card-in flex flex-col gap-1.5 rounded-lg border border-slate-800 bg-slate-900 px-4 py-2">
-                <div className="flex items-center gap-3">
-                  <LiveChips gameState={gameState} insights={props.insights} />
-                  <div className="min-w-32 flex-1">
-                    <TeamGoldBar gameState={gameState} />
-                  </div>
-                </div>
-                <AlertFeed insights={props.insights} />
-              </div>
-            )}
-
-            {/* Ambient context: teams and gauges sit visually below the advice. */}
-            <div className="flex gap-3 opacity-90">
-              <TeamPanel
-                title="Tu equipo"
-                accent="ally"
-                players={[gameState.self, ...gameState.allies]}
-                selfChampion={gameState.self.championName}
-              />
-              <TeamPanel title="Enemigos" accent="enemy" players={gameState.enemies} />
-            </div>
-
-            <Gauges aggregates={gameState.enemyAggregates} gameTimeS={gameState.gameTimeS} />
-            <ObjectivesRow objectives={gameState.objectives} selfTeam={gameState.self.team} />
-          </div>
+          <InGameLayout
+            gameState={gameState}
+            curve={curve}
+            recommendations={props.recommendations ?? null}
+            insights={props.insights}
+            onOpenSettings={props.onOpenSettings}
+          />
         ))}
     </div>
   )

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ChampionMeta } from '@shared/champselect'
 import type { SessionPhase } from '@shared/session'
 import { normalizeTheme } from '@shared/themes'
-import TopBar, { type ViewId } from './components/TopBar'
+import Shell, { type ViewId } from './components/Shell'
 import LiveView from './components/LiveView'
 import HistoryView from './components/HistoryView'
 import SettingsView from './components/SettingsView'
@@ -69,29 +69,21 @@ export default function App(): React.JSX.Element {
   }, [insights.alerts])
 
   return (
-    <div className="flex h-screen flex-col bg-slate-950 text-slate-100">
-      <TopBar
-        active={view}
-        onSelect={setView}
-        phase={phase}
-        mascotReactKey={mascotReactKey}
-      />
-      <main className="min-h-0 flex-1 overflow-y-auto">
-        {view === 'live' && (
-          <LiveView
-            phase={phase}
-            liveState={liveState}
-            gameState={gameState}
-            champSelect={champSelect}
-            recommendations={recommendations}
-            championMeta={championMeta}
-            insights={insights}
-            onOpenSettings={() => setView('settings')}
-          />
-        )}
-        {view === 'history' && <HistoryView />}
-        {view === 'settings' && <SettingsView />}
-      </main>
-    </div>
+    <Shell active={view} onSelect={setView} phase={phase} mascotReactKey={mascotReactKey}>
+      {view === 'live' && (
+        <LiveView
+          phase={phase}
+          liveState={liveState}
+          gameState={gameState}
+          champSelect={champSelect}
+          recommendations={recommendations}
+          championMeta={championMeta}
+          insights={insights}
+          onOpenSettings={() => setView('settings')}
+        />
+      )}
+      {view === 'history' && <HistoryView />}
+      {view === 'settings' && <SettingsView />}
+    </Shell>
   )
 }
