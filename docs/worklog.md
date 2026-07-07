@@ -1,6 +1,12 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-07 (19) — CRITICAL: 1.4.0-1.4.2 crashed at startup; real cause found + fixed (v1.4.3)
+**Done (check green, 327):** the owner's "JavaScript error on open" was NOT (only) the double-instance lock: since 1.4.0 the packaged app crashed at startup because the ESM main bundle did `import { autoUpdater } from 'electron-updater'` — electron-updater is CJS with getter-defined exports that Node's ESM named-import interop can't see, so the main process threw before creating any window (the "running" processes were native error dialogs; diagnosed by the missing renderer process + absent updater.log). Fixed with the default-import interop (`import updaterPackage from 'electron-updater'`).
+**Verified live**: packaged 1.4.3 boots (4 processes incl. renderer), `updater.log` shows the full check pipeline against GitHub ("Checking for update → latest version compared, downgrade disallowed"). Releases v1.4.0-v1.4.2 DELETED from GitHub (broken installers; git tags kept). Release workflow now includes a mandatory smoke test: launch `dist/win-unpacked` and confirm window + updater.log BEFORE publishing.
+**Lesson recorded:** `npm run check` can't catch packaged-only failures (vitest runs the TS sources, not the ESM bundle); anything touching main-process imports needs the win-unpacked smoke test.
+**Files:** src/main/updater.ts.
+
 ## 2026-07-07 (18) — Single-instance lock (owner hit "JavaScript error" on open)
 **Done (check green, 327):** launching a second copy opened the same SQLite file and crashed with the main-process JS error dialog (reproduced: three stacked instances after the release day's repeated launches). `app.requestSingleInstanceLock()` now quits the newcomer and `second-instance` restores/focuses the running window — double-clicking the icon while the app lives in the tray/background just brings it forward. Shipped as v1.4.1, which doubles as the first real-world auto-updater test (1.4.0 installs should offer it on next start).
 **Files:** src/main/index.ts.
