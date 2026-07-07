@@ -12,6 +12,13 @@ extraResources:
 icon: resources/icon.png
 win:
   target: nsis
+# electron-updater feed: the app checks the LATEST GitHub release for
+# latest.yml + the installer. Every release must upload latest.yml and the
+# .blockmap next to the setup exe (see docs/HANDOFF.md release flow).
+publish:
+  provider: github
+  owner: carlo23666
+  repo: lolcompanion
 nsis:
   # Per-user one-click installer: no admin rights needed on friends' PCs.
   oneClick: true

@@ -15,6 +15,10 @@ pero es un proyecto personal sin garantías.
    pulsa **Más información → Ejecutar de todas formas**.
 3. Se instala solo para tu usuario (no pide administrador) y se abre al terminar.
 
+A partir de la 1.4.0 **la app se actualiza sola**: detecta cada nueva versión, la descarga en
+segundo plano y te pregunta si reiniciar (si dices "luego", se aplica al cerrar). Solo instalas
+a mano esta primera vez. Tus ajustes, clave e historial se conservan siempre entre versiones.
+
 ## 2. Conseguir tu clave de la API de Riot (gratis, una sola vez)
 
 La app necesita una clave de Riot para leer tu historial de partidas. La clave es personal:

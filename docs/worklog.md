@@ -1,6 +1,11 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-07 (17) — Auto-update from GitHub releases (owner request)
+**Done (check green, 327):** `electron-updater` (NEW dependency — the standard electron-builder companion; zero-cost: the feed is the latest GitHub release) wired in `src/main/updater.ts`: packaged builds check on startup + every 4h, auto-download, Spanish dialog offers "Reiniciar ahora / Luego", and `autoInstallOnAppQuit` applies postponed updates on close. Dev builds skip entirely. `electron-builder.yml` gains the `publish: github` block so builds emit `latest.yml` + `.blockmap` — **every release from now on must upload `latest.yml`, the `.blockmap`, the setup exe and `meta-seed.json.gz`** (release-workflow updated). Settings/history/API key already survive updates (userData + `deleteAppDataOnUninstall: false`) — confirmed across 1.0.1→1.3.0 upgrades. INSTALAR.md tells friends the 1.4.0+ app updates itself.
+**Notes:** app is unsigned — electron-updater installs fine without a signature (no `publisherName` verification configured); revisit if code signing ever lands.
+**Files:** src/main/{updater(new),index}.ts, electron-builder.yml, docs/INSTALAR.md, package.json.
+
 ## 2026-07-07 (16) — Meta first EVERYWHERE + shareable meta seed (owner: friend's fresh install was mute)
 **Done (check green, 327):** a friend's install recommended nothing (custom game + empty meta DB + owner-specific pool fallback). Three fixes:
 1. **Role fallback in the live lookup** (`MetaRepo.itemsFor` + `topRoleFor`): custom/blind lobbies carry no position, and an uncrawled role said nothing — both now fall back to the champion's most-played Master+ role. The engine no longer goes silent for lack of a label.

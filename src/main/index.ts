@@ -13,6 +13,7 @@ import { broadcast, handleInvoke } from './ipc'
 import { startLcu, type LcuConnector } from './lcu'
 import { startLiveClient, type LiveClientPoller } from './liveclient'
 import { importMetaSeedIfEmpty } from './meta-seed'
+import { startAutoUpdater } from './updater'
 import { OverlayManager } from './overlay'
 import { SettingsRepo, SETTING_KEYS } from './db/repos/settings'
 import { catchUpMissedMatches, PostGameIngestor } from './postgame'
@@ -131,6 +132,9 @@ void app.whenReady().then(() => {
   // Fresh install → pull the shared Master+ seed so the engine has builds
   // from minute one (no-op when the local crawler already has data).
   void importMetaSeedIfEmpty(database, { log: (message) => console.log(message) })
+
+  // Keep every install current from GitHub releases (packaged builds only).
+  startAutoUpdater((message) => console.log(message))
   const postGame = new PostGameIngestor({
     db: database,
     getContext: () => getRiotContext(database),
