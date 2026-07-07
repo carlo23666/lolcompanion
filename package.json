@@ -1,6 +1,6 @@
 {
   "name": "lol-companion",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Local-first desktop companion for League of Legends with explained build recommendations",
   "main": "out/main/index.js",
   "type": "module",
