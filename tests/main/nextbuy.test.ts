@@ -172,11 +172,18 @@ describe('meta fallback baseline (Master+ items)', () => {
     expect(rec?.reasons.join(' ')).toContain('Master+')
   })
 
-  it('pool baseline wins over meta when both exist', () => {
+  it('meta baseline wins over pool when both exist (Master+ first, 2026-07-07)', () => {
     const state = selfWith('Jinx', [], 1200)
     const rec = nextBuyRecommendation(state, staticData, TEST_POOL, META)
+    expect(rec?.reasons.join(' ')).toContain('Master+')
+    expect(rec?.reasons.join(' ')).not.toContain('tu build')
+  })
+
+  it('pool remains the fallback when the meta sample is thin', () => {
+    const state = selfWith('Jinx', [], 1200)
+    const rec = nextBuyRecommendation(state, staticData, TEST_POOL, { ...META, games: 10 })
     expect(rec?.reasons.join(' ')).toContain('tu build')
-    expect(rec?.reasons.join(' ')).not.toContain('Master+')
+    expect(rec?.reasons.join(' ')).not.toContain('más comprado en Master+')
   })
 
   it('thin samples are rejected (champion games and per-item games gates)', () => {

@@ -50,3 +50,5 @@ Declined (Riot policy — hard rule 1, do NOT promote to a WP):
 - (2026-07-07) In-game splash backdrop uses sanitized display name; add a championName->ddragon-id map (Wukong->MonkeyKing etc.) so it never 404s.
 - (2026-07-07) Anime/Estrella is the first LIGHT theme; hardcoded emerald/rose/sky utilities look fine but deserve a dedicated light-surface contrast pass.
 - (2026-07-07) Per-mascot coach voice flavor (Sombra dry/edgy, Yuki genki) on top of buildPersona(name).
+
+- (2026-07-07) Champ select pick suggestions still rank by OWN winrate first with Master+ as a +/-0.15 blend; the in-game engine is now Master+-first — consider the same inversion in champselect if the owner confirms.

@@ -7,6 +7,11 @@ import {
 } from '@shared/schemas/baselines'
 import type { StaticData } from '../staticdata/manager'
 import poolJson from './baselines/pool.json'
+import {
+  META_ITEM_MIN_GAMES,
+  META_TRUST_MIN_GAMES,
+  type MetaItemsInput
+} from './meta-items'
 
 /** Parsed once; JSON is bundled, so this stays pure (no runtime I/O). */
 let cachedPool: BaselinePool | null = null
@@ -40,33 +45,20 @@ export function findBaseline(
   return entries.find((entry) => entry.role === role) ?? entries[0] ?? null
 }
 
-/**
- * Master+ item aggregates for the OWN champion+role, passed in by the caller
- * (the engine stays pure — no DB access here). Fallback build source for
- * champions outside the owner's pool.json.
- */
-export interface MetaItemsInput {
-  /** Most-bought completed items, most games first (meta_champion_items). */
-  items: { itemId: number; games: number; wins: number }[]
-  /** Aggregated games for the champion+role (sample-size gate). */
-  games: number
-}
-
-// Sample gates: below these the "meta build" is noise, better to say nothing.
-const META_MIN_CHAMP_GAMES = 20
-const META_MIN_ITEM_GAMES = 5
+export type { MetaItemsInput } from './meta-items'
 
 export interface EffectiveBaseline {
   core: number[]
   situational: number[]
-  /** Reason wording differs: "tu build" (pool) vs "build Master+" (meta). */
+  /** Reason wording differs: "build Master+" (meta) vs "tu build" (pool). */
   source: 'pool' | 'meta'
 }
 
 /**
- * The build the engine advises from: the owner's pool entry when it exists,
- * otherwise a synthetic baseline from Master+ frequencies — frequency order
- * approximates build order (final-build data has no timestamps).
+ * The build the engine advises from. Since 2026-07-07 the hierarchy is
+ * inverted (owner request): the Master+ frequency build is PRIMARY whenever
+ * the sample is trustworthy — frequency order approximates build order — and
+ * the owner's own pool entry is only the fallback for uncrawled champions.
  */
 export function resolveBaseline(
   state: GameState,
@@ -74,22 +66,25 @@ export function resolveBaseline(
   pool: BaselinePool,
   meta?: MetaItemsInput
 ): EffectiveBaseline | null {
+  if (meta && meta.games >= META_TRUST_MIN_GAMES) {
+    const usable = meta.items.filter((entry) => {
+      if (entry.games < META_ITEM_MIN_GAMES) return false
+      const node = staticData.itemGraph.nodes.get(entry.itemId)
+      return (
+        node !== undefined && node.availableOnSR && node.depth >= 2 && occupiesBuildSlot(node)
+      )
+    })
+    if (usable.length >= 3) {
+      return {
+        core: usable.slice(0, 5).map((entry) => entry.itemId),
+        situational: usable.slice(5, 10).map((entry) => entry.itemId),
+        source: 'meta'
+      }
+    }
+  }
   const own = findBaseline(pool, state.self.championId, state.self.position)
   if (own) return { core: own.core, situational: own.situational, source: 'pool' }
-  if (!meta || meta.games < META_MIN_CHAMP_GAMES) return null
-  const usable = meta.items.filter((entry) => {
-    if (entry.games < META_MIN_ITEM_GAMES) return false
-    const node = staticData.itemGraph.nodes.get(entry.itemId)
-    return (
-      node !== undefined && node.availableOnSR && node.depth >= 2 && occupiesBuildSlot(node)
-    )
-  })
-  if (usable.length < 3) return null
-  return {
-    core: usable.slice(0, 5).map((entry) => entry.itemId),
-    situational: usable.slice(5, 8).map((entry) => entry.itemId),
-    source: 'meta'
-  }
+  return null
 }
 
 interface MissingBreakdown {

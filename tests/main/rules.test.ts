@@ -201,6 +201,43 @@ describe('rule: anti-burst', () => {
   })
 })
 
+describe('rules are Master+-aware (meta primero, 2026-07-07)', () => {
+  it('anti-burst picks the defensive Master+ players build, not the class heuristic', () => {
+    // AD self would get GA heuristically; Master+ on this champion buy Mercurial.
+    const meta = { games: 300, items: [{ itemId: 3139, games: 60, wins: 33 }] }
+    const outputs = antiBurstRule(late, staticData, meta)
+    expect(outputs[0]?.itemId).toBe(3139)
+    expect(outputs[0]?.reasons.join(' ')).toContain('Master+')
+  })
+
+  it('anti-burst without meta backing ships capped and labeled as suggestion', () => {
+    // Trusted sample, but no defensive appears in the champion distribution.
+    const meta = { games: 300, items: [{ itemId: 3031, games: 200, wins: 110 }] }
+    const outputs = antiBurstRule(late, staticData, meta)
+    expect(outputs[0]?.itemId).toBe(3026) // heuristic still names the least-bad option
+    expect(outputs[0]?.score).toBeLessThanOrEqual(45)
+    expect(outputs[0]?.reasons.join(' ')).toContain('sugerencia situacional')
+  })
+
+  it('antiheal line follows Master+ (Morello line despite a physical self)', () => {
+    const state = structuredClone(late)
+    state.enemyAggregates.healingIndex = 999
+    state.self.items = state.self.items.filter(
+      (item) => ![3123, 3033, 6609, 3916, 3165].includes(item.id)
+    )
+    const meta = { games: 300, items: [{ itemId: 3165, games: 50, wins: 27 }] }
+    const outputs = antihealRule(state, staticData, meta)
+    expect(outputs[0]?.itemId).toBe(3916) // Oblivion Orb: component of the meta line
+    expect(outputs[0]?.reasons.join(' ')).toContain('Master+')
+  })
+
+  it('without any meta the heuristics behave as before (no cap, no label)', () => {
+    const outputs = antiBurstRule(late, staticData)
+    expect(outputs[0]?.itemId).toBe(3026)
+    expect(outputs[0]?.reasons.join(' ')).not.toContain('sugerencia situacional')
+  })
+})
+
 describe('rule: spike-now', () => {
   function selfWith(items: number[], gold: number): GameState {
     const state = structuredClone(early)

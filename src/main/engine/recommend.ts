@@ -14,11 +14,12 @@ import {
 export type { MetaItemsInput } from './nextbuy'
 
 /**
- * Full recommendation pass: baseline next-buy + WP-007 rule adjustments.
- * Rule items that sit in the champion's situational slots get a boost.
- * `meta` (optional, Master+ aggregates for the own champion+role) backs the
- * build advice when the champion is outside the owner's pool. Pure and
- * synchronous — the caller does any DB lookups.
+ * Full recommendation pass, Master+-first (owner request 2026-07-07): the
+ * meta build is the primary baseline AND every rule receives the champion's
+ * Master+ item distribution, so situational picks come from what top players
+ * actually build (unbacked picks ship capped + labeled). The owner's pool
+ * only backs champions without crawl data. Pure and synchronous — the caller
+ * does any DB lookups.
  */
 export function recommend(
   state: GameState,
@@ -27,7 +28,7 @@ export function recommend(
   meta?: MetaItemsInput
 ): Recommendation[] {
   const baseline = resolveBaseline(state, staticData, pool, meta)
-  const ruleRecommendations = runEngine(state, staticData).map((rec) => {
+  const ruleRecommendations = runEngine(state, staticData, meta).map((rec) => {
     if (rec.itemId !== null && baseline?.situational.includes(rec.itemId) === true) {
       return {
         ...rec,

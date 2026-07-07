@@ -1,6 +1,17 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-07 (13) — Engine inverted: Master+ primero, la lógica solo ajusta (owner: "no more Zhonya on ADCs")
+**Done (check green, 316):** the recommendation hierarchy is inverted per owner feedback ("rely on Master+ games mostly, add logic to modify a bit or offer suggestions").
+1. **New `engine/meta-items.ts`** — the Master+ item distribution (per champion+role, from the crawler's migration-005 aggregates) is now a first-class engine input: trust gates (≥20 champion games, ≥5 item games), `metaPreferred`/`metaUsage`/`orderByMeta` set math, `SUGGESTION_SCORE_CAP = 45`, and shared Spanish reason builders.
+2. **Baseline flipped** (`resolveBaseline`): the Master+ frequency build is PRIMARY whenever trusted (core = top 5, situational = next 5); the owner's pool.json is now only the fallback for uncrawled champions (it was the other way around).
+3. **Rules are Master+-aware** (`Rule` signature gains `meta`): anti-burst picks the defensive Master+ players actually build on the champion (Zhonya-on-ADC is now structurally impossible: no usage → no pick); antiheal chooses its LINE (physical/magic) from meta full-item usage before falling back to the self-damage heuristic (also fixed: owning Mortal Reminder now silences the rule — 3033 was missing from the owned-check list); armor-vs-mr and anti-tank order their class options by champion usage. When a rule's need is real but NO candidate is Master+-backed on a trusted sample, the advice ships capped at 45 and labeled "sugerencia situacional, no prioridad" — it can never outrank the meta build line.
+4. Live lookup widened to 30 items so rules can intersect beyond the core build.
+**Deviations / notes:**
+- Rules WITHOUT any meta data (uncrawled champion/patch) behave exactly as before — heuristics uncapped; degradation only kicks in when data says otherwise. Backtest harness intentionally stays meta-less (historical patches wouldn't match today's aggregates).
+- Champ select pick suggestions still weigh the owner's own winrate first with Master+ as a ±0.15 blend — flagged in INBOX for the same inversion if the owner wants it there too.
+**Files:** src/main/engine/{meta-items(new),nextbuy,recommend,index}.ts, src/main/engine/rules/{types,antiheal,anti-burst,armor-vs-mr,anti-tank}.ts, src/main/liveclient/index.ts, tests/main/{nextbuy,rules}.test.ts.
+
 ## 2026-07-07 (12) — Two new identities (Abismo · Estrella), image layers, new app icon, v1.1.0 release (owner request)
 **Done (check green, 311):**
 1. **Theme system back to three FULL identities** (`themes.ts`): `neon` (unchanged default), **`abismo`** — abyss black + blood crimson over the same class names (indigo-*→crimson, amber-*→bone gold), knife-sharp 0-2px radii, Russo One display, breathing crimson floor vignette, mascot **Sombra** (black cat, glowing crimson eyes, collar with gold tag, predatory tail sway) — and **`anime`/"Estrella"** — a LIGHT pastel Star-Guardian identity: the whole slate scale inverts (950 = sakura paper, 100 = ink, `color-scheme: light`), magical-girl pink brand, star gold, 16-24px bubbly radii, Mochiy Pop One display, falling petal/stardust bokeh, mascot **Yuki** (chibi coach: twin-tails that bob, star clips, star eyes when hyped, determined brows when focused). Legacy ids remap (noche→abismo, sakura→anime, rest→neon). Settings picker reappears automatically (it was `hidden={THEMES.length < 2}`).

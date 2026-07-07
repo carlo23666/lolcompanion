@@ -1,3 +1,11 @@
+import {
+  metaPickReason,
+  metaTrusted,
+  metaUsage,
+  orderByMeta,
+  SUGGESTION_SCORE_CAP,
+  suggestionReason
+} from '../meta-items'
 import { THRESHOLDS } from './thresholds'
 import { availableOptions, clampScore, itemName, ownsAny, pct } from './helpers'
 import type { Rule, RuleOutput } from './types'
@@ -15,9 +23,11 @@ function isTanky(tags: string[]): boolean {
 
 /**
  * Rule 2 — armor-vs-mr: enemy damage split skewed → prioritize the matching
- * resist, with concrete options for the own champion class.
+ * resist. Options are ordered by Master+ usage on the own champion (the
+ * class-based lists only shape the candidate set); when Master+ players buy
+ * none of them on this champion, the advice ships capped + labeled.
  */
-export const armorVsMrRule: Rule = (state, staticData) => {
+export const armorVsMrRule: Rule = (state, staticData, meta) => {
   const outputs: RuleOutput[] = []
   const { physicalShare, magicShare } = state.enemyAggregates
   const selfTags = staticData.champions.get(state.self.championId)?.tags ?? []
@@ -46,17 +56,29 @@ export const armorVsMrRule: Rule = (state, staticData) => {
     score: number,
     reasons: string[]
   ): void => {
-    const viable = availableOptions(staticData, options)
+    // Master+ usage on the own champion decides the order within the class.
+    const viable = orderByMeta(availableOptions(staticData, options), meta)
     if (viable.length === 0 || ownsAny(state.self, viable)) return
+    const anyMetaBacked = viable.some((id) => metaUsage(meta, id) !== null)
+    const capped = !anyMetaBacked && metaTrusted(meta)
     viable.forEach((itemId, index) => {
+      const stat = metaUsage(meta, itemId)
       outputs.push({
         ruleId: 'armor-vs-mr',
         itemId,
         category,
         action: 'prioritize',
         // Alternatives rank right below the preferred option.
-        score: clampScore(score - index * 8),
-        reasons
+        score: capped
+          ? Math.min(clampScore(score - index * 8), SUGGESTION_SCORE_CAP)
+          : clampScore(score - index * 8),
+        reasons: [
+          ...reasons,
+          ...(stat !== null
+            ? [metaPickReason(state.self.championName, itemName(staticData, itemId), stat)]
+            : []),
+          ...(capped && index === 0 ? [suggestionReason(state.self.championName)] : [])
+        ]
       })
     })
   }

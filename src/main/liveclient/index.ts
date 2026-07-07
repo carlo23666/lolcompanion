@@ -92,8 +92,9 @@ export function createSnapshotProcessor(
     if (patch === null) return undefined
     const winrate = repo.championWinrate(champion, role, patch)
     if (winrate === null) return undefined
-    // 20 items: enough to annotate rule picks (GA, antiheal…) beyond the core.
-    return { items: repo.topItems(champion, role, patch, 20), games: winrate.games }
+    // 30 items: the rules intersect their candidates with this distribution
+    // (antiheal/defensives/pen), so it must reach past the core build.
+    return { items: repo.topItems(champion, role, patch, 30), games: winrate.games }
   }
 
   return {

@@ -1,18 +1,23 @@
 import { HEALER_CHAMPION_WEIGHTS } from '../normalize'
+import { metaPickReason, metaPreferred } from '../meta-items'
 import { THRESHOLDS } from './thresholds'
 import { clampScore, itemCost, itemName, ownsAny, selfIsPhysical } from './helpers'
 import type { Rule, RuleOutput } from './types'
 
-/** Grievous wounds items: [cheap component, full item] per damage class. */
-const ANTIHEAL_PHYSICAL = [3123, 6609] as const // Executioner's, Chempunk
+/** Grievous wounds lines: [cheap component, ...full items] per damage class. */
+const ANTIHEAL_PHYSICAL = [3123, 3033, 6609] as const // Executioner's, Mortal Reminder, Chempunk
 const ANTIHEAL_MAGIC = [3916, 3165] as const // Oblivion Orb, Morellonomicon
+const ANTIHEAL_FULL = [3033, 6609, 3165] as const // full items only (meta lookup)
 const ALL_ANTIHEAL = [...ANTIHEAL_PHYSICAL, ...ANTIHEAL_MAGIC]
 
 /**
  * Rule 1 — antiheal: enemy healing index over threshold → Grievous Wounds,
- * cheap component first, gold-aware.
+ * cheap component first, gold-aware. The LINE (physical vs magic) follows
+ * what Master+ players buy on this champion; the own-damage heuristic only
+ * decides when there is no meta signal. Antiheal is never capped — the need
+ * is generic and the component is cheap.
  */
-export const antihealRule: Rule = (state, staticData) => {
+export const antihealRule: Rule = (state, staticData, meta) => {
   const healingIndex = state.enemyAggregates.healingIndex
   if (healingIndex < THRESHOLDS.ANTIHEAL_MIN_INDEX) return []
   if (ownsAny(state.self, ALL_ANTIHEAL)) return []
@@ -24,7 +29,13 @@ export const antihealRule: Rule = (state, staticData) => {
     .filter((enemy) => (HEALER_CHAMPION_WEIGHTS[enemy.championId] ?? 0) > 0)
     .map((enemy) => enemy.championName)
 
-  const [componentId] = selfIsPhysical(state) ? ANTIHEAL_PHYSICAL : ANTIHEAL_MAGIC
+  // Master+ decides the line; self damage profile is only the tiebreak.
+  const metaPick = metaPreferred(meta, ANTIHEAL_FULL)
+  const physicalLine =
+    metaPick !== null
+      ? (ANTIHEAL_PHYSICAL as readonly number[]).includes(metaPick.itemId)
+      : selfIsPhysical(state)
+  const [componentId] = physicalLine ? ANTIHEAL_PHYSICAL : ANTIHEAL_MAGIC
   const cost = itemCost(staticData, componentId)
   const gold = state.self.currentGold
   const affordable = gold >= cost
@@ -44,6 +55,11 @@ export const antihealRule: Rule = (state, staticData) => {
       ? `${itemName(staticData, componentId)} cuesta ${String(cost)} de oro y llevas ${String(Math.floor(gold))}: cómpralo en la próxima base`
       : `${itemName(staticData, componentId)} cuesta ${String(cost)} de oro, te faltan ${String(Math.ceil(cost - gold))}`
   )
+  if (metaPick !== null) {
+    reasons.push(
+      metaPickReason(state.self.championName, itemName(staticData, metaPick.itemId), metaPick)
+    )
+  }
   if (allyHasIt) {
     reasons.push('Un aliado ya lleva antiheal; menos urgente pero cubre tus propios objetivos')
   }
