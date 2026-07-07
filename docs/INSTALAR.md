@@ -15,18 +15,25 @@ pero es un proyecto personal sin garantías.
    pulsa **Más información → Ejecutar de todas formas**.
 3. Se instala solo para tu usuario (no pide administrador) y se abre al terminar.
 
-## 2. Conseguir tu clave de la API de Riot (gratis, 2 minutos)
+## 2. Conseguir tu clave de la API de Riot (gratis, una sola vez)
 
-La app necesita una clave personal de Riot para leer tu historial de partidas.
+La app necesita una clave de Riot para leer tu historial de partidas. La clave es personal:
+cada uno registra la suya (las normas de Riot prohíben compartir claves o meterlas dentro de
+la app), pero se hace UNA vez y no caduca a diario.
 
 1. Entra en <https://developer.riotgames.com> con tu cuenta de Riot.
-2. En la página principal verás **Development API Key** → cópiala (empieza por `RGAPI-`).
-3. En LoL Companion: **Ajustes → Cuenta → Clave de la API de Riot** → pégala.
+2. Arriba a la derecha: tu perfil → **Apps** → **Register App** (portal "Personal App").
+3. Rellena lo mínimo: nombre (p. ej. "LoL Companion personal"), descripción corta ("companion
+   local de escritorio para mis propias partidas, solo lectura") y elige **Personal App**.
+4. Riot la aprueba (normalmente en horas, a veces al momento) y te da una clave **persistente**
+   que empieza por `RGAPI-`.
+5. En LoL Companion: **Ajustes → Cuenta → Clave de la API de Riot** → pégala.
 
-⚠️ **La clave de desarrollo caduca cada 24 horas.** Cuando la sincronización falle, vuelve a la
-web, pulsa *Regenerate API Key* y pega la nueva. (Sí, es un rollo — estamos en ello.)
+Mientras esperas la aprobación puedes usar la **Development API Key** de la página principal
+del portal — funciona igual pero ⚠️ caduca cada 24 horas (vuelve a la web, *Regenerate API
+Key*, pega la nueva). Con la Personal App te olvidas de esto.
 
-Nota: la clave recién generada tarda unos minutos en activarse; si da error nada más pegarla,
+Nota: una clave recién generada tarda unos minutos en activarse; si da error nada más pegarla,
 espera 2-3 minutos.
 
 ## 3. Configurar tu cuenta
@@ -52,6 +59,7 @@ En **Ajustes → Cuenta**:
 ## Problemas conocidos
 
 - "Cuenta no encontrada" → revisa el Riot ID (nombre#TAG exacto) y la región.
-- Sincronización falla tras funcionar ayer → la clave ha caducado (paso 2).
+- Sincronización falla tras funcionar ayer → tu clave era la de desarrollo (24h) y ha caducado;
+  registra la Personal App del paso 2 y no volverá a pasar.
 - El overlay no se ve → LoL está en pantalla completa exclusiva; cámbialo a "sin bordes".
 - Cualquier otra cosa → pantallazo y mándaselo a Carlo.
