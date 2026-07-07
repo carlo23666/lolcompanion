@@ -140,8 +140,141 @@ function BitxoSprite(props: { mood: Mood }): React.JSX.Element {
   )
 }
 
+/* ----- Sombra (abismo): black cat, blood-crimson eyes ----- */
+
+function SombraSprite(props: { mood: Mood }): React.JSX.Element {
+  const mood = props.mood
+  const eye = (cx: number): React.JSX.Element =>
+    mood === 'sleepy' ? (
+      <path
+        d={`M${String(cx - 2.4)} 22 q2.4 1.8 4.8 0`}
+        stroke="#e3244a"
+        strokeWidth="1.1"
+        fill="none"
+      />
+    ) : mood === 'focused' ? (
+      <rect
+        className="cat-eye-glow"
+        x={cx - 2.2}
+        y={20.9}
+        width="4.4"
+        height="1.6"
+        fill="#e3244a"
+        color="#e3244a"
+      />
+    ) : (
+      <g className="hexi-eye">
+        <ellipse
+          className="cat-eye-glow"
+          cx={cx}
+          cy={21.8}
+          rx={mood === 'hyped' ? 2.4 : 2}
+          ry={mood === 'hyped' ? 2.6 : 1.7}
+          fill="#e3244a"
+          color="#e3244a"
+        />
+        <rect x={cx - 0.5} y={20.4} width="1" height="2.8" fill="#0c0c13" />
+      </g>
+    )
+  return (
+    <svg viewBox="0 0 64 52" data-mood={mood}>
+      {/* tail curls around the body, swaying slow and predatory */}
+      <path
+        className="cat-tail"
+        d="M16 44 Q6 42 8 32 Q9 27 14 26 Q11 31 13 35 Q15 40 22 42 Z"
+        fill="#0c0c13"
+      />
+      {/* body + chest */}
+      <ellipse cx="30" cy="38" rx="14" ry="11" fill="#0c0c13" />
+      <ellipse cx="34" cy="41" rx="7" ry="7.5" fill="#16161f" />
+      {/* head */}
+      <circle cx="42" cy="22" r="10" fill="#0c0c13" />
+      <path d="M35 15 l-2.5 -8.5 7.5 4.5 z" fill="#0c0c13" />
+      <path d="M36 14 l-1.2 -4.5 3.8 2.4 z" fill="#520d1e" />
+      <path d="M49 15 l2.5 -8.5 -7.5 4.5 z" fill="#0c0c13" />
+      <path d="M48 14 l1.2 -4.5 -3.8 2.4 z" fill="#520d1e" />
+      {eye(38.5)}
+      {eye(45.5)}
+      {/* whiskers */}
+      <path d="M50 25 h5 M50 27 l4.5 1.5" stroke="#555571" strokeWidth="0.7" fill="none" />
+      {/* crimson collar + tag */}
+      <path d="M35 30 q7 3.5 14 0 l-0.5 2.5 q-6.5 3 -13 0 z" fill="#921530" />
+      <circle cx="42" cy="33.5" r="1.6" fill="#d8b86a" />
+      {mood === 'sleepy' && (
+        <text x="53" y="10" fontSize="8" fill="#555571">
+          z
+        </text>
+      )}
+    </svg>
+  )
+}
+
+/* ----- Yuki (anime): chibi star-guardian coach ----- */
+
+function YukiSprite(props: { mood: Mood }): React.JSX.Element {
+  const mood = props.mood
+  const eye = (cx: number): React.JSX.Element =>
+    mood === 'sleepy' ? (
+      <path
+        d={`M${String(cx - 2.5)} 25 q2.5 2 5 0`}
+        stroke="#5a3566"
+        strokeWidth="1.3"
+        fill="none"
+      />
+    ) : mood === 'hyped' ? (
+      <path
+        d={`M${String(cx)} 22.2 l1 2 2.2 0.3 -1.6 1.6 0.4 2.2 -2 -1.1 -2 1.1 0.4 -2.2 -1.6 -1.6 2.2 -0.3 z`}
+        fill="#c9821e"
+      />
+    ) : (
+      <g className="hexi-eye">
+        <ellipse cx={cx} cy={25} rx="2.4" ry={mood === 'focused' ? 2.2 : 3} fill="#5a3566" />
+        <circle cx={cx + 0.8} cy={24} r="0.9" fill="#fff" />
+      </g>
+    )
+  return (
+    <svg viewBox="0 0 64 52" data-mood={mood}>
+      {/* twin tails (bob against the float) */}
+      <path className="yuki-hair-l" d="M20 15 Q10 22 13 36 Q18 31 20 22 Z" fill="#f7a8cc" />
+      <path className="yuki-hair-r" d="M44 15 Q54 22 51 36 Q46 31 44 22 Z" fill="#f7a8cc" />
+      {/* hair cap + face */}
+      <circle cx="32" cy="20" r="13" fill="#f7a8cc" />
+      <circle cx="32" cy="24" r="10.5" fill="#ffe3d2" />
+      {/* bangs */}
+      <path d="M22 20 q3 -6 10 -6 q7 0 10 6 l-3 3 -2.5 -3 -2.5 3 -2 -3 -2.5 3 -2.5 -3 z" fill="#f7a8cc" />
+      {/* star clips */}
+      <path d="M21 16 l0.8 1.6 1.8 0.2 -1.3 1.3 0.3 1.8 -1.6 -0.9 -1.6 0.9 0.3 -1.8 -1.3 -1.3 1.8 -0.2 z" fill="#ffd77e" />
+      {eye(27.5)}
+      {eye(36.5)}
+      {/* blush + mouth */}
+      <circle cx="24.5" cy="27.5" r="1.6" fill="#ff9db0" opacity="0.55" />
+      <circle cx="39.5" cy="27.5" r="1.6" fill="#ff9db0" opacity="0.55" />
+      <path
+        d={mood === 'hyped' ? 'M30 30 q2 2.4 4 0' : 'M30.5 30 q1.5 1.4 3 0'}
+        stroke="#c04476"
+        strokeWidth="1"
+        fill="none"
+      />
+      {/* focused: determined brows */}
+      {mood === 'focused' && (
+        <path d="M25 20.5 l4.5 1 M39 20.5 l-4.5 1" stroke="#5a3566" strokeWidth="1.1" />
+      )}
+      {/* chibi body: white uniform with pink trim + star brooch */}
+      <path d="M26 34 h12 q2 6 -1 10 h-10 q-3 -4 -1 -10 z" fill="#ffffff" stroke="#f06ba6" strokeWidth="1" />
+      <path d="M26.5 42 q5.5 2.5 11 0 l1 2.5 q-6.5 3 -13 0 z" fill="#f06ba6" />
+      <path d="M32 36 l0.9 1.8 2 0.3 -1.5 1.4 0.4 2 -1.8 -1 -1.8 1 0.4 -2 -1.5 -1.4 2 -0.3 z" fill="#ffd77e" />
+      {mood === 'sleepy' && (
+        <text x="50" y="10" fontSize="8" fill="#ad7495">
+          z
+        </text>
+      )}
+    </svg>
+  )
+}
+
 /**
- * Bitxo, the pixel axolotl coach (SVG, CSS-animated frame swap). Exported as
+ * The active identity's mascot (SVG, CSS animated): Bitxo the pixel axolotl,
+ * Sombra the black cat or Yuki the chibi star guardian. Exported as
  * HexiSprite so every existing call site keeps working.
  */
 export function HexiSprite(props: {
@@ -149,7 +282,8 @@ export function HexiSprite(props: {
   alerting?: boolean
   className?: string
 }): React.JSX.Element {
-  const name = useMascotName()
+  const theme = useTheme()
+  const name = mascotNameFor(theme)
   const alerting = props.alerting ?? false
   const mood = alerting ? 'hyped' : props.mood
   return (
@@ -159,7 +293,13 @@ export function HexiSprite(props: {
       className={`hexi inline-block ${props.className ?? 'h-16 w-16'} ${alerting ? 'gold-pulse' : ''}`}
       data-mood={mood}
     >
-      <BitxoSprite mood={mood} />
+      {theme === 'abismo' ? (
+        <SombraSprite mood={mood} />
+      ) : theme === 'anime' ? (
+        <YukiSprite mood={mood} />
+      ) : (
+        <BitxoSprite mood={mood} />
+      )}
     </span>
   )
 }

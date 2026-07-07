@@ -1,6 +1,8 @@
 // Generates resources/icon.png (256x256) — the app/installer/window icon.
 // Zero-dep PNG encoder (node:zlib deflate + hand-rolled chunks) drawing the
-// hextech mark: gold hexagon ring + teal inner crystal on deep navy.
+// brand mark: pixel Bitxo face (gold coach headband) over the void-navy
+// rounded square with the rift-aurora glows (pink top-left, gold bottom-right)
+// — matches the "Neón Grieta" identity in src/renderer/src/assets/main.css.
 // The output is COMMITTED (the main process imports it as ?asset for the
 // runtime window icon); rerun after tweaking: node scripts/make-icon.mjs
 import { Buffer } from 'node:buffer'
@@ -12,20 +14,40 @@ import { fileURLToPath } from 'node:url'
 const SIZE = 256
 const CENTER = SIZE / 2
 
-// Palette (matches the hextech theme in src/renderer/src/assets/main.css).
-const NAVY = [15, 17, 23]
-const NAVY_LIGHT = [26, 31, 46]
-const GOLD = [200, 155, 60]
-const GOLD_BRIGHT = [240, 200, 100]
-const TEAL = [10, 200, 185]
+// Palette (matches the neon identity in main.css).
+const NAVY = [10, 14, 28]
+const NAVY_LIGHT = [17, 22, 41]
+const PINK = [255, 93, 143]
+const GOLD = [242, 193, 78]
 
-/** Signed distance from point to the edge of a flat-top hexagon of radius r. */
-function hexDistance(x, y, r) {
-  const px = Math.abs(x)
-  const py = Math.abs(y)
-  // Flat-top hexagon: max of the three half-plane distances.
-  return Math.max(px * 0.866025 + py * 0.5, py) - r
+// Bitxo face, front view, 15×11 cells. Same colors as Mascot.tsx.
+const FACE = [
+  '.....ppppp.....',
+  'g...ppppppp...g',
+  'gg.phhhhhhhp.gg',
+  '.gg.ppppppp.gg.',
+  'gg.ppppppppp.gg',
+  '.g.pEwpppEwp.g.',
+  'gg.ppppppppp.gg',
+  '.g.pcpppppcp.g.',
+  '...pppmmmppp...',
+  '....ppppppp....',
+  '.....ppppp.....'
+]
+const FACE_COLORS = {
+  p: [255, 167, 201], // body pink
+  g: [255, 93, 143], // gill fronds (brand pink)
+  E: [43, 33, 64], // eye
+  w: [255, 255, 255], // eye shine
+  c: [255, 107, 138], // cheek blush
+  m: [217, 106, 155], // smile
+  h: [242, 193, 78] // gold coach headband
 }
+const CELL = 13 // 15*13 = 195px wide
+const FACE_W = FACE[0].length * CELL
+const FACE_H = FACE.length * CELL
+const FACE_X = Math.round((SIZE - FACE_W) / 2)
+const FACE_Y = Math.round((SIZE - FACE_H) / 2) + 6
 
 const pixels = Buffer.alloc(SIZE * SIZE * 4)
 
@@ -33,42 +55,39 @@ for (let row = 0; row < SIZE; row++) {
   for (let col = 0; col < SIZE; col++) {
     const x = col - CENTER
     const y = row - CENTER
-    const radial = Math.hypot(x, y) / CENTER
 
-    // Rounded-square navy background with a subtle center glow.
+    // Rounded-square alpha mask.
     const cornerR = 56
     const half = CENTER - 4
     const qx = Math.max(Math.abs(x) - half + cornerR, 0)
     const qy = Math.max(Math.abs(y) - half + cornerR, 0)
     const bgDist = Math.hypot(qx, qy) - cornerR
-    let alpha = bgDist < 0 ? 255 : Math.max(0, Math.round(255 * (1 - bgDist)))
+    const alpha = bgDist < 0 ? 255 : Math.max(0, Math.round(255 * (1 - bgDist)))
 
-    const glow = Math.max(0, 1 - radial * 1.4)
-    let rC = NAVY[0] + (NAVY_LIGHT[0] - NAVY[0]) * glow
-    let gC = NAVY[1] + (NAVY_LIGHT[1] - NAVY[1]) * glow
-    let bC = NAVY[2] + (NAVY_LIGHT[2] - NAVY[2]) * glow
+    // Void navy base with a soft vertical lift.
+    const lift = Math.max(0, 1 - row / SIZE)
+    let rC = NAVY[0] + (NAVY_LIGHT[0] - NAVY[0]) * lift
+    let gC = NAVY[1] + (NAVY_LIGHT[1] - NAVY[1]) * lift
+    let bC = NAVY[2] + (NAVY_LIGHT[2] - NAVY[2]) * lift
 
-    // Outer gold hexagon ring.
-    const ringOuter = hexDistance(x, y, 100)
-    const ringInner = hexDistance(x, y, 84)
-    if (ringOuter < 0 && ringInner > 0) {
-      const edge = Math.min(-ringOuter, ringInner)
-      const t = Math.min(1, edge / 3)
-      // Brighter toward the top-left for a lit-metal feel.
-      const sheen = 0.5 + 0.5 * Math.max(0, -(x + y) / 180)
-      rC = rC + ((GOLD[0] + (GOLD_BRIGHT[0] - GOLD[0]) * sheen) - rC) * t
-      gC = gC + ((GOLD[1] + (GOLD_BRIGHT[1] - GOLD[1]) * sheen) - gC) * t
-      bC = bC + ((GOLD[2] + (GOLD_BRIGHT[2] - GOLD[2]) * sheen) - bC) * t
-    }
+    // Rift aurora: pink glow from the top-left, gold ember bottom-right.
+    const pinkGlow = Math.max(0, 1 - Math.hypot(col - 52, row - 44) / 190) * 0.34
+    const goldGlow = Math.max(0, 1 - Math.hypot(col - 212, row - 226) / 190) * 0.26
+    rC += (PINK[0] - rC) * pinkGlow + (GOLD[0] - rC) * goldGlow
+    gC += (PINK[1] - gC) * pinkGlow + (GOLD[1] - gC) * goldGlow
+    bC += (PINK[2] - bC) * pinkGlow + (GOLD[2] - bC) * goldGlow
 
-    // Inner teal crystal (smaller hexagon), with a vertical facet split.
-    const crystal = hexDistance(x, y, 52)
-    if (crystal < 0) {
-      const t = Math.min(1, -crystal / 3)
-      const facet = x < 0 ? 1 : 0.72
-      rC = rC + (TEAL[0] * facet - rC) * t
-      gC = gC + (TEAL[1] * facet - gC) * t
-      bC = bC + (TEAL[2] * facet - bC) * t
+    // Bitxo face cells on top (hard pixel edges — it IS pixel art).
+    const cellCol = Math.floor((col - FACE_X) / CELL)
+    const cellRow = Math.floor((row - FACE_Y) / CELL)
+    if (cellRow >= 0 && cellRow < FACE.length && cellCol >= 0 && cellCol < FACE[0].length) {
+      const cell = FACE[cellRow][cellCol]
+      const color = FACE_COLORS[cell]
+      if (color) {
+        rC = color[0]
+        gC = color[1]
+        bC = color[2]
+      }
     }
 
     const offset = (row * SIZE + col) * 4

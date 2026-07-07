@@ -1,9 +1,13 @@
 /**
- * The app's single visual identity: "Neón Grieta" — void-navy esports base,
- * Bitxo-pink brand glow + coin gold, phase-reactive rift aurora. Palette,
- * typography and illumination live in main.css; this module is the source of
- * truth for the identity id and the mascot/persona name used by renderer AND
- * main (the coach speaks as the mascot).
+ * The app's three visual identities. Each is a FULL identity: palette,
+ * display face, corner language, ambient atmosphere and chrome variant (all
+ * CSS-var / data-theme driven in main.css + Shell.tsx) and its own mascot.
+ * Single source of truth for renderer AND main (the coach's persona name
+ * follows the active theme).
+ *
+ *  - neon   — "Neón Grieta": void navy + Bitxo pink + coin gold, rift aurora.
+ *  - abismo — "Abismo": abyss black + blood crimson, knife-sharp, icon rail.
+ *  - anime  — "Estrella": light pastel Star-Guardian kawaii, floating chrome.
  */
 export interface AppTheme {
   id: string
@@ -17,20 +21,32 @@ export const THEMES: AppTheme[] = [
   {
     id: 'neon',
     label: 'Neón Grieta',
-    hint: 'azul vacío · rosa Bitxo + oro · mascota Bitxo (ajolote píxel)',
+    hint: 'azul vacío · rosa + oro · mascota Bitxo (ajolote píxel)',
     mascot: 'Bitxo'
+  },
+  {
+    id: 'abismo',
+    label: 'Abismo',
+    hint: 'negro abisal · carmesí · mascota Sombra (gato negro)',
+    mascot: 'Sombra'
+  },
+  {
+    id: 'anime',
+    label: 'Estrella',
+    hint: 'pastel guardiana estelar · rosa + oro · mascota Yuki (chibi)',
+    mascot: 'Yuki'
   }
 ]
 
 export const DEFAULT_THEME = 'neon'
 
-/** Every pre-2.0 theme collapses onto the one identity. */
+/** Pre-2.0 ids collapse onto the closest identity. */
 const LEGACY_THEME_MAP: Record<string, string> = {
   hextech: 'neon',
   void: 'neon',
-  noche: 'neon',
+  noche: 'abismo',
   recreativa: 'neon',
-  sakura: 'neon',
+  sakura: 'anime',
   cabina: 'neon'
 }
 

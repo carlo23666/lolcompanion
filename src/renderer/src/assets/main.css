@@ -26,6 +26,20 @@
   src: url('./fonts/press-start-2p.woff2') format('woff2');
   font-display: swap;
 }
+/* Abismo display face: heavy, industrial, knife-edged (OFL, vendored). */
+@font-face {
+  font-family: 'Russo One';
+  src: url('./fonts/russo-one-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+/* Estrella display face: rounded kawaii pop (OFL, vendored, latin subset). */
+@font-face {
+  font-family: 'Mochiy Pop One';
+  src: url('./fonts/mochiy-pop-one-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
 
 /*
  * ONE identity: "Neón Grieta". Blitz-grade dark esports base — void-navy
@@ -71,6 +85,80 @@
   --aura-c: color-mix(in srgb, #4a6cff 7%, transparent);
   --aura-o: 0.75;
 }
+/*
+ * ABISMO — abyss black + blood crimson over the same class names: the
+ * indigo-* scale becomes crimson, amber-* becomes bone gold, radii go
+ * knife-sharp and the display face turns industrial. Shell renders the
+ * stealth icon rail for this identity.
+ */
+html[data-theme='abismo'] {
+  --color-slate-950: #050508;
+  --color-slate-900: #0b0b11;
+  --color-slate-800: #12121a;
+  --color-slate-700: #1e1e2b;
+  --color-slate-600: #34344a;
+  --color-slate-500: #555571;
+  --color-slate-400: #8585a0;
+  --color-slate-300: #b9b9cb;
+  --color-slate-200: #d9d9e4;
+  --color-slate-100: #f1f1f6;
+  --color-amber-300: #e6cd8d; /* bone gold */
+  --color-amber-400: #d8b86a;
+  --color-indigo-300: #ff7186; /* blood crimson bright */
+  --color-indigo-500: #e3244a; /* blood crimson */
+  --color-indigo-600: #bf1c3d;
+  --color-indigo-700: #921530;
+  --color-indigo-800: #520d1e;
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 2px;
+  --radius-2xl: 4px;
+  --font-display: 'Russo One', 'Bahnschrift', 'Segoe UI', sans-serif;
+  --aura-a: color-mix(in srgb, var(--color-indigo-500) 5%, transparent);
+  --aura-b: color-mix(in srgb, var(--color-indigo-500) 3%, transparent);
+  --aura-c: transparent;
+}
+
+/*
+ * ESTRELLA — the anime identity is LIGHT: pastel Star-Guardian cosmos. The
+ * whole slate scale inverts (950 = pale sakura paper, 100 = ink), indigo-*
+ * becomes magical-girl pink, amber-* a star gold dark enough for light
+ * surfaces. Bubbly radii, Mochiy Pop display, falling petal atmosphere.
+ */
+html[data-theme='anime'] {
+  color-scheme: light;
+  --color-slate-950: #fdf2f7; /* page (sakura paper) */
+  --color-slate-900: #ffffff; /* card */
+  --color-slate-800: #f7e3ee; /* well */
+  --color-slate-700: #eecbdd; /* border */
+  --color-slate-600: #d59cbd;
+  --color-slate-500: #ad7495;
+  --color-slate-400: #855a76;
+  --color-slate-300: #5f3e56;
+  --color-slate-200: #462e40;
+  --color-slate-100: #2e1d2b; /* ink */
+  --color-amber-300: #c9821e; /* star gold (readable on white) */
+  --color-amber-400: #b06f0a;
+  --color-indigo-300: #d1568d; /* pink readable on white */
+  --color-indigo-500: #f06ba6; /* magical-girl pink */
+  --color-indigo-600: #e0568f;
+  --color-indigo-700: #c04476;
+  --color-indigo-800: #f2c3da; /* light pink borders */
+  --radius-xs: 8px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --font-display: 'Mochiy Pop One', 'Comic Sans MS', 'Segoe UI', sans-serif;
+  --aura-a: color-mix(in srgb, #f06ba6 14%, transparent);
+  --aura-b: color-mix(in srgb, #ffd77e 18%, transparent);
+  --aura-c: color-mix(in srgb, #9d7bff 12%, transparent);
+  --aura-o: 0.9;
+}
+
 html[data-phase='clientOpen'] {
   --aura-a: color-mix(in srgb, var(--color-indigo-500) 10%, transparent);
   --aura-b: color-mix(in srgb, var(--color-amber-400) 6%, transparent);
@@ -113,6 +201,45 @@ body::before {
   opacity: var(--aura-o);
   animation: aurora-drift 46s ease-in-out infinite alternate;
   transition: opacity 1200ms ease;
+}
+
+/* Per-identity atmosphere layer (body::after, above the aurora, behind UI). */
+html[data-theme='abismo'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--color-indigo-500) 9%, transparent),
+    transparent 32%
+  );
+  animation: abyss-breath 7s ease-in-out infinite;
+}
+
+/* Estrella: soft petal/stardust bokeh drifting down the page forever. */
+html[data-theme='anime'] body::after {
+  content: '';
+  position: fixed;
+  top: -12vh;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow:
+    8vw 4vh 2px 1px rgb(240 107 166 / 45%),
+    22vw 28vh 3px 0 rgb(255 205 92 / 40%),
+    35vw 12vh 2px 2px rgb(240 107 166 / 30%),
+    48vw 40vh 3px 0 rgb(157 123 255 / 35%),
+    61vw 6vh 2px 1px rgb(240 107 166 / 40%),
+    72vw 32vh 2px 0 rgb(255 205 92 / 35%),
+    84vw 18vh 3px 1px rgb(240 107 166 / 35%),
+    93vw 44vh 2px 0 rgb(157 123 255 / 30%);
+  animation: petal-fall 22s linear infinite;
 }
 
 /* Headings speak the display face everywhere — one rule, whole-app voice. */
@@ -285,6 +412,25 @@ select:focus {
   }
   to {
     transform: translate3d(2.5%, 2%, 0) scale(1.07);
+  }
+}
+
+@keyframes abyss-breath {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes petal-fall {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(124vh);
   }
 }
 
@@ -499,6 +645,50 @@ select:focus {
   opacity: 0;
 }
 
+/* Sombra (abismo): slow predatory tail sway; eyes glow when focused. */
+@keyframes tail-sway {
+  0%,
+  100% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(14deg);
+  }
+}
+.cat-tail {
+  transform-origin: 15% 85%;
+  animation: tail-sway 2.4s ease-in-out infinite;
+}
+.hexi[data-mood='hyped'] .cat-tail {
+  animation-duration: 0.6s;
+}
+.cat-eye-glow {
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+/* Yuki (anime): twin-tails bob against the float. */
+@keyframes hair-bob {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+.yuki-hair-l {
+  transform-origin: 80% 10%;
+  animation: hair-bob 2s ease-in-out infinite;
+}
+.yuki-hair-r {
+  transform-origin: 20% 10%;
+  animation: hair-bob 2s ease-in-out infinite reverse;
+}
+.hexi[data-mood='hyped'] .yuki-hair-l,
+.hexi[data-mood='hyped'] .yuki-hair-r {
+  animation-duration: 0.55s;
+}
+
 /* ---------- mascot (shared float/bob) ---------- */
 
 .hexi {
@@ -529,6 +719,10 @@ select:focus {
 
 @media (prefers-reduced-motion: reduce) {
   body::before,
+  body::after,
+  .cat-tail,
+  .yuki-hair-l,
+  .yuki-hair-r,
   .hex-card,
   .neon-dock::after,
   .btn-glow::after,

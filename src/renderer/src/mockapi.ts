@@ -11,7 +11,7 @@ import midGameState from '../../../fixtures/gamestate/mid.json'
  * and screenshotable by tooling — without Electron or a running game.
  *
  * URL params: ?phase=idle|champSelect|inGame|postGame (default inGame)
- *             ?theme=neon (single identity; legacy ids normalize onto it)
+ *             ?theme=neon|abismo|anime (default neon)
  * Never active in production: main.tsx only loads this when window.api is
  * missing, which cannot happen under the preload.
  */

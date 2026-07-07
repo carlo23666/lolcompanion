@@ -46,3 +46,7 @@ Feature requests (all screen-visible/own-data → compliant):
 
 Declined (Riot policy — hard rule 1, do NOT promote to a WP):
 - Enemy flash/summoner-cooldown timers (manual, ally-ping-derived, or otherwise) were requested and declined: enemy cooldown tracking of any kind is banned by Riot (March 2025), regardless of data source.
+
+- (2026-07-07) In-game splash backdrop uses sanitized display name; add a championName->ddragon-id map (Wukong->MonkeyKing etc.) so it never 404s.
+- (2026-07-07) Anime/Estrella is the first LIGHT theme; hardcoded emerald/rose/sky utilities look fine but deserve a dedicated light-surface contrast pass.
+- (2026-07-07) Per-mascot coach voice flavor (Sombra dry/edgy, Yuki genki) on top of buildPersona(name).

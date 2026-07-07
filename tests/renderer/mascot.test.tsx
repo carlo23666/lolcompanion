@@ -27,7 +27,7 @@ describe('Mascot (Bitxo)', () => {
     )
   })
 
-  it('legacy theme ids normalize onto the single identity (Bitxo stays)', () => {
+  it('the mascot swaps live with the identity (Sombra on abismo, Yuki on anime)', () => {
     render(
       <>
         <Mascot phase="idle" />
@@ -35,7 +35,26 @@ describe('Mascot (Bitxo)', () => {
       </>
     )
     act(() => {
-      window.dispatchEvent(new CustomEvent('app-theme', { detail: 'sakura' }))
+      window.dispatchEvent(new CustomEvent('app-theme', { detail: 'abismo' }))
+    })
+    expect(screen.getByTestId('theme').textContent).toBe('abismo')
+    expect(screen.getByRole('img', { name: /Sombra/, hidden: true })).toBeInTheDocument()
+
+    act(() => {
+      window.dispatchEvent(new CustomEvent('app-theme', { detail: 'anime' }))
+    })
+    expect(screen.getByRole('img', { name: /Yuki/, hidden: true })).toBeInTheDocument()
+  })
+
+  it('legacy theme ids normalize (recreativa→neon keeps Bitxo)', () => {
+    render(
+      <>
+        <Mascot phase="idle" />
+        <ThemeProbe />
+      </>
+    )
+    act(() => {
+      window.dispatchEvent(new CustomEvent('app-theme', { detail: 'recreativa' }))
     })
     expect(screen.getByTestId('theme').textContent).toBe('neon')
     expect(screen.getByRole('img', { name: /Bitxo/, hidden: true })).toBeInTheDocument()

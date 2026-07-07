@@ -1,6 +1,19 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-07 (12) — Two new identities (Abismo · Estrella), image layers, new app icon, v1.1.0 release (owner request)
+**Done (check green, 311):**
+1. **Theme system back to three FULL identities** (`themes.ts`): `neon` (unchanged default), **`abismo`** — abyss black + blood crimson over the same class names (indigo-*→crimson, amber-*→bone gold), knife-sharp 0-2px radii, Russo One display, breathing crimson floor vignette, mascot **Sombra** (black cat, glowing crimson eyes, collar with gold tag, predatory tail sway) — and **`anime`/"Estrella"** — a LIGHT pastel Star-Guardian identity: the whole slate scale inverts (950 = sakura paper, 100 = ink, `color-scheme: light`), magical-girl pink brand, star gold, 16-24px bubbly radii, Mochiy Pop One display, falling petal/stardust bokeh, mascot **Yuki** (chibi coach: twin-tails that bob, star clips, star eyes when hyped, determined brows when focused). Legacy ids remap (noche→abismo, sakura→anime, rest→neon). Settings picker reappears automatically (it was `hidden={THEMES.length < 2}`).
+2. **Chrome follows the identity** (Shell.tsx): neon keeps the Blitz sidebar; abismo renders a stealth 56px icon-only rail (monogram wordmark, tooltips, aria-labels preserved); anime renders a floating rounded-3xl card sidebar with pill nav. Same DOM roles/accessible names in all three.
+3. **Transparent image layers**: in-game gets the player's champion splash as a 320px backdrop fading into the page color (name sanitized, `onError` removes the layer when the splash isn't cached); the recommendation hero card gets oversized rotated item art bleeding off the corner at 7%; alternatives rows got bigger icons + hover chrome. (Champ select + dashboard already had splash banners.)
+4. **New app icon** (`scripts/make-icon.mjs` rewritten, same zero-dep PNG encoder): pixel Bitxo face with the gold coach headband over the void-navy rounded square with rift-aurora glows. Verified by rendering the PNG.
+5. Fonts vendored (OFL latin): russo-one-400 (7KB), mochiy-pop-one-400 (18KB); LICENSE.txt updated.
+**Deviations / notes:**
+- The in-game splash uses the LIVE champion display name sanitized to letters; names whose ddragon id differs (Wukong→MonkeyKing, Renata Glasc) will 404 and the layer hides itself — cosmetic-only degradation, noted in INBOX as a future championName→id map.
+- Anime is the app's first light theme: hardcoded emerald/rose/sky utilities keep their Tailwind defaults on light surfaces (checked: readable), but a dedicated pass was not done — flagged in INBOX.
+- Coach persona text is shared by the three mascots (only the name changes); per-mascot voice flavor → INBOX.
+**Files:** src/shared/themes.ts, src/renderer/src/assets/{main.css,fonts/*}, src/renderer/src/components/{Shell,Mascot,LiveView,RecommendationCard}.tsx, src/renderer/src/mockapi.ts, scripts/make-icon.mjs, resources/icon.png, tests/renderer/mascot.test.tsx.
+
 ## 2026-07-07 (11) — ONE identity "Neón Grieta": phase-reactive illumination, Bitxo upgraded, Chakra Petch (owner: "gaming app, animations everywhere, proper mascot, illuminations, a specific recognizable theme like Blitz")
 **Done (check green, 310):** the three identities collapse into ONE recognizable theme (`neon`) — this settles the INBOX item "once the owner picks a winner, deepen that one"; the brief asked for "a specific theme", singular.
 1. **Identity**: void-navy surfaces + **Bitxo pink** `#ff5d8f` as the brand color (mapped onto the `indigo-*` scale so no component changed class names; no LoL tool owns pink — that is the recognizability play) + coin gold for economy/hero accents. `themes.ts` keeps its full API; every legacy id (hextech/void/noche/recreativa/sakura/cabina) normalizes to `neon`, so stored settings migrate silently and the coach persona is always Bitxo.

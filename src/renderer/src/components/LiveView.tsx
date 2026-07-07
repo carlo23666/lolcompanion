@@ -176,8 +176,29 @@ function InGameLayout(props: {
   const hint = <OverlayHint onOpenSettings={props.onOpenSettings} />
   const direction = <GameDirectionPanel />
 
+  // Transparent champion-splash backdrop: your champion looms behind the
+  // console, fading into the page color (theme-aware via slate vars).
+  const splashName = gameState.self.championName.replace(/[^a-zA-Z]/g, '')
+  const backdrop = (
+    <div
+      className="pointer-events-none absolute inset-x-0 -top-4 -z-10 h-80 overflow-hidden"
+      aria-hidden
+    >
+      <img
+        src={`ddicon://splash/${splashName}_0.jpg`}
+        alt=""
+        className="h-full w-full object-cover object-top opacity-15"
+        onError={(event) => {
+          event.currentTarget.parentElement?.remove()
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/70 to-slate-950" />
+    </div>
+  )
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="relative isolate flex flex-col gap-3">
+      {backdrop}
       {hint}
       {statusBar}
       <div className="grid grid-cols-1 items-start gap-3 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">

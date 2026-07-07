@@ -64,7 +64,16 @@ export default function RecommendationCard(props: {
   return (
     // Outer wrapper owns the pulse shadow (the hex clip would cut it off).
     <div className={`card-in rounded-lg ${pulse ? 'gold-pulse' : ''}`}>
-      <section className="hex-card energy-border bg-slate-900 p-4">
+      <section className="hex-card energy-border relative overflow-hidden bg-slate-900 p-4">
+      {/* Oversized transparent item art bleeding off the card's corner. */}
+      {top.itemId !== null && (
+        <img
+          src={`ddicon://item/${String(top.itemId)}.png`}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute -top-6 -right-6 h-36 w-36 rotate-12 opacity-[0.07] blur-[1px]"
+        />
+      )}
       <div className="mb-2.5 flex items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">
           ◆ Recomendación
@@ -125,12 +134,15 @@ export default function RecommendationCard(props: {
               Alternativas
             </p>
             {rest.slice(0, 3).map((rec, index) => (
-              <div key={index} className="flex items-center gap-2">
+              <div
+                key={index}
+                className="flex items-center gap-2 rounded-md border border-transparent px-1 py-0.5 transition-colors hover:border-slate-700 hover:bg-slate-800/60"
+              >
                 {rec.itemId !== null && (
                   <img
                     src={`ddicon://item/${String(rec.itemId)}.png`}
                     alt=""
-                    className="h-7 w-7 rounded-sm border border-slate-700"
+                    className="h-8 w-8 rounded-sm border border-slate-700"
                   />
                 )}
                 <span className="min-w-0 flex-1 truncate text-xs text-slate-300">
