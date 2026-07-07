@@ -52,3 +52,5 @@ Declined (Riot policy — hard rule 1, do NOT promote to a WP):
 - (2026-07-07) Per-mascot coach voice flavor (Sombra dry/edgy, Yuki genki) on top of buildPersona(name).
 
 - (2026-07-07) Champ select pick suggestions still rank by OWN winrate first with Master+ as a +/-0.15 blend; the in-game engine is now Master+-first — consider the same inversion in champselect if the owner confirms.
+
+- (2026-07-07) Owner proposed password-encrypted bundled API key as a "license" for friends. Declined (shared personal-key use violates Riot ToS + per-key rate limit collapses with N users; cipher only protects the repo copy, not post-install use). The RIGHT version of his idea for phase 2 / monetization: small proxy backend holding a Riot PRODUCTION key, friends authenticate with owner-issued revocable tokens (the "license"), server enforces per-user quotas. Needs ADR revisiting ADR-002 (zero-cost/no-backend) + Riot production key application (ADR-007).
