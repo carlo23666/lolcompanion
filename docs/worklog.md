@@ -1,6 +1,14 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-07 (16) — Meta first EVERYWHERE + shareable meta seed (owner: friend's fresh install was mute)
+**Done (check green, 327):** a friend's install recommended nothing (custom game + empty meta DB + owner-specific pool fallback). Three fixes:
+1. **Role fallback in the live lookup** (`MetaRepo.itemsFor` + `topRoleFor`): custom/blind lobbies carry no position, and an uncrawled role said nothing — both now fall back to the champion's most-played Master+ role. The engine no longer goes silent for lack of a label.
+2. **Champ select inverted too** (owner: "meta first, personal after — as I've said several times"): when the Master+ sample is real (≥30 games), the Master+ winrate IS the score's base and the owner's record only adjusts (±0.35 max); own-vs-comp matchup nudge reduced 0.25→0.15. Reasons now lead with the Master+ line ("la base de la sugerencia"). Own data is the base only for champions the meta hasn't sampled.
+3. **Shareable meta seed**: `npm run meta:export` dumps the local aggregates (latest patch, aggregates + match-id ledger, zod-validated schema in `shared/schemas/meta-seed.ts`) as `dist/meta-seed.json.gz` (~330 KB for 13.8k matches). On startup, an install with an EMPTY meta store downloads the seed from the latest GitHub release and imports it (`src/main/meta-seed.ts`) — fresh installs get Master+ builds from minute one, offline/missing-asset degrade silently, and the imported ledger means a later local crawl never double-counts. Import is only-empty by design (aggregate merges can't dedupe).
+**Notes:** the seed carries only anonymous aggregates + public match ids — no personal data. Release workflow now includes exporting + uploading the seed asset. Candidate pool in champ select is still the owner's played champions (you can only pick what you know) — only the RANKING is meta-first.
+**Files:** src/main/db/repos/meta.ts, src/main/{meta-seed(new),champselect,index}.ts, src/main/liveclient/index.ts, src/shared/schemas/meta-seed.ts (new), scripts/export-meta-seed.mjs (new), package.json, tests/main/meta.test.ts.
+
 ## 2026-07-07 (15) — Historial drawer utilities: rival, oro/min, build vs Master+, colas, racha (owner: "include everything useful")
 **Done (check green, 318):** the deeper utilities proposed in session 14 are wired end to end.
 1. **HistoryDetail extended (main + shared)**: `role`; `laneOpponent` — same-position enemy derived from stored participants (opposite win flag = other team; ARAM/empty roles stay null); `metaBuild` — Master+ final-build distribution for the champion+role from the crawler aggregates, exact match patch when crawled (≥20 games) else the newest crawled patch, always labeled with the patch used.

@@ -18,7 +18,8 @@
     "backtest": "node scripts/backtest.mjs",
     "test": "node scripts/electron-node.mjs node_modules/vitest/vitest.mjs run",
     "check": "npm run typecheck && npm run lint && npm run test",
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "electron-builder install-app-deps",
+    "meta:export": "node scripts/electron-node.mjs scripts/export-meta-seed.mjs"
   },
   "dependencies": {
     "better-sqlite3": "^12.11.1",

@@ -82,19 +82,20 @@ export function createSnapshotProcessor(
     log: (message) => console.log(message)
   })
 
-  // Master+ items for the own champion+role — backs the build advice when
-  // the champion has no pool.json entry. One lookup per champion+role.
+  // Master+ items for the own champion+role — the PRIMARY build source. One
+  // lookup per champion+role; itemsFor falls back to the champion's
+  // most-played Master+ role when the lobby has none (customs/blind).
   let metaKey = ''
   let metaItems: MetaItemsInput | undefined
   const lookupMetaItems = (champion: string, role: string): MetaItemsInput | undefined => {
     const repo = new MetaRepo(db)
     const patch = repo.latestPatch()
     if (patch === null) return undefined
-    const winrate = repo.championWinrate(champion, role, patch)
-    if (winrate === null) return undefined
     // 30 items: the rules intersect their candidates with this distribution
     // (antiheal/defensives/pen), so it must reach past the core build.
-    return { items: repo.topItems(champion, role, patch, 30), games: winrate.games }
+    const found = repo.itemsFor(champion, role, patch, 30)
+    if (found === null) return undefined
+    return { items: found.items, games: found.games }
   }
 
   return {

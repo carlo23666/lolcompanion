@@ -1,9 +1,12 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { Buffer } from 'node:buffer'
+import { gzipSync } from 'node:zlib'
 import { describe, expect, it } from 'vitest'
 import Database from 'better-sqlite3'
 import { runMigrations } from '@main/db'
 import { MetaRepo } from '@main/db/repos'
+import { importMetaSeedIfEmpty } from '@main/meta-seed'
 import { aggregateMatch, patchOf } from '@main/riot/meta-aggregate'
 import { MetaCrawler, type MetaCrawlerClient } from '@main/riot/metacrawler'
 import { RiotApiError } from '@main/riot/client'
@@ -177,3 +180,133 @@ async function vipollUntilDone(crawler: MetaCrawler): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 5))
   }
 }
+
+function makeDb(): ReturnType<typeof Database> {
+  const db = new Database(':memory:')
+  runMigrations(db)
+  return db
+}
+
+describe('MetaRepo.itemsFor (role fallback — customs/blind lobbies)', () => {
+  it('empty role falls back to the most-played Master+ role', () => {
+    const db = makeDb()
+    const meta = new MetaRepo(db)
+    const aggregate = aggregateMatch(baseMatch)
+    if (!aggregate) throw new Error('aggregate null')
+    meta.applyAggregate(aggregate)
+    const sample = aggregate.championStats.find((stat) => stat.role !== '')
+    if (!sample) throw new Error('no positioned champion in fixture')
+
+    expect(meta.topRoleFor(sample.champion, '16.13')).toBe(sample.role)
+    const found = meta.itemsFor(sample.champion, '', '16.13', 10)
+    expect(found?.role).toBe(sample.role)
+    expect(found?.games).toBeGreaterThan(0)
+  })
+
+  it('a role with no crawl data falls back instead of going silent', () => {
+    const db = makeDb()
+    const meta = new MetaRepo(db)
+    const aggregate = aggregateMatch(baseMatch)
+    if (!aggregate) throw new Error('aggregate null')
+    meta.applyAggregate(aggregate)
+    const sample = aggregate.championStats.find((stat) => stat.role === 'TOP')
+    if (!sample) throw new Error('no TOP champion in fixture')
+
+    const found = meta.itemsFor(sample.champion, 'UTILITY', '16.13', 10)
+    expect(found?.role).toBe('TOP')
+  })
+
+  it('unknown champion → null', () => {
+    const meta = new MetaRepo(makeDb())
+    expect(meta.itemsFor('Teemo', '', '16.13', 10)).toBeNull()
+  })
+})
+
+describe('meta seed (export → import)', () => {
+  function seededSource(): { meta: MetaRepo; aggregate: NonNullable<ReturnType<typeof aggregateMatch>> } {
+    const meta = new MetaRepo(makeDb())
+    const aggregate = aggregateMatch(baseMatch)
+    if (!aggregate) throw new Error('aggregate null')
+    meta.applyAggregate(aggregate)
+    return { meta, aggregate }
+  }
+
+  it('round-trips into an empty store, ledger included (no re-crawl double count)', () => {
+    const { meta: source, aggregate } = seededSource()
+    const seed = { version: 1 as const, exportedAt: 'test', ...source.exportSeed('16.13') }
+
+    const target = new MetaRepo(makeDb())
+    expect(target.importSeed(seed)).toBe(true)
+    expect(target.latestPatch()).toBe('16.13')
+
+    const sample = aggregate.championStats[0]
+    if (!sample) throw new Error('empty aggregate')
+    expect(target.championWinrate(sample.champion, sample.role, '16.13')).toEqual(
+      source.championWinrate(sample.champion, sample.role, '16.13')
+    )
+    // The seeded ledger makes a later crawl of the same match a no-op.
+    expect(target.applyAggregate(aggregate)).toBe(false)
+  })
+
+  it('refuses to import over existing data (only-empty rule)', () => {
+    const { meta: source } = seededSource()
+    const seed = { version: 1 as const, exportedAt: 'test', ...source.exportSeed('16.13') }
+    expect(source.importSeed(seed)).toBe(false)
+  })
+})
+
+describe('importMetaSeedIfEmpty (first-run bootstrap)', () => {
+  function seedPayload(): Buffer {
+    const meta = new MetaRepo(makeDb())
+    const aggregate = aggregateMatch(baseMatch)
+    if (!aggregate) throw new Error('aggregate null')
+    meta.applyAggregate(aggregate)
+    const seed = { version: 1, exportedAt: 'test', ...meta.exportSeed('16.13') }
+    return gzipSync(Buffer.from(JSON.stringify(seed)))
+  }
+
+  const fetchOk =
+    (body: Buffer): typeof fetch =>
+    () =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        arrayBuffer: () =>
+          Promise.resolve(body.buffer.slice(body.byteOffset, body.byteOffset + body.byteLength))
+      } as Response)
+
+  it('downloads, validates and imports into an empty store', async () => {
+    const db = makeDb()
+    const result = await importMetaSeedIfEmpty(db, { fetchImpl: fetchOk(seedPayload()) })
+    expect(result).toBe('imported')
+    expect(new MetaRepo(db).latestPatch()).toBe('16.13')
+  })
+
+  it('does nothing when the store already has data', async () => {
+    const db = makeDb()
+    const aggregate = aggregateMatch(baseMatch)
+    if (!aggregate) throw new Error('aggregate null')
+    new MetaRepo(db).applyAggregate(aggregate)
+    let called = false
+    const spy: typeof fetch = () => {
+      called = true
+      return Promise.reject(new Error('should not fetch'))
+    }
+    expect(await importMetaSeedIfEmpty(db, { fetchImpl: spy })).toBe('skipped-not-empty')
+    expect(called).toBe(false)
+  })
+
+  it('offline → unavailable, store stays empty, nothing throws', async () => {
+    const db = makeDb()
+    const offline: typeof fetch = () => Promise.reject(new Error('ENOTFOUND github.com'))
+    expect(await importMetaSeedIfEmpty(db, { fetchImpl: offline })).toBe('unavailable')
+    expect(new MetaRepo(db).latestPatch()).toBeNull()
+  })
+
+  it('malformed payload → invalid, store stays empty', async () => {
+    const db = makeDb()
+    const junk = gzipSync(Buffer.from(JSON.stringify({ version: 2, nope: true })))
+    expect(await importMetaSeedIfEmpty(db, { fetchImpl: fetchOk(junk) })).toBe('invalid')
+    expect(new MetaRepo(db).latestPatch()).toBeNull()
+  })
+})

@@ -1,3 +1,4 @@
+import type { MetaSeed } from '@shared/schemas/meta-seed'
 import type { MetaMatchAggregate } from '../../riot/meta-aggregate'
 import { comparePatchDesc } from '../../staticdata/manager'
 import type { AppDatabase } from '../index'
@@ -115,6 +116,101 @@ export class MetaRepo {
          ORDER BY games DESC LIMIT ?`
       )
       .all(patch, champion, role, limit) as MetaItemStat[]
+  }
+
+  /** The champion's most-played role at Master+ (for role-less lobbies). */
+  topRoleFor(champion: string, patch: string): string | null {
+    const row = this.db
+      .prepare(
+        `SELECT role FROM meta_champion_stats
+         WHERE patch = ? AND champion = ? AND role != ''
+         ORDER BY games DESC LIMIT 1`
+      )
+      .get(patch, champion) as { role: string } | undefined
+    return row?.role ?? null
+  }
+
+  /**
+   * Champion item distribution with ROLE FALLBACK: custom/blind lobbies carry
+   * no assigned position, and a role with no crawl data says nothing — in
+   * both cases fall back to the champion's most-played Master+ role so the
+   * engine never goes silent for lack of a label (owner report 2026-07-07).
+   */
+  itemsFor(
+    champion: string,
+    role: string,
+    patch: string,
+    limit: number
+  ): { role: string; games: number; items: MetaItemStat[] } | null {
+    const direct = role === '' ? null : this.championWinrate(champion, role, patch)
+    let effectiveRole = role
+    let winrate = direct
+    if (winrate === null) {
+      const fallback = this.topRoleFor(champion, patch)
+      if (fallback === null) return null
+      effectiveRole = fallback
+      winrate = this.championWinrate(champion, fallback, patch)
+      if (winrate === null) return null
+    }
+    return {
+      role: effectiveRole,
+      games: winrate.games,
+      items: this.topItems(champion, effectiveRole, patch, limit)
+    }
+  }
+
+  /** Everything needed to seed another install, for the given patch. */
+  exportSeed(patch: string): Omit<MetaSeed, 'version' | 'exportedAt'> {
+    const matchIds = (
+      this.db.prepare('SELECT matchId FROM meta_matches WHERE patch = ?').all(patch) as {
+        matchId: string
+      }[]
+    ).map((row) => row.matchId)
+    const championStats = this.db
+      .prepare('SELECT champion, role, games, wins FROM meta_champion_stats WHERE patch = ?')
+      .all(patch) as MetaSeed['championStats']
+    const matchups = this.db
+      .prepare(
+        'SELECT champion, role, enemyChampion, games, wins FROM meta_matchups WHERE patch = ?'
+      )
+      .all(patch) as MetaSeed['matchups']
+    const items = this.db
+      .prepare('SELECT champion, role, itemId, games, wins FROM meta_champion_items WHERE patch = ?')
+      .all(patch) as MetaSeed['items']
+    return { patch, matchIds, championStats, matchups, items }
+  }
+
+  /**
+   * Imports a seed into an EMPTY meta store (only-empty rule: aggregates
+   * can't be merged with partially-overlapping local crawls without double
+   * counting). The seed's matchIds land in the ledger, so a local crawl
+   * started later skips them cleanly.
+   */
+  importSeed(seed: MetaSeed): boolean {
+    if (this.latestPatch() !== null) return false
+    const mark = this.db.prepare('INSERT OR IGNORE INTO meta_matches (matchId, patch) VALUES (?, ?)')
+    const putStat = this.db.prepare(
+      'INSERT OR REPLACE INTO meta_champion_stats (patch, champion, role, games, wins) VALUES (?, ?, ?, ?, ?)'
+    )
+    const putMatchup = this.db.prepare(
+      'INSERT OR REPLACE INTO meta_matchups (patch, champion, role, enemyChampion, games, wins) VALUES (?, ?, ?, ?, ?, ?)'
+    )
+    const putItem = this.db.prepare(
+      'INSERT OR REPLACE INTO meta_champion_items (patch, champion, role, itemId, games, wins) VALUES (?, ?, ?, ?, ?, ?)'
+    )
+    this.db.transaction(() => {
+      for (const matchId of seed.matchIds) mark.run(matchId, seed.patch)
+      for (const row of seed.championStats) {
+        putStat.run(seed.patch, row.champion, row.role, row.games, row.wins)
+      }
+      for (const row of seed.matchups) {
+        putMatchup.run(seed.patch, row.champion, row.role, row.enemyChampion, row.games, row.wins)
+      }
+      for (const row of seed.items) {
+        putItem.run(seed.patch, row.champion, row.role, row.itemId, row.games, row.wins)
+      }
+    })()
+    return true
   }
 
   /** Aggregated matches per patch (status panel). */

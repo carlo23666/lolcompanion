@@ -156,10 +156,29 @@ export function pickSuggestions(
       const winratePct = (acc.wins / acc.games) * 100
       const metaRole = inferRole(acc.rows)
       // Laplace smoothing: small samples get pulled toward 50%.
-      let score = (acc.wins + 2) / (acc.games + 4)
-      const reasons = [
-        `${winratePct.toFixed(0)}% de victorias en ${String(acc.games)} partidas como ${roleLabel} (tus datos)`
-      ]
+      const ownScore = (acc.wins + 2) / (acc.games + 4)
+
+      // META FIRST (owner request, repeatedly): when the Master+ sample is
+      // real, the Master+ winrate IS the score's base and the owner's own
+      // record only adjusts it (±0.35 max at the extremes). Own data is the
+      // base only while there is no meta sample for the champion+role.
+      const metaStat = meta?.championWinrate(champion, metaRole)
+      const metaBacked = metaStat != null && metaStat.games >= META_MIN_CHAMPION_GAMES
+      let score: number
+      const reasons: string[] = []
+      if (metaBacked) {
+        const metaWr = metaStat.wins / metaStat.games
+        score = metaWr + (ownScore - 0.5) * 0.35
+        reasons.push(
+          `${(metaWr * 100).toFixed(0)}% WR en Master+ este parche (${String(metaStat.games)} partidas) — la base de la sugerencia`,
+          `${winratePct.toFixed(0)}% de victorias en ${String(acc.games)} partidas como ${roleLabel} (tus datos, ajustan)`
+        )
+      } else {
+        score = ownScore
+        reasons.push(
+          `${winratePct.toFixed(0)}% de victorias en ${String(acc.games)} partidas como ${roleLabel} (tus datos — la meta aún no tiene muestra de este campeón)`
+        )
+      }
 
       // Matchup component: own record with this champion AGAINST any of the
       // enemies already visible. Small samples only nudge, never dominate.
@@ -170,22 +189,11 @@ export function pickSuggestions(
         if (versus.length >= 2) {
           const versusWins = versus.filter((row) => row.win).length
           const versusWr = versusWins / versus.length
-          score += (versusWr - 0.5) * 0.25
+          score += (versusWr - 0.5) * 0.15
           reasons.push(
             `contra campeones de esta comp: ${String(versusWins)} de ${String(versus.length)} ganadas`
           )
         }
-      }
-
-      // Master+ aggregate: how the champion performs at the top right now,
-      // and specifically into the visible lane opponents.
-      const metaStat = meta?.championWinrate(champion, metaRole)
-      if (metaStat && metaStat.games >= META_MIN_CHAMPION_GAMES) {
-        const metaWr = metaStat.wins / metaStat.games
-        score += (metaWr - 0.5) * 0.3
-        reasons.push(
-          `${(metaWr * 100).toFixed(0)}% WR en Master+ este parche (${String(metaStat.games)} partidas)`
-        )
       }
       if (meta && enemyChampions.length > 0) {
         let versusGames = 0
