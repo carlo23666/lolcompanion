@@ -11,14 +11,14 @@ import midGameState from '../../../fixtures/gamestate/mid.json'
  * and screenshotable by tooling — without Electron or a running game.
  *
  * URL params: ?phase=idle|champSelect|inGame|postGame (default inGame)
- *             ?theme=recreativa|sakura|cabina (default recreativa)
+ *             ?theme=neon (single identity; legacy ids normalize onto it)
  * Never active in production: main.tsx only loads this when window.api is
  * missing, which cannot happen under the preload.
  */
 
 const params = new URLSearchParams(window.location.search)
 const phase = params.get('phase') ?? 'inGame'
-const theme = params.get('theme') ?? 'recreativa'
+const theme = params.get('theme') ?? 'neon'
 
 const mid = midGameState as unknown as GameState
 

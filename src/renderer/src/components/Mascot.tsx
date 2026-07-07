@@ -22,7 +22,8 @@ const PHRASES: Record<SessionPhase, string[]> = {
 
 /**
  * Active theme id, live: applyTheme() (App.tsx) dispatches 'app-theme' on
- * every change so mascots swap instantly with the identity.
+ * every change. One identity today, but the hook stays — it is the single
+ * place the renderer learns about identity switches.
  */
 export function useTheme(): string {
   const [theme, setTheme] = useState(
@@ -38,50 +39,54 @@ export function useTheme(): string {
   return theme
 }
 
-/** The active identity's mascot/persona name (Bitxo · Kumo · Byte). */
+/** The identity's mascot/persona name. */
 export function useMascotName(): string {
   return mascotNameFor(useTheme())
 }
 
-/* ----- Bitxo (recreativa): pixel axolotl, real 2-frame sprite walk ----- */
+/* ----- Bitxo: pixel axolotl coach, real 2-frame sprite walk ----- */
 
 const BITXO_COLORS: Record<string, string> = {
-  p: '#f7a8c4', // body pink
+  p: '#ffa7c9', // body pink
   d: '#d96a9b', // limbs / outline
-  g: '#ff6b8a', // gills
+  g: '#ff5d8f', // gill fronds (brand pink)
   E: '#2b2140', // eye
-  b: '#fbc6db', // belly
+  w: '#ffffff', // eye shine
+  c: '#ff6b8a', // cheek blush
+  b: '#ffd1e3', // belly
   t: '#e989b1' // tail
 }
 
-// 14×12 cells, side view facing right. Frames differ in legs + tail tip.
+// 16×13 cells, side view facing right. Frames differ in legs + tail flick.
 const BITXO_FRAME_A = [
-  '..............',
-  '..........g.g.',
-  '.........gg...',
-  '....pppppppp..',
-  '..tppppppppp..',
-  '.ttpppppEpppp.',
-  '..tppppppppp..',
-  '...pbbbbbbpp..',
-  '....dd...dd...',
-  '....d.....d...',
-  '..............',
-  '..............'
+  '................',
+  '.............g.g',
+  '............gg.g',
+  '....pppppppppgg.',
+  '..t.ppppppppppp.',
+  '.ttpppppppEwppp.',
+  '.ttpppppppppcp..',
+  '..tppppbbbbbpp..',
+  '...ppbbbbbbbp...',
+  '....dd....dd....',
+  '....d......d....',
+  '................',
+  '................'
 ]
 const BITXO_FRAME_B = [
-  '..............',
-  '..........g.g.',
-  '.........gg...',
-  '....pppppppp..',
-  '.tpppppppppp..',
-  '.tppppppEpppp.',
-  '.ttppppppppp..',
-  '...pbbbbbbpp..',
-  '.....dd..dd...',
-  '......d...d...',
-  '.....d.....d..',
-  '..............'
+  '................',
+  '.............g.g',
+  '..t.........gg.g',
+  '..t.pppppppppgg.',
+  '.ttppppppppppp..',
+  '.tppppppppEwppp.',
+  '..tppppppppppcp.',
+  '...pppppbbbbbp..',
+  '....pbbbbbbbp...',
+  '.....dd...dd....',
+  '......d.....d...',
+  '................',
+  '................'
 ]
 
 function PixelFrame(props: { map: string[]; className: string }): React.JSX.Element {
@@ -107,11 +112,27 @@ function PixelFrame(props: { map: string[]; className: string }): React.JSX.Elem
 
 function BitxoSprite(props: { mood: Mood }): React.JSX.Element {
   return (
-    <svg viewBox="0 0 56 48" style={{ imageRendering: 'pixelated' }} data-mood={props.mood}>
+    <svg viewBox="0 0 64 52" style={{ imageRendering: 'pixelated' }} data-mood={props.mood}>
       <PixelFrame map={BITXO_FRAME_A} className="px-a" />
       <PixelFrame map={BITXO_FRAME_B} className="px-b" />
+      {/* Coach headband when locked in. */}
+      {props.mood === 'focused' && (
+        <g>
+          <rect x="34" y="13" width="26" height="3" fill="#f2c14e" />
+          <rect x="30" y="14" width="5" height="2" fill="#f2c14e" />
+          <rect x="27" y="17" width="4" height="2" fill="#e0a93a" />
+        </g>
+      )}
+      {/* Hype sparkles. */}
+      {props.mood === 'hyped' && (
+        <g fill="#ffd47e">
+          <rect x="24" y="4" width="3" height="3" />
+          <rect x="58" y="24" width="3" height="3" />
+          <rect x="16" y="12" width="2" height="2" />
+        </g>
+      )}
       {props.mood === 'sleepy' && (
-        <text x="44" y="10" fontSize="8" fill="#8188ac">
+        <text x="50" y="10" fontSize="8" fill="#8188ac">
           z
         </text>
       )}
@@ -119,78 +140,16 @@ function BitxoSprite(props: { mood: Mood }): React.JSX.Element {
   )
 }
 
-/* ----- Kumo (sakura): brush-stroke kitsune spirit ----- */
-
-function KumoSprite(props: { mood: Mood }): React.JSX.Element {
-  const closed = props.mood === 'sleepy'
-  return (
-    <svg viewBox="0 0 64 52" data-mood={props.mood}>
-      <path
-        className="kumo-tail"
-        d="M14 38 Q0 42 2 26 Q8 32 14 28 Q12 34 18 36 Z"
-        fill="#f2a7c3"
-      />
-      <ellipse cx="30" cy="36" rx="16" ry="11" fill="#f4efea" />
-      <circle cx="44" cy="26" r="10" fill="#f4efea" />
-      {/* ears with sakura inner */}
-      <path d="M38 19 l-3 -9 7 5 z" fill="#f4efea" />
-      <path d="M39 17.5 l-1.5 -4.5 3.5 2.5 z" fill="#f2a7c3" />
-      <path d="M49 19 l3 -9 -7 5 z" fill="#f4efea" />
-      <path d="M48 17.5 l1.5 -4.5 -3.5 2.5 z" fill="#f2a7c3" />
-      {/* face */}
-      {closed ? (
-        <path d="M45 26 q2 1.5 4 0" stroke="#632840" strokeWidth="1.2" fill="none" />
-      ) : (
-        <g className="hexi-eye">
-          <circle cx="46" cy="25" r="1.6" fill="#632840" />
-        </g>
-      )}
-      <path d="M52 29 q2 0.5 3 2" stroke="#d9b36c" strokeWidth="1.2" fill="none" />
-      {/* gold seal on the haunch */}
-      <circle cx="26" cy="36" r="3.4" fill="none" stroke="#d9b36c" strokeWidth="1" />
-      <path d="M24.5 36 h3 M26 34.5 v3" stroke="#d9b36c" strokeWidth="0.8" />
-    </svg>
-  )
-}
-
-/* ----- Byte (cabina): copilot drone ----- */
-
-function ByteSprite(props: { mood: Mood }): React.JSX.Element {
-  return (
-    <svg viewBox="0 0 64 52" data-mood={props.mood}>
-      <ellipse cx="32" cy="24" rx="17" ry="12" fill="#16292c" stroke="#9bd1e5" strokeWidth="1.6" />
-      {/* visor */}
-      <rect x="21" y="19" width="22" height="9" rx="4.5" fill="#0a1517" stroke="#ffb454" strokeWidth="1" />
-      <rect
-        className="byte-eye"
-        x="24"
-        y="22"
-        width="4"
-        height="3"
-        fill={props.mood === 'sleepy' ? '#587873' : '#ffb454'}
-      />
-      {/* antennae + landing struts */}
-      <path d="M32 12 v-5 m0 0 l3 -2" stroke="#9bd1e5" strokeWidth="1.4" fill="none" />
-      <circle cx="35.5" cy="4.5" r="1.5" fill="#ffb454" />
-      <path d="M17 33 l-5 7 M47 33 l5 7" stroke="#9bd1e5" strokeWidth="1.6" />
-      {/* status lights */}
-      <circle cx="45" cy="30" r="1.3" fill={props.mood === 'hyped' ? '#ffb454' : '#9bd1e5'} />
-    </svg>
-  )
-}
-
 /**
- * The active identity's mascot (SVG, CSS animated): Bitxo the pixel axolotl,
- * Kumo the kitsune spirit or Byte the copilot drone. Exported as HexiSprite
- * so every existing call site keeps working.
+ * Bitxo, the pixel axolotl coach (SVG, CSS-animated frame swap). Exported as
+ * HexiSprite so every existing call site keeps working.
  */
 export function HexiSprite(props: {
   mood: Mood
   alerting?: boolean
   className?: string
 }): React.JSX.Element {
-  const theme = useTheme()
-  const name = mascotNameFor(theme)
+  const name = useMascotName()
   const alerting = props.alerting ?? false
   const mood = alerting ? 'hyped' : props.mood
   return (
@@ -200,13 +159,7 @@ export function HexiSprite(props: {
       className={`hexi inline-block ${props.className ?? 'h-16 w-16'} ${alerting ? 'gold-pulse' : ''}`}
       data-mood={mood}
     >
-      {theme === 'sakura' ? (
-        <KumoSprite mood={mood} />
-      ) : theme === 'cabina' ? (
-        <ByteSprite mood={mood} />
-      ) : (
-        <BitxoSprite mood={mood} />
-      )}
+      <BitxoSprite mood={mood} />
     </span>
   )
 }
@@ -245,10 +198,10 @@ export default function Mascot(props: {
   }, [props.reactKey])
 
   return (
-    <div className="relative flex items-center gap-2" aria-hidden>
-      <HexiSprite mood={mood} alerting={alerting} className="h-10 w-10" />
+    <div className="neon-dock relative flex items-center gap-2" aria-hidden>
+      <HexiSprite mood={mood} alerting={alerting} className="h-14 w-14" />
       {bubble !== null && (
-        <div className="alert-in absolute top-full right-0 z-50 mt-1 w-max max-w-44 rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-center text-[10px] text-slate-300 shadow-lg">
+        <div className="pixel-bubble alert-in absolute bottom-full left-1/2 z-50 mb-1.5 w-max max-w-44 -translate-x-1/2 rounded-lg border border-indigo-800/70 bg-slate-900 px-2 py-1.5 text-center text-slate-300 shadow-lg">
           {bubble}
         </div>
       )}

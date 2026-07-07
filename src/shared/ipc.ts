@@ -35,7 +35,7 @@ export interface AppSettings {
   soundCategories: { recommendation: boolean; spike: boolean; objective: boolean }
   /** Experimental in-game overlay window (shows while inGame). */
   overlayEnabled: boolean
-  /** Color scheme id: 'hextech' (default), 'void' or 'noche'. */
+  /** Identity id ('neon'); legacy ids normalize onto it. */
   theme: string
   /** Whether a Riot API key is configured (env or stored). The key itself never crosses IPC. */
   apiKeySet: boolean

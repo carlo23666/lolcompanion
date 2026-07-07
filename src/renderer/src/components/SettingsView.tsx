@@ -559,7 +559,8 @@ export default function SettingsView(): React.JSX.Element {
             Overlay in-game con la mascota (experimental — requiere LoL en ventana o sin
             bordes; se activa al entrar en partida)
           </label>
-          <fieldset className="text-xs text-slate-400">
+          {/* Single identity today — the picker reappears if THEMES grows. */}
+          <fieldset className="text-xs text-slate-400" hidden={THEMES.length < 2}>
             <legend className="mb-1">Tema</legend>
             <div className="flex gap-2">
               {THEMES.map((option) => (
@@ -590,10 +591,7 @@ export default function SettingsView(): React.JSX.Element {
             >
               Guardar
             </button>
-            <button
-              className="rounded bg-indigo-700 px-3 py-1.5 text-sm hover:bg-indigo-600"
-              onClick={() => void sync()}
-            >
+            <button className="btn-glow rounded-md px-3 py-1.5 text-sm" onClick={() => void sync()}>
               Sincronizar historial
             </button>
           </div>

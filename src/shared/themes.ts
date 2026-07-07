@@ -1,8 +1,9 @@
 /**
- * The app's three visual identities. Each is a FULL identity: palette,
- * typography, corner/panel language (all CSS-var driven in main.css) and its
- * own mascot. Single source of truth for renderer AND main (the coach's
- * persona name follows the active theme).
+ * The app's single visual identity: "Neón Grieta" — void-navy esports base,
+ * Bitxo-pink brand glow + coin gold, phase-reactive rift aurora. Palette,
+ * typography and illumination live in main.css; this module is the source of
+ * truth for the identity id and the mascot/persona name used by renderer AND
+ * main (the coach speaks as the mascot).
  */
 export interface AppTheme {
   id: string
@@ -14,32 +15,23 @@ export interface AppTheme {
 
 export const THEMES: AppTheme[] = [
   {
-    id: 'recreativa',
-    label: 'Recreativa',
-    hint: 'azul pizarra · dorado + teal · mascota Bitxo (ajolote píxel)',
+    id: 'neon',
+    label: 'Neón Grieta',
+    hint: 'azul vacío · rosa Bitxo + oro · mascota Bitxo (ajolote píxel)',
     mascot: 'Bitxo'
-  },
-  {
-    id: 'sakura',
-    label: 'Sakura',
-    hint: 'índigo tinta · rosa + oro · mascota Kumo (kitsune)',
-    mascot: 'Kumo'
-  },
-  {
-    id: 'cabina',
-    label: 'Cabina',
-    hint: 'verde abisal · ámbar + hielo · mascota Byte (dron)',
-    mascot: 'Byte'
   }
 ]
 
-export const DEFAULT_THEME = 'recreativa'
+export const DEFAULT_THEME = 'neon'
 
-/** Pre-1.1 themes map onto the closest new identity. */
+/** Every pre-2.0 theme collapses onto the one identity. */
 const LEGACY_THEME_MAP: Record<string, string> = {
-  hextech: 'recreativa',
-  void: 'sakura',
-  noche: 'cabina'
+  hextech: 'neon',
+  void: 'neon',
+  noche: 'neon',
+  recreativa: 'neon',
+  sakura: 'neon',
+  cabina: 'neon'
 }
 
 export function normalizeTheme(theme: string | null | undefined): string {

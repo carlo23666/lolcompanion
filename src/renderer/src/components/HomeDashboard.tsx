@@ -94,7 +94,7 @@ export default function HomeDashboard(props: {
           </p>
         </div>
         <button
-          className="rounded bg-indigo-700 px-5 py-2 text-sm font-semibold hover:bg-indigo-600"
+          className="btn-glow rounded-md px-5 py-2 text-sm"
           onClick={props.onOpenSettings}
         >
           Empezar en Ajustes

@@ -1,5 +1,26 @@
 @import 'tailwindcss';
 
+/* Display face: Chakra Petch (OFL, vendored) — squared esports type for the
+ * wordmark, nav, headings, buttons and HUD numerals. */
+@font-face {
+  font-family: 'Chakra Petch';
+  src: url('./fonts/chakra-petch-500.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Chakra Petch';
+  src: url('./fonts/chakra-petch-600.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Chakra Petch';
+  src: url('./fonts/chakra-petch-700.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+/* Arcade wink: ONLY the mascot's speech bubbles speak pixel. */
 @font-face {
   font-family: 'Press Start 2P';
   src: url('./fonts/press-start-2p.woff2') format('woff2');
@@ -7,97 +28,103 @@
 }
 
 /*
- * ONE professional design system (benchmark: Blitz / U.GG / Discord):
- * flat tinted surfaces, a single gold accent + a cool secondary, quiet
- * controls, unified radii, high data density. The three identities are
- * ACCENT + SURFACE TINT + MASCOT variations over this base — never a
- * different chrome. Default: 'recreativa'.
+ * ONE identity: "Neón Grieta". Blitz-grade dark esports base — void-navy
+ * surfaces, Bitxo-pink brand glow (mapped onto the indigo-* scale so every
+ * component keeps its class names) and coin gold for economy/hero accents.
+ * Illumination is ambient and phase-reactive (see the aurora below).
  */
 @theme {
-  /* — Recreativa: cool blue-slate surfaces, coin gold, CRT teal. — */
-  --color-slate-950: #0d0f14; /* page */
-  --color-slate-900: #13161d; /* card */
-  --color-slate-800: #1b1f28; /* well / input */
-  --color-slate-700: #2a2f3b; /* raised border */
-  --color-slate-600: #454c5c;
-  --color-slate-500: #6a7284;
-  --color-slate-400: #949cae;
-  --color-slate-300: #c4cad6;
-  --color-slate-200: #dee2ea;
-  --color-slate-100: #f2f4f8;
-  --color-amber-300: #f2c877; /* accent bright */
-  --color-amber-400: #e8b45a; /* accent */
-  --color-indigo-300: #6fd8c6; /* secondary (teal) */
-  --color-indigo-500: #35c0ab;
-  --color-indigo-600: #279b8a;
-  --color-indigo-700: #1e776b;
-  --color-indigo-800: #174f48;
-  /* Unified corner language — identical in every identity. */
+  --color-slate-950: #0a0e1c; /* page (void navy) */
+  --color-slate-900: #111629; /* card */
+  --color-slate-800: #19203a; /* well / input */
+  --color-slate-700: #293355; /* raised border */
+  --color-slate-600: #43507e;
+  --color-slate-500: #67739c;
+  --color-slate-400: #939dc0;
+  --color-slate-300: #c2c9e0;
+  --color-slate-200: #dde1f1;
+  --color-slate-100: #f2f4fb;
+  --color-amber-300: #ffd47e; /* coin gold bright */
+  --color-amber-400: #f2c14e; /* coin gold */
+  --color-indigo-300: #ff9dbe; /* Bitxo pink bright */
+  --color-indigo-500: #ff5d8f; /* Bitxo pink — THE brand color */
+  --color-indigo-600: #e04a7b;
+  --color-indigo-700: #ad3a62;
+  --color-indigo-800: #672646;
+  /* Unified corner language. */
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 10px;
   --radius-xl: 12px;
   --radius-2xl: 16px;
+  /* font-display utility (also emitted as --font-display for inline use). */
+  --font-display: 'Chakra Petch', 'Bahnschrift', 'Segoe UI', sans-serif;
 }
 
 :root {
   color-scheme: dark;
-  /* Brand-only display face (Shell logo); content is always the sans stack. */
-  --font-display: 'Press Start 2P', ui-monospace, monospace;
+  --font-pixel: 'Press Start 2P', ui-monospace, monospace;
+  /* Rift aurora (phase-reactive illumination): idle = dim ember. */
+  --aura-a: color-mix(in srgb, var(--color-indigo-500) 7%, transparent);
+  --aura-b: color-mix(in srgb, var(--color-amber-400) 4%, transparent);
+  --aura-c: color-mix(in srgb, #4a6cff 7%, transparent);
+  --aura-o: 0.75;
 }
-
-html[data-theme='sakura'] {
-  --color-slate-950: #100e16;
-  --color-slate-900: #16131f;
-  --color-slate-800: #1f1b2b;
-  --color-slate-700: #2e2840;
-  --color-slate-600: #4a4361;
-  --color-slate-500: #6f688a;
-  --color-slate-400: #9992b2;
-  --color-slate-300: #c7c2d9;
-  --color-slate-200: #e0dcec;
-  --color-slate-100: #f4f2f9;
-  --color-amber-300: #e6c584; /* gold seal */
-  --color-amber-400: #d9b36c;
-  --color-indigo-300: #ec9fbe; /* sakura pink */
-  --color-indigo-500: #d8709b;
-  --color-indigo-600: #c05a84;
-  --color-indigo-700: #944061;
-  --color-indigo-800: #633046;
-  --font-display: 'Yu Gothic UI', 'Meiryo UI', 'Segoe UI', sans-serif;
+html[data-phase='clientOpen'] {
+  --aura-a: color-mix(in srgb, var(--color-indigo-500) 10%, transparent);
+  --aura-b: color-mix(in srgb, var(--color-amber-400) 6%, transparent);
+  --aura-o: 0.9;
 }
-
-html[data-theme='cabina'] {
-  --color-slate-950: #0c1213;
-  --color-slate-900: #111819;
-  --color-slate-800: #182122;
-  --color-slate-700: #263233;
-  --color-slate-600: #3e4f50;
-  --color-slate-500: #617374;
-  --color-slate-400: #8da0a0;
-  --color-slate-300: #c0cccc;
-  --color-slate-200: #dce4e4;
-  --color-slate-100: #f0f5f5;
-  --color-amber-300: #f7c078; /* instrument amber */
-  --color-amber-400: #f0ab4f;
-  --color-indigo-300: #8ecbe0; /* ice blue */
-  --color-indigo-500: #58a5c4;
-  --color-indigo-600: #4589a5;
-  --color-indigo-700: #34687e;
-  --color-indigo-800: #264a5a;
-  --font-display: 'Cascadia Code', 'Consolas', ui-monospace, monospace;
+html[data-phase='champSelect'] {
+  --aura-a: color-mix(in srgb, var(--color-amber-400) 13%, transparent);
+  --aura-b: color-mix(in srgb, var(--color-indigo-500) 9%, transparent);
+  --aura-o: 1;
+}
+html[data-phase='inGame'] {
+  --aura-a: color-mix(in srgb, var(--color-indigo-500) 15%, transparent);
+  --aura-b: color-mix(in srgb, var(--color-amber-400) 8%, transparent);
+  --aura-c: color-mix(in srgb, #4a6cff 10%, transparent);
+  --aura-o: 1;
+}
+html[data-phase='postGame'] {
+  --aura-a: color-mix(in srgb, var(--color-amber-400) 10%, transparent);
+  --aura-b: color-mix(in srgb, var(--color-indigo-500) 7%, transparent);
+  --aura-o: 0.9;
 }
 
 body {
   @apply bg-slate-950 text-slate-100 antialiased;
-  /* One quiet ambient tint at the top — no textures, no patterns. */
-  background-image: radial-gradient(
-    ellipse 70% 40% at 50% -10%,
-    color-mix(in srgb, var(--color-indigo-500) 7%, transparent),
-    transparent
-  );
-  background-attachment: fixed;
+}
+
+/* The signature: a slow-breathing rift aurora behind everything. Its hue and
+ * intensity follow the session phase — the app literally lights up when the
+ * player steps into the Rift. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -22%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(42% 36% at 16% 6%, var(--aura-a), transparent 72%),
+    radial-gradient(40% 32% at 86% 92%, var(--aura-b), transparent 72%),
+    radial-gradient(30% 26% at 74% 12%, var(--aura-c), transparent 70%);
+  opacity: var(--aura-o);
+  animation: aurora-drift 46s ease-in-out infinite alternate;
+  transition: opacity 1200ms ease;
+}
+
+/* Headings speak the display face everywhere — one rule, whole-app voice. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: 0.015em;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-indigo-500) 45%, transparent);
 }
 
 /* Themed scrollbars */
@@ -113,43 +140,184 @@ body {
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-slate-600);
+  background: color-mix(in srgb, var(--color-indigo-500) 40%, var(--color-slate-700));
 }
 
-/* Quiet, tactile controls — utilities own colors; this owns the feel. */
+/* Controls: display voice, tactile press, illuminated focus. Utilities own
+ * the colors; this owns the feel. */
 button {
+  font-family: var(--font-display);
+  font-weight: 500;
   transition:
     background-color 120ms ease-out,
     color 120ms ease-out,
     border-color 120ms ease-out,
+    box-shadow 160ms ease-out,
+    filter 120ms ease-out,
     transform 80ms ease-out;
 }
+button:hover {
+  filter: brightness(1.08);
+}
 button:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+  filter: brightness(0.96);
+}
+:focus-visible {
+  outline: 2px solid var(--color-indigo-500);
+  outline-offset: 2px;
 }
 input[type='text'],
 input[type='password'],
 select,
 input[type='range'] {
-  transition: border-color 120ms ease-out;
+  transition:
+    border-color 120ms ease-out,
+    box-shadow 160ms ease-out;
 }
 input[type='text']:focus,
 input[type='password']:focus,
 select:focus {
   outline: none;
-  border-color: var(--color-amber-400);
+  border-color: var(--color-indigo-500);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-indigo-500) 22%, transparent);
 }
 
-/* Hero panel: the one place the accent frames content. */
+/* Brand wordmark: gold→pink gradient text with a faint neon halo. */
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  background: linear-gradient(92deg, var(--color-amber-300), var(--color-indigo-500) 85%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--color-indigo-500) 35%, transparent));
+}
+
+/* Primary CTA: pink energy, sheen sweep on hover. */
+.btn-glow {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-indigo-500), var(--color-indigo-600));
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--color-indigo-500) 30%, transparent);
+}
+.btn-glow:hover {
+  box-shadow: 0 0 26px color-mix(in srgb, var(--color-indigo-500) 50%, transparent);
+}
+.btn-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgb(255 255 255 / 35%) 50%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+}
+.btn-glow:hover::after {
+  animation: sheen 700ms ease-out;
+}
+
+/* Hero panel: the one card framed in energy — gradient border + breathing
+ * glow. Wins over utility background-color because it is unlayered. */
 .hex-card {
-  border: 1px solid color-mix(in srgb, var(--color-amber-400) 45%, transparent);
+  border: 1px solid transparent;
   border-radius: var(--radius-lg);
+  background:
+    linear-gradient(var(--color-slate-900), var(--color-slate-900)) padding-box,
+    linear-gradient(
+        140deg,
+        color-mix(in srgb, var(--color-amber-400) 65%, transparent),
+        color-mix(in srgb, var(--color-indigo-500) 55%, transparent) 55%,
+        color-mix(in srgb, var(--color-amber-400) 30%, transparent)
+      )
+      border-box;
+  animation: hero-breath 4.2s ease-in-out infinite;
 }
 .energy-border {
   position: relative;
 }
 
+/* Mascot dock (sidebar): Bitxo stands on a neon light pool. */
+.neon-dock {
+  position: relative;
+}
+.neon-dock::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 74px;
+  height: 16px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    color-mix(in srgb, var(--color-indigo-500) 45%, transparent),
+    transparent 70%
+  );
+  filter: blur(3px);
+  animation: dock-pulse 3.2s ease-in-out infinite;
+}
+
+/* HUD numerals that matter glow. */
+.stat-glow {
+  text-shadow: 0 0 14px color-mix(in srgb, currentColor 55%, transparent);
+}
+
+/* Mascot speech bubble: tiny pixel voice. */
+.pixel-bubble {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  line-height: 1.7;
+}
+
 /* ---------- animations ---------- */
+
+@keyframes aurora-drift {
+  from {
+    transform: translate3d(-2.5%, -1.5%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(2.5%, 2%, 0) scale(1.07);
+  }
+}
+
+@keyframes hero-breath {
+  0%,
+  100% {
+    box-shadow: 0 0 18px color-mix(in srgb, var(--color-indigo-500) 10%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 30px color-mix(in srgb, var(--color-indigo-500) 22%, transparent);
+  }
+}
+
+@keyframes sheen {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes dock-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: translateX(-50%) scaleX(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1.12);
+  }
+}
 
 @keyframes card-in {
   from {
@@ -220,6 +388,16 @@ select:focus {
   }
 }
 
+@keyframes dot-ping {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 45%, transparent);
+  }
+  60% {
+    box-shadow: 0 0 0 4px transparent;
+  }
+}
+
 .card-in {
   animation: card-in 240ms ease-out both;
 }
@@ -230,6 +408,10 @@ select:focus {
 
 .alert-in {
   animation: alert-in 200ms ease-out both;
+}
+
+.dot-ping {
+  animation: dot-ping 2.2s ease-out infinite;
 }
 
 /* Live objective chip breathing while the objective is up. */
@@ -277,9 +459,8 @@ select:focus {
   animation: hexi-walk-out 1200ms ease-in both;
 }
 
-/* ---------- mascot sprite cycles (per identity) ---------- */
+/* ---------- Bitxo sprite: true 2-frame pixel walk (steps(1)) ---------- */
 
-/* Bitxo (recreativa): true 2-frame pixel sprite walk (steps(1)). */
 @keyframes px-frame-a {
   0%,
   49.9% {
@@ -318,41 +499,6 @@ select:focus {
   opacity: 0;
 }
 
-/* Kumo (sakura): swaying brush tail. */
-@keyframes tail-sway {
-  0%,
-  100% {
-    transform: rotate(-8deg);
-  }
-  50% {
-    transform: rotate(10deg);
-  }
-}
-.kumo-tail {
-  transform-origin: 80% 80%;
-  animation: tail-sway 1.6s ease-in-out infinite;
-}
-.hexi[data-mood='hyped'] .kumo-tail {
-  animation-duration: 0.5s;
-}
-
-/* Byte (cabina): scanning visor light. */
-@keyframes visor-scan {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(10px);
-  }
-}
-.byte-eye {
-  animation: visor-scan 2.2s ease-in-out infinite;
-}
-.hexi[data-mood='hyped'] .byte-eye {
-  animation-duration: 0.6s;
-}
-
 /* ---------- mascot (shared float/bob) ---------- */
 
 .hexi {
@@ -382,18 +528,21 @@ select:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  body::before,
+  .hex-card,
+  .neon-dock::after,
+  .btn-glow::after,
   .card-in,
   .gold-pulse,
   .alert-in,
+  .dot-ping,
   .hexi,
   .hexi .hexi-eye,
   .objective-live,
   .hexi-walk-in,
   .hexi-walk-out,
   .px-a,
-  .px-b,
-  .kumo-tail,
-  .byte-eye {
+  .px-b {
     animation: none;
   }
 }

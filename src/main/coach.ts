@@ -17,7 +17,7 @@ export const DEFAULT_COACH_MODEL = 'gemma3:4b'
 /**
  * The mascot's voice, shared by every prompt. Gamer/geek registers well with
  * the owner; the champion in the data is always THE PLAYER — second person
- * only. The name follows the active identity (Bitxo · Kumo · Byte).
+ * only. The name follows the active identity (Bitxo).
  */
 export function buildPersona(name: string): string {
   return [

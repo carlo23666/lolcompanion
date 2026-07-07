@@ -109,7 +109,7 @@ function InGameLayout(props: {
         {label}
       </span>
       <span
-        className={`text-xl leading-tight font-semibold ${accent ? 'text-amber-300' : 'text-slate-100'}`}
+        className={`font-display text-xl leading-tight font-semibold ${accent ? 'stat-glow text-amber-300' : 'text-slate-100'}`}
         style={{ fontVariantNumeric: 'tabular-nums' }}
       >
         {value}
@@ -122,7 +122,7 @@ function InGameLayout(props: {
         <img
           src={`ddicon://champion/${gameState.self.championId}.png`}
           alt={gameState.self.championName}
-          className="h-10 w-10 rounded border border-amber-400/40"
+          className="h-10 w-10 rounded border border-amber-400/40 shadow-[0_0_10px_-2px_var(--color-amber-400)]"
         />
         <div>
           <p className="text-sm leading-tight font-semibold text-slate-100">

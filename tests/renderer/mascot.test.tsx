@@ -6,19 +6,28 @@ function ThemeProbe(): React.JSX.Element {
   return <span data-testid="theme">{useTheme()}</span>
 }
 
-describe('Mascot (per-theme sprite)', () => {
-  it('mood follows the session phase (default: Bitxo, recreativa)', () => {
+describe('Mascot (Bitxo)', () => {
+  it('mood follows the session phase', () => {
     const { rerender } = render(<Mascot phase="idle" />)
-    expect(screen.getByRole('img', { name: /Bitxo/, hidden: true })).toHaveAttribute('data-mood', 'sleepy')
+    expect(screen.getByRole('img', { name: /Bitxo/, hidden: true })).toHaveAttribute(
+      'data-mood',
+      'sleepy'
+    )
 
     rerender(<Mascot phase="champSelect" />)
-    expect(screen.getByRole('img', { name: /Bitxo/, hidden: true })).toHaveAttribute('data-mood', 'hyped')
+    expect(screen.getByRole('img', { name: /Bitxo/, hidden: true })).toHaveAttribute(
+      'data-mood',
+      'hyped'
+    )
 
     rerender(<Mascot phase="inGame" />)
-    expect(screen.getByRole('img', { name: /Bitxo/, hidden: true })).toHaveAttribute('data-mood', 'focused')
+    expect(screen.getByRole('img', { name: /Bitxo/, hidden: true })).toHaveAttribute(
+      'data-mood',
+      'focused'
+    )
   })
 
-  it('the mascot swaps live with the theme (Kumo on sakura, Byte on cabina)', () => {
+  it('legacy theme ids normalize onto the single identity (Bitxo stays)', () => {
     render(
       <>
         <Mascot phase="idle" />
@@ -28,13 +37,8 @@ describe('Mascot (per-theme sprite)', () => {
     act(() => {
       window.dispatchEvent(new CustomEvent('app-theme', { detail: 'sakura' }))
     })
-    expect(screen.getByTestId('theme').textContent).toBe('sakura')
-    expect(screen.getByRole('img', { name: /Kumo/, hidden: true })).toBeInTheDocument()
-
-    act(() => {
-      window.dispatchEvent(new CustomEvent('app-theme', { detail: 'cabina' }))
-    })
-    expect(screen.getByRole('img', { name: /Byte/, hidden: true })).toBeInTheDocument()
+    expect(screen.getByTestId('theme').textContent).toBe('neon')
+    expect(screen.getByRole('img', { name: /Bitxo/, hidden: true })).toBeInTheDocument()
   })
 
   it('shows a speech bubble on phase change', () => {
