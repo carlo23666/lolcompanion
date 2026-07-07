@@ -1,7 +1,22 @@
+import { appendFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { app, dialog } from 'electron'
 import { autoUpdater } from 'electron-updater'
 
 const CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000 // every 4h while the app stays open
+
+/** Packaged main-process stdout goes nowhere on Windows — the updater keeps
+ * its own trace at <userData>/updater.log so failures are diagnosable. */
+function makeFileLog(): (message: string) => void {
+  const logFile = join(app.getPath('userData'), 'updater.log')
+  return (message: string): void => {
+    try {
+      appendFileSync(logFile, `${new Date().toISOString()} ${message}\n`)
+    } catch {
+      // Logging must never break the app.
+    }
+  }
+}
 
 /**
  * Auto-update against the latest GitHub release (electron-updater): checks on
@@ -10,8 +25,24 @@ const CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000 // every 4h while the app stays ope
  * can postpone; the update also applies on next quit automatically.
  * Dev builds skip everything (no feed, no noise).
  */
-export function startAutoUpdater(log: (message: string) => void): void {
+export function startAutoUpdater(consoleLog: (message: string) => void): void {
   if (!app.isPackaged) return
+
+  const fileLog = makeFileLog()
+  const log = (message: string): void => {
+    consoleLog(message)
+    fileLog(message)
+  }
+  // Full internal trace (feed URLs, version compare, download progress).
+  const traced = (level: string) => (message: unknown) => {
+    fileLog(`[${level}] ${typeof message === 'string' ? message : JSON.stringify(message)}`)
+  }
+  autoUpdater.logger = {
+    info: traced('info'),
+    warn: traced('warn'),
+    error: traced('error'),
+    debug: traced('debug')
+  }
 
   autoUpdater.autoDownload = true
   autoUpdater.autoInstallOnAppQuit = true
