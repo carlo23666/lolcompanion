@@ -1,7 +1,12 @@
 import { appendFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { app, dialog } from 'electron'
-import { autoUpdater } from 'electron-updater'
+// electron-updater is CJS with getter-defined exports: a NAMED import from
+// the ESM main bundle throws at startup ("does not provide an export named
+// 'autoUpdater'") — the default-import interop is the only safe path.
+import updaterPackage from 'electron-updater'
+
+const { autoUpdater } = updaterPackage
 
 const CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000 // every 4h while the app stays open
 
