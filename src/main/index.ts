@@ -115,6 +115,21 @@ function registerIpcHandlers(db: AppDatabase): void {
   })
 }
 
+// Single instance: a second launch would open the same SQLite file and die
+// with a lock error ("A JavaScript error occurred…"). Instead, hand over to
+// the running instance and bring its window to the front.
+if (!app.requestSingleInstanceLock()) {
+  app.quit()
+}
+app.on('second-instance', () => {
+  const win = BrowserWindow.getAllWindows().find((candidate) => !candidate.isDestroyed())
+  if (win) {
+    if (win.isMinimized()) win.restore()
+    win.show()
+    win.focus()
+  }
+})
+
 void app.whenReady().then(() => {
   // No File/Edit/View bar — the app is a single-window dashboard.
   Menu.setApplicationMenu(null)

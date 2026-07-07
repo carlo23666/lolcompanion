@@ -1,6 +1,10 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-07 (18) — Single-instance lock (owner hit "JavaScript error" on open)
+**Done (check green, 327):** launching a second copy opened the same SQLite file and crashed with the main-process JS error dialog (reproduced: three stacked instances after the release day's repeated launches). `app.requestSingleInstanceLock()` now quits the newcomer and `second-instance` restores/focuses the running window — double-clicking the icon while the app lives in the tray/background just brings it forward. Shipped as v1.4.1, which doubles as the first real-world auto-updater test (1.4.0 installs should offer it on next start).
+**Files:** src/main/index.ts.
+
 ## 2026-07-07 (17) — Auto-update from GitHub releases (owner request)
 **Done (check green, 327):** `electron-updater` (NEW dependency — the standard electron-builder companion; zero-cost: the feed is the latest GitHub release) wired in `src/main/updater.ts`: packaged builds check on startup + every 4h, auto-download, Spanish dialog offers "Reiniciar ahora / Luego", and `autoInstallOnAppQuit` applies postponed updates on close. Dev builds skip entirely. `electron-builder.yml` gains the `publish: github` block so builds emit `latest.yml` + `.blockmap` — **every release from now on must upload `latest.yml`, the `.blockmap`, the setup exe and `meta-seed.json.gz`** (release-workflow updated). Settings/history/API key already survive updates (userData + `deleteAppDataOnUninstall: false`) — confirmed across 1.0.1→1.3.0 upgrades. INSTALAR.md tells friends the 1.4.0+ app updates itself.
 **Notes:** app is unsigned — electron-updater installs fine without a signature (no `publisherName` verification configured); revisit if code signing ever lands.
