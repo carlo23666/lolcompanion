@@ -208,10 +208,11 @@ function InGameLayout(props: {
           {insightsRow}
         </div>
         <div className="flex flex-col gap-3">
+          {/* Time-critical first: objective timers lead the instruments. */}
+          {objectives}
           {allies}
           {enemies}
           {gauges}
-          {objectives}
         </div>
       </div>
     </div>
@@ -227,6 +228,7 @@ export default function LiveView(props: {
   championMeta?: Record<number, ChampionMeta>
   insights?: LiveInsightsData
   onOpenSettings?: () => void
+  onOpenHistory?: () => void
 }): React.JSX.Element {
   const { phase, gameState } = props
   const curve = usePersonalCurve(gameState)
@@ -245,6 +247,14 @@ export default function LiveView(props: {
         <div className="flex flex-1 flex-col items-center justify-center gap-3">
           <p className="text-sm font-medium text-slate-300">🏁 Fin de la partida</p>
           <PostGameReport />
+          {props.onOpenHistory && (
+            <button
+              className="rounded border border-slate-700 bg-slate-800 px-4 py-1.5 text-xs text-slate-300 hover:border-indigo-500/60 hover:text-slate-100"
+              onClick={props.onOpenHistory}
+            >
+              Ver en historial — compara con tus otras partidas
+            </button>
+          )}
         </div>
       )}
       {phase === 'champSelect' && (

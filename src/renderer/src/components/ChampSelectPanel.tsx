@@ -169,6 +169,65 @@ export default function ChampSelectPanel(props: {
     }
   }, [cs])
 
+  // Locked pick? The screen's job flips from "elegir" (suggestions lead) to
+  // "preparar" (your plan + the anti-comp buy plan lead, suggestions leave).
+  const picked = (own?.championId ?? 0) > 0
+
+  const tipsSection =
+    insights !== null && insights.tips.length > 0 ? (
+      <div className="rounded border border-slate-800 bg-slate-950/60 p-2.5">
+        <p className="mb-2 text-[10px] font-semibold tracking-widest text-slate-400 uppercase">
+          Plan de compra contra esta comp
+        </p>
+        <ul className="space-y-1.5">
+          {insights.tips.map((tip, index) => (
+            <li key={index} className="alert-in text-xs leading-snug text-slate-300">
+              💡 {tip}
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : null
+
+  const planSection = insights?.ownPlan ? (
+    <div
+      className={`rounded border bg-slate-950/60 p-2 ${
+        picked ? 'border-amber-400/50' : 'border-amber-400/20'
+      }`}
+    >
+      <p className="mb-1 text-[11px] font-semibold text-amber-300">
+        Tu plan con {ownMeta?.name ?? insights.ownPlan.championId} (de tus propias partidas)
+      </p>
+      <div className="flex flex-wrap items-center gap-1.5">
+        {insights.ownPlan.core.map((item, index) => (
+          <span key={item.id} className="flex items-center gap-1 text-xs text-slate-300">
+            {index > 0 && <span className="text-slate-600">→</span>}
+            <img
+              src={`ddicon://item/${String(item.id)}.png`}
+              alt={item.name}
+              title={item.name}
+              className={picked ? 'h-9 w-9 rounded border border-slate-700' : 'h-7 w-7 rounded border border-slate-700'}
+            />
+          </span>
+        ))}
+        {insights.ownPlan.situational.length > 0 && (
+          <>
+            <span className="mx-1 text-[10px] text-slate-500">situacionales:</span>
+            {insights.ownPlan.situational.map((item) => (
+              <img
+                key={item.id}
+                src={`ddicon://item/${String(item.id)}.png`}
+                alt={item.name}
+                title={item.name}
+                className="h-6 w-6 rounded border border-slate-800 opacity-80"
+              />
+            ))}
+          </>
+        )}
+      </div>
+    </div>
+  ) : null
+
   if (!cs) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-2 py-16 text-center">
@@ -260,8 +319,12 @@ export default function ChampSelectPanel(props: {
           )}
         </div>
 
+        {/* Post-lock: preparation leads. */}
+        {picked && planSection}
+        {picked && tipsSection}
+
         <div className="grid grid-cols-1 items-start gap-3 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        {insights !== null && insights.picks.length > 0 && (
+        {!picked && insights !== null && insights.picks.length > 0 && (
           <div className="rounded border border-indigo-500/30 bg-slate-950/60 p-2.5">
             <p className="mb-2 text-[10px] font-semibold tracking-widest text-indigo-300 uppercase">
               ¿Qué te pego? · tus partidas + Master+ + kit
@@ -315,57 +378,11 @@ export default function ChampSelectPanel(props: {
           </div>
         )}
 
-        {insights !== null && insights.tips.length > 0 && (
-          <div className="rounded border border-slate-800 bg-slate-950/60 p-2.5">
-            <p className="mb-2 text-[10px] font-semibold tracking-widest text-slate-400 uppercase">
-              Plan de compra contra esta comp
-            </p>
-            <ul className="space-y-1.5">
-              {insights.tips.map((tip, index) => (
-                <li key={index} className="alert-in text-xs leading-snug text-slate-300">
-                  💡 {tip}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {!picked && tipsSection}
         </div>
 
-        {insights?.ownPlan && (
-          <div className="rounded border border-amber-400/20 bg-slate-950/60 p-2">
-            <p className="mb-1 text-[11px] font-semibold text-amber-300">
-              Tu plan con {ownMeta?.name ?? insights.ownPlan.championId} (de tus propias
-              partidas)
-            </p>
-            <div className="flex flex-wrap items-center gap-1.5">
-              {insights.ownPlan.core.map((item, index) => (
-                <span key={item.id} className="flex items-center gap-1 text-xs text-slate-300">
-                  {index > 0 && <span className="text-slate-600">→</span>}
-                  <img
-                    src={`ddicon://item/${String(item.id)}.png`}
-                    alt={item.name}
-                    title={item.name}
-                    className="h-7 w-7 rounded border border-slate-700"
-                  />
-                </span>
-              ))}
-              {insights.ownPlan.situational.length > 0 && (
-                <>
-                  <span className="mx-1 text-[10px] text-slate-500">situacionales:</span>
-                  {insights.ownPlan.situational.map((item) => (
-                    <img
-                      key={item.id}
-                      src={`ddicon://item/${String(item.id)}.png`}
-                      alt={item.name}
-                      title={item.name}
-                      className="h-6 w-6 rounded border border-slate-800 opacity-80"
-                    />
-                  ))}
-                </>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Pre-lock: the plan tags along under the suggestions. */}
+        {!picked && planSection}
 
         {insights !== null && (insights.picks.length > 0 || insights.tips.length > 0) && (
           <CoachDraft insights={insights} />

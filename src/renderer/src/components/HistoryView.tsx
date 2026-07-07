@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { HistoryAggregate, HistoryDetail, HistoryRow } from '@shared/history'
 import type { PostGameReportResult } from '@shared/report'
 import { ReportCard } from './PostGameReport'
@@ -12,6 +12,83 @@ function formatDuration(totalSeconds: number): string {
 
 function formatDate(epochMs: number): string {
   return new Date(epochMs).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+}
+
+const ROLE_LABEL: Record<string, string> = {
+  TOP: 'TOP',
+  JUNGLE: 'JG',
+  MIDDLE: 'MID',
+  BOTTOM: 'ADC',
+  UTILITY: 'SUP'
+}
+
+type ResultFilter = 'todas' | 'victoria' | 'derrota'
+type SortKey = 'fecha' | 'kda' | 'cs' | 'duracion'
+
+const SORTERS: Record<SortKey, (a: HistoryRow, b: HistoryRow) => number> = {
+  fecha: (a, b) => b.gameCreation - a.gameCreation,
+  kda: (a, b) => kdaOf(b) - kdaOf(a),
+  cs: (a, b) => b.csPerMin - a.csPerMin,
+  duracion: (a, b) => b.durationS - a.durationS
+}
+
+function kdaOf(row: HistoryRow): number {
+  return (row.kills + row.assists) / Math.max(1, row.deaths)
+}
+
+/** Aggregates over the CURRENT filtered set — the filters become a question
+ * ("¿cómo voy con X en este parche?") and this strip is the answer. */
+function SummaryStrip(props: { rows: HistoryRow[] }): React.JSX.Element | null {
+  const { rows } = props
+  if (rows.length === 0) return null
+  const wins = rows.filter((row) => row.win).length
+  const kills = rows.reduce((sum, row) => sum + row.kills, 0)
+  const deaths = rows.reduce((sum, row) => sum + row.deaths, 0)
+  const assists = rows.reduce((sum, row) => sum + row.assists, 0)
+  const cs = rows.reduce((sum, row) => sum + row.csPerMin, 0) / rows.length
+  const wr = Math.round((wins / rows.length) * 100)
+  // Newest first regardless of the active sort.
+  const recent = [...rows].sort((a, b) => b.gameCreation - a.gameCreation).slice(0, 10)
+
+  const cell = (label: string, value: React.ReactNode): React.JSX.Element => (
+    <div className="flex flex-col px-4 first:pl-0">
+      <span className="text-[10px] font-semibold tracking-widest text-slate-500 uppercase">
+        {label}
+      </span>
+      <span
+        className="font-display text-lg leading-tight font-semibold text-slate-100"
+        style={{ fontVariantNumeric: 'tabular-nums' }}
+      >
+        {value}
+      </span>
+    </div>
+  )
+
+  return (
+    <div className="card-in flex flex-wrap items-center rounded-lg border border-slate-800 bg-slate-900 px-4 py-2.5">
+      <div className="flex divide-x divide-slate-800">
+        {cell('Partidas', rows.length)}
+        {cell(
+          'Winrate',
+          <span className={wr >= 50 ? 'text-emerald-400' : 'text-rose-400'}>{wr}%</span>
+        )}
+        {cell('KDA', ((kills + assists) / Math.max(1, deaths)).toFixed(2))}
+        {cell('CS/min', cs.toFixed(1))}
+      </div>
+      <div className="ml-auto flex items-center gap-1.5" title="Últimas 10 (izquierda = más reciente)">
+        <span className="text-[10px] font-semibold tracking-widest text-slate-500 uppercase">
+          Forma
+        </span>
+        {recent.map((row) => (
+          <span
+            key={row.matchId}
+            className={`h-2.5 w-2.5 rounded-full ${row.win ? 'bg-emerald-500' : 'bg-rose-500/70'}`}
+            title={`${row.champion}: ${row.win ? 'victoria' : 'derrota'}`}
+          />
+        ))}
+      </div>
+    </div>
+  )
 }
 
 function GoldSparkline(props: { curve: number[] }): React.JSX.Element | null {
@@ -103,12 +180,38 @@ function DetailDrawer(props: { detail: HistoryDetail }): React.JSX.Element {
   )
 }
 
+function FilterSelect(props: {
+  label: string
+  value: string
+  options: { value: string; label: string }[]
+  onChange: (value: string) => void
+}): React.JSX.Element {
+  return (
+    <select
+      aria-label={props.label}
+      className="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-xs"
+      value={props.value}
+      onChange={(event) => props.onChange(event.target.value)}
+    >
+      {props.options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  )
+}
+
 export default function HistoryView(): React.JSX.Element {
   const [tab, setTab] = useState<'partidas' | 'stats'>('partidas')
   const [rows, setRows] = useState<HistoryRow[]>([])
   const [aggregates, setAggregates] = useState<HistoryAggregate[]>([])
   const [champions, setChampions] = useState<string[]>([])
   const [filter, setFilter] = useState<string>('')
+  const [result, setResult] = useState<ResultFilter>('todas')
+  const [role, setRole] = useState<string>('')
+  const [patch, setPatch] = useState<string>('')
+  const [sort, setSort] = useState<SortKey>('fecha')
   const [expanded, setExpanded] = useState<string | null>(null)
   const [detail, setDetail] = useState<HistoryDetail | null>(null)
 
@@ -127,6 +230,22 @@ export default function HistoryView(): React.JSX.Element {
     void refresh(filter)
     return window.api.on('history:changed', () => void refresh(filter))
   }, [filter, refresh])
+
+  // Result/role/patch/sort work over the champion-filtered list, in memory —
+  // the answer updates instantly, no round trips.
+  const patches = useMemo(
+    () => [...new Set(rows.map((row) => row.patch))].sort().reverse(),
+    [rows]
+  )
+  const visible = useMemo(() => {
+    const filtered = rows.filter(
+      (row) =>
+        (result === 'todas' || row.win === (result === 'victoria')) &&
+        (role === '' || row.role === role) &&
+        (patch === '' || row.patch === patch)
+    )
+    return filtered.sort(SORTERS[sort])
+  }, [rows, result, role, patch, sort])
 
   const toggleDetail = async (matchId: string): Promise<void> => {
     if (expanded === matchId) {
@@ -157,98 +276,154 @@ export default function HistoryView(): React.JSX.Element {
             ))}
           </div>
         </div>
-        {tab === 'partidas' && (
-          <select
-            aria-label="Filtrar por campeón"
-            className="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm"
-            value={filter}
-            onChange={(event) => setFilter(event.target.value)}
-          >
-            <option value="">Todos los campeones</option>
-            {champions.map((champion) => (
-              <option key={champion} value={champion}>
-                {champion}
-              </option>
-            ))}
-          </select>
-        )}
       </div>
 
       {tab === 'stats' && <StatsView />}
       {tab === 'partidas' && (
         <>
-
-      {aggregates.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {aggregates.slice(0, 6).map((aggregate) => (
-            <span
-              key={aggregate.champion}
-              className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs text-slate-300"
+          {/* The question bar: champion · result · role · patch · order. */}
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              aria-label="Filtrar por campeón"
+              className="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-xs"
+              value={filter}
+              onChange={(event) => setFilter(event.target.value)}
             >
-              {aggregate.champion} · {aggregate.games}p ·{' '}
-              <span
-                className={aggregate.winratePct >= 50 ? 'text-emerald-400' : 'text-rose-400'}
-              >
-                {Math.round(aggregate.winratePct)}% WR
-              </span>{' '}
-              · {aggregate.csPerMin.toFixed(1)} CS/min
-            </span>
-          ))}
-        </div>
-      )}
+              <option value="">Todos los campeones</option>
+              {champions.map((champion) => (
+                <option key={champion} value={champion}>
+                  {champion}
+                </option>
+              ))}
+            </select>
+            <FilterSelect
+              label="Filtrar por resultado"
+              value={result}
+              onChange={(value) => setResult(value as ResultFilter)}
+              options={[
+                { value: 'todas', label: 'Todas' },
+                { value: 'victoria', label: 'Victorias' },
+                { value: 'derrota', label: 'Derrotas' }
+              ]}
+            />
+            <FilterSelect
+              label="Filtrar por rol"
+              value={role}
+              onChange={setRole}
+              options={[
+                { value: '', label: 'Todos los roles' },
+                ...Object.entries(ROLE_LABEL).map(([value, label]) => ({ value, label }))
+              ]}
+            />
+            <FilterSelect
+              label="Filtrar por parche"
+              value={patch}
+              onChange={setPatch}
+              options={[
+                { value: '', label: 'Todos los parches' },
+                ...patches.map((value) => ({ value, label: `parche ${value}` }))
+              ]}
+            />
+            <div className="ml-auto flex items-center gap-1.5">
+              <span className="text-[10px] tracking-widest text-slate-500 uppercase">Ordenar</span>
+              <FilterSelect
+                label="Ordenar partidas"
+                value={sort}
+                onChange={(value) => setSort(value as SortKey)}
+                options={[
+                  { value: 'fecha', label: 'Fecha' },
+                  { value: 'kda', label: 'KDA' },
+                  { value: 'cs', label: 'CS/min' },
+                  { value: 'duracion', label: 'Duración' }
+                ]}
+              />
+            </div>
+          </div>
 
-      {rows.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
-          <span className="text-4xl" aria-hidden>
-            📜
-          </span>
-          <p className="text-sm font-medium text-slate-300">Sin partidas guardadas</p>
-          <p className="max-w-xs text-xs text-slate-500">
-            Sincroniza tu historial en Ajustes o termina una partida: aparecerá aquí sola.
-          </p>
-        </div>
-      ) : (
-        <ul className="divide-y divide-slate-800 overflow-y-auto rounded-lg border border-slate-800">
-          {rows.map((row) => (
-            <li key={row.matchId}>
-              <button
-                className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-slate-900"
-                onClick={() => void toggleDetail(row.matchId)}
-              >
-                <span
-                  className={`w-1 self-stretch rounded ${row.win ? 'bg-emerald-500' : 'bg-rose-500'}`}
-                  aria-hidden
-                />
-                <img
-                  src={`ddicon://champion/${row.champion}.png`}
-                  alt={row.champion}
-                  className="h-8 w-8 rounded"
-                />
-                <span className="w-24 truncate font-medium">{row.champion}</span>
-                <span className="w-20 font-mono text-slate-300">
-                  {row.kills}/{row.deaths}/{row.assists}
-                </span>
-                <span className="w-24 font-mono text-slate-400">
-                  {row.csPerMin.toFixed(1)} CS/min
-                </span>
-                <span className={`w-16 text-xs ${row.win ? 'text-emerald-400' : 'text-rose-400'}`}>
-                  {row.win ? 'Victoria' : 'Derrota'}
-                </span>
-                <span className="w-14 font-mono text-xs text-slate-500">
-                  {formatDuration(row.durationS)}
-                </span>
-                <span className="w-14 text-xs text-slate-500">{row.patch}</span>
-                <span className="ml-auto text-xs text-slate-600">
-                  {formatDate(row.gameCreation)}
-                </span>
-              </button>
-              {expanded === row.matchId && detail !== null && detail.matchId === row.matchId && (
-                <DetailDrawer detail={detail} />
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+          <SummaryStrip rows={visible} />
+
+          {aggregates.length > 0 && filter === '' && (
+            <div className="flex flex-wrap gap-2">
+              {aggregates.slice(0, 6).map((aggregate) => (
+                <button
+                  key={aggregate.champion}
+                  className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs text-slate-300 hover:border-indigo-500/60"
+                  onClick={() => setFilter(aggregate.champion)}
+                  title={`Filtrar por ${aggregate.champion}`}
+                >
+                  {aggregate.champion} · {aggregate.games}p ·{' '}
+                  <span
+                    className={aggregate.winratePct >= 50 ? 'text-emerald-400' : 'text-rose-400'}
+                  >
+                    {Math.round(aggregate.winratePct)}% WR
+                  </span>{' '}
+                  · {aggregate.csPerMin.toFixed(1)} CS/min
+                </button>
+              ))}
+            </div>
+          )}
+
+          {visible.length === 0 ? (
+            <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
+              <span className="text-4xl" aria-hidden>
+                📜
+              </span>
+              <p className="text-sm font-medium text-slate-300">
+                {rows.length === 0 ? 'Sin partidas guardadas' : 'Ninguna partida cumple el filtro'}
+              </p>
+              <p className="max-w-xs text-xs text-slate-500">
+                {rows.length === 0
+                  ? 'Sincroniza tu historial en Ajustes o termina una partida: aparecerá aquí sola.'
+                  : 'Relaja algún filtro para volver a ver partidas.'}
+              </p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-slate-800 overflow-y-auto rounded-lg border border-slate-800">
+              {visible.map((row) => (
+                <li key={row.matchId}>
+                  <button
+                    className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-slate-900"
+                    onClick={() => void toggleDetail(row.matchId)}
+                  >
+                    <span
+                      className={`w-1 self-stretch rounded ${row.win ? 'bg-emerald-500' : 'bg-rose-500'}`}
+                      aria-hidden
+                    />
+                    <img
+                      src={`ddicon://champion/${row.champion}.png`}
+                      alt={row.champion}
+                      className="h-8 w-8 rounded"
+                    />
+                    <span className="w-24 truncate font-medium">{row.champion}</span>
+                    <span className="w-9 text-[10px] font-semibold text-slate-500">
+                      {ROLE_LABEL[row.role] ?? ''}
+                    </span>
+                    <span className="w-20 font-mono text-slate-300">
+                      {row.kills}/{row.deaths}/{row.assists}
+                    </span>
+                    <span className="w-24 font-mono text-slate-400">
+                      {row.csPerMin.toFixed(1)} CS/min
+                    </span>
+                    <span
+                      className={`w-16 text-xs ${row.win ? 'text-emerald-400' : 'text-rose-400'}`}
+                    >
+                      {row.win ? 'Victoria' : 'Derrota'}
+                    </span>
+                    <span className="w-14 font-mono text-xs text-slate-500">
+                      {formatDuration(row.durationS)}
+                    </span>
+                    <span className="w-14 text-xs text-slate-500">{row.patch}</span>
+                    <span className="ml-auto text-xs text-slate-600">
+                      {formatDate(row.gameCreation)}
+                    </span>
+                  </button>
+                  {expanded === row.matchId &&
+                    detail !== null &&
+                    detail.matchId === row.matchId && <DetailDrawer detail={detail} />}
+                </li>
+              ))}
+            </ul>
+          )}
         </>
       )}
     </div>

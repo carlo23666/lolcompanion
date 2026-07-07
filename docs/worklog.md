@@ -1,6 +1,15 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-07 (14) — Information redistribution per phase + Historial as analysis desk (owner request)
+**Done (check green, 316):** each surface now has ONE declared job and its layout follows it.
+1. **Historial** (the "for sure more utilities" ask): a question bar (campeón · resultado · rol · parche · orden — result/role/patch/sort are client-side over the fetched rows, instant), a **summary strip that answers the active filter** (partidas, WR, KDA, CS/min + last-10 form dots, newest first), champion chips became clickable filters, role chip per row, and a filtered-empty state distinct from no-data. Sorting: fecha/KDA/CS/duración.
+2. **Champ select**: the screen's job flips at lock-in. Before: pick suggestions lead (unchanged). After locking: suggestions disappear, "Tu plan" (bigger icons, amber frame) + "Plan de compra contra esta comp" take the stage — nobody needs pick advice after picking.
+3. **In game**: objective timers promoted to the top of the instruments column (they were buried under two team panels; they're the only time-critical element there).
+4. **Post game**: "Ver en historial" CTA under the report (LiveView gains optional onOpenHistory, wired in App) — the report now flows into deeper analysis.
+5. **Overlay**: intentionally untouched — its glance hierarchy (top rec → alert takeover → hover expand → pin) already matches its job.
+**Files:** src/renderer/src/components/{HistoryView(rewritten),ChampSelectPanel,LiveView}.tsx, src/renderer/src/App.tsx.
+
 ## 2026-07-07 (13) — Engine inverted: Master+ primero, la lógica solo ajusta (owner: "no more Zhonya on ADCs")
 **Done (check green, 316):** the recommendation hierarchy is inverted per owner feedback ("rely on Master+ games mostly, add logic to modify a bit or offer suggestions").
 1. **New `engine/meta-items.ts`** — the Master+ item distribution (per champion+role, from the crawler's migration-005 aggregates) is now a first-class engine input: trust gates (≥20 champion games, ≥5 item games), `metaPreferred`/`metaUsage`/`orderByMeta` set math, `SUGGESTION_SCORE_CAP = 45`, and shared Spanish reason builders.

@@ -80,6 +80,7 @@ export default function App(): React.JSX.Element {
           championMeta={championMeta}
           insights={insights}
           onOpenSettings={() => setView('settings')}
+          onOpenHistory={() => setView('history')}
         />
       )}
       {view === 'history' && <HistoryView />}
