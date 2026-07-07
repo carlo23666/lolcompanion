@@ -44,6 +44,7 @@ const aggregates: HistoryAggregate[] = [
 const detail: HistoryDetail = {
   matchId: 'EUW1_2',
   champion: 'Jinx',
+  role: 'BOTTOM',
   win: true,
   kills: 11,
   deaths: 3,
@@ -55,7 +56,18 @@ const detail: HistoryDetail = {
   durationS: 1854,
   patch: '16.13',
   items: [3031, 3006, 3085],
-  goldCurve: [500, 1200, 2100, 3300, 4700]
+  goldCurve: [500, 1200, 2100, 3300, 4700],
+  laneOpponent: 'Caitlyn',
+  metaBuild: {
+    patch: '16.13',
+    games: 1809,
+    items: [
+      { itemId: 3031, games: 1500, wins: 830 },
+      { itemId: 3085, games: 1200, wins: 640 },
+      { itemId: 3006, games: 1100, wins: 590 },
+      { itemId: 3036, games: 700, wins: 380 }
+    ]
+  }
 }
 
 function stubHistoryApi(): ReturnType<typeof vi.fn> {
@@ -113,6 +125,33 @@ describe('HistoryView', () => {
     await user.click(await screen.findByText('11/3/5'))
     expect(await screen.findByText('Build final')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Curva de oro por minuto' })).toBeInTheDocument()
-    expect(screen.getByAltText('objeto 3031').getAttribute('src')).toBe('ddicon://item/3031.png')
+    expect(screen.getAllByAltText('objeto 3031')[0]?.getAttribute('src')).toBe(
+      'ddicon://item/3031.png'
+    )
+  })
+
+  it('drawer utilities: lane opponent, gold/min and the Master+ build comparison', async () => {
+    stubHistoryApi()
+    const user = userEvent.setup()
+    render(<HistoryView />)
+
+    await user.click(await screen.findByText('11/3/5'))
+    expect(await screen.findByText('Rival de carril')).toBeInTheDocument()
+    expect(screen.getByText('Caitlyn')).toBeInTheDocument()
+    // 14900 gold over 30.9 min ≈ 482/min.
+    expect(screen.getByText(/482\/min/)).toBeInTheDocument()
+    // Meta comparison: 3/4 of the top meta items are in the final build.
+    expect(screen.getByText(/Build Master\+/)).toBeInTheDocument()
+    expect(screen.getByText('3/4')).toBeInTheDocument()
+    // 1500 of 1809 games ≈ 83%.
+    expect(screen.getByText('83%')).toBeInTheDocument()
+  })
+
+  it('summary strip answers the filtered set (WR, racha, forma)', async () => {
+    stubHistoryApi()
+    render(<HistoryView />)
+    await screen.findByText('Victoria')
+    expect(screen.getByText('50%')).toBeInTheDocument() // 1W 1L
+    expect(screen.getByText('+1')).toBeInTheDocument() // newest is a win
   })
 })

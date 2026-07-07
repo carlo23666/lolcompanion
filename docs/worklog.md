@@ -1,6 +1,15 @@
 # Worklog
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-07 (15) — Historial drawer utilities: rival, oro/min, build vs Master+, colas, racha (owner: "include everything useful")
+**Done (check green, 318):** the deeper utilities proposed in session 14 are wired end to end.
+1. **HistoryDetail extended (main + shared)**: `role`; `laneOpponent` — same-position enemy derived from stored participants (opposite win flag = other team; ARAM/empty roles stay null); `metaBuild` — Master+ final-build distribution for the champion+role from the crawler aggregates, exact match patch when crawled (≥20 games) else the newest crawled patch, always labeled with the patch used.
+2. **Drawer**: "Rival de carril" with portrait; oro/min next to total gold; **"Build Master+" comparison row** — top 6 meta items with pick %, the ones in YOUR final build get an emerald ring, plus a "coincides en X/Y" verdict. This is the op.gg-style loop the owner wanted: every stored game auditable against what Master+ finishes.
+3. **List**: queue filter ("Todas las colas" — SoloQ/Flex/Normal/ARAM… labels from queueId) + queue label per row; summary strip gains the current **racha** within the filtered set.
+4. mockapi serves a full detail now (drawer verifiable in the browser preview); renderer tests +2 (drawer utilities, summary strip), test detail literal extended.
+**Notes:** metaBuild needs crawl data — on champions/roles without ≥20 Master+ games the section simply doesn't render (no fake comparisons).
+**Files:** src/shared/history.ts, src/main/history.ts, src/renderer/src/components/HistoryView.tsx, src/renderer/src/mockapi.ts, tests/renderer/history.test.tsx.
+
 ## 2026-07-07 (14) — Information redistribution per phase + Historial as analysis desk (owner request)
 **Done (check green, 316):** each surface now has ONE declared job and its layout follows it.
 1. **Historial** (the "for sure more utilities" ask): a question bar (campeón · resultado · rol · parche · orden — result/role/patch/sort are client-side over the fetched rows, instant), a **summary strip that answers the active filter** (partidas, WR, KDA, CS/min + last-10 form dots, newest first), champion chips became clickable filters, role chip per row, and a filtered-empty state distinct from no-data. Sorting: fecha/KDA/CS/duración.

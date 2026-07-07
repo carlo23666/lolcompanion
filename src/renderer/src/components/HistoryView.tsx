@@ -22,6 +22,20 @@ const ROLE_LABEL: Record<string, string> = {
   UTILITY: 'SUP'
 }
 
+const QUEUE_LABEL: Record<number, string> = {
+  420: 'SoloQ',
+  440: 'Flex',
+  400: 'Normal',
+  430: 'Blind',
+  450: 'ARAM',
+  490: 'Quickplay',
+  700: 'Clash'
+}
+
+function queueLabel(queueId: number): string {
+  return QUEUE_LABEL[queueId] ?? `cola ${String(queueId)}`
+}
+
 type ResultFilter = 'todas' | 'victoria' | 'derrota'
 type SortKey = 'fecha' | 'kda' | 'cs' | 'duracion'
 
@@ -48,7 +62,15 @@ function SummaryStrip(props: { rows: HistoryRow[] }): React.JSX.Element | null {
   const cs = rows.reduce((sum, row) => sum + row.csPerMin, 0) / rows.length
   const wr = Math.round((wins / rows.length) * 100)
   // Newest first regardless of the active sort.
-  const recent = [...rows].sort((a, b) => b.gameCreation - a.gameCreation).slice(0, 10)
+  const byDate = [...rows].sort((a, b) => b.gameCreation - a.gameCreation)
+  const recent = byDate.slice(0, 10)
+  // Current streak within the filtered set (＋wins / −losses from the newest).
+  let streak = 0
+  for (const row of byDate) {
+    if (row.win !== byDate[0]?.win) break
+    streak += 1
+  }
+  const streakSigned = (byDate[0]?.win ?? true) ? streak : -streak
 
   const cell = (label: string, value: React.ReactNode): React.JSX.Element => (
     <div className="flex flex-col px-4 first:pl-0">
@@ -74,6 +96,12 @@ function SummaryStrip(props: { rows: HistoryRow[] }): React.JSX.Element | null {
         )}
         {cell('KDA', ((kills + assists) / Math.max(1, deaths)).toFixed(2))}
         {cell('CS/min', cs.toFixed(1))}
+        {cell(
+          'Racha',
+          <span className={streakSigned > 0 ? 'text-emerald-400' : 'text-rose-400'}>
+            {streakSigned > 0 ? `+${String(streakSigned)}` : String(streakSigned)}
+          </span>
+        )}
       </div>
       <div className="ml-auto flex items-center gap-1.5" title="Últimas 10 (izquierda = más reciente)">
         <span className="text-[10px] font-semibold tracking-widest text-slate-500 uppercase">
@@ -147,11 +175,29 @@ function DetailDrawer(props: { detail: HistoryDetail }): React.JSX.Element {
           <p>
             {detail.kills}/{detail.deaths}/{detail.assists} · {detail.cs} CS ·{' '}
             {Math.round(detail.gold / 100) / 10}k oro
+            {detail.durationS > 0 && (
+              <span className="text-slate-500">
+                {' '}
+                ({String(Math.round(detail.gold / (detail.durationS / 60)))}/min)
+              </span>
+            )}
           </p>
           <p className="text-slate-500">
             {Math.round(detail.damage / 100) / 10}k daño · visión {detail.vision}
           </p>
         </div>
+        {detail.laneOpponent !== null && (
+          <div className="flex items-center gap-1.5">
+            <p className="text-slate-400">Rival de carril</p>
+            <img
+              src={`ddicon://champion/${detail.laneOpponent}.png`}
+              alt={detail.laneOpponent}
+              title={detail.laneOpponent}
+              className="h-7 w-7 rounded border border-rose-500/40"
+            />
+            <span className="text-slate-300">{detail.laneOpponent}</span>
+          </div>
+        )}
         {!reportRequested && (
           <button
             className="ml-auto rounded border border-slate-700 bg-slate-800 px-2.5 py-1 text-slate-300 hover:border-slate-500"
@@ -161,6 +207,44 @@ function DetailDrawer(props: { detail: HistoryDetail }): React.JSX.Element {
           </button>
         )}
       </div>
+      {/* Your build against what Master+ actually finished on this
+          champion+role — matching items get the emerald ring. */}
+      {detail.metaBuild !== null && detail.metaBuild.items.length > 0 && (
+        <div className="mt-2.5">
+          <p className="mb-1 text-slate-400">
+            Build Master+ ({detail.champion} · parche {detail.metaBuild.patch} ·{' '}
+            {detail.metaBuild.games} partidas) — coincides en{' '}
+            <span className="font-semibold text-slate-200">
+              {detail.metaBuild.items.slice(0, 6).filter((entry) => detail.items.includes(entry.itemId)).length}
+              /{Math.min(6, detail.metaBuild.items.length)}
+            </span>
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {detail.metaBuild.items.slice(0, 6).map((entry) => {
+              const owned = detail.items.includes(entry.itemId)
+              const pct = Math.round((entry.games / (detail.metaBuild?.games ?? 1)) * 100)
+              return (
+                <div key={entry.itemId} className="flex flex-col items-center gap-0.5">
+                  <img
+                    src={`ddicon://item/${String(entry.itemId)}.png`}
+                    alt={`objeto ${String(entry.itemId)}`}
+                    title={`${String(pct)}% de las builds Master+${owned ? ' · también en la tuya' : ''}`}
+                    className={`h-7 w-7 rounded border ${
+                      owned ? 'border-emerald-500 ring-1 ring-emerald-500/60' : 'border-slate-700 opacity-80'
+                    }`}
+                  />
+                  <span
+                    className="text-[10px] text-slate-500"
+                    style={{ fontVariantNumeric: 'tabular-nums' }}
+                  >
+                    {pct}%
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
       {detail.goldCurve.length > 1 && (
         <div className="mt-2">
           <p className="text-slate-400">Oro por minuto</p>
@@ -211,6 +295,7 @@ export default function HistoryView(): React.JSX.Element {
   const [result, setResult] = useState<ResultFilter>('todas')
   const [role, setRole] = useState<string>('')
   const [patch, setPatch] = useState<string>('')
+  const [queue, setQueue] = useState<string>('')
   const [sort, setSort] = useState<SortKey>('fecha')
   const [expanded, setExpanded] = useState<string | null>(null)
   const [detail, setDetail] = useState<HistoryDetail | null>(null)
@@ -237,15 +322,17 @@ export default function HistoryView(): React.JSX.Element {
     () => [...new Set(rows.map((row) => row.patch))].sort().reverse(),
     [rows]
   )
+  const queues = useMemo(() => [...new Set(rows.map((row) => row.queueId))].sort(), [rows])
   const visible = useMemo(() => {
     const filtered = rows.filter(
       (row) =>
         (result === 'todas' || row.win === (result === 'victoria')) &&
         (role === '' || row.role === role) &&
-        (patch === '' || row.patch === patch)
+        (patch === '' || row.patch === patch) &&
+        (queue === '' || String(row.queueId) === queue)
     )
     return filtered.sort(SORTERS[sort])
-  }, [rows, result, role, patch, sort])
+  }, [rows, result, role, patch, queue, sort])
 
   const toggleDetail = async (matchId: string): Promise<void> => {
     if (expanded === matchId) {
@@ -313,6 +400,15 @@ export default function HistoryView(): React.JSX.Element {
               options={[
                 { value: '', label: 'Todos los roles' },
                 ...Object.entries(ROLE_LABEL).map(([value, label]) => ({ value, label }))
+              ]}
+            />
+            <FilterSelect
+              label="Filtrar por cola"
+              value={queue}
+              onChange={setQueue}
+              options={[
+                { value: '', label: 'Todas las colas' },
+                ...queues.map((id) => ({ value: String(id), label: queueLabel(id) }))
               ]}
             />
             <FilterSelect
@@ -413,6 +509,9 @@ export default function HistoryView(): React.JSX.Element {
                       {formatDuration(row.durationS)}
                     </span>
                     <span className="w-14 text-xs text-slate-500">{row.patch}</span>
+                    <span className="w-16 text-[10px] text-slate-500">
+                      {queueLabel(row.queueId)}
+                    </span>
                     <span className="ml-auto text-xs text-slate-600">
                       {formatDate(row.gameCreation)}
                     </span>

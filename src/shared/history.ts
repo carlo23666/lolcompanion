@@ -25,6 +25,7 @@ export interface HistoryAggregate {
 export interface HistoryDetail {
   matchId: string
   champion: string
+  role: string
   win: boolean
   kills: number
   deaths: number
@@ -37,4 +38,13 @@ export interface HistoryDetail {
   patch: string
   items: number[]
   goldCurve: number[]
+  /** Same-lane enemy champion (ddragon id), when derivable. */
+  laneOpponent: string | null
+  /** Master+ final-build distribution for this champion+role (crawled meta);
+   * falls back to the newest crawled patch when the match patch has none. */
+  metaBuild: {
+    patch: string
+    games: number
+    items: { itemId: number; games: number; wins: number }[]
+  } | null
 }

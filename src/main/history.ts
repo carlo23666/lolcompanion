@@ -5,16 +5,18 @@ import type {
   HistoryRow
 } from '@shared/history'
 import type { AppDatabase } from './db'
-import { MatchRepo, TimelineRepo } from './db/repos'
+import { MatchRepo, MetaRepo, TimelineRepo } from './db/repos'
 
 /** Read-side service for the Historial view. Pure queries, no network. */
 export class HistoryService {
   private readonly matches: MatchRepo
   private readonly timelines: TimelineRepo
+  private readonly meta: MetaRepo
 
   constructor(db: AppDatabase) {
     this.matches = new MatchRepo(db)
     this.timelines = new TimelineRepo(db)
+    this.meta = new MetaRepo(db)
   }
 
   list(puuid: string, champion?: string, limit = 100): HistoryRow[] {
@@ -69,8 +71,38 @@ export class HistoryService {
   detail(puuid: string, matchId: string): HistoryDetail | null {
     const match = this.matches.getMatch(matchId)
     if (!match) return null
-    const own = this.matches.getParticipants(matchId).find((p) => p.puuid === puuid)
+    const participants = this.matches.getParticipants(matchId)
+    const own = participants.find((p) => p.puuid === puuid)
     if (!own) return null
+
+    // Lane opponent: same position, opposite result (teams differ ⟺ win
+    // flags differ in a finished game). Empty roles (ARAM) stay null.
+    const laneOpponent =
+      own.role !== ''
+        ? (participants.find(
+            (p) => p.puuid !== puuid && p.role === own.role && p.win !== own.win
+          )?.champion ?? null)
+        : null
+
+    // Master+ build for the same champion+role: exact match patch when
+    // crawled, otherwise the newest crawled patch (labeled — the UI shows it).
+    let metaBuild: HistoryDetail['metaBuild'] = null
+    if (own.role !== '') {
+      const candidates = [match.patch, this.meta.latestPatch()].filter(
+        (patch): patch is string => patch !== null
+      )
+      for (const patch of candidates) {
+        const winrate = this.meta.championWinrate(own.champion, own.role, patch)
+        if (winrate !== null && winrate.games >= 20) {
+          metaBuild = {
+            patch,
+            games: winrate.games,
+            items: this.meta.topItems(own.champion, own.role, patch, 12)
+          }
+          break
+        }
+      }
+    }
 
     // Per-minute gold curve for the owner, from the stored timeline.
     let goldCurve: number[] = []
@@ -93,6 +125,7 @@ export class HistoryService {
     return {
       matchId,
       champion: own.champion,
+      role: own.role,
       win: own.win,
       kills: own.kills,
       deaths: own.deaths,
@@ -105,7 +138,9 @@ export class HistoryService {
       patch: match.patch,
       // Slots 0-5 only: slot 6 is the trinket, not part of the build.
       items: own.items.slice(0, 6).filter((id) => id > 0),
-      goldCurve
+      goldCurve,
+      laneOpponent,
+      metaBuild
     }
   }
 }

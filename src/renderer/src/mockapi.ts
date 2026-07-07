@@ -259,8 +259,38 @@ export function installMockApi(): void {
               summary: ['Farmeaste 0.7 CS/min por encima de tu media — GG de granja']
             }
           })
-        case 'stats:curve':
         case 'history:detail':
+          return respond({
+            matchId: String(args[0]),
+            champion: 'Kaisa',
+            role: 'BOTTOM',
+            win: true,
+            kills: 9,
+            deaths: 4,
+            assists: 6,
+            cs: 216,
+            gold: 14500,
+            damage: 28900,
+            vision: 14,
+            durationS: 1860,
+            patch: '16.13',
+            items: [3031, 3006, 3153, 3036, 3026],
+            goldCurve: [500, 1400, 2600, 4100, 5900, 8200, 10800, 12900, 14500],
+            laneOpponent: 'Jinx',
+            metaBuild: {
+              patch: '16.13',
+              games: 1809,
+              items: [
+                { itemId: 3031, games: 1490, wins: 810 },
+                { itemId: 3006, games: 1380, wins: 745 },
+                { itemId: 3153, games: 1120, wins: 620 },
+                { itemId: 3036, games: 840, wins: 470 },
+                { itemId: 3085, games: 660, wins: 350 },
+                { itemId: 3026, games: 480, wins: 265 }
+              ]
+            }
+          })
+        case 'stats:curve':
           return respond(null)
         case 'dev:enabled':
           return respond(false)
