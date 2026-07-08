@@ -14,13 +14,27 @@ const statRow = {
 }
 
 export const metaSeedSchema = z.object({
-  version: z.literal(1),
+  // v2 adds itemOrder (WP-015); v1 seeds remain importable.
+  version: z.union([z.literal(1), z.literal(2)]),
   patch: z.string().min(1),
   exportedAt: z.string(),
   matchIds: z.array(z.string().min(1)),
   championStats: z.array(z.object(statRow)),
   matchups: z.array(z.object({ ...statRow, enemyChampion: z.string().min(1) })),
-  items: z.array(z.object({ ...statRow, itemId: z.number().int().positive() }))
+  items: z.array(z.object({ ...statRow, itemId: z.number().int().positive() })),
+  /** Item completion-order aggregates (v2). */
+  itemOrder: z
+    .array(
+      z.object({
+        champion: z.string().min(1),
+        role: z.string(),
+        itemId: z.number().int().positive(),
+        games: z.number().int().positive(),
+        slotSum: z.number().int().nonnegative(),
+        firstGames: z.number().int().nonnegative()
+      })
+    )
+    .optional()
 })
 
 export type MetaSeed = z.infer<typeof metaSeedSchema>

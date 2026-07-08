@@ -1,5 +1,5 @@
 import type { MetaSeed } from '@shared/schemas/meta-seed'
-import type { MetaMatchAggregate } from '../../riot/meta-aggregate'
+import type { MetaMatchAggregate, MetaOrderAggregate } from '../../riot/meta-aggregate'
 import { comparePatchDesc } from '../../staticdata/manager'
 import type { AppDatabase } from '../index'
 
@@ -13,6 +13,17 @@ export interface MetaItemStat {
   itemId: number
   games: number
   wins: number
+  /** Completion-order stats (migration 006); absent until timelines land. */
+  orderGames?: number
+  slotSum?: number
+  firstGames?: number
+}
+
+export interface MetaOrderStat {
+  itemId: number
+  orderGames: number
+  slotSum: number
+  firstGames: number
 }
 
 /**
@@ -67,6 +78,56 @@ export class MetaRepo {
     return applied
   }
 
+  /**
+   * Applies one timeline's order deltas atomically. Idempotency rides the
+   * hasTimeline flag: the first call per match wins, repeats are no-ops.
+   * Requires the match to be in the ledger (applyAggregate/importSeed first).
+   */
+  applyOrderAggregate(aggregate: MetaOrderAggregate): boolean {
+    const claim = this.db.prepare(
+      'UPDATE meta_matches SET hasTimeline = 1 WHERE matchId = ? AND hasTimeline = 0'
+    )
+    const bump = this.db.prepare(
+      `INSERT INTO meta_champion_item_order (patch, champion, role, itemId, games, slotSum, firstGames)
+       VALUES (?, ?, ?, ?, 1, ?, ?)
+       ON CONFLICT(patch, champion, role, itemId) DO UPDATE SET
+         games = games + 1, slotSum = slotSum + excluded.slotSum,
+         firstGames = firstGames + excluded.firstGames`
+    )
+    let applied = false
+    this.db.transaction(() => {
+      if (claim.run(aggregate.matchId).changes === 0) return
+      applied = true
+      for (const row of aggregate.items) {
+        bump.run(aggregate.patch, row.champion, row.role, row.itemId, row.slot, row.first ? 1 : 0)
+      }
+    })()
+    return applied
+  }
+
+  /** Aggregated matches still missing their timeline pass (backfill queue). */
+  matchesNeedingTimeline(limit: number): string[] {
+    return (
+      this.db
+        .prepare(
+          `SELECT matchId FROM meta_matches
+           WHERE hasTimeline = 0 AND patch != 'skip' LIMIT ?`
+        )
+        .all(limit) as { matchId: string }[]
+    ).map((row) => row.matchId)
+  }
+
+  /** Completion-order stats for a champion+role. */
+  orderStatsFor(champion: string, role: string, patch: string): MetaOrderStat[] {
+    return this.db
+      .prepare(
+        `SELECT itemId, games AS orderGames, slotSum, firstGames
+         FROM meta_champion_item_order
+         WHERE patch = ? AND champion = ? AND role = ?`
+      )
+      .all(patch, champion, role) as MetaOrderStat[]
+  }
+
   /** Marks a fetched-but-unusable match so it is never fetched again. */
   markSkipped(matchId: string): void {
     this.db
@@ -107,15 +168,32 @@ export class MetaRepo {
     return row ? { patch, ...row } : null
   }
 
-  /** Most-bought final items for a champion+role, most games first. */
+  /** Most-bought final items for a champion+role (order stats joined in). */
   topItems(champion: string, role: string, patch: string, limit: number): MetaItemStat[] {
-    return this.db
+    const rows = this.db
       .prepare(
-        `SELECT itemId, games, wins FROM meta_champion_items
-         WHERE patch = ? AND champion = ? AND role = ?
-         ORDER BY games DESC LIMIT ?`
+        `SELECT i.itemId, i.games, i.wins,
+                o.games AS orderGames, o.slotSum, o.firstGames
+         FROM meta_champion_items i
+         LEFT JOIN meta_champion_item_order o
+           ON o.patch = i.patch AND o.champion = i.champion
+          AND o.role = i.role AND o.itemId = i.itemId
+         WHERE i.patch = ? AND i.champion = ? AND i.role = ?
+         ORDER BY i.games DESC LIMIT ?`
       )
-      .all(patch, champion, role, limit) as MetaItemStat[]
+      .all(patch, champion, role, limit) as (MetaItemStat & {
+      orderGames: number | null
+      slotSum: number | null
+      firstGames: number | null
+    })[]
+    return rows.map((row) => ({
+      itemId: row.itemId,
+      games: row.games,
+      wins: row.wins,
+      ...(row.orderGames !== null
+        ? { orderGames: row.orderGames, slotSum: row.slotSum ?? 0, firstGames: row.firstGames ?? 0 }
+        : {})
+    }))
   }
 
   /** The champion's most-played role at Master+ (for role-less lobbies). */
@@ -177,7 +255,13 @@ export class MetaRepo {
     const items = this.db
       .prepare('SELECT champion, role, itemId, games, wins FROM meta_champion_items WHERE patch = ?')
       .all(patch) as MetaSeed['items']
-    return { patch, matchIds, championStats, matchups, items }
+    const itemOrder = this.db
+      .prepare(
+        `SELECT champion, role, itemId, games, slotSum, firstGames
+         FROM meta_champion_item_order WHERE patch = ?`
+      )
+      .all(patch) as NonNullable<MetaSeed['itemOrder']>
+    return { patch, matchIds, championStats, matchups, items, itemOrder }
   }
 
   /**
@@ -188,7 +272,14 @@ export class MetaRepo {
    */
   importSeed(seed: MetaSeed): boolean {
     if (this.latestPatch() !== null) return false
-    const mark = this.db.prepare('INSERT OR IGNORE INTO meta_matches (matchId, patch) VALUES (?, ?)')
+    // A seed carrying order rows already contains whatever timeline data the
+    // exporter had; re-backfilling those matches locally would double-count
+    // the slots, so their ledger rows arrive with hasTimeline = 1. v1 seeds
+    // (no order rows) leave the flag at 0 → a local crawl may backfill.
+    const hasOrderData = (seed.itemOrder?.length ?? 0) > 0
+    const mark = this.db.prepare(
+      'INSERT OR IGNORE INTO meta_matches (matchId, patch, hasTimeline) VALUES (?, ?, ?)'
+    )
     const putStat = this.db.prepare(
       'INSERT OR REPLACE INTO meta_champion_stats (patch, champion, role, games, wins) VALUES (?, ?, ?, ?, ?)'
     )
@@ -198,8 +289,12 @@ export class MetaRepo {
     const putItem = this.db.prepare(
       'INSERT OR REPLACE INTO meta_champion_items (patch, champion, role, itemId, games, wins) VALUES (?, ?, ?, ?, ?, ?)'
     )
+    const putOrder = this.db.prepare(
+      `INSERT OR REPLACE INTO meta_champion_item_order
+       (patch, champion, role, itemId, games, slotSum, firstGames) VALUES (?, ?, ?, ?, ?, ?, ?)`
+    )
     this.db.transaction(() => {
-      for (const matchId of seed.matchIds) mark.run(matchId, seed.patch)
+      for (const matchId of seed.matchIds) mark.run(matchId, seed.patch, hasOrderData ? 1 : 0)
       for (const row of seed.championStats) {
         putStat.run(seed.patch, row.champion, row.role, row.games, row.wins)
       }
@@ -208,6 +303,17 @@ export class MetaRepo {
       }
       for (const row of seed.items) {
         putItem.run(seed.patch, row.champion, row.role, row.itemId, row.games, row.wins)
+      }
+      for (const row of seed.itemOrder ?? []) {
+        putOrder.run(
+          seed.patch,
+          row.champion,
+          row.role,
+          row.itemId,
+          row.games,
+          row.slotSum,
+          row.firstGames
+        )
       }
     })()
     return true

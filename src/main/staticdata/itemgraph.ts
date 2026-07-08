@@ -67,6 +67,19 @@ export function buildItemGraph(items: Record<string, DdItem>): ItemGraph {
   return { nodes, finishedSRItems }
 }
 
+/**
+ * Items that can be a slot in a real build plan: purchasable finished pieces —
+ * legendaries (nothing builds out of them) and finished boots (their tier-3
+ * upgrade doesn't demote them to "component"). Excludes raw components
+ * (Bramble, Sheen…), starters, trinkets and consumables: advising those as
+ * build slots is exactly the "Bramble first on Nasus" bug (WP-015).
+ */
+export function isFinishedBuildItem(node: ItemNode): boolean {
+  if (!node.availableOnSR || node.depth < 2) return false
+  if (node.tags.includes('Trinket') || node.tags.includes('Consumable')) return false
+  return node.buildsInto.length === 0 || node.tags.includes('Boots')
+}
+
 const PASSIVE_MARKUP = /<passive>(.*?)<\/passive>/g
 
 function parsePassives(description: string | undefined): string[] {

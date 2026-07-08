@@ -32,6 +32,10 @@ export const armorVsMrRule: Rule = (state, staticData, meta) => {
   const { physicalShare, magicShare } = state.enemyAggregates
   const selfTags = staticData.champions.get(state.self.championId)?.tags ?? []
   const tanky = isTanky(selfTags)
+  // Phase awareness (WP-015): before the first completed item, a skewed comp
+  // is a PLAN, not a purchase — no Master+ player opens with reactive resists.
+  // Capped and labeled so it can never outrank the build path pre-first-back.
+  const preFirstItem = !state.self.items.some((item) => item.isCompleted)
 
   const topDealers = (type: 'physical' | 'magic'): string[] =>
     state.enemies
@@ -60,14 +64,14 @@ export const armorVsMrRule: Rule = (state, staticData, meta) => {
     const viable = orderByMeta(availableOptions(staticData, options), meta)
     if (viable.length === 0 || ownsAny(state.self, viable)) return
     const anyMetaBacked = viable.some((id) => metaUsage(meta, id) !== null)
-    const capped = !anyMetaBacked && metaTrusted(meta)
+    const capped = (!anyMetaBacked && metaTrusted(meta)) || preFirstItem
     viable.forEach((itemId, index) => {
       const stat = metaUsage(meta, itemId)
       outputs.push({
         ruleId: 'armor-vs-mr',
         itemId,
         category,
-        action: 'prioritize',
+        action: preFirstItem ? 'add' : 'prioritize',
         // Alternatives rank right below the preferred option.
         score: capped
           ? Math.min(clampScore(score - index * 8), SUGGESTION_SCORE_CAP)
@@ -77,7 +81,12 @@ export const armorVsMrRule: Rule = (state, staticData, meta) => {
           ...(stat !== null
             ? [metaPickReason(state.self.championName, itemName(staticData, itemId), stat)]
             : []),
-          ...(capped && index === 0 ? [suggestionReason(state.self.championName)] : [])
+          ...(preFirstItem && index === 0
+            ? ['Aún sin tu primer objeto: prioriza tu build y deja esta defensa para después']
+            : []),
+          ...(capped && !preFirstItem && index === 0
+            ? [suggestionReason(state.self.championName)]
+            : [])
         ]
       })
     })

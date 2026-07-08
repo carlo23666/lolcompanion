@@ -9,6 +9,8 @@ import { ingestHistory } from './ingest'
 import { RiotRateLimiter } from './limiter'
 import { MetaCrawler } from './metacrawler'
 import { normalizeRiotId } from './riotid'
+import { getStaticDataManager } from '../staticdata'
+import { isFinishedBuildItem } from '../staticdata/itemgraph'
 import { normalizeTheme } from '@shared/themes'
 
 export { RiotClient, RiotApiError, PLATFORM_TO_REGIONAL } from './client'
@@ -186,16 +188,27 @@ export function registerRiotIpc(db: AppDatabase): void {
     patches: metaRepo.status()
   }))
 
-  handleInvoke('meta:crawl:start', () => {
+  handleInvoke('meta:crawl:start', async () => {
     const apiKey = resolveApiKey(settings, keyCodec)
     if (apiKey === null) {
       return { started: false, error: MISSING_KEY_ERROR }
     }
     const platform = settings.get(SETTING_KEYS.platform) ?? 'euw1'
+    // Completion-order stats only count finished build pieces (WP-015).
+    const staticData = await getStaticDataManager()
+      .load()
+      .catch(() => null)
+    if (staticData === null) {
+      return { started: false, error: 'datos estáticos no disponibles (sin conexión y sin caché)' }
+    }
     metaCrawler ??= new MetaCrawler({
       client: new RiotClient({ apiKey, platform, limiter }),
       repo: metaRepo,
       onProgress: (status) => broadcast('meta:progress', status),
+      isOrderable: (itemId) => {
+        const node = staticData.itemGraph.nodes.get(itemId)
+        return node !== undefined && isFinishedBuildItem(node)
+      },
       log: (message) => console.log(message)
     })
     return metaCrawler.start()

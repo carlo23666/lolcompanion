@@ -129,9 +129,21 @@ describe('MetaCrawler', () => {
             ? { ok: true as const, value: match }
             : { ok: false as const, error: new RiotApiError('notFound', '404') }
         )
-      }
+      },
+      // Minimal valid timeline per match: order aggregation yields no rows
+      // but the hasTimeline flag settles, keeping the dedupe assertions exact.
+      timeline: (matchId) =>
+        Promise.resolve({
+          ok: true as const,
+          value: {
+            metadata: { matchId, participants: [] },
+            info: { frames: [] }
+          }
+        })
     }
   }
+  /** Order predicate for crawler tests: anything counts (no static data here). */
+  const anyOrderable = (): boolean => true
 
   it('crawls seed histories, aggregates, and dedupes across runs', async () => {
     const db = new Database(':memory:')
@@ -141,7 +153,12 @@ describe('MetaCrawler', () => {
     second.metadata.matchId = 'EUW1_SECOND'
     const client = fakeClient([baseMatch, second])
 
-    const crawler = new MetaCrawler({ client, repo: meta, onProgress: () => undefined })
+    const crawler = new MetaCrawler({
+      client,
+      repo: meta,
+      onProgress: () => undefined,
+      isOrderable: anyOrderable
+    })
     crawler.start()
     await vipollUntilDone(crawler)
     expect(crawler.status().stored).toBe(2)
@@ -163,10 +180,13 @@ describe('MetaCrawler', () => {
         apexLeague: () =>
           Promise.resolve({ ok: false as const, error: new RiotApiError('forbidden', '403', 403) }),
         matchIds: () => Promise.resolve({ ok: true as const, value: [] }),
-        match: () => Promise.resolve({ ok: false as const, error: new RiotApiError('notFound', '404') })
+        match: () => Promise.resolve({ ok: false as const, error: new RiotApiError('notFound', '404') }),
+        timeline: () =>
+          Promise.resolve({ ok: false as const, error: new RiotApiError('notFound', '404') })
       },
       repo: new MetaRepo(db),
-      onProgress: () => undefined
+      onProgress: () => undefined,
+      isOrderable: anyOrderable
     })
     crawler.start()
     await vipollUntilDone(crawler)

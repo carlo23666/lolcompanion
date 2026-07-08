@@ -36,8 +36,12 @@ if (!patch) {
   process.exit(1)
 }
 
+// Order rows only exist if the exporting DB reached migration 006 (WP-015);
+// an empty table still exports as version 2 with itemOrder: [] — importers
+// then mark seeded matches as timeline-done, which is correct because the
+// exporter's aggregates ARE the order truth for those matches.
 const seed = {
-  version: 1,
+  version: 2,
   patch,
   exportedAt: new Date().toISOString(),
   matchIds: db
@@ -52,6 +56,11 @@ const seed = {
     .all(patch),
   items: db
     .prepare('SELECT champion, role, itemId, games, wins FROM meta_champion_items WHERE patch = ?')
+    .all(patch),
+  itemOrder: db
+    .prepare(
+      'SELECT champion, role, itemId, games, slotSum, firstGames FROM meta_champion_item_order WHERE patch = ?'
+    )
     .all(patch)
 }
 db.close()

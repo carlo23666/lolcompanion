@@ -15,6 +15,8 @@ export const matchIdsSchema = z.array(z.string())
 
 export const matchParticipantSchema = z.looseObject({
   puuid: z.string(),
+  /** 1-10, matches timeline event participantIds (WP-015 order aggregation). */
+  participantId: z.number().optional(),
   championName: z.string(),
   championId: z.number().optional(),
   teamId: z.number(),

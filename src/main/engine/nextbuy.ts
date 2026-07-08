@@ -6,9 +6,10 @@ import {
   type BaselinePool
 } from '@shared/schemas/baselines'
 import type { StaticData } from '../staticdata/manager'
-import { itemConflict } from '../staticdata/itemgraph'
+import { isFinishedBuildItem, itemConflict } from '../staticdata/itemgraph'
 import poolJson from './baselines/pool.json'
 import {
+  avgCompletionSlot,
   META_ITEM_MIN_GAMES,
   META_TRUST_MIN_GAMES,
   type MetaItemsInput
@@ -68,13 +69,28 @@ export function resolveBaseline(
   meta?: MetaItemsInput
 ): EffectiveBaseline | null {
   if (meta && meta.games >= META_TRUST_MIN_GAMES) {
+    // Finished pieces only: components (Bramble, Sheen…) appear in final
+    // builds but are never build SLOTS — advising them as such was the
+    // "Bramble first on Nasus" bug (WP-015).
     const usable = meta.items.filter((entry) => {
       if (entry.games < META_ITEM_MIN_GAMES) return false
       const node = staticData.itemGraph.nodes.get(entry.itemId)
-      return (
-        node !== undefined && node.availableOnSR && node.depth >= 2 && occupiesBuildSlot(node)
-      )
+      return node !== undefined && isFinishedBuildItem(node)
     })
+    // With enough timeline coverage, REAL completion order beats frequency
+    // (a popular-but-late Thornmail must not become the "first core item").
+    // Items without order sample keep their frequency rank at the tail.
+    const ordered = usable.filter((entry) => avgCompletionSlot(entry) !== null)
+    if (ordered.length >= 3) {
+      usable.sort((a, b) => {
+        const slotA = avgCompletionSlot(a)
+        const slotB = avgCompletionSlot(b)
+        if (slotA !== null && slotB !== null) return slotA - slotB
+        if (slotA !== null) return -1
+        if (slotB !== null) return 1
+        return b.games - a.games
+      })
+    }
     if (usable.length >= 3) {
       return {
         core: usable.slice(0, 5).map((entry) => entry.itemId),

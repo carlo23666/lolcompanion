@@ -8,6 +8,22 @@ export interface MetaItemStat {
   itemId: number
   games: number
   wins: number
+  /** Completion-order stats from timelines (WP-015); absent until crawled. */
+  orderGames?: number
+  /** Sum of 1-based completion positions across orderGames. */
+  slotSum?: number
+  /** Games where this was the FIRST finished item. */
+  firstGames?: number
+}
+
+/** Below this sample an item's average completion slot is noise. */
+export const ORDER_MIN_GAMES = 3
+
+/** Average completion position (1 = first item), or null without sample. */
+export function avgCompletionSlot(stat: MetaItemStat): number | null {
+  return stat.orderGames !== undefined && stat.slotSum !== undefined && stat.orderGames >= ORDER_MIN_GAMES
+    ? stat.slotSum / stat.orderGames
+    : null
 }
 
 export interface MetaItemsInput {

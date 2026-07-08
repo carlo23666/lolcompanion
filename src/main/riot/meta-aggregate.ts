@@ -1,4 +1,4 @@
-import type { RiotMatch } from '@shared/schemas/riot'
+import type { RiotMatch, RiotTimeline } from '@shared/schemas/riot'
 
 /** Deltas one match contributes to the meta tables. Pure data, no I/O. */
 export interface MetaMatchAggregate {
@@ -75,5 +75,70 @@ export function aggregateMatch(match: RiotMatch): MetaMatchAggregate | null {
     }
   }
 
+  return aggregate
+}
+
+/** Deltas one timeline contributes to meta_champion_item_order (WP-015). */
+export interface MetaOrderAggregate {
+  matchId: string
+  patch: string
+  items: { champion: string; role: string; itemId: number; slot: number; first: boolean }[]
+}
+
+/**
+ * Extracts per-participant item COMPLETION order from a match timeline:
+ * for each finished build item (caller passes the predicate — the aggregate
+ * stays pure), the 1-based position in which it was first purchased.
+ * ITEM_UNDO/ITEM_SOLD are deliberately ignored: for finished items they are
+ * noise-level and tracking them would complicate resume/idempotency.
+ * Returns null when the timeline doesn't belong to the match or the match
+ * isn't an aggregatable ranked game (same gates as aggregateMatch).
+ */
+export function aggregateTimelineOrder(
+  match: RiotMatch,
+  timeline: RiotTimeline,
+  isOrderable: (itemId: number) => boolean
+): MetaOrderAggregate | null {
+  if (timeline.metadata.matchId !== match.metadata.matchId) return null
+  if (match.info.queueId !== RANKED_SOLO_QUEUE) return null
+  if (match.info.gameDuration < MIN_DURATION_S) return null
+
+  const byParticipant = new Map<number, { champion: string; role: string }>()
+  for (const [index, participant] of match.info.participants.entries()) {
+    byParticipant.set(participant.participantId ?? index + 1, {
+      champion: participant.championName,
+      role: participant.teamPosition ?? ''
+    })
+  }
+
+  // Purchase events arrive frame by frame, already in chronological order.
+  const seen = new Map<number, Set<number>>()
+  const aggregate: MetaOrderAggregate = {
+    matchId: match.metadata.matchId,
+    patch: patchOf(match.info.gameVersion),
+    items: []
+  }
+  for (const frame of timeline.info.frames) {
+    for (const event of frame.events) {
+      if (event.type !== 'ITEM_PURCHASED') continue
+      const participantId = event.participantId
+      const itemId = event.itemId
+      if (participantId === undefined || itemId === undefined) continue
+      if (!isOrderable(itemId)) continue
+      const owner = byParticipant.get(participantId)
+      if (!owner) continue
+      const owned = seen.get(participantId) ?? new Set<number>()
+      if (owned.has(itemId)) continue // repurchase: first occurrence decides
+      owned.add(itemId)
+      seen.set(participantId, owned)
+      aggregate.items.push({
+        champion: owner.champion,
+        role: owner.role,
+        itemId,
+        slot: owned.size,
+        first: owned.size === 1
+      })
+    }
+  }
   return aggregate
 }
