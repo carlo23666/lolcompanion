@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { IpcEventChannel, IpcEventChannels } from '@shared/ipc'
+import { t as translators, type Translator } from '@shared/i18n'
+import { useT } from './i18n'
 
 /** Subscribes to a push channel and keeps the latest payload as state. */
 export function useIpcEvent<C extends IpcEventChannel>(
@@ -57,7 +59,8 @@ export function objectiveWindowText(
   deaths: { championName: string; isJungler: boolean }[],
   now: number,
   nextDragonS: number | null,
-  nextBaronS: number | null
+  nextBaronS: number | null,
+  t: Translator = translators.es
 ): string | null {
   const jungler = deaths.find((death) => death.isJungler)
   if (!jungler && deaths.length < 2) return null
@@ -65,18 +68,18 @@ export function objectiveWindowText(
   const dragonIn = nextDragonS !== null ? nextDragonS - now : null
   const baronIn = nextBaronS !== null && now >= BARON_SPAWN_S - OBJECTIVE_SOON_S ? nextBaronS - now : null
   let objective: string | null = null
-  if (baronIn !== null && baronIn <= 0) objective = '¡Barón libre!'
-  else if (dragonIn !== null && dragonIn <= 0) objective = 'dragón libre'
+  if (baronIn !== null && baronIn <= 0) objective = t('alert.baronFree')
+  else if (dragonIn !== null && dragonIn <= 0) objective = t('alert.dragonFree')
   else if (baronIn !== null && baronIn <= OBJECTIVE_SOON_S)
-    objective = `Barón sale en ${formatClock(Math.max(0, baronIn))}`
+    objective = t('alert.baronIn', { time: formatClock(Math.max(0, baronIn)) })
   else if (dragonIn !== null && dragonIn <= OBJECTIVE_SOON_S)
-    objective = `dragón sale en ${formatClock(Math.max(0, dragonIn))}`
+    objective = t('alert.dragonIn', { time: formatClock(Math.max(0, dragonIn)) })
   if (objective === null) return null
 
   const who = jungler
-    ? `${jungler.championName} (jungla enemiga) ha muerto`
-    : `${String(deaths.length)} enemigos han muerto`
-  return `${who} — ${objective}`
+    ? t('alert.junglerDied', { champion: jungler.championName })
+    : t('alert.enemiesDied', { n: String(deaths.length) })
+  return t('alert.objectiveWindow', { who, objective })
 }
 
 /**
@@ -90,6 +93,11 @@ export function useLiveInsights(): LiveInsights {
     nextDragonS: DRAGON_FIRST_SPAWN_S,
     nextBaronS: BARON_SPAWN_S
   })
+  // Latest translator in a ref: the event subscription mounts once, but alert
+  // text must follow the current locale without re-subscribing (ADR-009).
+  const t = useT()
+  const tRef = useRef(t)
+  tRef.current = t
   const timeRef = useRef(0)
   const selfTeamRef = useRef<'ORDER' | 'CHAOS'>('ORDER')
   const idRef = useRef(1)
@@ -137,7 +145,10 @@ export function useLiveInsights(): LiveInsights {
               id: idRef.current++,
               gameTimeS: now,
               kind: 'spike',
-              text: `${event.championName} completó ${event.item.name} — power spike`
+              text: tRef.current('alert.spike', {
+                champion: event.championName,
+                item: event.item.name
+              })
             })
           }
         } else if (event.type === 'levelUp' && event.team === enemyTeam) {
@@ -146,7 +157,10 @@ export function useLiveInsights(): LiveInsights {
               id: idRef.current++,
               gameTimeS: now,
               kind: 'spike',
-              text: `${event.championName} alcanzó nivel ${String(event.level)}`
+              text: tRef.current('alert.levelSpike', {
+                champion: event.championName,
+                level: String(event.level)
+              })
             })
           }
         } else if (event.type === 'objectiveTaken') {
@@ -158,7 +172,8 @@ export function useLiveInsights(): LiveInsights {
         enemyDeaths,
         now,
         timersRef.current.dragon,
-        timersRef.current.baron
+        timersRef.current.baron,
+        tRef.current
       )
       if (windowText !== null) {
         // Appended last so the batch reverse below surfaces it on top.

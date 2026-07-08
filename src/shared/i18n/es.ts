@@ -287,6 +287,10 @@ export const es: Catalog = {
     'Consejos EN PARTIDA (~1 por minuto): la mascota sugiere macro en el overlay — visión antes de objetivos, cuándo forzar, cuándo jugar seguro',
   'set.coach.model': 'Modelo',
   'set.coach.notInstalled': '{model} (no instalado — se usará otro)',
+  'set.sync.title': 'Sincronización',
+  'set.sync.error': 'Error: {error}',
+  'set.sync.done': 'Completado: {stored} partidas nuevas ({skipped} ya guardadas)',
+  'set.sync.downloading': 'Descargando… {stored} guardadas, {skipped} omitidas',
 
   // --- Mascot bubbles ---
   'mascot.idle.1': 'Zzz…',
@@ -316,6 +320,17 @@ export const es: Catalog = {
   'overlay.live': 'VIVO',
   'overlay.waiting': 'Esperando recomendación…',
   'overlay.matchPanel': 'Panel de partida',
+
+  // --- Live alerts (spike / objective window) ---
+  'alert.baronFree': '¡Barón libre!',
+  'alert.dragonFree': 'dragón libre',
+  'alert.baronIn': 'Barón sale en {time}',
+  'alert.dragonIn': 'dragón sale en {time}',
+  'alert.junglerDied': '{champion} (jungla enemiga) ha muerto',
+  'alert.enemiesDied': '{n} enemigos han muerto',
+  'alert.objectiveWindow': '{who} — {objective}',
+  'alert.spike': '{champion} completó {item} — power spike',
+  'alert.levelSpike': '{champion} alcanzó nivel {level}',
 
   // --- Engine: shared words + ordinals + categories ---
   'engine.word.physical': 'físico',

@@ -636,7 +636,7 @@ export default function SettingsView(): React.JSX.Element {
 
       {progress !== null && (
         <section className="max-w-md rounded-lg border border-slate-800 bg-slate-900 p-4">
-          <h2 className="mb-2 text-sm font-semibold text-slate-300">Sincronización</h2>
+          <h2 className="mb-2 text-sm font-semibold text-slate-300">{t('set.sync.title')}</h2>
           <div className="h-2 w-full overflow-hidden rounded bg-slate-800">
             <div
               className="h-full bg-indigo-500 transition-all"
@@ -647,10 +647,16 @@ export default function SettingsView(): React.JSX.Element {
           </div>
           <p className="mt-2 text-xs text-slate-400">
             {progress.error !== undefined
-              ? `Error: ${progress.error}`
+              ? t('set.sync.error', { error: progress.error })
               : progress.done
-                ? `Completado: ${String(progress.stored)} partidas nuevas (${String(progress.skipped)} ya guardadas)`
-                : `Descargando… ${String(progress.stored)} guardadas, ${String(progress.skipped)} omitidas`}
+                ? t('set.sync.done', {
+                    stored: String(progress.stored),
+                    skipped: String(progress.skipped)
+                  })
+                : t('set.sync.downloading', {
+                    stored: String(progress.stored),
+                    skipped: String(progress.skipped)
+                  })}
           </p>
         </section>
       )}

@@ -282,6 +282,10 @@ export const en = {
     'IN-GAME tips (~1 per minute): the mascot suggests macro in the overlay — vision before objectives, when to force, when to play safe',
   'set.coach.model': 'Model',
   'set.coach.notInstalled': '{model} (not installed — another will be used)',
+  'set.sync.title': 'Sync',
+  'set.sync.error': 'Error: {error}',
+  'set.sync.done': 'Done: {stored} new games ({skipped} already saved)',
+  'set.sync.downloading': 'Downloading… {stored} saved, {skipped} skipped',
 
   // --- Mascot bubbles ---
   'mascot.idle.1': 'Zzz…',
@@ -311,6 +315,17 @@ export const en = {
   'overlay.live': 'LIVE',
   'overlay.waiting': 'Waiting for a recommendation…',
   'overlay.matchPanel': 'Match panel',
+
+  // --- Live alerts (spike / objective window) ---
+  'alert.baronFree': "Baron's up!",
+  'alert.dragonFree': "dragon's up",
+  'alert.baronIn': 'Baron spawns in {time}',
+  'alert.dragonIn': 'dragon spawns in {time}',
+  'alert.junglerDied': '{champion} (enemy jungler) died',
+  'alert.enemiesDied': '{n} enemies died',
+  'alert.objectiveWindow': '{who} — {objective}',
+  'alert.spike': '{champion} finished {item} — power spike',
+  'alert.levelSpike': '{champion} reached level {level}',
 
   // --- Engine: shared words + ordinals + categories ---
   'engine.word.physical': 'physical',
