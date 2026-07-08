@@ -65,6 +65,25 @@ export interface WeekdayStat {
   winratePct: number
 }
 
+/** An explicit weak point detected from the stored history (WP-016). */
+export interface WeaknessInsight {
+  key:
+    | 'deaths-early'
+    | 'deaths-mid'
+    | 'deaths-late'
+    | 'gankable'
+    | 'low-vision'
+    | 'objectives-while-dead'
+    | 'low-kill-participation'
+  severity: 'high' | 'medium'
+  /** Spanish sentence with the numbers baked in. */
+  finding: string
+  /** One actionable line. */
+  advice: string
+  /** Sample size behind the verdict. */
+  games: number
+}
+
 export interface StatsOverview {
   totalGames: number
   champions: ChampionStat[]
@@ -76,4 +95,6 @@ export interface StatsOverview {
   worstMatchups: MatchupStat[]
   bestMatchups: MatchupStat[]
   weekdays: WeekdayStat[]
+  /** High severity first; empty while the sample is too small. */
+  weaknesses: WeaknessInsight[]
 }

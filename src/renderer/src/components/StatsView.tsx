@@ -77,6 +77,34 @@ function StreakCard(props: { overview: StatsOverview }): React.JSX.Element {
   )
 }
 
+/** Explicit weak points from the stored history (WP-016). */
+function WeaknessPanel(props: { overview: StatsOverview }): React.JSX.Element | null {
+  const { weaknesses } = props.overview
+  if (weaknesses.length === 0) return null
+  return (
+    <Card title="Puntos débiles detectados">
+      <ul className="flex flex-col gap-2">
+        {weaknesses.map((weakness) => (
+          <li
+            key={weakness.key}
+            className={`rounded border-l-2 py-1 pl-3 pr-2 ${
+              weakness.severity === 'high'
+                ? 'border-rose-500 bg-rose-500/5'
+                : 'border-amber-500 bg-amber-500/5'
+            }`}
+          >
+            <p className="text-sm text-slate-200">
+              {weakness.severity === 'high' ? '🔴' : '🟠'} {weakness.finding}
+              <span className="ml-1 text-[11px] text-slate-500">({weakness.games}p)</span>
+            </p>
+            <p className="mt-0.5 text-xs text-slate-400">{weakness.advice}</p>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  )
+}
+
 function ChampionTable(props: { overview: StatsOverview }): React.JSX.Element {
   return (
     <Card title="Por campeón">
@@ -257,6 +285,7 @@ export default function StatsView(): React.JSX.Element {
   return (
     <div className="flex flex-col gap-3 overflow-y-auto">
       <StreakCard overview={overview} />
+      <WeaknessPanel overview={overview} />
       <ChampionTable overview={overview} />
       <CurvesCard curves={curves} />
 

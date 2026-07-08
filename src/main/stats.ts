@@ -10,6 +10,11 @@ import type {
 } from '@shared/stats'
 import type { AppDatabase } from './db'
 import { MatchRepo, TimelineRepo, type ParticipantRow } from './db/repos'
+import {
+  computeWeaknesses,
+  extractWeaknessEvents,
+  type WeaknessGameInput
+} from './stats-weaknesses'
 
 /** New play session starts after this pause between games. */
 const SESSION_GAP_MS = 45 * 60 * 1000
@@ -83,7 +88,8 @@ export class StatsService {
       firstDragon,
       worstMatchups: worst,
       bestMatchups: best,
-      weekdays
+      weekdays,
+      weaknesses: computeWeaknesses(this.weaknessInputs(puuid, rows))
     }
     this.overviewCache.set(puuid, { newestMatchId, value: overview })
     return overview
@@ -343,6 +349,55 @@ export class StatsService {
       }))
     const byWinrate = [...qualified].sort((a, b) => a.winratePct - b.winratePct)
     return { worst: byWinrate.slice(0, 5), best: byWinrate.slice(-5).reverse() }
+  }
+
+  /** Per-game inputs for the weakness detectors (WP-016). */
+  private weaknessInputs(
+    puuid: string,
+    rows: { match: { matchId: string; durationS: number }; own: ParticipantRow }[]
+  ): WeaknessGameInput[] {
+    return rows.map(({ match, own }) => {
+      const participants = this.matches.getParticipants(match.matchId)
+      const teamKills = participants
+        .filter((participant) => participant.win === own.win)
+        .reduce((sum, participant) => sum + participant.kills, 0)
+      const input: WeaknessGameInput = {
+        durationS: match.durationS,
+        role: own.role,
+        win: own.win,
+        kills: own.kills,
+        deaths: own.deaths,
+        assists: own.assists,
+        vision: own.vision,
+        teamKills
+      }
+
+      const timeline = this.timelines.getTimelineRaw(match.matchId) as
+        | (Parameters<typeof extractWeaknessEvents>[0] & {
+            metadata?: { participants?: string[] }
+          })
+        | null
+      if (!timeline) return input
+      const timelineParticipants = timeline.metadata?.participants ?? []
+      const ownParticipantId = timelineParticipants.indexOf(puuid) + 1
+      if (ownParticipantId === 0) return input
+
+      const enemyParticipantIds = new Set<number>()
+      const enemyJunglerIds = new Set<number>()
+      for (const participant of participants) {
+        if (participant.win === own.win) continue
+        const id = timelineParticipants.indexOf(participant.puuid) + 1
+        if (id === 0) continue
+        enemyParticipantIds.add(id)
+        if (participant.role === 'JUNGLE') enemyJunglerIds.add(id)
+      }
+      const events = extractWeaknessEvents(timeline, {
+        ownParticipantId,
+        enemyParticipantIds,
+        enemyJunglerIds
+      })
+      return { ...input, ...events }
+    })
   }
 
   private weekdays(
