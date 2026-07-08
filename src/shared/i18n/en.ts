@@ -199,6 +199,41 @@ export const en = {
   'stats.wd.5': 'Fri',
   'stats.wd.6': 'Sat',
 
+  // --- Post-game report ---
+  'report.coachTitle': "{mascot}'s analysis (local AI)",
+  'report.coachThinking': '{mascot} is thinking… (local model, give it a few seconds)',
+  'report.coachPreparing': 'Preparing analysis…',
+  'report.unknownError': 'unknown error',
+  'report.avg': 'avg {value}',
+  'report.practiceTool': 'Practice Tool',
+  'report.thisMode': 'this mode',
+  'report.waiting': 'The report shows up as soon as Riot publishes the game (1-3 min)…',
+  'report.unsupportedMode':
+    "{mode} games don't appear in Riot's match history, so there's no report for this game.",
+  'report.stat.deaths': 'Deaths',
+  'report.stat.vision': 'Vision',
+  'report.engineRecs': 'Engine recommendations ({followed}/{total} followed)',
+
+  // --- Champ select panel ---
+  'csp.coachTitle': '{mascot} analyzes the draft',
+  'csp.recalculating': 'recalculating…',
+  'csp.thinking': 'Thinking…',
+  'csp.waitingDraft': 'Waiting for draft changes…',
+  'csp.championFallback': 'champion {id}',
+  'csp.unpicked': 'unpicked',
+  'csp.buyPlan': 'Buy plan against this comp',
+  'csp.yourPlan': 'Your plan with {champion} (from your own games)',
+  'csp.situational': 'situational:',
+  'csp.inProgress': 'Champion select in progress',
+  'csp.waitingData': 'Waiting for select data…',
+  'csp.title': 'Champion select',
+  'csp.yourPosition': 'your position: {pos}',
+  'csp.noPicks': 'No visible picks yet',
+  'csp.bans': 'Bans',
+  'csp.whatPick': 'What should I pick? · your games + Master+ + kit',
+  'csp.inGames': 'in {games} games',
+  'csp.footer': 'Advice derived only from champions visible on screen.',
+
   // --- Engine: shared words + ordinals + categories ---
   'engine.word.physical': 'physical',
   'engine.word.magic': 'magic',

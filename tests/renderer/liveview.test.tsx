@@ -53,7 +53,8 @@ describe('LiveView', () => {
         gameState={null}
         champSelect={champSelect}
         championMeta={championMeta}
-      />
+      />,
+      { wrapper: esWrapper }
     )
     expect(screen.getByText(/tu posición: MID/)).toBeInTheDocument()
     // Ally pick, own pick intent and the enemy pick render as portraits

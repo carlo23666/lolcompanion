@@ -204,6 +204,41 @@ export const es: Catalog = {
   'stats.wd.5': 'Vie',
   'stats.wd.6': 'Sáb',
 
+  // --- Post-game report ---
+  'report.coachTitle': 'Análisis de {mascot} (IA local)',
+  'report.coachThinking': '{mascot} está pensando… (modelo local, dale unos segundos)',
+  'report.coachPreparing': 'Preparando análisis…',
+  'report.unknownError': 'error desconocido',
+  'report.avg': 'media {value}',
+  'report.practiceTool': 'Herramienta de práctica',
+  'report.thisMode': 'este modo',
+  'report.waiting': 'El informe aparecerá en cuanto Riot publique la partida (1-3 min)…',
+  'report.unsupportedMode':
+    'Las partidas de {mode} no aparecen en el historial de Riot, así que no hay informe para esta partida.',
+  'report.stat.deaths': 'Muertes',
+  'report.stat.vision': 'Visión',
+  'report.engineRecs': 'Recomendaciones del motor ({followed}/{total} seguidas)',
+
+  // --- Champ select panel ---
+  'csp.coachTitle': '{mascot} analiza el draft',
+  'csp.recalculating': 'recalculando…',
+  'csp.thinking': 'Pensando…',
+  'csp.waitingDraft': 'Esperando cambios en el draft…',
+  'csp.championFallback': 'campeón {id}',
+  'csp.unpicked': 'sin elegir',
+  'csp.buyPlan': 'Plan de compra contra esta comp',
+  'csp.yourPlan': 'Tu plan con {champion} (de tus propias partidas)',
+  'csp.situational': 'situacionales:',
+  'csp.inProgress': 'Selección de campeones en curso',
+  'csp.waitingData': 'Esperando datos de la selección…',
+  'csp.title': 'Selección de campeones',
+  'csp.yourPosition': 'tu posición: {pos}',
+  'csp.noPicks': 'Sin picks visibles todavía',
+  'csp.bans': 'Baneos',
+  'csp.whatPick': '¿Qué te pego? · tus partidas + Master+ + kit',
+  'csp.inGames': 'en {games} partidas',
+  'csp.footer': 'Consejos derivados solo de los campeones visibles en pantalla.',
+
   // --- Engine: shared words + ordinals + categories ---
   'engine.word.physical': 'físico',
   'engine.word.magic': 'mágico',

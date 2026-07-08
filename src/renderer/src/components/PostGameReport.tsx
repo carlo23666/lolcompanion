@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { PostGameReport as Report, PostGameReportResult } from '@shared/report'
+import type { MessageKey } from '@shared/i18n'
+import { useT } from '../i18n'
 import { HexiSprite, useMascotName } from './Mascot'
 
 /**
@@ -9,6 +11,7 @@ import { HexiSprite, useMascotName } from './Mascot'
  */
 function CoachSection(props: { report: Report }): React.JSX.Element | null {
   const mascot = useMascotName()
+  const t = useT()
   const [ready, setReady] = useState(false)
   const [thinking, setThinking] = useState(false)
   const [advice, setAdvice] = useState<string | null>(null)
@@ -32,7 +35,7 @@ function CoachSection(props: { report: Report }): React.JSX.Element | null {
     void window.api.invoke('coach:analyze', props.report).then((result) => {
       setThinking(false)
       if (result.ok && result.text !== undefined) setAdvice(result.text)
-      else setError(result.error ?? 'error desconocido')
+      else setError(result.error ?? t('report.unknownError'))
     })
   }, [ready, props.report])
 
@@ -44,15 +47,13 @@ function CoachSection(props: { report: Report }): React.JSX.Element | null {
         <HexiSprite mood={thinking ? 'focused' : 'idle'} className="h-9 w-9 shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="mb-1 text-[11px] font-semibold tracking-wide text-indigo-300 uppercase">
-            Análisis de {mascot} (IA local)
+            {t('report.coachTitle', { mascot })}
           </p>
           {advice !== null ? (
             <p className="text-xs leading-relaxed whitespace-pre-wrap text-slate-300">{advice}</p>
           ) : (
             <p className="text-xs text-slate-500">
-              {thinking
-                ? `${mascot} está pensando… (modelo local, dale unos segundos)`
-                : 'Preparando análisis…'}
+              {thinking ? t('report.coachThinking', { mascot }) : t('report.coachPreparing')}
             </p>
           )}
           {error !== null && <p className="mt-1 text-[11px] text-rose-400">{error}</p>}
@@ -71,6 +72,7 @@ function StatDelta(props: {
   /** Deaths-style metrics: staying under your average is the good outcome. */
   lowerIsBetter?: boolean
 }): React.JSX.Element {
+  const t = useT()
   const decimals = props.decimals ?? 1
   const better =
     props.average !== null &&
@@ -86,16 +88,16 @@ function StatDelta(props: {
       <p className="text-[11px] text-slate-500">{props.label}</p>
       {props.average !== null && (
         <p className={`text-[11px] font-mono ${better ? 'text-emerald-400' : 'text-rose-400'}`}>
-          {better ? '▲' : '▼'} media {props.average.toFixed(decimals)}
-          {props.suffix ?? ''}
+          {better ? '▲' : '▼'}{' '}
+          {t('report.avg', { value: `${props.average.toFixed(decimals)}${props.suffix ?? ''}` })}
         </p>
       )}
     </div>
   )
 }
 
-const UNSUPPORTED_MODE_LABEL: Record<string, string> = {
-  PRACTICETOOL: 'Herramienta de práctica'
+const UNSUPPORTED_MODE_KEYS: Record<string, MessageKey> = {
+  PRACTICETOOL: 'report.practiceTool'
 }
 
 /**
@@ -103,6 +105,7 @@ const UNSUPPORTED_MODE_LABEL: Record<string, string> = {
  * recommendations were followed. Refreshes when auto-ingest links the match.
  */
 export default function PostGameReport(): React.JSX.Element | null {
+  const t = useT()
   const [result, setResult] = useState<PostGameReportResult | null>(null)
 
   useEffect(() => {
@@ -114,18 +117,14 @@ export default function PostGameReport(): React.JSX.Element | null {
   }, [])
 
   if (result === null) {
-    return (
-      <p className="card-in text-center text-xs text-slate-500">
-        El informe aparecerá en cuanto Riot publique la partida (1-3 min)…
-      </p>
-    )
+    return <p className="card-in text-center text-xs text-slate-500">{t('report.waiting')}</p>
   }
 
   if (result.kind === 'unsupported') {
+    const modeKey = UNSUPPORTED_MODE_KEYS[result.gameMode]
     return (
       <p className="card-in max-w-sm text-center text-xs text-slate-500">
-        Las partidas de {UNSUPPORTED_MODE_LABEL[result.gameMode] ?? 'este modo'} no aparecen en
-        el historial de Riot, así que no hay informe para esta partida.
+        {t('report.unsupportedMode', { mode: modeKey ? t(modeKey) : t('report.thisMode') })}
       </p>
     )
   }
@@ -135,6 +134,7 @@ export default function PostGameReport(): React.JSX.Element | null {
 
 /** Presentational report card, reused by Historial → Ver informe. */
 export function ReportCard(props: { report: Report }): React.JSX.Element {
+  const t = useT()
   const report = props.report
   const followed = report.recommendedItems.filter((item) => item.followed)
 
@@ -150,7 +150,7 @@ export function ReportCard(props: { report: Report }): React.JSX.Element {
           <p className="text-sm font-bold text-slate-100">
             {report.champion} ·{' '}
             <span className={report.win ? 'text-emerald-400' : 'text-rose-400'}>
-              {report.win ? 'Victoria' : 'Derrota'}
+              {report.win ? t('home.win') : t('home.loss')}
             </span>
           </p>
           <p className="font-mono text-xs text-slate-400">
@@ -161,29 +161,29 @@ export function ReportCard(props: { report: Report }): React.JSX.Element {
       </div>
 
       <div className="mb-3 grid grid-cols-5 gap-2 rounded border border-slate-800 bg-slate-950/50 py-2">
-        <StatDelta label="CS/min" value={report.csPerMin} average={report.avgCsPerMin} />
+        <StatDelta label={t('stats.th.csmin')} value={report.csPerMin} average={report.avgCsPerMin} />
         <StatDelta
-          label="Oro/min"
+          label={t('stats.th.goldmin')}
           value={report.goldPerMin}
           average={report.avgGoldPerMin}
           decimals={0}
         />
         <StatDelta
-          label="% daño"
+          label={t('stats.th.dmgPct')}
           value={report.damageSharePct}
           average={report.avgDamageSharePct}
           decimals={0}
           suffix="%"
         />
         <StatDelta
-          label="Muertes"
+          label={t('report.stat.deaths')}
           value={report.deaths}
           average={report.avgDeaths}
           decimals={0}
           lowerIsBetter
         />
         <StatDelta
-          label="Visión"
+          label={t('report.stat.vision')}
           value={report.visionScore}
           average={report.avgVisionScore}
           decimals={0}
@@ -203,8 +203,10 @@ export function ReportCard(props: { report: Report }): React.JSX.Element {
       {report.recommendedItems.length > 0 && (
         <div>
           <p className="mb-1 text-xs font-semibold text-slate-400">
-            Recomendaciones del motor ({followed.length}/{report.recommendedItems.length}{' '}
-            seguidas)
+            {t('report.engineRecs', {
+              followed: String(followed.length),
+              total: String(report.recommendedItems.length)
+            })}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {report.recommendedItems.map((item) => (
