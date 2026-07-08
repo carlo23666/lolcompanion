@@ -1,7 +1,18 @@
 import { useEffect, useState } from 'react'
 import type { PersonalCurve, StatsOverview } from '@shared/stats'
+import type { MessageKey } from '@shared/i18n'
+import { useT } from '../i18n'
 
-const WEEKDAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+const WEEKDAY_KEYS: readonly MessageKey[] = [
+  'stats.wd.0',
+  'stats.wd.1',
+  'stats.wd.2',
+  'stats.wd.3',
+  'stats.wd.4',
+  'stats.wd.5',
+  'stats.wd.6'
+]
+// Language-neutral (numbers + min); no key needed.
 const DURATION_LABEL: Record<string, string> = {
   corta: '< 25 min',
   media: '25-32 min',
@@ -25,13 +36,14 @@ function Card(props: { title: string; children: React.ReactNode }): React.JSX.El
 
 function StreakCard(props: { overview: StatsOverview }): React.JSX.Element {
   const { streaks, totalGames } = props.overview
+  const t = useT()
   const tilt =
     streaks.sessionFirstWrPct !== null &&
     streaks.sessionLaterWrPct !== null &&
     streaks.sessionLaterGames >= 10 &&
     streaks.sessionFirstWrPct - streaks.sessionLaterWrPct >= 5
   return (
-    <Card title="Rachas y sesiones">
+    <Card title={t('stats.streaks')}>
       <div className="flex flex-wrap items-center gap-4 text-sm">
         <div>
           <p
@@ -39,35 +51,39 @@ function StreakCard(props: { overview: StatsOverview }): React.JSX.Element {
           >
             {streaks.current >= 0 ? '▲' : '▼'} {Math.abs(streaks.current)}
           </p>
-          <p className="text-xs text-slate-500">racha actual</p>
+          <p className="text-xs text-slate-500">{t('stats.currentStreak')}</p>
         </div>
         <div className="text-xs text-slate-400">
           <p>
-            Mejor racha: <span className="text-emerald-400">{streaks.longestWin} victorias</span>
+            {t('stats.bestStreak')}{' '}
+            <span className="text-emerald-400">{t('stats.wins', { n: String(streaks.longestWin) })}</span>
           </p>
           <p>
-            Peor racha: <span className="text-rose-400">{streaks.longestLoss} derrotas</span>
+            {t('stats.worstStreak')}{' '}
+            <span className="text-rose-400">{t('stats.losses', { n: String(streaks.longestLoss) })}</span>
           </p>
-          <p className="text-slate-600">{totalGames} partidas analizadas</p>
+          <p className="text-slate-600">{t('stats.gamesAnalyzed', { n: String(totalGames) })}</p>
         </div>
         {streaks.sessionFirstWrPct !== null && streaks.sessionLaterWrPct !== null && (
           <div className="text-xs text-slate-400">
             <p>
-              Partidas 1-2 de sesión:{' '}
+              {t('stats.session12')}{' '}
               <span className={wrColor(streaks.sessionFirstWrPct)}>
                 {Math.round(streaks.sessionFirstWrPct)}% WR
               </span>
             </p>
             <p>
-              Partida 3 en adelante:{' '}
+              {t('stats.session3')}{' '}
               <span className={wrColor(streaks.sessionLaterWrPct)}>
                 {Math.round(streaks.sessionLaterWrPct)}% WR
               </span>
             </p>
             {tilt && (
               <p className="mt-1 text-amber-400">
-                ⚠ Tu winrate cae {Math.round(streaks.sessionFirstWrPct - streaks.sessionLaterWrPct)}{' '}
-                puntos a partir de la 3ª partida — considera sesiones más cortas
+                ⚠{' '}
+                {t('stats.tilt', {
+                  n: String(Math.round(streaks.sessionFirstWrPct - streaks.sessionLaterWrPct))
+                })}
               </p>
             )}
           </div>
@@ -80,9 +96,10 @@ function StreakCard(props: { overview: StatsOverview }): React.JSX.Element {
 /** Explicit weak points from the stored history (WP-016). */
 function WeaknessPanel(props: { overview: StatsOverview }): React.JSX.Element | null {
   const { weaknesses } = props.overview
+  const t = useT()
   if (weaknesses.length === 0) return null
   return (
-    <Card title="Puntos débiles detectados">
+    <Card title={t('stats.weakTitle')}>
       <ul className="flex flex-col gap-2">
         {weaknesses.map((weakness) => (
           <li
@@ -95,7 +112,9 @@ function WeaknessPanel(props: { overview: StatsOverview }): React.JSX.Element | 
           >
             <p className="text-sm text-slate-200">
               {weakness.severity === 'high' ? '🔴' : '🟠'} {weakness.finding}
-              <span className="ml-1 text-[11px] text-slate-500">({weakness.games}p)</span>
+              <span className="ml-1 text-[11px] text-slate-500">
+                {t('stats.weakSample', { n: String(weakness.games) })}
+              </span>
             </p>
             <p className="mt-0.5 text-xs text-slate-400">{weakness.advice}</p>
           </li>
@@ -106,20 +125,21 @@ function WeaknessPanel(props: { overview: StatsOverview }): React.JSX.Element | 
 }
 
 function ChampionTable(props: { overview: StatsOverview }): React.JSX.Element {
+  const t = useT()
   return (
-    <Card title="Por campeón">
+    <Card title={t('stats.byChampion')}>
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
             <tr className="text-left text-slate-500">
-              <th className="pb-1 pr-2 font-normal">Campeón</th>
-              <th className="pb-1 pr-2 font-normal">P</th>
-              <th className="pb-1 pr-2 font-normal">WR</th>
-              <th className="pb-1 pr-2 font-normal">KDA</th>
-              <th className="pb-1 pr-2 font-normal">CS/min</th>
-              <th className="pb-1 pr-2 font-normal">Oro/min</th>
-              <th className="pb-1 pr-2 font-normal">% daño</th>
-              <th className="pb-1 font-normal">Visión/min</th>
+              <th className="pb-1 pr-2 font-normal">{t('stats.th.champion')}</th>
+              <th className="pb-1 pr-2 font-normal">{t('stats.th.games')}</th>
+              <th className="pb-1 pr-2 font-normal">{t('stats.th.wr')}</th>
+              <th className="pb-1 pr-2 font-normal">{t('stats.th.kda')}</th>
+              <th className="pb-1 pr-2 font-normal">{t('stats.th.csmin')}</th>
+              <th className="pb-1 pr-2 font-normal">{t('stats.th.goldmin')}</th>
+              <th className="pb-1 pr-2 font-normal">{t('stats.th.dmgPct')}</th>
+              <th className="pb-1 font-normal">{t('stats.th.visionMin')}</th>
             </tr>
           </thead>
           <tbody>
@@ -175,6 +195,7 @@ function MatchupChips(props: {
   title: string
   matchups: StatsOverview['worstMatchups']
 }): React.JSX.Element | null {
+  const t = useT()
   if (props.matchups.length === 0) return null
   return (
     <Card title={props.title}>
@@ -183,7 +204,10 @@ function MatchupChips(props: {
           <span
             key={matchup.enemyChampion}
             className="flex items-center gap-1 rounded bg-slate-800 px-1.5 py-0.5 text-[11px] text-slate-300"
-            title={`${matchup.role} · ${String(matchup.games)} partidas`}
+            title={t('stats.matchupTitle', {
+              role: matchup.role,
+              games: String(matchup.games)
+            })}
           >
             <img
               src={`ddicon://champion/${matchup.enemyChampion}.png`}
@@ -202,18 +226,19 @@ function MatchupChips(props: {
 }
 
 function CurvesCard(props: { curves: PersonalCurve[] }): React.JSX.Element | null {
+  const t = useT()
   if (props.curves.length === 0) return null
   return (
-    <Card title="Tu curva de farmeo (medias personales)">
+    <Card title={t('stats.curves')}>
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
             <tr className="text-left text-slate-500">
-              <th className="pb-1 pr-2 font-normal">Campeón</th>
+              <th className="pb-1 pr-2 font-normal">{t('stats.th.champion')}</th>
               <th className="pb-1 pr-2 font-normal">CS @10</th>
               <th className="pb-1 pr-2 font-normal">CS @15</th>
-              <th className="pb-1 pr-2 font-normal">Oro @10</th>
-              <th className="pb-1 font-normal">Oro @15</th>
+              <th className="pb-1 pr-2 font-normal">{t('stats.th.gold10')}</th>
+              <th className="pb-1 font-normal">{t('stats.th.gold15')}</th>
             </tr>
           </thead>
           <tbody>
@@ -243,6 +268,7 @@ function CurvesCard(props: { curves: PersonalCurve[] }): React.JSX.Element | nul
 }
 
 export default function StatsView(): React.JSX.Element {
+  const t = useT()
   const [overview, setOverview] = useState<StatsOverview | null>(null)
   const [curves, setCurves] = useState<PersonalCurve[]>([])
   const [loading, setLoading] = useState(true)
@@ -272,14 +298,10 @@ export default function StatsView(): React.JSX.Element {
   }, [])
 
   if (loading && overview === null) {
-    return <p className="p-4 text-sm text-slate-500">Calculando estadísticas…</p>
+    return <p className="p-4 text-sm text-slate-500">{t('stats.calculating')}</p>
   }
   if (overview === null || overview.totalGames === 0) {
-    return (
-      <p className="p-4 text-sm text-slate-500">
-        Sin datos todavía — sincroniza tu historial en Ajustes.
-      </p>
-    )
+    return <p className="p-4 text-sm text-slate-500">{t('stats.noData')}</p>
   }
 
   return (
@@ -290,7 +312,7 @@ export default function StatsView(): React.JSX.Element {
       <CurvesCard curves={curves} />
 
       <div className="grid gap-3 md:grid-cols-2">
-        <Card title="Winrate por duración de partida">
+        <Card title={t('stats.durationTitle')}>
           <div className="flex flex-col gap-1.5">
             {overview.durations.map((duration) => (
               <BarRow
@@ -304,14 +326,14 @@ export default function StatsView(): React.JSX.Element {
         </Card>
 
         {overview.firstDragon !== null && (
-          <Card title="Primer dragón">
+          <Card title={t('stats.firstDragon')}>
             <div className="flex items-center gap-6 text-center">
               <div>
                 <p className={`text-xl font-bold ${wrColor(overview.firstDragon.withWrPct)}`}>
                   {Math.round(overview.firstDragon.withWrPct)}%
                 </p>
                 <p className="text-[11px] text-slate-500">
-                  tu equipo lo coge ({overview.firstDragon.withGames}p)
+                  {t('stats.dragonTaken', { n: String(overview.firstDragon.withGames) })}
                 </p>
               </div>
               <div>
@@ -319,29 +341,32 @@ export default function StatsView(): React.JSX.Element {
                   {Math.round(overview.firstDragon.withoutWrPct)}%
                 </p>
                 <p className="text-[11px] text-slate-500">
-                  lo pierde ({overview.firstDragon.withoutGames}p)
+                  {t('stats.dragonLost', { n: String(overview.firstDragon.withoutGames) })}
                 </p>
               </div>
             </div>
           </Card>
         )}
 
-        <MatchupChips title="Peores matchups (misma línea)" matchups={overview.worstMatchups} />
-        <MatchupChips title="Mejores matchups (misma línea)" matchups={overview.bestMatchups} />
+        <MatchupChips title={t('stats.worstMatchups')} matchups={overview.worstMatchups} />
+        <MatchupChips title={t('stats.bestMatchups')} matchups={overview.bestMatchups} />
       </div>
 
-      <Card title="Winrate por día de la semana">
+      <Card title={t('stats.byWeekday')}>
         <div className="flex flex-col gap-1.5">
           {overview.weekdays
             .filter((day) => day.games > 0)
-            .map((day) => (
+            .map((day) => {
+              const key = WEEKDAY_KEYS[day.weekday]
+              return (
               <BarRow
                 key={day.weekday}
-                label={WEEKDAYS[day.weekday] ?? String(day.weekday)}
+                label={key ? t(key) : String(day.weekday)}
                 pct={day.winratePct}
                 games={day.games}
               />
-            ))}
+              )
+            })}
         </div>
       </Card>
     </div>

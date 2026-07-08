@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { HistoryAggregate, HistoryDetail, HistoryRow } from '@shared/history'
 import type { PostGameReportResult } from '@shared/report'
+import type { Translator } from '@shared/i18n'
+import { intlLocale, useLocale, useT } from '../i18n'
 import { ReportCard } from './PostGameReport'
 import StatsView from './StatsView'
 
@@ -10,8 +12,8 @@ function formatDuration(totalSeconds: number): string {
   return `${String(minutes)}:${String(seconds).padStart(2, '0')}`
 }
 
-function formatDate(epochMs: number): string {
-  return new Date(epochMs).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+function formatDate(epochMs: number, locale: string): string {
+  return new Date(epochMs).toLocaleDateString(locale, { day: '2-digit', month: 'short' })
 }
 
 const ROLE_LABEL: Record<string, string> = {
@@ -32,8 +34,8 @@ const QUEUE_LABEL: Record<number, string> = {
   700: 'Clash'
 }
 
-function queueLabel(queueId: number): string {
-  return QUEUE_LABEL[queueId] ?? `cola ${String(queueId)}`
+function queueLabel(queueId: number, t: Translator): string {
+  return QUEUE_LABEL[queueId] ?? t('hist.queuePrefix', { id: String(queueId) })
 }
 
 type ResultFilter = 'todas' | 'victoria' | 'derrota'
@@ -54,6 +56,7 @@ function kdaOf(row: HistoryRow): number {
  * ("¿cómo voy con X en este parche?") and this strip is the answer. */
 function SummaryStrip(props: { rows: HistoryRow[] }): React.JSX.Element | null {
   const { rows } = props
+  const t = useT()
   if (rows.length === 0) return null
   const wins = rows.filter((row) => row.win).length
   const kills = rows.reduce((sum, row) => sum + row.kills, 0)
@@ -89,29 +92,29 @@ function SummaryStrip(props: { rows: HistoryRow[] }): React.JSX.Element | null {
   return (
     <div className="card-in flex flex-wrap items-center rounded-lg border border-slate-800 bg-slate-900 px-4 py-2.5">
       <div className="flex divide-x divide-slate-800">
-        {cell('Partidas', rows.length)}
+        {cell(t('hist.summary.games'), rows.length)}
         {cell(
-          'Winrate',
+          t('hist.summary.winrate'),
           <span className={wr >= 50 ? 'text-emerald-400' : 'text-rose-400'}>{wr}%</span>
         )}
-        {cell('KDA', ((kills + assists) / Math.max(1, deaths)).toFixed(2))}
-        {cell('CS/min', cs.toFixed(1))}
+        {cell(t('hist.summary.kda'), ((kills + assists) / Math.max(1, deaths)).toFixed(2))}
+        {cell(t('hist.summary.cs'), cs.toFixed(1))}
         {cell(
-          'Racha',
+          t('hist.summary.streak'),
           <span className={streakSigned > 0 ? 'text-emerald-400' : 'text-rose-400'}>
             {streakSigned > 0 ? `+${String(streakSigned)}` : String(streakSigned)}
           </span>
         )}
       </div>
-      <div className="ml-auto flex items-center gap-1.5" title="Últimas 10 (izquierda = más reciente)">
+      <div className="ml-auto flex items-center gap-1.5" title={t('hist.summary.formTitle')}>
         <span className="text-[10px] font-semibold tracking-widest text-slate-500 uppercase">
-          Forma
+          {t('hist.summary.form')}
         </span>
         {recent.map((row) => (
           <span
             key={row.matchId}
             className={`h-2.5 w-2.5 rounded-full ${row.win ? 'bg-emerald-500' : 'bg-rose-500/70'}`}
-            title={`${row.champion}: ${row.win ? 'victoria' : 'derrota'}`}
+            title={`${row.champion}: ${row.win ? t('hist.winLower') : t('hist.lossLower')}`}
           />
         ))}
       </div>
@@ -121,6 +124,7 @@ function SummaryStrip(props: { rows: HistoryRow[] }): React.JSX.Element | null {
 
 function GoldSparkline(props: { curve: number[] }): React.JSX.Element | null {
   const { curve } = props
+  const t = useT()
   if (curve.length < 2) return null
   const width = 260
   const height = 48
@@ -137,7 +141,7 @@ function GoldSparkline(props: { curve: number[] }): React.JSX.Element | null {
       width={width}
       height={height}
       role="img"
-      aria-label="Curva de oro por minuto"
+      aria-label={t('hist.goldCurveLabel')}
       className="mt-1"
     >
       <polyline points={points} fill="none" stroke="#f59e0b" strokeWidth="1.5" />
@@ -147,6 +151,7 @@ function GoldSparkline(props: { curve: number[] }): React.JSX.Element | null {
 
 function DetailDrawer(props: { detail: HistoryDetail }): React.JSX.Element {
   const { detail } = props
+  const t = useT()
   const [report, setReport] = useState<PostGameReportResult | null>(null)
   const [reportRequested, setReportRequested] = useState(false)
 
@@ -159,13 +164,13 @@ function DetailDrawer(props: { detail: HistoryDetail }): React.JSX.Element {
     <div className="border-t border-slate-800 bg-slate-950/60 px-4 py-3 text-xs">
       <div className="flex flex-wrap items-center gap-4">
         <div>
-          <p className="mb-1 text-slate-400">Build final</p>
+          <p className="mb-1 text-slate-400">{t('hist.finalBuild')}</p>
           <div className="flex gap-1">
             {detail.items.map((itemId, index) => (
               <img
                 key={`${String(itemId)}-${String(index)}`}
                 src={`ddicon://item/${String(itemId)}.png`}
-                alt={`objeto ${String(itemId)}`}
+                alt={t('hist.itemAlt', { id: String(itemId) })}
                 className="h-7 w-7 rounded border border-slate-700"
               />
             ))}
@@ -174,21 +179,26 @@ function DetailDrawer(props: { detail: HistoryDetail }): React.JSX.Element {
         <div className="font-mono text-slate-300">
           <p>
             {detail.kills}/{detail.deaths}/{detail.assists} · {detail.cs} CS ·{' '}
-            {Math.round(detail.gold / 100) / 10}k oro
+            {t('hist.detailGold', { gold: String(Math.round(detail.gold / 100) / 10) })}
             {detail.durationS > 0 && (
               <span className="text-slate-500">
                 {' '}
-                ({String(Math.round(detail.gold / (detail.durationS / 60)))}/min)
+                {t('hist.perMin', {
+                  value: String(Math.round(detail.gold / (detail.durationS / 60)))
+                })}
               </span>
             )}
           </p>
           <p className="text-slate-500">
-            {Math.round(detail.damage / 100) / 10}k daño · visión {detail.vision}
+            {t('hist.damageVision', {
+              dmg: String(Math.round(detail.damage / 100) / 10),
+              vision: String(detail.vision)
+            })}
           </p>
         </div>
         {detail.laneOpponent !== null && (
           <div className="flex items-center gap-1.5">
-            <p className="text-slate-400">Rival de carril</p>
+            <p className="text-slate-400">{t('hist.laneOpponent')}</p>
             <img
               src={`ddicon://champion/${detail.laneOpponent}.png`}
               alt={detail.laneOpponent}
@@ -203,7 +213,7 @@ function DetailDrawer(props: { detail: HistoryDetail }): React.JSX.Element {
             className="ml-auto rounded border border-slate-700 bg-slate-800 px-2.5 py-1 text-slate-300 hover:border-slate-500"
             onClick={() => void loadReport()}
           >
-            Ver informe
+            {t('hist.viewReport')}
           </button>
         )}
       </div>
@@ -212,8 +222,11 @@ function DetailDrawer(props: { detail: HistoryDetail }): React.JSX.Element {
       {detail.metaBuild !== null && detail.metaBuild.items.length > 0 && (
         <div className="mt-2.5">
           <p className="mb-1 text-slate-400">
-            Build Master+ ({detail.champion} · parche {detail.metaBuild.patch} ·{' '}
-            {detail.metaBuild.games} partidas) — coincides en{' '}
+            {t('hist.metaBuild', {
+              champion: detail.champion,
+              patch: detail.metaBuild.patch,
+              games: String(detail.metaBuild.games)
+            })}{' '}
             <span className="font-semibold text-slate-200">
               {detail.metaBuild.items.slice(0, 6).filter((entry) => detail.items.includes(entry.itemId)).length}
               /{Math.min(6, detail.metaBuild.items.length)}
@@ -227,8 +240,8 @@ function DetailDrawer(props: { detail: HistoryDetail }): React.JSX.Element {
                 <div key={entry.itemId} className="flex flex-col items-center gap-0.5">
                   <img
                     src={`ddicon://item/${String(entry.itemId)}.png`}
-                    alt={`objeto ${String(entry.itemId)}`}
-                    title={`${String(pct)}% de las builds Master+${owned ? ' · también en la tuya' : ''}`}
+                    alt={t('hist.itemAlt', { id: String(entry.itemId) })}
+                    title={`${t('hist.masterPctTitle', { pct: String(pct) })}${owned ? t('hist.alsoYours') : ''}`}
                     className={`h-7 w-7 rounded border ${
                       owned ? 'border-emerald-500 ring-1 ring-emerald-500/60' : 'border-slate-700 opacity-80'
                     }`}
@@ -247,7 +260,7 @@ function DetailDrawer(props: { detail: HistoryDetail }): React.JSX.Element {
       )}
       {detail.goldCurve.length > 1 && (
         <div className="mt-2">
-          <p className="text-slate-400">Oro por minuto</p>
+          <p className="text-slate-400">{t('hist.goldPerMin')}</p>
           <GoldSparkline curve={detail.goldCurve} />
         </div>
       )}
@@ -256,7 +269,7 @@ function DetailDrawer(props: { detail: HistoryDetail }): React.JSX.Element {
           {report?.kind === 'report' ? (
             <ReportCard report={report.report} />
           ) : (
-            <p className="text-slate-500">No hay informe disponible para esta partida.</p>
+            <p className="text-slate-500">{t('hist.noReport')}</p>
           )}
         </div>
       )}
@@ -287,6 +300,8 @@ function FilterSelect(props: {
 }
 
 export default function HistoryView(): React.JSX.Element {
+  const t = useT()
+  const locale = useLocale()
   const [tab, setTab] = useState<'partidas' | 'stats'>('partidas')
   const [rows, setRows] = useState<HistoryRow[]>([])
   const [aggregates, setAggregates] = useState<HistoryAggregate[]>([])
@@ -348,7 +363,7 @@ export default function HistoryView(): React.JSX.Element {
     <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-3 p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-lg font-bold">Historial</h1>
+          <h1 className="text-lg font-bold">{t('nav.history')}</h1>
           <div className="flex rounded border border-slate-700 text-xs" role="tablist">
             {(['partidas', 'stats'] as const).map((id) => (
               <button
@@ -358,7 +373,7 @@ export default function HistoryView(): React.JSX.Element {
                 className={`px-2.5 py-1 ${tab === id ? 'bg-slate-700 text-slate-100' : 'text-slate-400 hover:text-slate-200'}`}
                 onClick={() => setTab(id)}
               >
-                {id === 'partidas' ? 'Partidas' : 'Estadísticas'}
+                {id === 'partidas' ? t('hist.tab.games') : t('hist.tab.stats')}
               </button>
             ))}
           </div>
@@ -371,12 +386,12 @@ export default function HistoryView(): React.JSX.Element {
           {/* The question bar: champion · result · role · patch · order. */}
           <div className="flex flex-wrap items-center gap-2">
             <select
-              aria-label="Filtrar por campeón"
+              aria-label={t('hist.filter.champion')}
               className="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-xs"
               value={filter}
               onChange={(event) => setFilter(event.target.value)}
             >
-              <option value="">Todos los campeones</option>
+              <option value="">{t('hist.allChampions')}</option>
               {champions.map((champion) => (
                 <option key={champion} value={champion}>
                   {champion}
@@ -384,53 +399,55 @@ export default function HistoryView(): React.JSX.Element {
               ))}
             </select>
             <FilterSelect
-              label="Filtrar por resultado"
+              label={t('hist.filter.result')}
               value={result}
               onChange={(value) => setResult(value as ResultFilter)}
               options={[
-                { value: 'todas', label: 'Todas' },
-                { value: 'victoria', label: 'Victorias' },
-                { value: 'derrota', label: 'Derrotas' }
+                { value: 'todas', label: t('hist.result.all') },
+                { value: 'victoria', label: t('hist.result.wins') },
+                { value: 'derrota', label: t('hist.result.losses') }
               ]}
             />
             <FilterSelect
-              label="Filtrar por rol"
+              label={t('hist.filter.role')}
               value={role}
               onChange={setRole}
               options={[
-                { value: '', label: 'Todos los roles' },
+                { value: '', label: t('hist.allRoles') },
                 ...Object.entries(ROLE_LABEL).map(([value, label]) => ({ value, label }))
               ]}
             />
             <FilterSelect
-              label="Filtrar por cola"
+              label={t('hist.filter.queue')}
               value={queue}
               onChange={setQueue}
               options={[
-                { value: '', label: 'Todas las colas' },
-                ...queues.map((id) => ({ value: String(id), label: queueLabel(id) }))
+                { value: '', label: t('hist.allQueues') },
+                ...queues.map((id) => ({ value: String(id), label: queueLabel(id, t) }))
               ]}
             />
             <FilterSelect
-              label="Filtrar por parche"
+              label={t('hist.filter.patch')}
               value={patch}
               onChange={setPatch}
               options={[
-                { value: '', label: 'Todos los parches' },
-                ...patches.map((value) => ({ value, label: `parche ${value}` }))
+                { value: '', label: t('hist.allPatches') },
+                ...patches.map((value) => ({ value, label: t('hist.patchLabel', { patch: value }) }))
               ]}
             />
             <div className="ml-auto flex items-center gap-1.5">
-              <span className="text-[10px] tracking-widest text-slate-500 uppercase">Ordenar</span>
+              <span className="text-[10px] tracking-widest text-slate-500 uppercase">
+                {t('hist.sort')}
+              </span>
               <FilterSelect
-                label="Ordenar partidas"
+                label={t('hist.sortAria')}
                 value={sort}
                 onChange={(value) => setSort(value as SortKey)}
                 options={[
-                  { value: 'fecha', label: 'Fecha' },
-                  { value: 'kda', label: 'KDA' },
-                  { value: 'cs', label: 'CS/min' },
-                  { value: 'duracion', label: 'Duración' }
+                  { value: 'fecha', label: t('hist.sort.date') },
+                  { value: 'kda', label: t('hist.sort.kda') },
+                  { value: 'cs', label: t('hist.sort.cs') },
+                  { value: 'duracion', label: t('hist.sort.duration') }
                 ]}
               />
             </div>
@@ -445,9 +462,9 @@ export default function HistoryView(): React.JSX.Element {
                   key={aggregate.champion}
                   className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs text-slate-300 hover:border-indigo-500/60"
                   onClick={() => setFilter(aggregate.champion)}
-                  title={`Filtrar por ${aggregate.champion}`}
+                  title={t('hist.filterBy', { champion: aggregate.champion })}
                 >
-                  {aggregate.champion} · {aggregate.games}p ·{' '}
+                  {aggregate.champion} · {t('hist.aggGames', { n: String(aggregate.games) })} ·{' '}
                   <span
                     className={aggregate.winratePct >= 50 ? 'text-emerald-400' : 'text-rose-400'}
                   >
@@ -465,12 +482,10 @@ export default function HistoryView(): React.JSX.Element {
                 📜
               </span>
               <p className="text-sm font-medium text-slate-300">
-                {rows.length === 0 ? 'Sin partidas guardadas' : 'Ninguna partida cumple el filtro'}
+                {rows.length === 0 ? t('hist.empty.none') : t('hist.empty.noMatch')}
               </p>
               <p className="max-w-xs text-xs text-slate-500">
-                {rows.length === 0
-                  ? 'Sincroniza tu historial en Ajustes o termina una partida: aparecerá aquí sola.'
-                  : 'Relaja algún filtro para volver a ver partidas.'}
+                {rows.length === 0 ? t('hist.empty.noneHint') : t('hist.empty.noMatchHint')}
               </p>
             </div>
           ) : (
@@ -503,17 +518,17 @@ export default function HistoryView(): React.JSX.Element {
                     <span
                       className={`w-16 text-xs ${row.win ? 'text-emerald-400' : 'text-rose-400'}`}
                     >
-                      {row.win ? 'Victoria' : 'Derrota'}
+                      {row.win ? t('hist.win') : t('hist.loss')}
                     </span>
                     <span className="w-14 font-mono text-xs text-slate-500">
                       {formatDuration(row.durationS)}
                     </span>
                     <span className="w-14 text-xs text-slate-500">{row.patch}</span>
                     <span className="w-16 text-[10px] text-slate-500">
-                      {queueLabel(row.queueId)}
+                      {queueLabel(row.queueId, t)}
                     </span>
                     <span className="ml-auto text-xs text-slate-600">
-                      {formatDate(row.gameCreation)}
+                      {formatDate(row.gameCreation, intlLocale(locale))}
                     </span>
                   </button>
                   {expanded === row.matchId &&

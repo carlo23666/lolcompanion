@@ -2,29 +2,32 @@ import { useEffect, useState } from 'react'
 import type { SessionPhase } from '@shared/session'
 import type { PostGameReportResult } from '@shared/report'
 import type { StatsOverview } from '@shared/stats'
+import type { MessageKey } from '@shared/i18n'
+import { useT } from '../i18n'
 import { HexiSprite, useMascotName } from './Mascot'
 
-const TIPS = [
-  'El dragón aparece en el minuto 5: pide visión del río antes.',
-  'Con 2500 de oro sin gastar estás jugando con desventaja — planea la base.',
-  'Heridas graves reduce la curación enemiga un 40%: no la compres tarde.',
-  'Tu racha de derrotas pesa: después de 2 seguidas, un descanso rinde más que otra cola.',
-  'Los picos de nivel 6/11/16 enemigos aparecen en el feed: respétalos.',
-  'Farmear 8 CS/min vale más que perseguir kills que no llegan.',
-  'Mira tu Historial: los datos de tus propias partidas mandan más que cualquier guía.'
+const TIP_KEYS: readonly MessageKey[] = [
+  'home.tip.1',
+  'home.tip.2',
+  'home.tip.3',
+  'home.tip.4',
+  'home.tip.5',
+  'home.tip.6',
+  'home.tip.7'
 ]
 
 const ROTATE_MS = 9000
 
 function TipTicker(): React.JSX.Element {
+  const t = useT()
   const [index, setIndex] = useState(0)
   useEffect(() => {
-    const timer = setInterval(() => setIndex((i) => (i + 1) % TIPS.length), ROTATE_MS)
+    const timer = setInterval(() => setIndex((i) => (i + 1) % TIP_KEYS.length), ROTATE_MS)
     return () => clearInterval(timer)
   }, [])
   return (
     <p key={index} className="alert-in text-xs text-slate-400">
-      💡 {TIPS[index]}
+      💡 {t(TIP_KEYS[index] ?? 'home.tip.1')}
     </p>
   )
 }
@@ -65,6 +68,7 @@ export default function HomeDashboard(props: {
   onOpenSettings?: () => void
 }): React.JSX.Element {
   const mascot = useMascotName()
+  const t = useT()
   const [stats, setStats] = useState<StatsOverview | null>(null)
   const [lastGame, setLastGame] = useState<PostGameReportResult | null>(null)
 
@@ -86,18 +90,17 @@ export default function HomeDashboard(props: {
         <HexiSprite mood="idle" className="h-28 w-28" />
         <div>
           <h2 className="text-xl font-bold text-slate-100">
-            ¡Hola! Soy {mascot}, tu coach de la Grieta
+            {t('home.firstRun.greeting', { mascot })}
           </h2>
           <p className="mx-auto mt-1 max-w-sm text-sm text-slate-400">
-            Configura tu Riot ID y sincroniza el historial: a partir de ahí analizo tus
-            campeones, tus builds y tus partidas en directo.
+            {t('home.firstRun.body')}
           </p>
         </div>
         <button
           className="btn-glow rounded-md px-5 py-2 text-sm"
           onClick={props.onOpenSettings}
         >
-          Empezar en Ajustes
+          {t('home.firstRun.cta')}
         </button>
         <div className="mt-2">
           <TipTicker />
@@ -127,25 +130,23 @@ export default function HomeDashboard(props: {
           />
           <div className="min-w-0 flex-1">
             <h2 className="text-xl font-bold text-slate-100">
-              {props.phase === 'clientOpen' ? '¡Lista para la cola!' : 'Descansando el cristal…'}
+              {props.phase === 'clientOpen' ? t('home.ready.title') : t('home.idle.title')}
             </h2>
             <p className="mt-0.5 max-w-md text-xs text-slate-400">
-              {props.phase === 'clientOpen'
-                ? 'Cliente detectado. Entra en cola: la selección de campeones y la partida se activan solas.'
-                : 'Abre el cliente de League of Legends; lo detecto automáticamente.'}
+              {props.phase === 'clientOpen' ? t('home.ready.body') : t('home.idle.body')}
             </p>
           </div>
           {stats !== null && stats.totalGames > 0 && (
             <div className="grid grid-cols-3 gap-2">
-              <Metric label="Partidas" value={stats.totalGames} />
+              <Metric label={t('home.metric.games')} value={stats.totalGames} />
               <Metric
-                label="Racha"
+                label={t('home.metric.streak')}
                 value={`${streak > 0 ? '+' : ''}${String(streak)}`}
                 tone={streak > 0 ? 'good' : streak < 0 ? 'bad' : undefined}
               />
               {hero && (
                 <Metric
-                  label={`WR ${hero.champion}`}
+                  label={t('home.metric.wr', { champion: hero.champion })}
                   value={`${hero.winratePct.toFixed(0)}%`}
                   tone={hero.winratePct >= 50 ? 'good' : 'bad'}
                 />
@@ -179,8 +180,11 @@ export default function HomeDashboard(props: {
                     className="text-[11px] text-slate-400"
                     style={{ fontVariantNumeric: 'tabular-nums' }}
                   >
-                    {champion.games} partidas · KDA {champion.kda.toFixed(1)} ·{' '}
-                    {champion.csPerMin.toFixed(1)} CS/min
+                    {t('home.champCard', {
+                      games: String(champion.games),
+                      kda: champion.kda.toFixed(1),
+                      cs: champion.csPerMin.toFixed(1)
+                    })}
                   </p>
                 </div>
                 <span
@@ -201,7 +205,7 @@ export default function HomeDashboard(props: {
       <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <section className="rounded-lg border border-slate-800 bg-slate-900 p-3.5">
           <h3 className="mb-2 text-[10px] font-semibold tracking-widest text-slate-500 uppercase">
-            Última partida
+            {t('home.lastGame')}
           </h3>
           {report ? (
             <div className="flex items-center gap-3">
@@ -213,9 +217,11 @@ export default function HomeDashboard(props: {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold">
                   <span className={report.win ? 'text-emerald-400' : 'text-rose-400'}>
-                    {report.win ? 'Victoria' : 'Derrota'}
+                    {report.win ? t('home.win') : t('home.loss')}
                   </span>{' '}
-                  <span className="text-slate-300">con {report.champion}</span>
+                  <span className="text-slate-300">
+                    {t('home.withChampion', { champion: report.champion })}
+                  </span>
                 </p>
                 <p
                   className="font-mono text-xs text-slate-400"
@@ -232,9 +238,7 @@ export default function HomeDashboard(props: {
               </div>
             </div>
           ) : (
-            <p className="text-xs text-slate-500">
-              Aún no hay ninguna partida enlazada — juega una y el informe aparecerá aquí.
-            </p>
+            <p className="text-xs text-slate-500">{t('home.noGame')}</p>
           )}
         </section>
         <section className="flex items-center rounded-lg border border-slate-800 bg-slate-900 p-3.5">

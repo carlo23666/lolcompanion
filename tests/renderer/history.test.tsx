@@ -4,6 +4,12 @@ import userEvent from '@testing-library/user-event'
 import type { RendererApi } from '@shared/ipc'
 import type { HistoryAggregate, HistoryDetail, HistoryRow } from '@shared/history'
 import HistoryView from '@renderer/components/HistoryView'
+import { LocaleProvider } from '@renderer/i18n'
+
+// Assertions are Spanish (existing-install default) → render under es.
+const esWrapper = ({ children }: { children: React.ReactNode }): React.JSX.Element => (
+  <LocaleProvider locale="es">{children}</LocaleProvider>
+)
 
 const rows: HistoryRow[] = [
   {
@@ -96,7 +102,7 @@ function stubHistoryApi(): ReturnType<typeof vi.fn> {
 describe('HistoryView', () => {
   it('renders aggregates header and the match list', async () => {
     stubHistoryApi()
-    render(<HistoryView />)
+    render(<HistoryView />, { wrapper: esWrapper })
     expect(await screen.findByText(/Jinx · 12p ·/)).toBeInTheDocument()
     expect(screen.getByText('58% WR')).toBeInTheDocument()
     expect(screen.getByText('11/3/5')).toBeInTheDocument()
@@ -108,7 +114,7 @@ describe('HistoryView', () => {
   it('filters by champion', async () => {
     const invoke = stubHistoryApi()
     const user = userEvent.setup()
-    render(<HistoryView />)
+    render(<HistoryView />, { wrapper: esWrapper })
     await screen.findByText('Victoria')
 
     await user.selectOptions(screen.getByLabelText('Filtrar por campeón'), 'Jinx')
@@ -120,7 +126,7 @@ describe('HistoryView', () => {
   it('opens the detail drawer with build and gold sparkline', async () => {
     stubHistoryApi()
     const user = userEvent.setup()
-    render(<HistoryView />)
+    render(<HistoryView />, { wrapper: esWrapper })
 
     await user.click(await screen.findByText('11/3/5'))
     expect(await screen.findByText('Build final')).toBeInTheDocument()
@@ -133,7 +139,7 @@ describe('HistoryView', () => {
   it('drawer utilities: lane opponent, gold/min and the Master+ build comparison', async () => {
     stubHistoryApi()
     const user = userEvent.setup()
-    render(<HistoryView />)
+    render(<HistoryView />, { wrapper: esWrapper })
 
     await user.click(await screen.findByText('11/3/5'))
     expect(await screen.findByText('Rival de carril')).toBeInTheDocument()
@@ -149,7 +155,7 @@ describe('HistoryView', () => {
 
   it('summary strip answers the filtered set (WR, racha, forma)', async () => {
     stubHistoryApi()
-    render(<HistoryView />)
+    render(<HistoryView />, { wrapper: esWrapper })
     await screen.findByText('Victoria')
     expect(screen.getByText('50%')).toBeInTheDocument() // 1W 1L
     expect(screen.getByText('+1')).toBeInTheDocument() // newest is a win
