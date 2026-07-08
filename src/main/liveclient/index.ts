@@ -75,11 +75,14 @@ export function createSnapshotProcessor(
     generate: (prompt) =>
       generateWithInstalledModel(
         coachSettings.get(SETTING_KEYS.coachModel) ?? DEFAULT_COACH_MODEL,
-        prompt
+        prompt,
+        undefined,
+        createTranslator(normalizeLocale(coachSettings.get(SETTING_KEYS.locale)))
       ),
     onTip: (tip) => broadcast('coach:tip', tip),
     onDirection: (tip) => broadcast('coach:direction', tip),
     personaName: () => mascotNameFor(coachSettings.get(SETTING_KEYS.theme)),
+    translate: () => createTranslator(normalizeLocale(coachSettings.get(SETTING_KEYS.locale))),
     log: (message) => console.log(message)
   })
 

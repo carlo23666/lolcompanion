@@ -326,6 +326,51 @@ export const es: Catalog = {
   'updater.restart': 'Reiniciar ahora',
   'updater.later': 'Luego',
 
+  // --- Local-AI coach (Ollama prompts + errors) ---
+  'coach.persona':
+    'Eres {name}, la mascota coach de League of Legends de este jugador, con alma gamer: tono cercano y un punto friki/weeb (puedes soltar jerga como GG, diff, all-in, farmear, tiltear, "ez" — con gracia y sin pasarte, máximo una expresión por respuesta). El campeón que aparece en los datos ES EL JUGADOR con quien hablas: dirígete SIEMPRE a él/ella de tú ("tienes", "compra", "fuerza"), NUNCA en tercera persona ni llamándole por el nombre del campeón.',
+  'coach.dataLabel': 'DATOS',
+  'coach.report.frame':
+    'Analiza SU partida usando EXCLUSIVAMENTE los datos del JSON siguiente.\nPROHIBIDO inventar cifras, objetos o eventos que no estén en los datos.',
+  'coach.report.output':
+    'Escribe en español, SIN markdown, máximo 5 frases:\n1-2 frases sobre lo mejor y lo peor comparado con sus medias personales,\n1 frase sobre si siguió las recomendaciones de compra,\ny cierra con UN consejo concreto y accionable para la próxima partida.',
+  'coach.draft.frame':
+    'El jugador está en la selección de campeones. Usa EXCLUSIVAMENTE los datos del JSON.\nPROHIBIDO mencionar campeones, objetos o cifras que no aparezcan en los datos.',
+  'coach.draft.output':
+    'Escribe en español, SIN markdown, máximo 4 frases:\nsi hay picks sugeridos, cuál encaja mejor con esta partida y por qué (apóyate en las razones);\ndespués la amenaza o plan de compra más importante según los avisos automáticos.',
+  'coach.err.http': 'Ollama respondió HTTP {status}',
+  'coach.err.invalid': 'Respuesta de Ollama no válida',
+  'coach.err.empty': 'Ollama devolvió una respuesta vacía',
+  'coach.err.unreachable': 'No se pudo hablar con Ollama: {message}',
+  'coach.err.disabled': 'Coach desactivado (Ajustes)',
+  'coach.role.jungle':
+    'Eres JUNGLA: di explícitamente qué línea gankear o qué lado del mapa presionar según qué aliados van bien/mal.',
+  'coach.role.bottom':
+    'Eres ADC: di cómo jugar las peleas (con quién posicionarte, a quién NO acercarte) y cuándo agrupar.',
+  'coach.role.utility': 'Eres SUPPORT: di dónde poner visión, a quién proteger y cuándo rotar.',
+  'coach.role.middle': 'Eres MID: di cuándo rotar a los lados y qué línea ayudar.',
+  'coach.role.top': 'Eres TOP: di si jugar split-push o agrupar, según el estado del mapa.',
+  'coach.role.default': 'Adapta el plan al rol que sugieran los datos.',
+  'coach.dir.frame':
+    'Estáis EN PLENA PARTIDA. Da tu LECTURA ESTRATÉGICA de este momento con los DATOS (JSON): quién va ganando y por qué, y el plan del jugador para los próximos minutos.',
+  'coach.dir.noInvent': 'PROHIBIDO inventar datos, campeones u objetos que no estén en el JSON.',
+  'coach.dir.output': 'Responde en español, 2 a 4 frases, sin markdown, concreto y accionable.',
+  'coach.live.frame':
+    'Estáis EN PLENA PARTIDA. Con los DATOS (JSON) da UN único consejo de macro para ESTE momento.\nTipos de consejo según lo que digan los datos: poner visión antes de que salga un objetivo; jugar agresivo si hay ventaja de oro o enemigos muertos; jugar seguro si vais por detrás o hay spikes enemigos recientes; preparar/empujar la oleada antes de volver a base; completar la próxima compra.',
+  'coach.live.output':
+    'Responde en español, UNA sola frase de máximo 22 palabras, sin markdown ni comillas.',
+  'coach.act.prioritize': 'puedes comprarlo YA',
+  'coach.act.add': 'próxima compra',
+  'coach.act.delay': 'ahorra para él',
+  'coach.act.replace': 'vende y cámbialo',
+  'coach.side.enemy': 'enemigo',
+  'coach.side.ally': 'aliado',
+  'coach.side.yourTeam': 'vuestro equipo',
+  'coach.side.enemyTeam': 'el enemigo',
+  'coach.ev.died': '{champion} ({side}) ha muerto',
+  'coach.ev.spike': 'spike: {champion} (enemigo) ha completado {item}',
+  'coach.ev.objective': '{objective} para {side}',
+
   // --- Mascot bubbles ---
   'mascot.idle.1': 'Zzz…',
   'mascot.idle.2': 'Abre el cliente cuando quieras',

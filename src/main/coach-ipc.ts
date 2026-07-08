@@ -1,4 +1,5 @@
 import { mascotNameFor } from '@shared/themes'
+import { createTranslator, normalizeLocale } from '@shared/i18n'
 import type { AppDatabase } from './db'
 import { SettingsRepo, SETTING_KEYS } from './db/repos/settings'
 import { handleInvoke } from './ipc'
@@ -14,6 +15,8 @@ import {
  * prompt/transport logic stays importable in tests without electron. */
 export function registerCoachIpc(db: AppDatabase): void {
   const settings = new SettingsRepo(db)
+  const tr = (): ReturnType<typeof createTranslator> =>
+    createTranslator(normalizeLocale(settings.get(SETTING_KEYS.locale)))
 
   handleInvoke('coach:status', async () => {
     const status = await ollamaStatus()
@@ -34,20 +37,22 @@ export function registerCoachIpc(db: AppDatabase): void {
   })
 
   handleInvoke('coach:analyze', async (report) => {
+    const t = tr()
     if (settings.get(SETTING_KEYS.coachEnabled) !== '1') {
-      return { ok: false as const, error: 'Coach desactivado (Ajustes)' }
+      return { ok: false as const, error: t('coach.err.disabled') }
     }
     const model = settings.get(SETTING_KEYS.coachModel) ?? DEFAULT_COACH_MODEL
     const persona = mascotNameFor(settings.get(SETTING_KEYS.theme))
-    return generateWithInstalledModel(model, buildCoachPrompt(report, persona))
+    return generateWithInstalledModel(model, buildCoachPrompt(report, persona, t), undefined, t)
   })
 
   handleInvoke('coach:draft', async (insights) => {
+    const t = tr()
     if (settings.get(SETTING_KEYS.coachEnabled) !== '1') {
-      return { ok: false as const, error: 'Coach desactivado (Ajustes)' }
+      return { ok: false as const, error: t('coach.err.disabled') }
     }
     const model = settings.get(SETTING_KEYS.coachModel) ?? DEFAULT_COACH_MODEL
     const persona = mascotNameFor(settings.get(SETTING_KEYS.theme))
-    return generateWithInstalledModel(model, buildDraftPrompt(insights, persona))
+    return generateWithInstalledModel(model, buildDraftPrompt(insights, persona, t), undefined, t)
   })
 }

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import type { ChampSelectInsights } from '@shared/champselect'
 import type { PostGameReport } from '@shared/report'
+import { t as translators, type Translator } from '@shared/i18n'
 
 /**
  * Optional local-AI coach over Ollama (https://ollama.com): turns the
@@ -19,15 +20,8 @@ export const DEFAULT_COACH_MODEL = 'gemma3:4b'
  * the owner; the champion in the data is always THE PLAYER — second person
  * only. The name follows the active identity (Bitxo).
  */
-export function buildPersona(name: string): string {
-  return [
-    `Eres ${name}, la mascota coach de League of Legends de este jugador, con alma gamer:`,
-    'tono cercano y un punto friki/weeb (puedes soltar jerga como GG, diff, all-in,',
-    'farmear, tiltear, "ez" — con gracia y sin pasarte, máximo una expresión por respuesta).',
-    'El campeón que aparece en los datos ES EL JUGADOR con quien hablas:',
-    'dirígete SIEMPRE a él/ella de tú ("tienes", "compra", "fuerza"),',
-    'NUNCA en tercera persona ni llamándole por el nombre del campeón.'
-  ].join('\n')
+export function buildPersona(name: string, t: Translator = translators.es): string {
+  return t('coach.persona', { name })
 }
 
 const tagsSchema = z.object({
@@ -53,7 +47,11 @@ export async function ollamaStatus(url: string = OLLAMA_URL): Promise<OllamaStat
 }
 
 /** The report's facts, serialized for the model, with an anti-hallucination frame. */
-export function buildCoachPrompt(report: PostGameReport, personaName = 'Bitxo'): string {
+export function buildCoachPrompt(
+  report: PostGameReport,
+  personaName = 'Bitxo',
+  t: Translator = translators.es
+): string {
   const facts = {
     campeon: report.champion,
     resultado: report.win ? 'victoria' : 'derrota',
@@ -76,21 +74,21 @@ export function buildCoachPrompt(report: PostGameReport, personaName = 'Bitxo'):
     conclusionesAutomaticas: report.summary
   }
   return [
-    buildPersona(personaName),
-    'Analiza SU partida usando EXCLUSIVAMENTE los datos del JSON siguiente.',
-    'PROHIBIDO inventar cifras, objetos o eventos que no estén en los datos.',
+    buildPersona(personaName, t),
+    t('coach.report.frame'),
     '',
-    `DATOS: ${JSON.stringify(facts)}`,
+    `${t('coach.dataLabel')}: ${JSON.stringify(facts)}`,
     '',
-    'Escribe en español, SIN markdown, máximo 5 frases:',
-    '1-2 frases sobre lo mejor y lo peor comparado con sus medias personales,',
-    '1 frase sobre si siguió las recomendaciones de compra,',
-    'y cierra con UN consejo concreto y accionable para la próxima partida.'
+    t('coach.report.output')
   ].join('\n')
 }
 
 /** Champ-select facts (comp analysis + ranked picks), anti-hallucination framed. */
-export function buildDraftPrompt(insights: ChampSelectInsights, personaName = 'Bitxo'): string {
+export function buildDraftPrompt(
+  insights: ChampSelectInsights,
+  personaName = 'Bitxo',
+  t: Translator = translators.es
+): string {
   const facts = {
     danoEnemigo: insights.enemySplit,
     danoAliado: insights.allySplit,
@@ -109,15 +107,12 @@ export function buildDraftPrompt(insights: ChampSelectInsights, personaName = 'B
       : null
   }
   return [
-    buildPersona(personaName),
-    'El jugador está en la selección de campeones. Usa EXCLUSIVAMENTE los datos del JSON.',
-    'PROHIBIDO mencionar campeones, objetos o cifras que no aparezcan en los datos.',
+    buildPersona(personaName, t),
+    t('coach.draft.frame'),
     '',
-    `DATOS: ${JSON.stringify(facts)}`,
+    `${t('coach.dataLabel')}: ${JSON.stringify(facts)}`,
     '',
-    'Escribe en español, SIN markdown, máximo 4 frases:',
-    'si hay picks sugeridos, cuál encaja mejor con esta partida y por qué (apóyate en las razones);',
-    'después la amenaza o plan de compra más importante según los avisos automáticos.'
+    t('coach.draft.output')
   ].join('\n')
 }
 
@@ -135,16 +130,18 @@ export function resolveModel(saved: string, available: string[]): string {
 export async function generateWithInstalledModel(
   savedModel: string,
   prompt: string,
-  url?: string
+  url?: string,
+  t: Translator = translators.es
 ): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
   const status = await ollamaStatus(url)
-  return generateCoachAdvice(resolveModel(savedModel, status.models), prompt, url)
+  return generateCoachAdvice(resolveModel(savedModel, status.models), prompt, url, t)
 }
 
 export async function generateCoachAdvice(
   model: string,
   prompt: string,
-  url: string = OLLAMA_URL
+  url: string = OLLAMA_URL,
+  t: Translator = translators.es
 ): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
   try {
     const response = await fetch(`${url}/api/generate`, {
@@ -161,17 +158,19 @@ export async function generateCoachAdvice(
       signal: AbortSignal.timeout(120_000)
     })
     if (!response.ok) {
-      return { ok: false, error: `Ollama respondió HTTP ${String(response.status)}` }
+      return { ok: false, error: t('coach.err.http', { status: String(response.status) }) }
     }
     const parsed = generateSchema.safeParse(await response.json())
-    if (!parsed.success) return { ok: false, error: 'Respuesta de Ollama no válida' }
+    if (!parsed.success) return { ok: false, error: t('coach.err.invalid') }
     const text = parsed.data.response.trim()
-    if (text === '') return { ok: false, error: 'Ollama devolvió una respuesta vacía' }
+    if (text === '') return { ok: false, error: t('coach.err.empty') }
     return { ok: true, text }
   } catch (error) {
     return {
       ok: false,
-      error: `No se pudo hablar con Ollama: ${error instanceof Error ? error.message : String(error)}`
+      error: t('coach.err.unreachable', {
+        message: error instanceof Error ? error.message : String(error)
+      })
     }
   }
 }

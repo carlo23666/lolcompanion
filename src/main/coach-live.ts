@@ -1,5 +1,6 @@
 import type { GameState, GameStateEvent } from '@shared/gamestate'
 import type { Recommendation } from '@shared/recommendation'
+import { t as translators, type MessageKey, type Translator } from '@shared/i18n'
 import { buildPersona } from './coach'
 
 /**
@@ -62,15 +63,12 @@ function playerFact(player: {
   }
 }
 
-const ROLE_GUIDANCE: Record<string, string> = {
-  JUNGLE:
-    'Eres JUNGLA: di explícitamente qué línea gankear o qué lado del mapa presionar según qué aliados van bien/mal.',
-  BOTTOM:
-    'Eres ADC: di cómo jugar las peleas (con quién posicionarte, a quién NO acercarte) y cuándo agrupar.',
-  UTILITY:
-    'Eres SUPPORT: di dónde poner visión, a quién proteger y cuándo rotar.',
-  MIDDLE: 'Eres MID: di cuándo rotar a los lados y qué línea ayudar.',
-  TOP: 'Eres TOP: di si jugar split-push o agrupar, según el estado del mapa.'
+const ROLE_GUIDANCE_KEYS: Record<string, MessageKey> = {
+  JUNGLE: 'coach.role.jungle',
+  BOTTOM: 'coach.role.bottom',
+  UTILITY: 'coach.role.utility',
+  MIDDLE: 'coach.role.middle',
+  TOP: 'coach.role.top'
 }
 
 /** Full strategic read: game state + every visible player + role guidance. */
@@ -78,18 +76,18 @@ export function buildDirectionPrompt(
   facts: LiveFacts,
   players: { aliados: PlayerFact[]; enemigos: PlayerFact[] },
   ownPosition: string,
-  personaName = 'Bitxo'
+  personaName = 'Bitxo',
+  t: Translator = translators.es
 ): string {
   return [
-    buildPersona(personaName),
-    'Estáis EN PLENA PARTIDA. Da tu LECTURA ESTRATÉGICA de este momento con los DATOS (JSON):',
-    'quién va ganando y por qué, y el plan del jugador para los próximos minutos.',
-    ROLE_GUIDANCE[ownPosition] ?? 'Adapta el plan al rol que sugieran los datos.',
-    'PROHIBIDO inventar datos, campeones u objetos que no estén en el JSON.',
+    buildPersona(personaName, t),
+    t('coach.dir.frame'),
+    t(ROLE_GUIDANCE_KEYS[ownPosition] ?? 'coach.role.default'),
+    t('coach.dir.noInvent'),
     '',
-    `DATOS: ${JSON.stringify({ ...facts, jugadores: players })}`,
+    `${t('coach.dataLabel')}: ${JSON.stringify({ ...facts, jugadores: players })}`,
     '',
-    'Responde en español, 2 a 4 frases, sin markdown, concreto y accionable.'
+    t('coach.dir.output')
   ].join('\n')
 }
 
@@ -114,26 +112,27 @@ export interface LiveFacts {
   proximaCompra: string | null
 }
 
-export function buildLiveCoachPrompt(facts: LiveFacts, personaName = 'Bitxo'): string {
+export function buildLiveCoachPrompt(
+  facts: LiveFacts,
+  personaName = 'Bitxo',
+  t: Translator = translators.es
+): string {
   return [
-    buildPersona(personaName),
-    'Estáis EN PLENA PARTIDA. Con los DATOS (JSON) da UN único consejo de macro para ESTE momento.',
-    'Tipos de consejo según lo que digan los datos: poner visión antes de que salga un objetivo;',
-    'jugar agresivo si hay ventaja de oro o enemigos muertos; jugar seguro si vais por detrás o',
-    'hay spikes enemigos recientes; preparar/empujar la oleada antes de volver a base; completar la próxima compra.',
-    'PROHIBIDO inventar datos, campeones u objetos que no estén en el JSON.',
+    buildPersona(personaName, t),
+    t('coach.live.frame'),
+    t('coach.dir.noInvent'),
     '',
-    `DATOS: ${JSON.stringify(facts)}`,
+    `${t('coach.dataLabel')}: ${JSON.stringify(facts)}`,
     '',
-    'Responde en español, UNA sola frase de máximo 22 palabras, sin markdown ni comillas.'
+    t('coach.live.output')
   ].join('\n')
 }
 
-const ACTION_LABEL: Record<Recommendation['action'], string> = {
-  prioritize: 'puedes comprarlo YA',
-  add: 'próxima compra',
-  delay: 'ahorra para él',
-  replace: 'vende y cámbialo'
+const ACTION_LABEL_KEYS: Record<Recommendation['action'], MessageKey> = {
+  prioritize: 'coach.act.prioritize',
+  add: 'coach.act.add',
+  delay: 'coach.act.delay',
+  replace: 'coach.act.replace'
 }
 
 export interface LiveCoachOptions {
@@ -145,6 +144,8 @@ export interface LiveCoachOptions {
   onDirection?(tip: LiveCoachTip): void
   /** Mascot/persona name for the prompt (follows the active theme). */
   personaName?: () => string
+  /** Translator for prompt text + fact strings (ADR-009); defaults to Spanish. */
+  translate?: () => Translator
   intervalS?: number
   directionIntervalS?: number
   log?: (message: string) => void
@@ -166,6 +167,10 @@ export class LiveCoach {
   constructor(private readonly options: LiveCoachOptions) {
     this.intervalS = options.intervalS ?? DEFAULT_INTERVAL_S
     this.directionIntervalS = options.directionIntervalS ?? DEFAULT_DIRECTION_INTERVAL_S
+  }
+
+  private get t(): Translator {
+    return this.options.translate?.() ?? translators.es
   }
 
   reset(): void {
@@ -205,7 +210,8 @@ export class LiveCoach {
         enemigos: state.enemies.map(playerFact)
       },
       state.self.position,
-      this.options.personaName?.() ?? 'Bitxo'
+      this.options.personaName?.() ?? 'Bitxo',
+      this.t
     )
     const atS = state.gameTimeS
     void this.options.generate(prompt).then((result) => {
@@ -238,7 +244,7 @@ export class LiveCoach {
       proximaCompra:
         topRecommendation === null
           ? null
-          : `${topRecommendation.itemName ?? topRecommendation.category ?? ''} (${ACTION_LABEL[topRecommendation.action]})`
+          : `${topRecommendation.itemName ?? topRecommendation.category ?? ''} (${this.t(ACTION_LABEL_KEYS[topRecommendation.action])})`
     }
   }
 
@@ -250,12 +256,18 @@ export class LiveCoach {
       if (event.type === 'playerDied') {
         this.recent.push({
           atS: now,
-          text: `${event.championName} (${enemy ? 'enemigo' : 'aliado'}) ha muerto`
+          text: this.t('coach.ev.died', {
+            champion: event.championName,
+            side: enemy ? this.t('coach.side.enemy') : this.t('coach.side.ally')
+          })
         })
       } else if (event.type === 'itemCompleted' && enemy && event.item.totalGold >= 2400) {
         this.recent.push({
           atS: now,
-          text: `spike: ${event.championName} (enemigo) ha completado ${event.item.name}`
+          text: this.t('coach.ev.spike', {
+            champion: event.championName,
+            item: event.item.name
+          })
         })
       } else if (event.type === 'objectiveTaken') {
         const ours = event.team === selfTeam
@@ -264,7 +276,10 @@ export class LiveCoach {
         if (event.objective === 'dragon' || event.objective === 'baron') {
           this.recent.push({
             atS: now,
-            text: `${event.objective === 'dragon' ? 'dragón' : 'Barón'} para ${ours ? 'vuestro equipo' : 'el enemigo'}`
+            text: this.t('coach.ev.objective', {
+              objective: this.t(event.objective === 'dragon' ? 'overlay.dragon' : 'overlay.baron'),
+              side: ours ? this.t('coach.side.yourTeam') : this.t('coach.side.enemyTeam')
+            })
           })
         }
       }
@@ -281,7 +296,8 @@ export class LiveCoach {
     this.lastTipAtS = state.gameTimeS
     const prompt = buildLiveCoachPrompt(
       this.buildFacts(state, topRecommendation),
-      this.options.personaName?.() ?? 'Bitxo'
+      this.options.personaName?.() ?? 'Bitxo',
+      this.t
     )
     const atS = state.gameTimeS
     void this.options.generate(prompt).then((result) => {
