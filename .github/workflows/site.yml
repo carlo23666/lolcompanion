@@ -1,0 +1,43 @@
+name: site
+
+# Deploys site/ to GitHub Pages. One-time setup: Settings → Pages → Source:
+# "GitHub Actions". Screenshots live in docs/media/ (single source of truth,
+# also embedded in the README) and are staged into the artifact here.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'docs/media/**'
+      - '.github/workflows/site.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stage site with media and favicon
+        run: |
+          mkdir -p _site/media
+          cp -r site/. _site/
+          cp docs/media/*.png _site/media/
+          cp resources/icon.png _site/icon.png
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
