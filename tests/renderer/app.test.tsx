@@ -15,7 +15,7 @@ export function stubApi(overrides: Record<string, unknown> = {}): ApiStub {
     if (channel === 'app:ping') return Promise.resolve({ pong: true, version: '0.1.0' })
     if (channel === 'session:get') return Promise.resolve('idle')
     if (channel === 'settings:get') {
-      return Promise.resolve({ riotId: null, platform: 'euw1', recordLive: false })
+      return Promise.resolve({ riotId: null, platform: 'euw1', recordLive: false, locale: 'es' })
     }
     if (channel in overrides) return Promise.resolve(overrides[channel])
     if (['history:list', 'history:aggregates', 'history:champions'].includes(channel)) {
@@ -50,8 +50,9 @@ describe('App shell', () => {
   it('renders the top bar with the three sections and the idle dashboard', async () => {
     stubApi()
     render(<App />)
+    // Nav labels localize once settings resolve (existing installs → es).
+    expect(await screen.findByRole('button', { name: 'Historial' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Live' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Historial' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ajustes' })).toBeInTheDocument()
     expect(await screen.findByText('Descansando el cristal…')).toBeInTheDocument()
   })
@@ -61,10 +62,10 @@ describe('App shell', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    await user.click(screen.getByRole('button', { name: 'Historial' }))
+    await user.click(await screen.findByRole('button', { name: 'Historial' }))
     expect(await screen.findByText('Sin partidas guardadas')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Ajustes' }))
+    await user.click(await screen.findByRole('button', { name: 'Ajustes' }))
     expect(await screen.findByText('Cuenta')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Live' }))

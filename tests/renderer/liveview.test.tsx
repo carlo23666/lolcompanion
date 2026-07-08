@@ -2,13 +2,22 @@ import { describe, expect, it } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import type { GameState } from '@shared/gamestate'
 import LiveView from '@renderer/components/LiveView'
+import { LocaleProvider } from '@renderer/i18n'
 import midGameState from '../../fixtures/gamestate/mid.json'
 
 const mid = midGameState as unknown as GameState
 
+// These assertions are in Spanish (the default for existing installs): render
+// under an es provider so useT resolves to Spanish, as the app does at runtime.
+const esWrapper = ({ children }: { children: React.ReactNode }): React.JSX.Element => (
+  <LocaleProvider locale="es">{children}</LocaleProvider>
+)
+
 describe('LiveView', () => {
   it('renders the home dashboard while no game runs and the other states', () => {
-    const { rerender } = render(<LiveView phase="idle" gameState={null} champSelect={null} />)
+    const { rerender } = render(<LiveView phase="idle" gameState={null} champSelect={null} />, {
+      wrapper: esWrapper
+    })
     expect(screen.getByText('Descansando el cristal…')).toBeInTheDocument()
 
     rerender(<LiveView phase="clientOpen" gameState={null} champSelect={null} />)
@@ -75,7 +84,8 @@ describe('LiveView', () => {
           nextDragonS: 400,
           nextBaronS: 1200
         }}
-      />
+      />,
+      { wrapper: esWrapper }
     )
     expect(screen.getByText(/power spike/)).toBeInTheDocument()
     expect(screen.getByText(/🐉 en el mapa/)).toBeInTheDocument()
@@ -85,7 +95,7 @@ describe('LiveView', () => {
   })
 
   it('in game: shows clock, own gold, both teams with items and gauges', () => {
-    render(<LiveView phase="inGame" gameState={mid} champSelect={null} />)
+    render(<LiveView phase="inGame" gameState={mid} champSelect={null} />, { wrapper: esWrapper })
 
     // Header: 15:00, own gold 1250, self KDA 4/1/3.
     expect(screen.getByText(/15:00/)).toBeInTheDocument()

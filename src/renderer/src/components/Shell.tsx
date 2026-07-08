@@ -1,25 +1,23 @@
 import { useEffect } from 'react'
 import type { SessionPhase } from '@shared/session'
+import type { MessageKey } from '@shared/i18n'
+import { useT } from '../i18n'
 import Mascot, { useTheme } from './Mascot'
 
 export type ViewId = 'live' | 'history' | 'settings'
 
-const ITEMS: { id: ViewId; label: string; icon: string }[] = [
-  { id: 'live', label: 'Live', icon: '▶' },
-  { id: 'history', label: 'Historial', icon: '▤' },
-  { id: 'settings', label: 'Ajustes', icon: '⚙' }
+const ITEMS: { id: ViewId; labelKey: MessageKey; icon: string }[] = [
+  { id: 'live', labelKey: 'nav.live', icon: '▶' },
+  { id: 'history', labelKey: 'nav.history', icon: '▤' },
+  { id: 'settings', labelKey: 'nav.settings', icon: '⚙' }
 ]
 
-const PHASE_DOT: Record<SessionPhase, { color: string; label: string; live: boolean }> = {
-  idle: { color: 'bg-slate-600 text-slate-600', label: 'Cliente cerrado', live: false },
-  clientOpen: { color: 'bg-indigo-500 text-indigo-500', label: 'Cliente abierto', live: true },
-  champSelect: {
-    color: 'bg-amber-400 text-amber-400',
-    label: 'Selección de campeones',
-    live: true
-  },
-  inGame: { color: 'bg-emerald-500 text-emerald-500', label: 'En partida', live: true },
-  postGame: { color: 'bg-indigo-300 text-indigo-300', label: 'Partida terminada', live: false }
+const PHASE_DOT: Record<SessionPhase, { color: string; labelKey: MessageKey; live: boolean }> = {
+  idle: { color: 'bg-slate-600 text-slate-600', labelKey: 'phase.idle', live: false },
+  clientOpen: { color: 'bg-indigo-500 text-indigo-500', labelKey: 'phase.clientOpen', live: true },
+  champSelect: { color: 'bg-amber-400 text-amber-400', labelKey: 'phase.champSelect', live: true },
+  inGame: { color: 'bg-emerald-500 text-emerald-500', labelKey: 'phase.inGame', live: true },
+  postGame: { color: 'bg-indigo-300 text-indigo-300', labelKey: 'phase.postGame', live: false }
 }
 
 /**
@@ -38,6 +36,8 @@ export default function Shell(props: {
 }): React.JSX.Element {
   const phase = PHASE_DOT[props.phase]
   const theme = useTheme()
+  const t = useT()
+  const phaseLabel = t(phase.labelKey)
 
   // The ambient layers (body::before/::after) read the phase from <html>.
   useEffect(() => {
@@ -67,7 +67,7 @@ export default function Shell(props: {
                 {floating ? 'LOL COMPANION ✦' : 'LOL COMPANION'}
               </p>
               <p className="text-[10px] tracking-[0.3em] text-slate-500 uppercase">
-                tu coach local
+                {t('shell.tagline')}
               </p>
             </div>
             <div
@@ -101,8 +101,8 @@ export default function Shell(props: {
                 key={item.id}
                 onClick={() => props.onSelect(item.id)}
                 aria-current={active ? 'page' : undefined}
-                aria-label={rail ? item.label : undefined}
-                title={rail ? item.label : undefined}
+                aria-label={rail ? t(item.labelKey) : undefined}
+                title={rail ? t(item.labelKey) : undefined}
                 className={base}
               >
                 {active && !floating && (
@@ -129,7 +129,7 @@ export default function Shell(props: {
                 >
                   {item.icon}
                 </span>
-                {!rail && item.label}
+                {!rail && t(item.labelKey)}
               </button>
             )
           })}
@@ -142,13 +142,13 @@ export default function Shell(props: {
             className={`flex items-center gap-1.5 font-display text-[10px] tracking-[0.14em] text-slate-500 uppercase ${
               rail ? 'flex-col gap-1' : ''
             }`}
-            title={phase.label}
+            title={phaseLabel}
           >
             <span
               className={`h-1.5 w-1.5 rounded-full ${phase.color} ${phase.live ? 'dot-ping' : ''}`}
               aria-hidden
             />
-            {!rail && phase.label}
+            {!rail && phaseLabel}
           </span>
         </div>
       </aside>

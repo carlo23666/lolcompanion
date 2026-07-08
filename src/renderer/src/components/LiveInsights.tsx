@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { GameState } from '@shared/gamestate'
 import type { PersonalCurve } from '@shared/stats'
+import { useT } from '../i18n'
 import type { LiveInsights as Insights } from '../hooks'
 
 function formatClock(totalSeconds: number): string {
@@ -23,6 +24,7 @@ export function PersonalCurveChip(props: {
   curve: PersonalCurve | null
 }): React.JSX.Element | null {
   const { gameState, curve } = props
+  const t = useT()
   const minute = gameState.gameTimeS / 60
   if (!curve || minute < 3) return null
   const currentCs = gameState.self.scores.creepScore
@@ -36,9 +38,15 @@ export function PersonalCurveChip(props: {
           ? 'border-emerald-800 bg-emerald-600/10 text-emerald-300'
           : 'border-rose-800 bg-rose-600/10 text-rose-300'
       }`}
-      title={`Tu media con ${curve.champion} (${String(curve.games)} partidas): ${curve.csAt10.toFixed(0)} CS @10, ${curve.csAt15.toFixed(0)} CS @15`}
+      title={t('live.curveTitle', {
+        champion: curve.champion,
+        games: String(curve.games),
+        cs10: curve.csAt10.toFixed(0),
+        cs15: curve.csAt15.toFixed(0)
+      })}
     >
-      🌾 CS {currentCs} · tu media {Math.round(expectedCs)} {ahead ? '▲' : '▼'}
+      🌾 {t('live.csVsAvg', { cs: String(currentCs), avg: String(Math.round(expectedCs)) })}{' '}
+      {ahead ? '▲' : '▼'}
       {Math.abs(Math.round(delta))}
     </span>
   )
@@ -46,6 +54,7 @@ export function PersonalCurveChip(props: {
 
 /** Estimated team gold comparison bar. */
 export function TeamGoldBar(props: { gameState: GameState }): React.JSX.Element {
+  const t = useT()
   const allies = props.gameState.allyAggregates.estimatedTotalGold
   const enemies = props.gameState.enemyAggregates.estimatedTotalGold
   const total = allies + enemies
@@ -53,11 +62,8 @@ export function TeamGoldBar(props: { gameState: GameState }): React.JSX.Element 
   const diff = allies - enemies
   const ahead = diff >= 0
   return (
-    <div
-      className="flex items-center gap-2 text-xs"
-      title="Oro estimado por equipo (modelo documentado en normalize.ts)"
-    >
-      <span className="text-slate-500">oro</span>
+    <div className="flex items-center gap-2 text-xs" title={t('live.goldTitle')}>
+      <span className="text-slate-500">{t('live.gold')}</span>
       <div className="flex h-2 flex-1 overflow-hidden rounded bg-rose-900/60">
         <div className="h-full bg-sky-600" style={{ width: `${String(allyPct)}%` }} />
       </div>
@@ -74,6 +80,7 @@ export function LiveChips(props: {
   insights: Insights
 }): React.JSX.Element {
   const { gameState, insights } = props
+  const t = useT()
   const now = gameState.gameTimeS
   const dragonIn = insights.nextDragonS !== null ? insights.nextDragonS - now : null
   const baronIn = insights.nextBaronS !== null ? insights.nextBaronS - now : null
@@ -83,17 +90,17 @@ export function LiveChips(props: {
     <div className="flex flex-wrap items-center gap-1.5">
       {dragonIn !== null && (
         <span className="rounded border border-slate-700 bg-slate-800/60 px-2 py-0.5 text-xs text-slate-300">
-          🐉 {dragonIn > 0 ? `en ${formatClock(dragonIn)}` : 'en el mapa'}
+          🐉 {dragonIn > 0 ? t('live.dragonIn', { time: formatClock(dragonIn) }) : t('live.onMap')}
         </span>
       )}
       {baronIn !== null && (
         <span className="rounded border border-slate-700 bg-slate-800/60 px-2 py-0.5 text-xs text-slate-300">
-          🟣 {baronIn > 0 ? `Barón en ${formatClock(baronIn)}` : 'Barón en el mapa'}
+          🟣 {baronIn > 0 ? t('live.baronIn', { time: formatClock(baronIn) }) : t('live.baronOnMap')}
         </span>
       )}
       {deadGold && (
         <span className="rounded border border-amber-800 bg-amber-600/10 px-2 py-0.5 text-xs text-amber-300">
-          💰 {Math.round(gameState.self.currentGold)} oro sin gastar — planea base
+          💰 {t('live.deadGold', { gold: String(Math.round(gameState.self.currentGold)) })}
         </span>
       )}
     </div>

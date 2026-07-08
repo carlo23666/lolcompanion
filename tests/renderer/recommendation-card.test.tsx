@@ -3,6 +3,12 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { RecommendationsPayload } from '@shared/ipc'
 import RecommendationCard from '@renderer/components/RecommendationCard'
+import { LocaleProvider } from '@renderer/i18n'
+
+// Assertions are in Spanish (existing-install default) → render under es.
+const esWrapper = ({ children }: { children: React.ReactNode }): React.JSX.Element => (
+  <LocaleProvider locale="es">{children}</LocaleProvider>
+)
 
 const payload: RecommendationsPayload = {
   gameTimeS: 900,
@@ -33,7 +39,7 @@ const payload: RecommendationsPayload = {
 
 describe('RecommendationCard', () => {
   it('shows the top recommendation with icon, action and top-3 reasons', () => {
-    render(<RecommendationCard payload={payload} currentGold={1250} />)
+    render(<RecommendationCard payload={payload} currentGold={1250} />, { wrapper: esWrapper })
     expect(screen.getByText('Llamada del verdugo')).toBeInTheDocument()
     expect(screen.getByText('PRÓXIMA COMPRA')).toBeInTheDocument()
     expect(screen.getByText(/Índice de curación enemiga 5.0/)).toBeInTheDocument()
@@ -44,7 +50,7 @@ describe('RecommendationCard', () => {
   })
 
   it('lists secondary recommendations in the alternatives rail', () => {
-    render(<RecommendationCard payload={payload} currentGold={1250} />)
+    render(<RecommendationCard payload={payload} currentGold={1250} />, { wrapper: esWrapper })
     expect(screen.getByText('Alternativas')).toBeInTheDocument()
     expect(screen.getByText('Ángel de la guarda')).toBeInTheDocument()
     expect(screen.getByText('55')).toBeInTheDocument()
@@ -52,7 +58,7 @@ describe('RecommendationCard', () => {
 
   it('records an auditable history when the top recommendation changes', async () => {
     const user = userEvent.setup()
-    const { rerender } = render(<RecommendationCard payload={payload} currentGold={1250} />)
+    const { rerender } = render(<RecommendationCard payload={payload} currentGold={1250} />, { wrapper: esWrapper })
     const changed: RecommendationsPayload = {
       gameTimeS: 960,
       recommendations: [

@@ -5,6 +5,7 @@ import type { RecommendationsPayload } from '@shared/ipc'
 import type { ChampSelectState } from '@shared/schemas/lcu'
 import type { SessionPhase } from '@shared/session'
 import { useIpcEvent, type LiveInsights as LiveInsightsData } from '../hooks'
+import { useT } from '../i18n'
 import AnimatedNumber from './AnimatedNumber'
 import ChampSelectPanel from './ChampSelectPanel'
 import { HexiSprite, useMascotName } from './Mascot'
@@ -13,6 +14,7 @@ import { HexiSprite, useMascotName } from './Mascot'
 function GameDirectionPanel(): React.JSX.Element | null {
   const direction = useIpcEvent('coach:direction')
   const mascot = useMascotName()
+  const t = useT()
   if (direction === null) return null
   return (
     <section className="card-in rounded-lg border border-indigo-800/60 bg-slate-900 p-3.5">
@@ -20,7 +22,7 @@ function GameDirectionPanel(): React.JSX.Element | null {
         <HexiSprite mood="focused" className="h-9 w-9 shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="mb-1 text-[10px] font-semibold tracking-widest text-indigo-300 uppercase">
-            Plan de partida · {mascot}
+            {t('live.gamePlan')} · {mascot}
           </p>
           <p className="text-xs leading-relaxed text-slate-300">{direction.text}</p>
         </div>
@@ -73,16 +75,16 @@ function OverlayHint(props: { onOpenSettings?: () => void }): React.JSX.Element 
       cancelled = true
     }
   }, [])
+  const t = useT()
   if (overlayEnabled !== false) return null
   return (
     <p className="card-in rounded border border-slate-800 bg-slate-900/60 px-3 py-1.5 text-[11px] text-slate-400">
-      💡 Tu mascota puede acompañarte dentro del juego con un overlay (LoL en ventana o sin
-      bordes).{' '}
+      💡 {t('live.overlayHint')}{' '}
       <button
         className="text-indigo-300 underline hover:text-indigo-200"
         onClick={props.onOpenSettings}
       >
-        Actívalo en Ajustes
+        {t('live.overlayEnable')}
       </button>
     </p>
   )
@@ -102,6 +104,7 @@ function InGameLayout(props: {
   onOpenSettings?: () => void
 }): React.JSX.Element {
   const { gameState, curve } = props
+  const t = useT()
 
   const stat = (label: string, value: React.ReactNode, accent = false): React.JSX.Element => (
     <div className="flex flex-col px-4 first:pl-0">
@@ -128,22 +131,30 @@ function InGameLayout(props: {
           <p className="text-sm leading-tight font-semibold text-slate-100">
             {gameState.self.championName}
           </p>
-          <p className="text-[11px] text-slate-500">nivel {gameState.self.level}</p>
+          <p className="text-[11px] text-slate-500">
+            {t('live.levelAbbr', { n: String(gameState.self.level) })}
+          </p>
         </div>
       </div>
       <div className="flex divide-x divide-slate-800">
-        {stat('Tiempo', formatClock(gameState.gameTimeS))}
-        {stat('Oro', <AnimatedNumber value={Math.round(gameState.self.currentGold)} />, true)}
+        {stat(t('live.stat.time'), formatClock(gameState.gameTimeS))}
         {stat(
-          'KDA',
+          t('live.stat.gold'),
+          <AnimatedNumber value={Math.round(gameState.self.currentGold)} />,
+          true
+        )}
+        {stat(
+          t('live.stat.kda'),
           `${String(gameState.self.scores.kills)}/${String(gameState.self.scores.deaths)}/${String(gameState.self.scores.assists)}`
         )}
-        {stat('CS', gameState.self.scores.creepScore)}
+        {stat(t('live.stat.cs'), gameState.self.scores.creepScore)}
       </div>
       <div className="ml-4">
         <PersonalCurveChip gameState={gameState} curve={curve} />
       </div>
-      <span className="ml-auto text-[11px] text-slate-600">parche {gameState.patch}</span>
+      <span className="ml-auto text-[11px] text-slate-600">
+        {t('live.patch', { patch: gameState.patch })}
+      </span>
     </div>
   )
   const hero = (
@@ -162,13 +173,13 @@ function InGameLayout(props: {
   ) : null
   const allies = (
     <TeamPanel
-      title="Tu equipo"
+      title={t('live.yourTeam')}
       accent="ally"
       players={[gameState.self, ...gameState.allies]}
       selfChampion={gameState.self.championName}
     />
   )
-  const enemies = <TeamPanel title="Enemigos" accent="enemy" players={gameState.enemies} />
+  const enemies = <TeamPanel title={t('live.enemies')} accent="enemy" players={gameState.enemies} />
   const gauges = <Gauges aggregates={gameState.enemyAggregates} gameTimeS={gameState.gameTimeS} />
   const objectives = (
     <ObjectivesRow objectives={gameState.objectives} selfTeam={gameState.self.team} />
@@ -232,27 +243,28 @@ export default function LiveView(props: {
 }): React.JSX.Element {
   const { phase, gameState } = props
   const curve = usePersonalCurve(gameState)
+  const t = useT()
 
   return (
     // min-h-full (not h-full): the view must be able to GROW past the
     // viewport so <main>'s scrollbar reaches everything. max-w keeps the
     // content composed on wide monitors instead of stretched and empty.
     <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-3 p-4">
-      <h1 className="text-lg font-bold">Live</h1>
+      <h1 className="text-lg font-bold">{t('nav.live')}</h1>
 
       {(phase === 'idle' || phase === 'clientOpen') && (
         <HomeDashboard phase={phase} onOpenSettings={props.onOpenSettings} />
       )}
       {phase === 'postGame' && (
         <div className="flex flex-1 flex-col items-center justify-center gap-3">
-          <p className="text-sm font-medium text-slate-300">🏁 Fin de la partida</p>
+          <p className="text-sm font-medium text-slate-300">🏁 {t('live.gameOverBanner')}</p>
           <PostGameReport />
           {props.onOpenHistory && (
             <button
               className="rounded border border-slate-700 bg-slate-800 px-4 py-1.5 text-xs text-slate-300 hover:border-indigo-500/60 hover:text-slate-100"
               onClick={props.onOpenHistory}
             >
-              Ver en historial — compara con tus otras partidas
+              {t('live.compareHistory')}
             </button>
           )}
         </div>
@@ -264,16 +276,12 @@ export default function LiveView(props: {
       {phase === 'inGame' &&
         (gameState === null ? (
           props.liveState === 'loading' ? (
-            <EmptyState
-              icon="🌀"
-              title="Cargando partida"
-              hint="La pantalla de carga está en marcha; los datos llegan al aparecer en la Grieta."
-            />
+            <EmptyState icon="🌀" title={t('live.loadingTitle')} hint={t('live.loadingHint')} />
           ) : (
             <EmptyState
               icon="⏳"
-              title="Conectando con la partida"
-              hint="Leyendo datos del juego (puerto 2999)…"
+              title={t('live.connectingTitle')}
+              hint={t('live.connectingHint')}
             />
           )
         ) : (

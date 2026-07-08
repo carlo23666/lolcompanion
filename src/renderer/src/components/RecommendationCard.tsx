@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Recommendation } from '@shared/recommendation'
 import type { RecommendationsPayload } from '@shared/ipc'
+import type { MessageKey } from '@shared/i18n'
+import { useT } from '../i18n'
 
-const ACTION_LABEL: Record<Recommendation['action'], string> = {
-  prioritize: 'COMPRA YA',
-  add: 'PRÓXIMA COMPRA',
-  delay: 'ESPERA',
-  replace: 'VENDE Y CAMBIA'
+const ACTION_LABEL_KEYS: Record<Recommendation['action'], MessageKey> = {
+  prioritize: 'rec.action.prioritize',
+  add: 'rec.action.add',
+  delay: 'rec.action.delay',
+  replace: 'rec.action.replace'
 }
 
 const ACTION_STYLE: Record<Recommendation['action'], string> = {
@@ -33,6 +35,7 @@ export default function RecommendationCard(props: {
   currentGold: number
 }): React.JSX.Element | null {
   const { payload } = props
+  const t = useT()
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const [showHistory, setShowHistory] = useState(false)
   const [pulse, setPulse] = useState(false)
@@ -76,13 +79,13 @@ export default function RecommendationCard(props: {
       )}
       <div className="mb-2.5 flex items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">
-          ◆ Recomendación
+          ◆ {t('live.recommendation')}
         </h3>
         <button
           className="text-[11px] text-slate-500 hover:text-slate-300"
           onClick={() => setShowHistory((visible) => !visible)}
         >
-          {showHistory ? 'ocultar historial' : `historial (${String(history.length)})`}
+          {showHistory ? t('rec.hideHistory') : t('rec.showHistory', { n: String(history.length) })}
         </button>
       </div>
 
@@ -98,7 +101,7 @@ export default function RecommendationCard(props: {
           <span
             className={`rounded border px-1.5 py-0.5 text-[10px] font-bold whitespace-nowrap ${ACTION_STYLE[top.action]}`}
           >
-            {ACTION_LABEL[top.action]}
+            {t(ACTION_LABEL_KEYS[top.action])}
           </span>
         </div>
 
@@ -111,7 +114,7 @@ export default function RecommendationCard(props: {
               className="text-[11px] text-slate-500"
               style={{ fontVariantNumeric: 'tabular-nums' }}
             >
-              puntuación {top.score}
+              {t('live.score', { score: String(top.score) })}
             </span>
           </div>
           <ul className="mt-1.5 space-y-1">
@@ -131,7 +134,7 @@ export default function RecommendationCard(props: {
         {rest.length > 0 && (
           <div className="flex flex-col gap-1.5 md:border-l md:border-slate-800 md:pl-4">
             <p className="text-[10px] font-semibold tracking-widest text-slate-500 uppercase">
-              Alternativas
+              {t('live.alternatives')}
             </p>
             {rest.slice(0, 3).map((rec, index) => (
               <div
@@ -167,7 +170,7 @@ export default function RecommendationCard(props: {
               <span>
                 {formatClock(entry.gameTimeS)} — {entry.title}
               </span>
-              <span>{ACTION_LABEL[entry.action]}</span>
+              <span>{t(ACTION_LABEL_KEYS[entry.action])}</span>
             </li>
           ))}
         </ul>
