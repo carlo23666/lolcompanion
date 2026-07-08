@@ -218,6 +218,24 @@ export const es: Catalog = {
   'report.stat.deaths': 'Muertes',
   'report.stat.vision': 'Visión',
   'report.engineRecs': 'Recomendaciones del motor ({followed}/{total} seguidas)',
+  'report.sum.deathsHigh':
+    'Has muerto {deaths} veces, por encima de tu media de {avg} con {champion} — revisa qué muertes eran evitables',
+  'report.sum.deathsLow': 'Solo {deaths} muertes (tu media: {avg}) — buen control del riesgo',
+  'report.sum.visionLow':
+    'Visión baja: {score} puntos frente a tu media de {avg} — compra algún pink más y usa el trinket al salir de base',
+  'report.sum.visionGood': 'Buena visión: {score} puntos frente a tu media de {avg}',
+  'report.sum.csLow':
+    'Farmeo flojo: {cs} CS/min frente a tu media de {avg} — prioriza oleadas entre jugadas',
+  'report.sum.dmgHigh':
+    'Has cargado con el daño del equipo: {pct}% frente a tu media de {avg}%',
+  'report.sum.buildConsistent':
+    'Build consistente: has seguido {followed} de {total} recomendaciones del motor',
+  'report.sum.buildFew':
+    'Solo has seguido {followed} de {total} recomendaciones del motor — compara tu build final con las sugerencias de abajo',
+  'report.sum.metaHigh':
+    'Tu build final coincide en {overlap} de {total} objetos con lo más comprado en Master+ con {champion}',
+  'report.sum.metaLow':
+    'Tu build final solo coincide en {overlap} de {total} objetos con lo más comprado en Master+ — compara tu itemización',
 
   // --- Champ select panel ---
   'csp.coachTitle': '{mascot} analiza el draft',
@@ -291,6 +309,22 @@ export const es: Catalog = {
   'set.sync.error': 'Error: {error}',
   'set.sync.done': 'Completado: {stored} partidas nuevas ({skipped} ya guardadas)',
   'set.sync.downloading': 'Descargando… {stored} guardadas, {skipped} omitidas',
+
+  // --- Errors + updater (main process) ---
+  'err.missingKey': 'Falta la clave de la API de Riot (Ajustes → Cuenta)',
+  'err.syncInProgress': 'Sincronización ya en curso',
+  'err.missingRiotId': 'Configura tu Riot ID (nombre#TAG) primero',
+  'err.accountNotFound': 'Cuenta no encontrada: {message}',
+  'err.staticUnavailable': 'Datos estáticos no disponibles (sin conexión y sin caché)',
+  'err.apiKeyRejected': 'Clave API rechazada (403): renuévala en Ajustes/.env',
+  'err.noSeeds': 'Sin jugadores semilla (¿clave API caducada?)',
+  'err.crawlInProgress': 'ya hay un rastreo en marcha',
+  'updater.title': 'Actualización lista',
+  'updater.message': 'LoL Companion {version} está descargada.',
+  'updater.detail':
+    'Puedes reiniciar ahora para aplicarla o seguir; se instalará sola al cerrar la app.',
+  'updater.restart': 'Reiniciar ahora',
+  'updater.later': 'Luego',
 
   // --- Mascot bubbles ---
   'mascot.idle.1': 'Zzz…',

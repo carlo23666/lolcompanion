@@ -213,6 +213,23 @@ export const en = {
   'report.stat.deaths': 'Deaths',
   'report.stat.vision': 'Vision',
   'report.engineRecs': 'Engine recommendations ({followed}/{total} followed)',
+  'report.sum.deathsHigh':
+    'You died {deaths} times, above your {avg} average with {champion} — review which deaths were avoidable',
+  'report.sum.deathsLow': 'Only {deaths} deaths (your avg: {avg}) — good risk control',
+  'report.sum.visionLow':
+    'Low vision: {score} points vs your {avg} average — buy a few more control wards and use your trinket leaving base',
+  'report.sum.visionGood': 'Good vision: {score} points vs your {avg} average',
+  'report.sum.csLow':
+    'Weak farming: {cs} CS/min vs your {avg} average — prioritize waves between plays',
+  'report.sum.dmgHigh': "You carried the team's damage: {pct}% vs your {avg}% average",
+  'report.sum.buildConsistent':
+    'Consistent build: you followed {followed} of {total} engine recommendations',
+  'report.sum.buildFew':
+    'You only followed {followed} of {total} engine recommendations — compare your final build with the suggestions below',
+  'report.sum.metaHigh':
+    'Your final build matches {overlap} of {total} items with the most-bought Master+ build for {champion}',
+  'report.sum.metaLow':
+    'Your final build only matches {overlap} of {total} items with the most-bought Master+ build — compare your itemization',
 
   // --- Champ select panel ---
   'csp.coachTitle': '{mascot} analyzes the draft',
@@ -286,6 +303,22 @@ export const en = {
   'set.sync.error': 'Error: {error}',
   'set.sync.done': 'Done: {stored} new games ({skipped} already saved)',
   'set.sync.downloading': 'Downloading… {stored} saved, {skipped} skipped',
+
+  // --- Errors + updater (main process) ---
+  'err.missingKey': 'Riot API key missing (Settings → Account)',
+  'err.syncInProgress': 'Sync already in progress',
+  'err.missingRiotId': 'Set your Riot ID (name#TAG) first',
+  'err.accountNotFound': 'Account not found: {message}',
+  'err.staticUnavailable': 'Static data unavailable (offline and no cache)',
+  'err.apiKeyRejected': 'API key rejected (403): renew it in Settings/.env',
+  'err.noSeeds': 'No seed players (API key expired?)',
+  'err.crawlInProgress': 'a crawl is already running',
+  'updater.title': 'Update ready',
+  'updater.message': 'LoL Companion {version} is downloaded.',
+  'updater.detail':
+    'You can restart now to apply it, or keep going; it installs on its own when you close the app.',
+  'updater.restart': 'Restart now',
+  'updater.later': 'Later',
 
   // --- Mascot bubbles ---
   'mascot.idle.1': 'Zzz…',

@@ -1,6 +1,7 @@
 import { appendFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { app, dialog } from 'electron'
+import type { Translator } from '@shared/i18n'
 // electron-updater is CJS with getter-defined exports: a NAMED import from
 // the ESM main bundle throws at startup ("does not provide an export named
 // 'autoUpdater'") — the default-import interop is the only safe path.
@@ -30,7 +31,11 @@ function makeFileLog(): (message: string) => void {
  * can postpone; the update also applies on next quit automatically.
  * Dev builds skip everything (no feed, no noise).
  */
-export function startAutoUpdater(consoleLog: (message: string) => void): void {
+export function startAutoUpdater(
+  consoleLog: (message: string) => void,
+  /** Resolves a translator at dialog time so it follows the current locale. */
+  translator: () => Translator
+): void {
   if (!app.isPackaged) return
 
   const fileLog = makeFileLog()
@@ -57,13 +62,14 @@ export function startAutoUpdater(consoleLog: (message: string) => void): void {
   })
   autoUpdater.on('update-downloaded', (info) => {
     log(`[updater] update downloaded: ${info.version}`)
+    const t = translator()
     void dialog
       .showMessageBox({
         type: 'info',
-        title: 'Actualización lista',
-        message: `LoL Companion ${info.version} está descargada.`,
-        detail: 'Puedes reiniciar ahora para aplicarla o seguir; se instalará sola al cerrar la app.',
-        buttons: ['Reiniciar ahora', 'Luego'],
+        title: t('updater.title'),
+        message: t('updater.message', { version: info.version }),
+        detail: t('updater.detail'),
+        buttons: [t('updater.restart'), t('updater.later')],
         defaultId: 0,
         cancelId: 1
       })

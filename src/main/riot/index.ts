@@ -12,8 +12,7 @@ import { normalizeRiotId } from './riotid'
 import { getStaticDataManager } from '../staticdata'
 import { isFinishedBuildItem } from '../staticdata/itemgraph'
 import { normalizeTheme } from '@shared/themes'
-import { normalizeLocale } from '@shared/i18n'
-import type { Locale } from '@shared/i18n'
+import { createTranslator, normalizeLocale, type Locale, type Translator } from '@shared/i18n'
 
 export { RiotClient, RiotApiError, PLATFORM_TO_REGIONAL } from './client'
 export type { Result, RiotErrorKind } from './client'
@@ -28,8 +27,6 @@ const limiter = new RiotRateLimiter()
 let metaCrawler: MetaCrawler | null = null
 // safeStorage is ready once the app is (all callers run post app.whenReady).
 const keyCodec = createSafeStorageCodec(safeStorage)
-
-const MISSING_KEY_ERROR = 'Falta la clave de la API de Riot (Ajustes → Cuenta)'
 
 /**
  * Ready-to-use client + owner puuid, or null when the app is not configured
@@ -57,6 +54,8 @@ export function getLocale(db: AppDatabase): Locale {
 
 export function registerRiotIpc(db: AppDatabase): void {
   const settings = new SettingsRepo(db)
+  /** Translator at the CURRENT locale — errors reach the renderer localized. */
+  const tr = (): Translator => createTranslator(normalizeLocale(settings.get(SETTING_KEYS.locale)))
 
   const readSoundVolume = (): number => {
     const raw = Number(settings.get(SETTING_KEYS.soundVolume) ?? '60')
@@ -131,17 +130,17 @@ export function registerRiotIpc(db: AppDatabase): void {
   })
 
   handleInvoke('ingest:start', async () => {
-    if (ingestRunning) return { started: false as const, error: 'Sincronización ya en curso' }
+    if (ingestRunning) return { started: false as const, error: tr()('err.syncInProgress') }
 
     const apiKey = resolveApiKey(settings, keyCodec)
     if (apiKey === null) {
-      return { started: false as const, error: MISSING_KEY_ERROR }
+      return { started: false as const, error: tr()('err.missingKey') }
     }
     // Normalize on read too: values saved before this fix may still carry
     // the invisible characters.
     const riotId = normalizeRiotId(settings.get(SETTING_KEYS.riotId) ?? '')
     if (riotId === '' || !riotId.includes('#')) {
-      return { started: false as const, error: 'Configura tu Riot ID (nombre#TAG) primero' }
+      return { started: false as const, error: tr()('err.missingRiotId') }
     }
     const platform = settings.get(SETTING_KEYS.platform) ?? 'euw1'
     const client = new RiotClient({ apiKey, platform, limiter })
@@ -151,7 +150,7 @@ export function registerRiotIpc(db: AppDatabase): void {
     if (puuid === null || puuid === '') {
       const account = await client.accountByRiotId(gameName, tagLine)
       if (!account.ok) {
-        return { started: false as const, error: `Cuenta no encontrada: ${account.error.message}` }
+        return { started: false as const, error: tr()('err.accountNotFound', { message: account.error.message }) }
       }
       puuid = account.value.puuid
       settings.set(SETTING_KEYS.puuid, puuid)
@@ -200,7 +199,7 @@ export function registerRiotIpc(db: AppDatabase): void {
   handleInvoke('meta:crawl:start', async () => {
     const apiKey = resolveApiKey(settings, keyCodec)
     if (apiKey === null) {
-      return { started: false, error: MISSING_KEY_ERROR }
+      return { started: false, error: tr()('err.missingKey') }
     }
     const platform = settings.get(SETTING_KEYS.platform) ?? 'euw1'
     // Completion-order stats only count finished build pieces (WP-015).
@@ -208,7 +207,7 @@ export function registerRiotIpc(db: AppDatabase): void {
       .load()
       .catch(() => null)
     if (staticData === null) {
-      return { started: false, error: 'datos estáticos no disponibles (sin conexión y sin caché)' }
+      return { started: false, error: tr()('err.staticUnavailable') }
     }
     metaCrawler ??= new MetaCrawler({
       client: new RiotClient({ apiKey, platform, limiter }),
@@ -218,6 +217,7 @@ export function registerRiotIpc(db: AppDatabase): void {
         const node = staticData.itemGraph.nodes.get(itemId)
         return node !== undefined && isFinishedBuildItem(node)
       },
+      t: tr(),
       log: (message) => console.log(message)
     })
     return metaCrawler.start()

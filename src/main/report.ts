@@ -5,6 +5,8 @@ import type {
 } from '@shared/report'
 import type { AppDatabase } from './db'
 import { LiveSessionRepo, MatchRepo, MetaRepo } from './db/repos'
+import { SettingsRepo, SETTING_KEYS } from './db/repos/settings'
+import { createTranslator, normalizeLocale, t as translators, type Translator } from '@shared/i18n'
 import type { StatsService } from './stats'
 
 const MAX_RECOMMENDED_ITEMS = 10
@@ -37,18 +39,26 @@ export function buildReportSummary(
     | 'recommendedItems'
   >,
   /** Final build vs the most-bought Master+ items (null = no meta data). */
-  metaBuild: { overlap: number; total: number } | null = null
+  metaBuild: { overlap: number; total: number } | null = null,
+  t: Translator = translators.es
 ): string[] {
   const lines: string[] = []
 
   if (report.avgDeaths !== null && report.avgDeaths > 0) {
     if (report.deaths >= report.avgDeaths + 2) {
       lines.push(
-        `Has muerto ${String(report.deaths)} veces, por encima de tu media de ${report.avgDeaths.toFixed(1)} con ${report.champion} — revisa qué muertes eran evitables`
+        t('report.sum.deathsHigh', {
+          deaths: String(report.deaths),
+          avg: report.avgDeaths.toFixed(1),
+          champion: report.champion
+        })
       )
     } else if (report.deaths <= report.avgDeaths - 1) {
       lines.push(
-        `Solo ${String(report.deaths)} muertes (tu media: ${report.avgDeaths.toFixed(1)}) — buen control del riesgo`
+        t('report.sum.deathsLow', {
+          deaths: String(report.deaths),
+          avg: report.avgDeaths.toFixed(1)
+        })
       )
     }
   }
@@ -56,11 +66,17 @@ export function buildReportSummary(
   if (report.avgVisionScore !== null && report.avgVisionScore > 0) {
     if (report.visionScore < report.avgVisionScore * 0.8) {
       lines.push(
-        `Visión baja: ${String(Math.round(report.visionScore))} puntos frente a tu media de ${report.avgVisionScore.toFixed(0)} — compra algún pink más y usa el trinket al salir de base`
+        t('report.sum.visionLow', {
+          score: String(Math.round(report.visionScore)),
+          avg: report.avgVisionScore.toFixed(0)
+        })
       )
     } else if (report.visionScore > report.avgVisionScore * 1.2) {
       lines.push(
-        `Buena visión: ${String(Math.round(report.visionScore))} puntos frente a tu media de ${report.avgVisionScore.toFixed(0)}`
+        t('report.sum.visionGood', {
+          score: String(Math.round(report.visionScore)),
+          avg: report.avgVisionScore.toFixed(0)
+        })
       )
     }
   }
@@ -68,7 +84,10 @@ export function buildReportSummary(
   if (report.avgCsPerMin !== null && report.avgCsPerMin > 0) {
     if (report.csPerMin < report.avgCsPerMin * 0.85) {
       lines.push(
-        `Farmeo flojo: ${report.csPerMin.toFixed(1)} CS/min frente a tu media de ${report.avgCsPerMin.toFixed(1)} — prioriza oleadas entre jugadas`
+        t('report.sum.csLow', {
+          cs: report.csPerMin.toFixed(1),
+          avg: report.avgCsPerMin.toFixed(1)
+        })
       )
     }
   }
@@ -76,7 +95,10 @@ export function buildReportSummary(
   if (report.avgDamageSharePct !== null && report.avgDamageSharePct > 0) {
     if (report.damageSharePct > report.avgDamageSharePct * 1.2) {
       lines.push(
-        `Has cargado con el daño del equipo: ${report.damageSharePct.toFixed(0)}% frente a tu media de ${report.avgDamageSharePct.toFixed(0)}%`
+        t('report.sum.dmgHigh', {
+          pct: report.damageSharePct.toFixed(0),
+          avg: report.avgDamageSharePct.toFixed(0)
+        })
       )
     }
   }
@@ -87,23 +109,28 @@ export function buildReportSummary(
     const ratio = followed / total
     if (ratio >= 0.7) {
       lines.push(
-        `Build consistente: has seguido ${String(followed)} de ${String(total)} recomendaciones del motor`
+        t('report.sum.buildConsistent', { followed: String(followed), total: String(total) })
       )
     } else if (ratio < 0.4) {
-      lines.push(
-        `Solo has seguido ${String(followed)} de ${String(total)} recomendaciones del motor — compara tu build final con las sugerencias de abajo`
-      )
+      lines.push(t('report.sum.buildFew', { followed: String(followed), total: String(total) }))
     }
   }
 
   if (metaBuild !== null && metaBuild.total >= 3) {
     if (metaBuild.overlap >= metaBuild.total - 1) {
       lines.push(
-        `Tu build final coincide en ${String(metaBuild.overlap)} de ${String(metaBuild.total)} objetos con lo más comprado en Master+ con ${report.champion}`
+        t('report.sum.metaHigh', {
+          overlap: String(metaBuild.overlap),
+          total: String(metaBuild.total),
+          champion: report.champion
+        })
       )
     } else if (metaBuild.overlap <= Math.floor(metaBuild.total / 2)) {
       lines.push(
-        `Tu build final solo coincide en ${String(metaBuild.overlap)} de ${String(metaBuild.total)} objetos con lo más comprado en Master+ — compara tu itemización`
+        t('report.sum.metaLow', {
+          overlap: String(metaBuild.overlap),
+          total: String(metaBuild.total)
+        })
       )
     }
   }
@@ -122,6 +149,7 @@ export class ReportService {
   private readonly sessions: LiveSessionRepo
   private readonly matches: MatchRepo
   private readonly meta: MetaRepo
+  private readonly settings: SettingsRepo
 
   constructor(
     db: AppDatabase,
@@ -130,6 +158,7 @@ export class ReportService {
     this.sessions = new LiveSessionRepo(db)
     this.matches = new MatchRepo(db)
     this.meta = new MetaRepo(db)
+    this.settings = new SettingsRepo(db)
   }
 
   lastReport(puuid: string): PostGameReportResult | null {
@@ -200,7 +229,8 @@ export class ReportService {
       recommendedItems,
       summary: []
     }
-    report.summary = buildReportSummary(report, this.metaBuildComparison(own, finalItems))
+    const t = createTranslator(normalizeLocale(this.settings.get(SETTING_KEYS.locale)))
+    report.summary = buildReportSummary(report, this.metaBuildComparison(own, finalItems), t)
     return { kind: 'report', report }
   }
 

@@ -1,4 +1,5 @@
 import type { RiotLeagueList, RiotMatch, RiotTimeline } from '@shared/schemas/riot'
+import { t as translators, type Translator } from '@shared/i18n'
 import type { MetaRepo } from '../db/repos'
 import { aggregateMatch, aggregateTimelineOrder, patchOf } from './meta-aggregate'
 import type { Result } from './client'
@@ -62,16 +63,22 @@ export class MetaCrawler {
       onProgress: (status: MetaCrawlStatus) => void
       /** Which items count for completion-order stats (from the item graph). */
       isOrderable: (itemId: number) => boolean
+      /** Localized status/error strings (ADR-009); defaults to Spanish. */
+      t?: Translator
       log?: (message: string) => void
     }
   ) {}
+
+  private get t(): Translator {
+    return this.options.t ?? translators.es
+  }
 
   status(): MetaCrawlStatus {
     return { ...this.state, running: this.running }
   }
 
   start(): { started: boolean; error?: string } {
-    if (this.running) return { started: false, error: 'ya hay un rastreo en marcha' }
+    if (this.running) return { started: false, error: this.t('err.crawlInProgress') }
     this.running = true
     this.stopRequested = false
     this.state = { running: true, processed: 0, stored: 0, seedsDone: 0, seedsTotal: 0, error: null }
@@ -123,7 +130,7 @@ export class MetaCrawler {
       const match = await this.options.client.match(matchId, CRAWL_PRIORITY)
       if (!match.ok) {
         if (match.error.kind === 'forbidden') {
-          this.state.error = 'clave API rechazada (403): renuévala en Ajustes/.env'
+          this.state.error = this.t('err.apiKeyRejected')
           return
         }
         continue
@@ -137,7 +144,7 @@ export class MetaCrawler {
     if (this.stopRequested || this.state.error !== null) return
     const seeds = await this.collectSeeds()
     if (seeds.length === 0) {
-      this.state.error ??= 'sin jugadores semilla (¿clave API caducada?)'
+      this.state.error ??= this.t('err.noSeeds')
       return
     }
     this.state.seedsTotal = seeds.length
@@ -152,7 +159,7 @@ export class MetaCrawler {
       )
       if (!ids.ok) {
         if (ids.error.kind === 'forbidden') {
-          this.state.error = 'clave API rechazada (403): renuévala en Ajustes/.env'
+          this.state.error = this.t('err.apiKeyRejected')
           return
         }
         continue // transient: move to the next seed
@@ -163,7 +170,7 @@ export class MetaCrawler {
         const match = await this.options.client.match(matchId, CRAWL_PRIORITY)
         if (!match.ok) {
           if (match.error.kind === 'forbidden') {
-            this.state.error = 'clave API rechazada (403): renuévala en Ajustes/.env'
+            this.state.error = this.t('err.apiKeyRejected')
             return
           }
           continue
@@ -191,7 +198,7 @@ export class MetaCrawler {
       const result = await this.options.client.apexLeague(tier, CRAWL_PRIORITY)
       if (!result.ok) {
         if (result.error.kind === 'forbidden') {
-          this.state.error = 'clave API rechazada (403): renuévala en Ajustes/.env'
+          this.state.error = this.t('err.apiKeyRejected')
           return []
         }
         this.options.log?.(`[meta] ${tier} list failed: ${result.error.message}`)

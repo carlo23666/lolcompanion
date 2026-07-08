@@ -157,7 +157,10 @@ void app.whenReady().then(() => {
   void importMetaSeedIfEmpty(database, { log: (message) => console.log(message) })
 
   // Keep every install current from GitHub releases (packaged builds only).
-  startAutoUpdater((message) => console.log(message))
+  startAutoUpdater(
+    (message) => console.log(message),
+    () => createTranslator(getLocale(database))
+  )
   const postGame = new PostGameIngestor({
     db: database,
     getContext: () => getRiotContext(database),
