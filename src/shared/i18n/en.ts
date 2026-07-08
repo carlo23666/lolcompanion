@@ -100,5 +100,71 @@ export const en = {
     "Over {other}: you can't carry both at once (they share {group})",
   'engine.recommend.situPool': '{item} is in your {champion} situationals',
   'engine.recommend.metaWr':
-    'in Master+ with {champion}: {wr}% WR carrying this item ({games} games)'
+    'in Master+ with {champion}: {wr}% WR carrying this item ({games} games)',
+
+  // --- Stats: weakness insights (WP-016) ---
+  'weakness.deaths.early.finding': 'You die {avg} times per game before minute 14',
+  'weakness.deaths.early.advice':
+    'Play the laning phase further back: every early death hands over the lane and a level lead',
+  'weakness.deaths.mid.finding': 'You die {avg} times per game between minute 14 and 25',
+  'weakness.deaths.mid.advice':
+    'In mid game whoever walks alone dies: move with your team and never cross the river without vision',
+  'weakness.deaths.late.finding': 'You die {avg} times per game after minute 25',
+  'weakness.deaths.late.advice':
+    'In late game each death is 40+ seconds out: never fight without your team or defend lanes with no escape',
+  'weakness.gankable.finding':
+    'The enemy jungler is involved in {avg} of your early deaths per game',
+  'weakness.gankable.advice':
+    "You're an easy gank target: hold river vision, watch the minimap when you push, and respect missing pings",
+  'weakness.vision.finding':
+    "Your average vision is {vision}/min, below your role's floor ({floor}/min)",
+  'weakness.vision.advice':
+    'Buy control wards every base and use your trinket leaving lane: vision is the cheapest stat to improve',
+  'weakness.objectives.finding':
+    '{pct}% of enemy objectives fall right after one of your deaths',
+  'weakness.objectives.advice':
+    "Before a dragon or baron spawns, play not to die: your death opens the objective even if you're not near it",
+  'weakness.participation.finding':
+    "You take part in {pct}% of your team's kills (floor: {floor}%)",
+  'weakness.participation.advice':
+    'The game is happening away from you: rotate to your team fights even at the cost of some farm',
+
+  // --- Champ select: role labels + pick reasons + comp tips ---
+  'cs.role.top': 'top',
+  'cs.role.jungle': 'jungle',
+  'cs.role.mid': 'mid',
+  'cs.role.adc': 'ADC',
+  'cs.role.support': 'support',
+  'cs.role.default': 'your games',
+  'cs.pick.metaBase': '{wr}% WR in Master+ this patch ({games} games) — the base of the suggestion',
+  'cs.pick.ownAdjust': '{wr}% wins in {games} games as {role} (your data, adjusts)',
+  'cs.pick.ownBase':
+    '{wr}% wins in {games} games as {role} (your data — meta has no sample for this champion yet)',
+  'cs.pick.versusOwn': "against this comp's champions: {wins} of {total} won",
+  'cs.pick.versusMeta': 'in Master+ vs {names}: {wr}% WR ({games} games)',
+  'cs.pick.addsMagic': 'adds the magic damage your team lacks',
+  'cs.pick.addsPhysical': 'adds the physical damage your team lacks',
+  'cs.pick.frontline': 'your team has no frontline and this pick provides it',
+  'cs.pick.tankVsAssassins': '{n} assassins ahead: you hold their engages better',
+  'cs.pick.mobilityVsAssassins':
+    '{n} assassins ahead: your mobility lets you reposition when they jump',
+  'cs.pick.immobileVsAssassins':
+    "watch out: immobile pick vs {n} assassins — you'll depend on your team's peel",
+  'cs.pick.antiTankStrong': '{n} tanks ahead: your %HP damage melts them',
+  'cs.pick.antiTankWeak':
+    '{n} tanks ahead and this pick struggles to kill them — consider an anti-tank',
+  'cs.pick.inPool': 'in your pool: baseline build ready',
+  'cs.tip.heavyAP': 'Very AP enemy comp ({n} of {total})',
+  'cs.tip.heavyAD': 'Very AD enemy comp ({n} of {total})',
+  'cs.tip.carryMr': "{heavy}: as a carry don't buy tank MR — {items} fit you ({cheap} is the cheap piece)",
+  'cs.tip.planMr': '{heavy}: plan magic resist — {cheap} is the cheap piece',
+  'cs.tip.carryArmor':
+    "{heavy}: as a carry don't buy tank armor — {items} fit you ({cheap} is the cheap piece)",
+  'cs.tip.planArmor': '{heavy}: plan armor — {cheap} is the cheap piece',
+  'cs.tip.mixed': 'Mixed enemy damage: HP outperforms stacking a single resist',
+  'cs.tip.healers': 'Enemy healing on the board ({names}): save a slot for Grievous Wounds',
+  'cs.tip.teamAllAd':
+    'Your team is almost all AD: the enemy benefits from stacking armor — the magic damage you add counts double',
+  'cs.tip.teamAllAp':
+    'Your team is almost all AP: the enemy benefits from stacking MR — the physical damage you add counts double'
 } as const

@@ -6,6 +6,7 @@ import type {
 } from '@shared/champselect'
 import type { ChampSelectState } from '@shared/schemas/lcu'
 import { championTraitsSchema, type ChampionTraits } from '@shared/schemas/traits'
+import { t as translators, type MessageKey, type Translator } from '@shared/i18n'
 import { findBaseline, loadBaselinePool } from './engine/nextbuy'
 import { HEALER_CHAMPION_WEIGHTS } from './engine/normalize'
 import { ARMOR_SQUISHY, MR_SQUISHY } from './engine/rules/armor-vs-mr'
@@ -54,12 +55,12 @@ export interface MetaSource {
   ): { games: number; wins: number } | null
 }
 
-const ROLE_LABEL: Record<string, string> = {
-  TOP: 'top',
-  JUNGLE: 'jungla',
-  MIDDLE: 'mid',
-  BOTTOM: 'ADC',
-  UTILITY: 'support'
+const ROLE_LABEL_KEYS: Record<string, MessageKey> = {
+  TOP: 'cs.role.top',
+  JUNGLE: 'cs.role.jungle',
+  MIDDLE: 'cs.role.mid',
+  BOTTOM: 'cs.role.adc',
+  UTILITY: 'cs.role.support'
 }
 
 /** Champion classes that count as frontline for the team-needs bonus. */
@@ -80,7 +81,8 @@ export function pickSuggestions(
   history: OwnerHistoryRow[],
   allySplit: TeamDamageSplit,
   pool: BaselinePool,
-  meta: MetaSource | null = null
+  meta: MetaSource | null = null,
+  t: Translator = translators.es
 ): PickSuggestion[] {
   const position = (state.ownPosition ?? '').toUpperCase()
   const rows = position === '' ? history : history.filter((row) => row.role === position)
@@ -127,7 +129,7 @@ export function pickSuggestions(
 
   const wantsMagic = allySplit.picked >= 2 && allySplit.physical >= allySplit.picked - 1
   const wantsPhysical = allySplit.picked >= 2 && allySplit.magic >= allySplit.picked - 1
-  const roleLabel = ROLE_LABEL[position] ?? 'tus partidas'
+  const roleLabel = t(ROLE_LABEL_KEYS[position] ?? 'cs.role.default')
 
   // Meta tables are keyed by role. Without an assigned position (blind pick,
   // custom games) fall back to the role the owner most plays that champion
@@ -170,13 +172,24 @@ export function pickSuggestions(
         const metaWr = metaStat.wins / metaStat.games
         score = metaWr + (ownScore - 0.5) * 0.35
         reasons.push(
-          `${(metaWr * 100).toFixed(0)}% WR en Master+ este parche (${String(metaStat.games)} partidas) — la base de la sugerencia`,
-          `${winratePct.toFixed(0)}% de victorias en ${String(acc.games)} partidas como ${roleLabel} (tus datos, ajustan)`
+          t('cs.pick.metaBase', {
+            wr: (metaWr * 100).toFixed(0),
+            games: String(metaStat.games)
+          }),
+          t('cs.pick.ownAdjust', {
+            wr: winratePct.toFixed(0),
+            games: String(acc.games),
+            role: roleLabel
+          })
         )
       } else {
         score = ownScore
         reasons.push(
-          `${winratePct.toFixed(0)}% de victorias en ${String(acc.games)} partidas como ${roleLabel} (tus datos — la meta aún no tiene muestra de este campeón)`
+          t('cs.pick.ownBase', {
+            wr: winratePct.toFixed(0),
+            games: String(acc.games),
+            role: roleLabel
+          })
         )
       }
 
@@ -191,7 +204,10 @@ export function pickSuggestions(
           const versusWr = versusWins / versus.length
           score += (versusWr - 0.5) * 0.15
           reasons.push(
-            `contra campeones de esta comp: ${String(versusWins)} de ${String(versus.length)} ganadas`
+            t('cs.pick.versusOwn', {
+              wins: String(versusWins),
+              total: String(versus.length)
+            })
           )
         }
       }
@@ -211,7 +227,11 @@ export function pickSuggestions(
           const versusWr = versusWins / versusGames
           score += (versusWr - 0.5) * 0.2
           reasons.push(
-            `en Master+ contra ${versusNames.join('/')}: ${(versusWr * 100).toFixed(0)}% WR (${String(versusGames)} partidas)`
+            t('cs.pick.versusMeta', {
+              names: versusNames.join('/'),
+              wr: (versusWr * 100).toFixed(0),
+              games: String(versusGames)
+            })
           )
         }
       }
@@ -220,10 +240,10 @@ export function pickSuggestions(
       const damageType = staticData.damageProfile(champion)
       if (wantsMagic && damageType !== 'physical') {
         score += 0.06
-        reasons.push('aporta el daño mágico que le falta a tu equipo')
+        reasons.push(t('cs.pick.addsMagic'))
       } else if (wantsPhysical && damageType !== 'magic') {
         score += 0.06
-        reasons.push('aporta el daño físico que le falta a tu equipo')
+        reasons.push(t('cs.pick.addsPhysical'))
       }
       if (
         teamLacksFrontline &&
@@ -231,11 +251,11 @@ export function pickSuggestions(
         champMeta.tags.some((tag) => FRONTLINE_TAGS.has(tag))
       ) {
         score += 0.05
-        reasons.push('tu equipo no tiene frontline y este pick la aporta')
+        reasons.push(t('cs.pick.frontline'))
       }
       if (enemyAssassins >= 2 && champMeta !== undefined && champMeta.tags.includes('Tank')) {
         score += 0.03
-        reasons.push(`${String(enemyAssassins)} asesinos enfrente: aguantas mejor sus entradas`)
+        reasons.push(t('cs.pick.tankVsAssassins', { n: String(enemyAssassins) }))
       }
 
       // Curated kit traits (mobility / tank-shred): a champion missing from
@@ -244,32 +264,24 @@ export function pickSuggestions(
       if (traits !== undefined && enemyAssassins >= 2) {
         if (traits.mobility >= 2) {
           score += 0.05
-          reasons.push(
-            `${String(enemyAssassins)} asesinos enfrente: tu movilidad te deja reposicionarte cuando saltan`
-          )
+          reasons.push(t('cs.pick.mobilityVsAssassins', { n: String(enemyAssassins) }))
         } else if (traits.mobility === 0) {
           score -= 0.05
-          reasons.push(
-            `ojo: pick inmóvil contra ${String(enemyAssassins)} asesinos — dependerás del peel de tu equipo`
-          )
+          reasons.push(t('cs.pick.immobileVsAssassins', { n: String(enemyAssassins) }))
         }
       }
       if (traits !== undefined && enemyTanks >= 2) {
         if (traits.antiTank >= 2) {
           score += 0.06
-          reasons.push(
-            `${String(enemyTanks)} tanques enfrente: tu daño por % de vida los derrite`
-          )
+          reasons.push(t('cs.pick.antiTankStrong', { n: String(enemyTanks) }))
         } else if (traits.antiTank === 0) {
           score -= 0.04
-          reasons.push(
-            `${String(enemyTanks)} tanques enfrente y a este pick le cuesta matarlos — plantéate un anti-tanques`
-          )
+          reasons.push(t('cs.pick.antiTankWeak', { n: String(enemyTanks) }))
         }
       }
       if (findBaseline(pool, champion, position) !== null) {
         score += 0.03
-        reasons.push('está en tu pool: build baseline lista')
+        reasons.push(t('cs.pick.inPool'))
       }
       const name = champMeta?.name ?? champion
       return { championId: champion, name, games: acc.games, winratePct, reasons, score }
@@ -286,7 +298,7 @@ export function pickSuggestions(
 }
 
 function itemRef(staticData: StaticData, id: number): ChampSelectItemRef {
-  return { id, name: staticData.itemGraph.nodes.get(id)?.name ?? `objeto ${String(id)}` }
+  return { id, name: staticData.itemGraph.nodes.get(id)?.name ?? `#${String(id)}` }
 }
 
 function damageSplit(staticData: StaticData, championKeys: number[]): TeamDamageSplit {
@@ -309,7 +321,8 @@ export function champSelectInsights(
   staticData: StaticData,
   pool: BaselinePool = loadBaselinePool(),
   ownerHistory: OwnerHistoryRow[] = [],
-  meta: MetaSource | null = null
+  meta: MetaSource | null = null,
+  t: Translator = translators.es
 ): ChampSelectInsights {
   const allyKeys = state.myTeam
     .map((member) => member.championId || member.championPickIntent)
@@ -354,29 +367,35 @@ export function champSelectInsights(
 
   if (enemySplit.picked >= 2) {
     if (enemySplit.magic >= 3) {
-      const heavy = `Comp enemiga muy AP (${String(enemySplit.magic)} de ${String(enemySplit.picked)})`
-      if (ownIsSquishy) {
-        tips.push(
-          `${heavy}: como carry no compres RM de tanque — ${squishyOptions(MR_SQUISHY)} encajan contigo (${itemRef(staticData, NEGATRON_CLOAK).name} es la pieza barata)`
-        )
-      } else {
-        tips.push(
-          `${heavy}: planea resistencia mágica — ${itemRef(staticData, NEGATRON_CLOAK).name} es la pieza barata`
-        )
-      }
+      const heavy = t('cs.tip.heavyAP', {
+        n: String(enemySplit.magic),
+        total: String(enemySplit.picked)
+      })
+      tips.push(
+        ownIsSquishy
+          ? t('cs.tip.carryMr', {
+              heavy,
+              items: squishyOptions(MR_SQUISHY),
+              cheap: itemRef(staticData, NEGATRON_CLOAK).name
+            })
+          : t('cs.tip.planMr', { heavy, cheap: itemRef(staticData, NEGATRON_CLOAK).name })
+      )
     } else if (enemySplit.physical >= 3) {
-      const heavy = `Comp enemiga muy AD (${String(enemySplit.physical)} de ${String(enemySplit.picked)})`
-      if (ownIsSquishy) {
-        tips.push(
-          `${heavy}: como carry no compres armadura de tanque — ${squishyOptions(ARMOR_SQUISHY)} encaja contigo (${itemRef(staticData, CHAIN_VEST).name} es la pieza barata)`
-        )
-      } else {
-        tips.push(
-          `${heavy}: planea armadura — ${itemRef(staticData, CHAIN_VEST).name} es la pieza barata`
-        )
-      }
+      const heavy = t('cs.tip.heavyAD', {
+        n: String(enemySplit.physical),
+        total: String(enemySplit.picked)
+      })
+      tips.push(
+        ownIsSquishy
+          ? t('cs.tip.carryArmor', {
+              heavy,
+              items: squishyOptions(ARMOR_SQUISHY),
+              cheap: itemRef(staticData, CHAIN_VEST).name
+            })
+          : t('cs.tip.planArmor', { heavy, cheap: itemRef(staticData, CHAIN_VEST).name })
+      )
     } else if (enemySplit.picked >= 4) {
-      tips.push('Daño enemigo mixto: la vida rinde más que apilar una sola resistencia')
+      tips.push(t('cs.tip.mixed'))
     }
   }
 
@@ -387,20 +406,14 @@ export function champSelectInsights(
     )
     .map((champion) => champion?.name ?? '')
   if (healers.length > 0) {
-    tips.push(
-      `Curación enemiga a la vista (${healers.join(', ')}): reserva hueco para heridas graves`
-    )
+    tips.push(t('cs.tip.healers', { names: healers.join(', ') }))
   }
 
   if (allySplit.picked >= 4) {
     if (allySplit.physical >= 4) {
-      tips.push(
-        'Tu equipo es casi todo AD: al rival le renta apilar armadura — el daño mágico que aportes vale doble'
-      )
+      tips.push(t('cs.tip.teamAllAd'))
     } else if (allySplit.magic >= 4) {
-      tips.push(
-        'Tu equipo es casi todo AP: al rival le renta apilar RM — el daño físico que aportes vale doble'
-      )
+      tips.push(t('cs.tip.teamAllAp'))
     }
   }
 
@@ -422,7 +435,7 @@ export function champSelectInsights(
   // Pick suggestions only matter while the owner hasn't locked a champion.
   const picks =
     (own?.championId ?? 0) === 0
-      ? pickSuggestions(state, staticData, ownerHistory, allySplit, pool, meta)
+      ? pickSuggestions(state, staticData, ownerHistory, allySplit, pool, meta, t)
       : []
 
   return { enemySplit, allySplit, tips, picks, ownPlan }

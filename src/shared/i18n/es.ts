@@ -106,5 +106,73 @@ export const es: Catalog = {
     'Antes que {other}: no se pueden llevar a la vez (comparten {group})',
   'engine.recommend.situPool': '{item} está en tus situacionales de {champion}',
   'engine.recommend.metaWr':
-    'en Master+ con {champion}: {wr}% WR llevando este objeto ({games} partidas)'
+    'en Master+ con {champion}: {wr}% WR llevando este objeto ({games} partidas)',
+
+  // --- Stats: weakness insights (WP-016) ---
+  'weakness.deaths.early.finding': 'Mueres {avg} veces por partida antes del minuto 14',
+  'weakness.deaths.early.advice':
+    'Juega la fase de líneas más atrás: cada muerte temprana regala la línea y la ventaja de nivel',
+  'weakness.deaths.mid.finding': 'Mueres {avg} veces por partida entre el minuto 14 y el 25',
+  'weakness.deaths.mid.advice':
+    'En mid game muere quien camina solo: muévete con tu equipo y no cruces el río sin visión',
+  'weakness.deaths.late.finding': 'Mueres {avg} veces por partida pasado el minuto 25',
+  'weakness.deaths.late.advice':
+    'En late game cada muerte son 40+ segundos fuera: no pelees sin tu equipo ni defiendas líneas sin escape',
+  'weakness.gankable.finding':
+    'El jungla enemigo participa en {avg} de tus muertes tempranas por partida',
+  'weakness.gankable.advice':
+    'Eres un objetivo fácil de gankeo: guarda visión en el río, mira el minimapa al empujar y respeta las desapariciones',
+  'weakness.vision.finding':
+    'Tu visión media es {vision}/min, por debajo del suelo de tu rol ({floor}/min)',
+  'weakness.vision.advice':
+    'Compra guardianes rosas cada base y usa el trinket al salir de línea: la visión es la estadística más barata de mejorar',
+  'weakness.objectives.finding':
+    'El {pct}% de los objetivos enemigos caen justo después de una muerte tuya',
+  'weakness.objectives.advice':
+    'Antes de que salga dragón o barón, juega a no morir: tu muerte abre el objetivo aunque no estés cerca',
+  'weakness.participation.finding':
+    'Participas en el {pct}% de las kills de tu equipo (suelo: {floor}%)',
+  'weakness.participation.advice':
+    'La partida está pasando lejos de ti: rota a las jugadas de tu equipo aunque pierdas un poco de farmeo',
+
+  // --- Champ select: role labels + pick reasons + comp tips ---
+  'cs.role.top': 'top',
+  'cs.role.jungle': 'jungla',
+  'cs.role.mid': 'mid',
+  'cs.role.adc': 'ADC',
+  'cs.role.support': 'support',
+  'cs.role.default': 'tus partidas',
+  'cs.pick.metaBase':
+    '{wr}% WR en Master+ este parche ({games} partidas) — la base de la sugerencia',
+  'cs.pick.ownAdjust': '{wr}% de victorias en {games} partidas como {role} (tus datos, ajustan)',
+  'cs.pick.ownBase':
+    '{wr}% de victorias en {games} partidas como {role} (tus datos — la meta aún no tiene muestra de este campeón)',
+  'cs.pick.versusOwn': 'contra campeones de esta comp: {wins} de {total} ganadas',
+  'cs.pick.versusMeta': 'en Master+ contra {names}: {wr}% WR ({games} partidas)',
+  'cs.pick.addsMagic': 'aporta el daño mágico que le falta a tu equipo',
+  'cs.pick.addsPhysical': 'aporta el daño físico que le falta a tu equipo',
+  'cs.pick.frontline': 'tu equipo no tiene frontline y este pick la aporta',
+  'cs.pick.tankVsAssassins': '{n} asesinos enfrente: aguantas mejor sus entradas',
+  'cs.pick.mobilityVsAssassins':
+    '{n} asesinos enfrente: tu movilidad te deja reposicionarte cuando saltan',
+  'cs.pick.immobileVsAssassins':
+    'ojo: pick inmóvil contra {n} asesinos — dependerás del peel de tu equipo',
+  'cs.pick.antiTankStrong': '{n} tanques enfrente: tu daño por % de vida los derrite',
+  'cs.pick.antiTankWeak':
+    '{n} tanques enfrente y a este pick le cuesta matarlos — plantéate un anti-tanques',
+  'cs.pick.inPool': 'está en tu pool: build baseline lista',
+  'cs.tip.heavyAP': 'Comp enemiga muy AP ({n} de {total})',
+  'cs.tip.heavyAD': 'Comp enemiga muy AD ({n} de {total})',
+  'cs.tip.carryMr':
+    '{heavy}: como carry no compres RM de tanque — {items} encajan contigo ({cheap} es la pieza barata)',
+  'cs.tip.planMr': '{heavy}: planea resistencia mágica — {cheap} es la pieza barata',
+  'cs.tip.carryArmor':
+    '{heavy}: como carry no compres armadura de tanque — {items} encaja contigo ({cheap} es la pieza barata)',
+  'cs.tip.planArmor': '{heavy}: planea armadura — {cheap} es la pieza barata',
+  'cs.tip.mixed': 'Daño enemigo mixto: la vida rinde más que apilar una sola resistencia',
+  'cs.tip.healers': 'Curación enemiga a la vista ({names}): reserva hueco para heridas graves',
+  'cs.tip.teamAllAd':
+    'Tu equipo es casi todo AD: al rival le renta apilar armadura — el daño mágico que aportes vale doble',
+  'cs.tip.teamAllAp':
+    'Tu equipo es casi todo AP: al rival le renta apilar RM — el daño físico que aportes vale doble'
 }

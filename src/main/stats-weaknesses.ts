@@ -1,4 +1,5 @@
 import type { WeaknessInsight } from '@shared/stats'
+import { t as translators, type Translator } from '@shared/i18n'
 
 /**
  * Weakness detectors over the stored history (WP-016): turn the numbers into
@@ -80,7 +81,10 @@ function fmt(value: number): string {
   return (Math.round(value * 10) / 10).toFixed(1)
 }
 
-export function computeWeaknesses(games: WeaknessGameInput[]): WeaknessInsight[] {
+export function computeWeaknesses(
+  games: WeaknessGameInput[],
+  t: Translator = translators.es
+): WeaknessInsight[] {
   if (games.length < T.MIN_GAMES) return []
   const insights: WeaknessInsight[] = []
 
@@ -115,25 +119,22 @@ export function computeWeaknesses(games: WeaknessGameInput[]): WeaknessInsight[]
         key: 'deaths-early' as const,
         avg: phases.early / withTimeline.length,
         threshold: T.PHASE_DEATHS.early,
-        label: 'antes del minuto 14',
-        advice:
-          'Juega la fase de líneas más atrás: cada muerte temprana regala la línea y la ventaja de nivel'
+        findingKey: 'weakness.deaths.early.finding' as const,
+        adviceKey: 'weakness.deaths.early.advice' as const
       },
       {
         key: 'deaths-mid' as const,
         avg: phases.mid / withTimeline.length,
         threshold: T.PHASE_DEATHS.mid,
-        label: 'entre el minuto 14 y el 25',
-        advice:
-          'En mid game muere quien camina solo: muévete con tu equipo y no cruces el río sin visión'
+        findingKey: 'weakness.deaths.mid.finding' as const,
+        adviceKey: 'weakness.deaths.mid.advice' as const
       },
       {
         key: 'deaths-late' as const,
         avg: lateGames > 0 ? phases.late / lateGames : 0,
         threshold: T.PHASE_DEATHS.late,
-        label: 'pasado el minuto 25',
-        advice:
-          'En late game cada muerte son 40+ segundos fuera: no pelees sin tu equipo ni defiendas líneas sin escape'
+        findingKey: 'weakness.deaths.late.finding' as const,
+        adviceKey: 'weakness.deaths.late.advice' as const
       }
     ]
     for (const phase of phaseDefs) {
@@ -141,8 +142,8 @@ export function computeWeaknesses(games: WeaknessGameInput[]): WeaknessInsight[]
         insights.push({
           key: phase.key,
           severity: severityFor(phase.avg, phase.threshold),
-          finding: `Mueres ${fmt(phase.avg)} veces por partida ${phase.label}`,
-          advice: phase.advice,
+          finding: t(phase.findingKey, { avg: fmt(phase.avg) }),
+          advice: t(phase.adviceKey),
           games: withTimeline.length
         })
       }
@@ -153,9 +154,8 @@ export function computeWeaknesses(games: WeaknessGameInput[]): WeaknessInsight[]
       insights.push({
         key: 'gankable',
         severity: severityFor(gankedPerGame, T.GANKED_PER_GAME),
-        finding: `El jungla enemigo participa en ${fmt(gankedPerGame)} de tus muertes tempranas por partida`,
-        advice:
-          'Eres un objetivo fácil de gankeo: guarda visión en el río, mira el minimapa al empujar y respeta las desapariciones',
+        finding: t('weakness.gankable.finding', { avg: fmt(gankedPerGame) }),
+        advice: t('weakness.gankable.advice'),
         games: withTimeline.length
       })
     }
@@ -166,9 +166,8 @@ export function computeWeaknesses(games: WeaknessGameInput[]): WeaknessInsight[]
         insights.push({
           key: 'objectives-while-dead',
           severity: severityFor(share, T.OBJECTIVES_WHILE_DEAD_SHARE),
-          finding: `El ${String(Math.round(share * 100))}% de los objetivos enemigos caen justo después de una muerte tuya`,
-          advice:
-            'Antes de que salga dragón o barón, juega a no morir: tu muerte abre el objetivo aunque no estés cerca',
+          finding: t('weakness.objectives.finding', { pct: String(Math.round(share * 100)) }),
+          advice: t('weakness.objectives.advice'),
           games: withTimeline.length
         })
       }
@@ -187,9 +186,11 @@ export function computeWeaknesses(games: WeaknessGameInput[]): WeaknessInsight[]
     insights.push({
       key: 'low-vision',
       severity: deficit >= T.HIGH_FACTOR ? 'high' : 'medium',
-      finding: `Tu visión media es ${visionPerMin.toFixed(2)}/min, por debajo del suelo de tu rol (${visionFloor.toFixed(2)}/min)`,
-      advice:
-        'Compra guardianes rosas cada base y usa el trinket al salir de línea: la visión es la estadística más barata de mejorar',
+      finding: t('weakness.vision.finding', {
+        vision: visionPerMin.toFixed(2),
+        floor: visionFloor.toFixed(2)
+      }),
+      advice: t('weakness.vision.advice'),
       games: games.length
     })
   }
@@ -206,9 +207,11 @@ export function computeWeaknesses(games: WeaknessGameInput[]): WeaknessInsight[]
       insights.push({
         key: 'low-kill-participation',
         severity: deficit >= T.HIGH_FACTOR ? 'high' : 'medium',
-        finding: `Participas en el ${String(Math.round(participation * 100))}% de las kills de tu equipo (suelo: ${String(Math.round(T.KILL_PARTICIPATION * 100))}%)`,
-        advice:
-          'La partida está pasando lejos de ti: rota a las jugadas de tu equipo aunque pierdas un poco de farmeo',
+        finding: t('weakness.participation.finding', {
+          pct: String(Math.round(participation * 100)),
+          floor: String(Math.round(T.KILL_PARTICIPATION * 100))
+        }),
+        advice: t('weakness.participation.advice'),
         games: participationGames.length
       })
     }

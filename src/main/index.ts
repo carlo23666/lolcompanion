@@ -17,7 +17,8 @@ import { startAutoUpdater } from './updater'
 import { OverlayManager } from './overlay'
 import { SettingsRepo, SETTING_KEYS } from './db/repos/settings'
 import { catchUpMissedMatches, PostGameIngestor } from './postgame'
-import { getOwnerPuuid, getRiotContext, registerRiotIpc } from './riot'
+import { getLocale, getOwnerPuuid, getRiotContext, registerRiotIpc } from './riot'
+import { createTranslator } from '@shared/i18n'
 import { SessionMachine } from './session/machine'
 import { getStaticDataManager } from './staticdata'
 
@@ -111,7 +112,14 @@ function registerIpcHandlers(db: AppDatabase): void {
               .filter((participant) => participant.win !== own.win)
               .map((participant) => participant.champion)
           }))
-    return champSelectInsights(state, data, undefined, history, metaSource(db))
+    return champSelectInsights(
+      state,
+      data,
+      undefined,
+      history,
+      metaSource(db),
+      createTranslator(getLocale(db))
+    )
   })
 }
 

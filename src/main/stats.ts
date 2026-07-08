@@ -10,6 +10,8 @@ import type {
 } from '@shared/stats'
 import type { AppDatabase } from './db'
 import { MatchRepo, TimelineRepo, type ParticipantRow } from './db/repos'
+import { SettingsRepo, SETTING_KEYS } from './db/repos/settings'
+import { createTranslator, normalizeLocale } from '@shared/i18n'
 import {
   computeWeaknesses,
   extractWeaknessEvents,
@@ -50,12 +52,14 @@ function pct(wins: number, games: number): number {
 export class StatsService {
   private readonly matches: MatchRepo
   private readonly timelines: TimelineRepo
+  private readonly settings: SettingsRepo
   private overviewCache = new Map<string, { newestMatchId: string; value: StatsOverview }>()
   private curveCache = new Map<string, PersonalCurve | null>()
 
   constructor(db: AppDatabase) {
     this.matches = new MatchRepo(db)
     this.timelines = new TimelineRepo(db)
+    this.settings = new SettingsRepo(db)
   }
 
   invalidate(): void {
@@ -89,7 +93,10 @@ export class StatsService {
       worstMatchups: worst,
       bestMatchups: best,
       weekdays,
-      weaknesses: computeWeaknesses(this.weaknessInputs(puuid, rows))
+      weaknesses: computeWeaknesses(
+        this.weaknessInputs(puuid, rows),
+        createTranslator(normalizeLocale(this.settings.get(SETTING_KEYS.locale)))
+      )
     }
     this.overviewCache.set(puuid, { newestMatchId, value: overview })
     return overview
