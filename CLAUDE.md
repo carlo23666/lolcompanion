@@ -42,7 +42,7 @@ Full context: `docs/architecture.md` and `docs/decisions.md`.
 - Conventional commits (`feat:`, `fix:`, `chore:`, `test:`, `docs:`). Small commits per logical step.
 - No `any`, no `@ts-ignore` without a comment explaining why. `strict: true` stays on.
 - Errors: use `Result`-style returns or typed errors for connector failures; never swallow exceptions silently.
-- All user-facing strings in Spanish; code, comments, and docs in English.
+- User-facing strings are localized via the `src/shared/i18n/` catalog (ADR-009, WP-017): NEVER hardcode display text. Add a key to `en.ts` (the source of truth — English is the default UI language) and its Spanish value in `es.ts` (the `Catalog` type makes a missing key a compile error), then render with a `Translator`. In the pure engine, `t` is threaded as a parameter (default = Spanish, for back-compat); in the renderer, use `useT()`. Code, comments, and docs stay in English.
 - Do not add dependencies beyond those listed here without noting it in the worklog with justification. Prefer zero-dep utilities.
 
 ## Definition of done for any WP
