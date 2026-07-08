@@ -33,6 +33,8 @@ export const SETTING_KEYS = {
   soundMuted: 'settings.soundMuted',
   overlayEnabled: 'settings.overlayEnabled',
   theme: 'settings.theme',
+  /** UI language ('en' | 'es'); ADR-009. Migration 007 grandfathers ES. */
+  locale: 'settings.locale',
   /** Local-AI coach over Ollama (see main/coach.ts, main/coach-live.ts). */
   coachEnabled: 'settings.coachEnabled',
   coachModel: 'settings.coachModel',

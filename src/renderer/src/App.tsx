@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import type { ChampionMeta } from '@shared/champselect'
 import type { SessionPhase } from '@shared/session'
 import { normalizeTheme } from '@shared/themes'
+import { DEFAULT_LOCALE, normalizeLocale, type Locale } from '@shared/i18n'
+import { LocaleProvider } from './i18n'
 import Shell, { type ViewId } from './components/Shell'
 import LiveView from './components/LiveView'
 import HistoryView from './components/HistoryView'
@@ -19,6 +21,7 @@ export function applyTheme(theme: string): void {
 
 export default function App(): React.JSX.Element {
   const [view, setView] = useState<ViewId>('live')
+  const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE)
   const [phase, setPhase] = useState<SessionPhase>('idle')
   const [championMeta, setChampionMeta] = useState<Record<number, ChampionMeta>>({})
   const gameState = useIpcEvent('gamestate:update')
@@ -39,11 +42,21 @@ export default function App(): React.JSX.Element {
         ...(settings.soundCategories != null ? { categories: settings.soundCategories } : {})
       })
       applyTheme(settings.theme)
+      setLocale(normalizeLocale(settings.locale))
     })
     // Offline with no cached patch this rejects; the UI then falls back to
     // showing numeric champion ids.
     window.api.invoke('staticdata:championMeta').then(setChampionMeta, () => undefined)
-    return window.api.on('session:phase', setPhase)
+    const offPhase = window.api.on('session:phase', setPhase)
+    const onLocale = (event: Event): void => {
+      const detail = (event as CustomEvent<Locale>).detail
+      setLocale(normalizeLocale(detail))
+    }
+    window.addEventListener('app-locale', onLocale)
+    return () => {
+      offPhase()
+      window.removeEventListener('app-locale', onLocale)
+    }
   }, [])
 
   // Gold chime when the top recommendation changes.
@@ -69,6 +82,7 @@ export default function App(): React.JSX.Element {
   }, [insights.alerts])
 
   return (
+    <LocaleProvider locale={locale}>
     <Shell active={view} onSelect={setView} phase={phase} mascotReactKey={mascotReactKey}>
       {view === 'live' && (
         <LiveView
@@ -86,5 +100,6 @@ export default function App(): React.JSX.Element {
       {view === 'history' && <HistoryView />}
       {view === 'settings' && <SettingsView />}
     </Shell>
+    </LocaleProvider>
   )
 }

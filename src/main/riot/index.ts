@@ -12,6 +12,8 @@ import { normalizeRiotId } from './riotid'
 import { getStaticDataManager } from '../staticdata'
 import { isFinishedBuildItem } from '../staticdata/itemgraph'
 import { normalizeTheme } from '@shared/themes'
+import { normalizeLocale } from '@shared/i18n'
+import type { Locale } from '@shared/i18n'
 
 export { RiotClient, RiotApiError, PLATFORM_TO_REGIONAL } from './client'
 export type { Result, RiotErrorKind } from './client'
@@ -48,6 +50,11 @@ export function getOwnerPuuid(db: AppDatabase): string | null {
   return puuid === null || puuid === '' ? null : puuid
 }
 
+/** Current UI locale (ADR-009); the engine/coach/updater translator source. */
+export function getLocale(db: AppDatabase): Locale {
+  return normalizeLocale(new SettingsRepo(db).get(SETTING_KEYS.locale))
+}
+
 export function registerRiotIpc(db: AppDatabase): void {
   const settings = new SettingsRepo(db)
 
@@ -73,6 +80,7 @@ export function registerRiotIpc(db: AppDatabase): void {
     soundCategories: readSoundCategories(),
     overlayEnabled: settings.get(SETTING_KEYS.overlayEnabled) === '1',
     theme: normalizeTheme(settings.get(SETTING_KEYS.theme)),
+    locale: normalizeLocale(settings.get(SETTING_KEYS.locale)),
     // Only the flag crosses IPC — the key itself never reaches the renderer.
     apiKeySet: hasApiKey(settings, keyCodec)
   }))
@@ -96,6 +104,7 @@ export function registerRiotIpc(db: AppDatabase): void {
     )
     settings.set(SETTING_KEYS.overlayEnabled, update.overlayEnabled ? '1' : '0')
     settings.set(SETTING_KEYS.theme, update.theme)
+    settings.set(SETTING_KEYS.locale, normalizeLocale(update.locale))
     // undefined = leave the stored key untouched; '' clears it.
     if (update.apiKey !== undefined) storeApiKey(settings, keyCodec, update.apiKey)
     const puuid = settings.get(SETTING_KEYS.puuid)

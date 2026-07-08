@@ -16,6 +16,7 @@ import type { PersonalCurve, StatsOverview } from './stats'
 import type { PostGameReport, PostGameReportResult } from './report'
 import type { Recommendation } from './recommendation'
 import type { SessionPhase } from './session'
+import type { Locale } from './i18n/types'
 
 export interface RecommendationsPayload {
   gameTimeS: number
@@ -37,6 +38,8 @@ export interface AppSettings {
   overlayEnabled: boolean
   /** Identity id ('neon'); legacy ids normalize onto it. */
   theme: string
+  /** UI language ('en' | 'es'); ADR-009. */
+  locale: Locale
   /** Whether a Riot API key is configured (env or stored). The key itself never crosses IPC. */
   apiKeySet: boolean
 }
@@ -79,6 +82,7 @@ export interface IpcInvokeChannels {
         soundCategories: { recommendation: boolean; spike: boolean; objective: boolean }
         overlayEnabled: boolean
         theme: string
+        locale: Locale
         /** New Riot API key to store; undefined = keep current, '' = clear. */
         apiKey?: string
       }

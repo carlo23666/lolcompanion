@@ -109,6 +109,7 @@ export function installMockApi(): void {
             soundCategories: { recommendation: true, spike: true, objective: true },
             overlayEnabled: true,
             theme,
+            locale: (params.get('lang') as 'en' | 'es') ?? 'es',
             apiKeySet: true
           })
         case 'staticdata:championMeta':

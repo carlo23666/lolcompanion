@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import type { IngestProgressPayload, MetaStatusPayload } from '@shared/ipc'
 import { DEFAULT_THEME, THEMES } from '@shared/themes'
+import { DEFAULT_LOCALE, LOCALES, LOCALE_LABELS, normalizeLocale, type Locale } from '@shared/i18n'
 import { applyTheme } from '../App'
+import { applyLocale, useT } from '../i18n'
 import { configureSounds, playPreview, type SoundCategories } from '../sounds'
 import DevScenario from './DevScenario'
 
@@ -381,8 +383,10 @@ export default function SettingsView(): React.JSX.Element {
   })
   const [overlay, setOverlay] = useState(false)
   const [theme, setTheme] = useState(DEFAULT_THEME)
+  const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE)
   const [status, setStatus] = useState<string | null>(null)
   const [progress, setProgress] = useState<IngestProgressPayload | null>(null)
+  const t = useT()
 
   useEffect(() => {
     void window.api.invoke('settings:get').then((settings) => {
@@ -395,6 +399,7 @@ export default function SettingsView(): React.JSX.Element {
       if (settings.soundCategories != null) setSoundCategories(settings.soundCategories)
       setOverlay(settings.overlayEnabled)
       setTheme(settings.theme)
+      setLocale(normalizeLocale(settings.locale))
     })
     return window.api.on('ingest:progress', setProgress)
   }, [])
@@ -402,6 +407,11 @@ export default function SettingsView(): React.JSX.Element {
   const previewTheme = (id: string): void => {
     setTheme(id)
     applyTheme(id) // instant preview; persisted on Guardar
+  }
+
+  const changeLocale = (next: Locale): void => {
+    setLocale(next)
+    applyLocale(next) // instant; persisted on save
   }
 
   const save = async (): Promise<void> => {
@@ -415,6 +425,7 @@ export default function SettingsView(): React.JSX.Element {
       soundCategories,
       overlayEnabled: overlay,
       theme,
+      locale,
       // Only send a key when the user typed one — undefined keeps the stored one.
       ...(trimmedKey === '' ? {} : { apiKey: trimmedKey })
     })
@@ -559,6 +570,27 @@ export default function SettingsView(): React.JSX.Element {
             Overlay in-game con la mascota (experimental — requiere LoL en ventana o sin
             bordes; se activa al entrar en partida)
           </label>
+          <fieldset className="text-xs text-slate-400">
+            <legend className="mb-1">{t('settings.language')}</legend>
+            <div className="flex gap-2">
+              {LOCALES.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => changeLocale(option)}
+                  aria-pressed={locale === option}
+                  className={`rounded border px-3 py-1.5 transition-colors ${
+                    locale === option
+                      ? 'border-amber-400 bg-amber-400/10 text-amber-300'
+                      : 'border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-500'
+                  }`}
+                >
+                  {LOCALE_LABELS[option]}
+                </button>
+              ))}
+            </div>
+            <p className="mt-1 text-[11px] text-slate-600">{t('settings.language.hint')}</p>
+          </fieldset>
           {/* Single identity today — the picker reappears if THEMES grows. */}
           <fieldset className="text-xs text-slate-400" hidden={THEMES.length < 2}>
             <legend className="mb-1">Tema</legend>
