@@ -2,7 +2,7 @@
 
 Local-first desktop companion for League of Legends (Electron + TypeScript). Reads your own live game (Live Client Data API), champ select (LCU) and match history (Riot API) to produce explained, context-aware build recommendations — driven primarily by Master+ match data, with a personal AI coach mascot.
 
-**Download:** grab the latest installer from [Releases](https://github.com/carlo23666/lolcompanion/releases) (per-user setup, no admin needed). Set your Riot API key in Ajustes on first run.
+**Website:** [carlo23666.github.io/lolcompanion](https://carlo23666.github.io/lolcompanion/) · **Download:** grab the latest installer from [Releases](https://github.com/carlo23666/lolcompanion/releases) (per-user setup, no admin needed). Set your Riot API key in Ajustes on first run.
 
 ## Screenshots
 
