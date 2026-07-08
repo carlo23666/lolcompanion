@@ -13,11 +13,12 @@ function stubOverlayApi(): {
   emit<C extends IpcEventChannel>(channel: C, payload: IpcEventChannels[C]): void
 } {
   const listeners = new Map<string, ((payload: unknown) => void)[]>()
-  const invoke = vi
-    .fn()
-    .mockImplementation((channel: string) =>
-      Promise.resolve(channel === 'overlay:interactive' ? { ok: true } : null)
-    )
+  const invoke = vi.fn().mockImplementation((channel: string) => {
+    if (channel === 'overlay:interactive') return Promise.resolve({ ok: true })
+    // The overlay loads its locale from settings (existing-install default es).
+    if (channel === 'settings:get') return Promise.resolve({ locale: 'es' })
+    return Promise.resolve(null)
+  })
   const api: RendererApi = {
     invoke,
     on(channel, listener) {
@@ -39,7 +40,7 @@ function stubOverlayApi(): {
 }
 
 describe('OverlayApp', () => {
-  it('shows the top recommendation in the compact bubble', () => {
+  it('shows the top recommendation in the compact bubble', async () => {
     const stub = stubOverlayApi()
     render(<OverlayApp />)
     stub.emit('gamestate:recommendations', {
@@ -56,7 +57,8 @@ describe('OverlayApp', () => {
       ]
     })
     expect(screen.getByText(/Filo Infinito/)).toBeInTheDocument()
-    expect(screen.getByText('COMPRA YA')).toBeInTheDocument()
+    // Label localizes once the overlay's settings-driven locale resolves (es).
+    expect(await screen.findByText('COMPRA YA')).toBeInTheDocument()
   })
 
   it('a coach tip makes Hexi walk in with the message, then leave', () => {

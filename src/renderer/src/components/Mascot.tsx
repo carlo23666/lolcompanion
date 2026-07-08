@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { SessionPhase } from '@shared/session'
+import type { MessageKey } from '@shared/i18n'
 import { DEFAULT_THEME, mascotNameFor, normalizeTheme } from '@shared/themes'
+import { useT } from '../i18n'
 
 export type Mood = 'sleepy' | 'idle' | 'hyped' | 'focused'
 
@@ -12,12 +14,12 @@ const MOOD_BY_PHASE: Record<SessionPhase, Mood> = {
   postGame: 'idle'
 }
 
-const PHRASES: Record<SessionPhase, string[]> = {
-  idle: ['Zzz…', 'Abre el cliente cuando quieras', 'Modo reposo'],
-  clientOpen: ['¡Lista la cola!', '¿Jugamos?', 'Calentando…'],
-  champSelect: ['¡Buen pick!', 'Mira sus picks 👀', '¡A por todas!'],
-  inGame: ['Concentración…', 'Farmea tranquilo, yo vigilo', 'Ojo al minimapa'],
-  postGame: ['GG', 'Analizando la partida…', '¿Otra?']
+const PHRASE_KEYS: Record<SessionPhase, readonly MessageKey[]> = {
+  idle: ['mascot.idle.1', 'mascot.idle.2', 'mascot.idle.3'],
+  clientOpen: ['mascot.clientOpen.1', 'mascot.clientOpen.2', 'mascot.clientOpen.3'],
+  champSelect: ['mascot.champSelect.1', 'mascot.champSelect.2', 'mascot.champSelect.3'],
+  inGame: ['mascot.inGame.1', 'mascot.inGame.2', 'mascot.inGame.3'],
+  postGame: ['mascot.postGame.1', 'mascot.postGame.2', 'mascot.postGame.3']
 }
 
 /**
@@ -313,29 +315,31 @@ export default function Mascot(props: {
   /** Increment to make the mascot react (e.g. new spike alert). */
   reactKey?: number
 }): React.JSX.Element {
+  const t = useT()
   const mood = MOOD_BY_PHASE[props.phase]
   const [bubble, setBubble] = useState<string | null>(null)
   const [alerting, setAlerting] = useState(false)
   const phraseIndex = useRef(0)
 
   useEffect(() => {
-    const phrases = PHRASES[props.phase]
-    phraseIndex.current = (phraseIndex.current + 1) % phrases.length
-    setBubble(phrases[phraseIndex.current] ?? null)
+    const keys = PHRASE_KEYS[props.phase]
+    phraseIndex.current = (phraseIndex.current + 1) % keys.length
+    const key = keys[phraseIndex.current]
+    setBubble(key ? t(key) : null)
     const timer = setTimeout(() => setBubble(null), 4500)
     return () => clearTimeout(timer)
-  }, [props.phase])
+  }, [props.phase, t])
 
   useEffect(() => {
     if (props.reactKey === undefined || props.reactKey === 0) return
     setAlerting(true)
-    setBubble('¡Ojo! ⚠')
+    setBubble(t('mascot.alert'))
     const timer = setTimeout(() => {
       setAlerting(false)
       setBubble(null)
     }, 3000)
     return () => clearTimeout(timer)
-  }, [props.reactKey])
+  }, [props.reactKey, t])
 
   return (
     <div className="neon-dock relative flex items-center gap-2" aria-hidden>

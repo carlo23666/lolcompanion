@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Recommendation } from '@shared/recommendation'
+import { DEFAULT_LOCALE, normalizeLocale, type Locale, type MessageKey } from '@shared/i18n'
+import { LocaleProvider, useT } from './i18n'
 import { HexiSprite } from './components/Mascot'
 import { PersonalCurveChip, TeamGoldBar, usePersonalCurve } from './components/LiveInsights'
 import { useIpcEvent, useLiveInsights, type LiveAlert } from './hooks'
 
-const ACTION_LABEL: Record<string, string> = {
-  prioritize: 'COMPRA YA',
-  add: 'PRÓXIMA COMPRA',
-  delay: 'ESPERA',
-  replace: 'VENDE Y CAMBIA'
+const ACTION_LABEL_KEYS: Record<Recommendation['action'], MessageKey> = {
+  prioritize: 'rec.action.prioritize',
+  add: 'rec.action.add',
+  delay: 'rec.action.delay',
+  replace: 'rec.action.replace'
 }
 
 const ALERT_SHOW_MS = 6000
@@ -28,6 +30,7 @@ function ObjectiveChip(props: {
   spawnS: number | null
   now: number
 }): React.JSX.Element | null {
+  const t = useT()
   if (props.spawnS === null) return null
   const remaining = props.spawnS - props.now
   const live = remaining <= 0
@@ -41,13 +44,14 @@ function ObjectiveChip(props: {
             : 'bg-slate-800/80 text-slate-400'
       }`}
     >
-      {props.icon} {live ? `${props.label} VIVO` : formatClock(remaining)}
+      {props.icon} {live ? `${props.label} ${t('overlay.live')}` : formatClock(remaining)}
     </span>
   )
 }
 
 function RecommendationRow(props: { rec: Recommendation; hero: boolean }): React.JSX.Element {
   const { rec, hero } = props
+  const t = useT()
   return (
     <div
       className={`flex items-center gap-2 rounded px-1.5 py-1 ${
@@ -65,7 +69,7 @@ function RecommendationRow(props: { rec: Recommendation; hero: boolean }): React
         <p className={`truncate font-semibold text-slate-100 ${hero ? 'text-xs' : 'text-[11px]'}`}>
           {rec.itemName ?? rec.category}{' '}
           <span className="text-[9px] font-bold text-indigo-300">
-            {ACTION_LABEL[rec.action] ?? ''}
+            {t(ACTION_LABEL_KEYS[rec.action])}
           </span>
         </p>
         {hero && rec.reasons[0] !== undefined && (
@@ -84,7 +88,8 @@ function RecommendationRow(props: { rec: Recommendation; hero: boolean }): React
  * is click-through except while the pointer is over the card
  * (`overlay:interactive`), so it never eats game clicks.
  */
-export default function OverlayApp(): React.JSX.Element | null {
+function OverlayContent(): React.JSX.Element | null {
+  const t = useT()
   const recommendations = useIpcEvent('gamestate:recommendations')
   const gameState = useIpcEvent('gamestate:update')
   const insights = useLiveInsights()
@@ -148,7 +153,7 @@ export default function OverlayApp(): React.JSX.Element | null {
             LoL Companion
           </span>
           <span className="rounded bg-slate-950/70 px-1.5 text-[9px] text-slate-500">
-            {expanded ? 'arrastra para mover' : 'pasa el ratón para ampliar'}
+            {expanded ? t('overlay.dragMove') : t('overlay.hoverExpand')}
           </span>
         </div>
 
@@ -186,7 +191,7 @@ export default function OverlayApp(): React.JSX.Element | null {
                 <p className="truncate text-sm font-semibold text-slate-100">
                   {top.itemName ?? top.category}{' '}
                   <span className="text-[10px] font-bold text-indigo-300">
-                    {ACTION_LABEL[top.action] ?? ''}
+                    {t(ACTION_LABEL_KEYS[top.action])}
                   </span>
                 </p>
                 {top.reasons[0] !== undefined && (
@@ -196,7 +201,7 @@ export default function OverlayApp(): React.JSX.Element | null {
             </div>
           ) : (
             <div className="min-w-0 flex-1 rounded-lg border border-slate-700/60 bg-slate-950/90 px-2.5 py-1.5">
-              <p className="text-[11px] text-slate-500">Esperando recomendación…</p>
+              <p className="text-[11px] text-slate-500">{t('overlay.waiting')}</p>
             </div>
           )}
         </div>
@@ -208,12 +213,12 @@ export default function OverlayApp(): React.JSX.Element | null {
           >
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
-                Panel de partida
+                {t('overlay.matchPanel')}
               </span>
               <button
                 type="button"
                 aria-pressed={pinned}
-                title={pinned ? 'Dejar de fijar' : 'Fijar panel abierto'}
+                title={pinned ? t('overlay.unpin') : t('overlay.pin')}
                 onClick={() => setPinned((value) => !value)}
                 className={`rounded px-1.5 py-0.5 text-[11px] ${
                   pinned ? 'bg-amber-400/20 text-amber-300' : 'bg-slate-800 text-slate-400'
@@ -238,8 +243,18 @@ export default function OverlayApp(): React.JSX.Element | null {
                   <PersonalCurveChip gameState={gameState} curve={curve} />
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <ObjectiveChip icon="🐉" label="dragón" spawnS={insights.nextDragonS} now={now} />
-                  <ObjectiveChip icon="🟣" label="Barón" spawnS={insights.nextBaronS} now={now} />
+                  <ObjectiveChip
+                    icon="🐉"
+                    label={t('overlay.dragon')}
+                    spawnS={insights.nextDragonS}
+                    now={now}
+                  />
+                  <ObjectiveChip
+                    icon="🟣"
+                    label={t('overlay.baron')}
+                    spawnS={insights.nextBaronS}
+                    now={now}
+                  />
                   <div className="min-w-16 flex-1">
                     <TeamGoldBar gameState={gameState} />
                   </div>
@@ -293,5 +308,25 @@ export default function OverlayApp(): React.JSX.Element | null {
         </div>
       )}
     </div>
+  )
+}
+
+/**
+ * The overlay is a SEPARATE window (its own renderer root), so it can't share
+ * App's LocaleProvider — it loads the locale from settings on mount. The
+ * overlay is recreated per game, so a mid-session language change is picked up
+ * next game (rare; no live sync needed here).
+ */
+export default function OverlayApp(): React.JSX.Element | null {
+  const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE)
+  useEffect(() => {
+    void window.api
+      .invoke('settings:get')
+      .then((settings) => setLocale(normalizeLocale(settings?.locale)), () => undefined)
+  }, [])
+  return (
+    <LocaleProvider locale={locale}>
+      <OverlayContent />
+    </LocaleProvider>
   )
 }

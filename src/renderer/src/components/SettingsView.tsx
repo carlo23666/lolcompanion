@@ -20,6 +20,7 @@ const REPLAY_SPEEDS: { label: string; intervalMs: number }[] = [
  * has been collected. Data feeds pick suggestions and the report card.
  */
 function MetaSection(): React.JSX.Element {
+  const t = useT()
   const [status, setStatus] = useState<MetaStatusPayload | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -37,7 +38,7 @@ function MetaSection(): React.JSX.Element {
   const start = async (): Promise<void> => {
     setError(null)
     const result = await window.api.invoke('meta:crawl:start')
-    if (!result.started) setError(result.error ?? 'no se pudo iniciar')
+    if (!result.started) setError(result.error ?? t('set.meta.startError'))
     refresh()
   }
 
@@ -51,28 +52,34 @@ function MetaSection(): React.JSX.Element {
 
   return (
     <section className="max-w-md rounded-lg border border-slate-800 bg-slate-900 p-4">
-      <h2 className="mb-1 text-sm font-semibold text-slate-300">Datos meta (Master+)</h2>
-      <p className="mb-3 text-[11px] text-slate-500">
-        Rastrea partidas ranked de Master, Grandmaster y Challenger con tu clave de la API y
-        guarda solo agregados (winrates, matchups, builds). Alimenta las sugerencias de pick y
-        el informe. Déjalo en marcha en segundo plano: ~2000 partidas/hora.
-      </p>
+      <h2 className="mb-1 text-sm font-semibold text-slate-300">{t('set.meta.title')}</h2>
+      <p className="mb-3 text-[11px] text-slate-500">{t('set.meta.desc')}</p>
       <div className="flex flex-col gap-2 text-xs">
         {totalMatches > 0 && status !== null && (
           <p className="text-slate-400">
-            📦 {totalMatches} partidas agregadas
+            📦 {t('set.meta.aggregated', { n: String(totalMatches) })}
             {status.patches.length > 0 && (
               <span className="text-slate-500">
                 {' '}
-                ({status.patches.map((entry) => `parche ${entry.patch}: ${String(entry.matches)}`).join(' · ')})
+                (
+                {status.patches
+                  .map((entry) =>
+                    t('set.meta.patchEntry', { patch: entry.patch, n: String(entry.matches) })
+                  )
+                  .join(' · ')}
+                )
               </span>
             )}
           </p>
         )}
         {running && status !== null && (
           <p className="text-indigo-300">
-            ⛏ Rastreando… {status.stored} nuevas esta sesión · semillas {status.seedsDone}/
-            {status.seedsTotal}
+            ⛏{' '}
+            {t('set.meta.crawling', {
+              stored: String(status.stored),
+              done: String(status.seedsDone),
+              total: String(status.seedsTotal)
+            })}
           </p>
         )}
         <div className="flex gap-2">
@@ -81,14 +88,14 @@ function MetaSection(): React.JSX.Element {
               className="rounded bg-rose-700 px-3 py-1.5 hover:bg-rose-600"
               onClick={() => void stop()}
             >
-              Detener rastreo
+              {t('set.meta.stop')}
             </button>
           ) : (
             <button
               className="rounded bg-indigo-700 px-3 py-1.5 hover:bg-indigo-600"
               onClick={() => void start()}
             >
-              ⛏ Iniciar rastreo Master+
+              ⛏ {t('set.meta.start')}
             </button>
           )}
         </div>
@@ -105,6 +112,7 @@ function MetaSection(): React.JSX.Element {
  * Purely optional — the app never requires it.
  */
 function CoachSection(): React.JSX.Element {
+  const t = useT()
   const [enabled, setEnabled] = useState(false)
   const [liveEnabled, setLiveEnabled] = useState(false)
   const [model, setModel] = useState('gemma3:4b')
@@ -135,26 +143,22 @@ function CoachSection(): React.JSX.Element {
 
   return (
     <section className="max-w-md rounded-lg border border-slate-800 bg-slate-900 p-4">
-      <h2 className="mb-1 text-sm font-semibold text-slate-300">Coach IA local (experimental)</h2>
-      <p className="mb-3 text-[11px] text-slate-500">
-        Usa un modelo de IA gratuito ejecutándose EN TU PC (via Ollama) para comentar tus
-        informes de partida en lenguaje natural. Nada sale de tu equipo. El motor de
-        recomendaciones no depende de esto.
-      </p>
+      <h2 className="mb-1 text-sm font-semibold text-slate-300">{t('set.coach.title')}</h2>
+      <p className="mb-3 text-[11px] text-slate-500">{t('set.coach.desc')}</p>
       <div className="flex flex-col gap-2 text-xs">
         <div className="flex items-center gap-2">
           {available ? (
-            <p className="text-emerald-400">✓ Ollama detectado ({models.length} modelos)</p>
+            <p className="text-emerald-400">✓ {t('set.coach.detected', { n: String(models.length) })}</p>
           ) : (
             <p className="text-slate-500">
-              Ollama no detectado. Instálalo gratis desde{' '}
-              <span className="text-indigo-300">ollama.com</span> y ejecuta{' '}
+              {t('set.coach.notDetected')}{' '}
+              <span className="text-indigo-300">ollama.com</span> {t('set.coach.andRun')}{' '}
               <code className="rounded bg-slate-800 px-1">ollama pull gemma3:4b</code>
             </p>
           )}
           <button
             type="button"
-            title="Volver a consultar Ollama (tras instalar o borrar modelos)"
+            title={t('set.coach.recheck')}
             className="rounded border border-slate-700 bg-slate-800 px-2 py-0.5 hover:border-slate-500"
             onClick={() => refresh(true)}
           >
@@ -167,7 +171,7 @@ function CoachSection(): React.JSX.Element {
             checked={enabled}
             onChange={(event) => setEnabled(event.target.checked)}
           />
-          Activar análisis de la mascota (informe de partida y champ select)
+          {t('set.coach.enable')}
         </label>
         <label className="flex items-center gap-2 text-slate-400">
           <input
@@ -176,11 +180,10 @@ function CoachSection(): React.JSX.Element {
             disabled={!enabled}
             onChange={(event) => setLiveEnabled(event.target.checked)}
           />
-          Consejos EN PARTIDA (~1 por minuto): la mascota sugiere macro en el overlay — visión
-          antes de objetivos, cuándo forzar, cuándo jugar seguro
+          {t('set.coach.live')}
         </label>
         <label className="text-slate-400">
-          Modelo
+          {t('set.coach.model')}
           {models.length > 0 ? (
             <select
               className="mt-1 w-full rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-slate-100"
@@ -188,7 +191,7 @@ function CoachSection(): React.JSX.Element {
               onChange={(event) => setModel(event.target.value)}
             >
               {!models.includes(model) && (
-                <option value={model}>{model} (no instalado — se usará otro)</option>
+                <option value={model}>{t('set.coach.notInstalled', { model })}</option>
               )}
               {models.map((name) => (
                 <option key={name} value={name}>
@@ -209,9 +212,9 @@ function CoachSection(): React.JSX.Element {
             className="rounded bg-slate-700 px-3 py-1.5 hover:bg-slate-600"
             onClick={() => void save()}
           >
-            Guardar
+            {t('set.save')}
           </button>
-          {saved && <span className="text-amber-400">Guardado</span>}
+          {saved && <span className="text-amber-400">{t('set.savedShort')}</span>}
         </div>
       </div>
     </section>
@@ -434,50 +437,47 @@ export default function SettingsView(): React.JSX.Element {
       setApiKeyInput('')
     }
     configureSounds({ enabled: sounds, volume: soundVolume, categories: soundCategories })
-    setStatus('Ajustes guardados')
+    setStatus(t('set.settingsSaved'))
   }
 
   const sync = async (): Promise<void> => {
     setStatus(null)
     setProgress(null)
     const result = await window.api.invoke('ingest:start')
-    if (!result.started) setStatus(result.error ?? 'No se pudo iniciar la sincronización')
+    if (!result.started) setStatus(result.error ?? t('set.syncError'))
   }
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-4 p-4">
-      <h1 className="text-lg font-bold">Ajustes</h1>
+      <h1 className="text-lg font-bold">{t('nav.settings')}</h1>
 
       <section className="max-w-md rounded-lg border border-slate-800 bg-slate-900 p-4">
-        <h2 className="mb-3 text-sm font-semibold text-slate-300">Cuenta</h2>
+        <h2 className="mb-3 text-sm font-semibold text-slate-300">{t('set.account')}</h2>
         <div className="flex flex-col gap-3">
           <label className="text-xs text-slate-400">
-            Riot ID (nombre#TAG)
+            {t('set.riotId')}
             <input
               className="mt-1 w-full rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-sm text-slate-100"
               value={riotId}
               onChange={(event) => setRiotId(event.target.value)}
-              placeholder="Ejemplo#EUW"
+              placeholder={t('set.riotIdPlaceholder')}
             />
           </label>
           <label className="text-xs text-slate-400">
-            Clave de la API de Riot{' '}
-            {apiKeySet && <span className="text-emerald-400">✓ guardada</span>}
+            {t('set.apiKey')}{' '}
+            {apiKeySet && <span className="text-emerald-400">✓ {t('set.saved')}</span>}
             <input
               type="password"
               autoComplete="off"
               className="mt-1 w-full rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-sm text-slate-100"
               value={apiKeyInput}
               onChange={(event) => setApiKeyInput(event.target.value)}
-              placeholder={apiKeySet ? '(sin cambios — escribe para reemplazarla)' : 'RGAPI-…'}
+              placeholder={apiKeySet ? t('set.apiKeyPlaceholderSet') : 'RGAPI-…'}
             />
-            <span className="mt-1 block text-[11px] text-slate-600">
-              Genera una gratis en developer.riotgames.com (las claves de desarrollo caducan cada
-              24 h). Se guarda cifrada en este equipo y nunca sale de él.
-            </span>
+            <span className="mt-1 block text-[11px] text-slate-600">{t('set.apiKeyHint')}</span>
           </label>
           <label className="text-xs text-slate-400">
-            Región
+            {t('set.region')}
             <select
               className="mt-1 w-full rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-sm text-slate-100"
               value={platform}
@@ -496,21 +496,21 @@ export default function SettingsView(): React.JSX.Element {
               checked={recordLive}
               onChange={(event) => setRecordLive(event.target.checked)}
             />
-            Grabar partidas en vivo como fixtures (solo desarrollo)
+            {t('set.recordLive')}
           </label>
           <fieldset className="rounded border border-slate-800 bg-slate-950/40 p-2 text-xs text-slate-400">
-            <legend className="px-1">Sonidos</legend>
+            <legend className="px-1">{t('set.sounds')}</legend>
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={sounds}
                 onChange={(event) => setSounds(event.target.checked)}
               />
-              Activar sonidos
+              {t('set.soundsEnable')}
             </label>
             <div className={sounds ? 'mt-2 flex flex-col gap-1.5' : 'mt-2 flex flex-col gap-1.5 opacity-40'}>
               <label className="flex items-center gap-2">
-                Volumen
+                {t('set.volume')}
                 <input
                   type="range"
                   min={0}
@@ -524,9 +524,9 @@ export default function SettingsView(): React.JSX.Element {
               </label>
               {(
                 [
-                  { key: 'recommendation', label: 'Nueva recomendación (campanita)' },
-                  { key: 'spike', label: 'Power-spike enemigo (doble aviso)' },
-                  { key: 'objective', label: 'Ventana de objetivo (cuerno)' }
+                  { key: 'recommendation', label: t('set.sound.recommendation') },
+                  { key: 'spike', label: t('set.sound.spike') },
+                  { key: 'objective', label: t('set.sound.objective') }
                 ] as const
               ).map((category) => (
                 <label key={category.key} className="flex items-center gap-2">
@@ -557,7 +557,7 @@ export default function SettingsView(): React.JSX.Element {
                   playPreview()
                 }}
               >
-                🔊 Probar
+                🔊 {t('set.soundTest')}
               </button>
             </div>
           </fieldset>
@@ -567,8 +567,7 @@ export default function SettingsView(): React.JSX.Element {
               checked={overlay}
               onChange={(event) => setOverlay(event.target.checked)}
             />
-            Overlay in-game con la mascota (experimental — requiere LoL en ventana o sin
-            bordes; se activa al entrar en partida)
+            {t('set.overlay')}
           </label>
           <fieldset className="text-xs text-slate-400">
             <legend className="mb-1">{t('settings.language')}</legend>
@@ -593,7 +592,7 @@ export default function SettingsView(): React.JSX.Element {
           </fieldset>
           {/* Single identity today — the picker reappears if THEMES grows. */}
           <fieldset className="text-xs text-slate-400" hidden={THEMES.length < 2}>
-            <legend className="mb-1">Tema</legend>
+            <legend className="mb-1">{t('set.theme')}</legend>
             <div className="flex gap-2">
               {THEMES.map((option) => (
                 <button
@@ -612,19 +611,17 @@ export default function SettingsView(): React.JSX.Element {
                 </button>
               ))}
             </div>
-            <p className="mt-1 text-[11px] text-slate-600">
-              Se aplica al instante; pulsa Guardar para conservarlo.
-            </p>
+            <p className="mt-1 text-[11px] text-slate-600">{t('set.applyHint')}</p>
           </fieldset>
           <div className="flex gap-2">
             <button
               className="rounded bg-slate-700 px-3 py-1.5 text-sm hover:bg-slate-600"
               onClick={() => void save()}
             >
-              Guardar
+              {t('set.save')}
             </button>
             <button className="btn-glow rounded-md px-3 py-1.5 text-sm" onClick={() => void sync()}>
-              Sincronizar historial
+              {t('set.saveHistory')}
             </button>
           </div>
           {status !== null && <p className="text-xs text-amber-400">{status}</p>}
