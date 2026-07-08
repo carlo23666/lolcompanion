@@ -4,6 +4,16 @@ Local-first desktop companion for League of Legends (Electron + TypeScript). Rea
 
 **Download:** grab the latest installer from [Releases](https://github.com/carlo23666/lolcompanion/releases) (per-user setup, no admin needed). Set your Riot API key in Ajustes on first run.
 
+## Screenshots
+
+In-game: explained recommendations (every advice carries its reasons), Master+-backed picks, enemy comp analysis and objective tracking:
+
+![Live game view](docs/media/live-ingame.png)
+
+Champ select: buy plan against the enemy comp plus your personal plan for the hovered champion — derived only from what's visible on screen:
+
+![Champ select view](docs/media/champ-select.png)
+
 - Start here: `CLAUDE.md` (agent instructions) → `docs/architecture.md` → `backlog/README.md`
 - Full research/plan: `docs/architecture.md` (condensed) — original study kept by owner.
 - Workflow: `docs/review-process.md`
