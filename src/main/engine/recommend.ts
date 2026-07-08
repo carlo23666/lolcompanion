@@ -2,6 +2,7 @@ import type { GameState } from '@shared/gamestate'
 import type { Recommendation } from '@shared/recommendation'
 import type { BaselinePool } from '@shared/schemas/baselines'
 import type { StaticData } from '../staticdata/manager'
+import { applyExclusivity } from './exclusivity'
 import { runEngine } from './index'
 import {
   endgameRecommendation,
@@ -92,7 +93,13 @@ export function recommend(
     }
   }
 
-  return annotated.sort((a, b) => b.score - a.score)
+  // Exclusivity last: never advise an item incompatible with an owned one, and
+  // between colliding candidates only the best-scored survives (WP-012).
+  return applyExclusivity(
+    annotated.sort((a, b) => b.score - a.score),
+    state.self.items.map((item) => item.id),
+    staticData
+  )
 }
 
 /** Below this sample the per-item Master+ WR is noise, not a signal. */

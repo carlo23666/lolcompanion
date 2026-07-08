@@ -6,6 +6,7 @@ import {
   type BaselinePool
 } from '@shared/schemas/baselines'
 import type { StaticData } from '../staticdata/manager'
+import { itemConflict } from '../staticdata/itemgraph'
 import poolJson from './baselines/pool.json'
 import {
   META_ITEM_MIN_GAMES,
@@ -182,6 +183,11 @@ export function nextBuyRecommendation(
       bootsSkippedForRune = true
       continue
     }
+    // An owned item from the same exclusivity group covers this slot (WP-012):
+    // skip it instead of pinning an unbuyable target and going silent.
+    if (state.self.items.some((item) => itemConflict(graph, coreId, item.id) !== null)) {
+      continue
+    }
     target = coreId
     coreIndex = index
     break
@@ -278,7 +284,13 @@ export function endgameRecommendation(
   const targetNode = baseline.situational
     .filter((id) => !ownedIds.has(id))
     .map((id) => graph.nodes.get(id))
-    .find((node) => node !== undefined && node.availableOnSR)
+    .find(
+      (node) =>
+        node !== undefined &&
+        node.availableOnSR &&
+        // Exclusivity (WP-012): an owned same-group item rules the pick out.
+        !buildItems.some((item) => itemConflict(graph, node.id, item.id) !== null)
+    )
   if (!targetNode) return null
 
   const gold = state.self.currentGold

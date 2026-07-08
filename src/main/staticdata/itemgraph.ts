@@ -17,6 +17,8 @@ export interface ItemNode {
   tags: string[]
   stats: Record<string, number>
   depth: number
+  /** Named passives parsed from the description markup (`<passive>X</passive>`). */
+  passives: string[]
 }
 
 export interface ItemGraph {
@@ -53,7 +55,8 @@ export function buildItemGraph(items: Record<string, DdItem>): ItemGraph {
         item.consumed !== true,
       tags: item.tags,
       stats: item.stats,
-      depth: item.depth ?? 1
+      depth: item.depth ?? 1,
+      passives: parsePassives(item.description)
     })
   }
 
@@ -62,6 +65,39 @@ export function buildItemGraph(items: Record<string, DdItem>): ItemGraph {
   )
 
   return { nodes, finishedSRItems }
+}
+
+const PASSIVE_MARKUP = /<passive>(.*?)<\/passive>/g
+
+function parsePassives(description: string | undefined): string[] {
+  if (description === undefined) return []
+  const names = new Set<string>()
+  for (const match of description.matchAll(PASSIVE_MARKUP)) {
+    const name = (match[1] ?? '').trim()
+    if (name.length > 0) names.add(name)
+  }
+  return [...names]
+}
+
+/**
+ * Exclusivity between two items, derived from the patch data: items sharing a
+ * named passive map 1:1 onto the in-game "Limited to 1 X item" groups (and
+ * where they don't, advising both is redundant anyway); finished boots form
+ * their own group. Returns the shared group label, or null when the pair is
+ * compatible. Starters (depth 1) share gold passives but coexist fine, and an
+ * item never conflicts with its own components or upgrades.
+ */
+export function itemConflict(graph: ItemGraph, aId: number, bId: number): string | null {
+  if (aId === bId) return null
+  const a = graph.nodes.get(aId)
+  const b = graph.nodes.get(bId)
+  if (!a || !b) return null
+  if (a.depth < 2 || b.depth < 2) return null
+  if (componentTree(graph, aId).includes(bId) || componentTree(graph, bId).includes(aId)) {
+    return null
+  }
+  if (a.tags.includes('Boots') && b.tags.includes('Boots')) return 'Botas'
+  return a.passives.find((passive) => b.passives.includes(passive)) ?? null
 }
 
 /** Flattens the full component tree of an item (recursive buildsFrom). */
