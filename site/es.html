@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LoL Companion — tu coach local para League of Legends</title>
+<meta name="description" content="App de escritorio local que analiza TU partida en directo y tu historial, y te recomienda compras y picks con explicaciones. Gratis, sin cuentas, sin servidor: todo se queda en tu PC. Cumple las normas de Riot." />
+<link rel="icon" href="icon.png" />
+<meta property="og:title" content="LoL Companion — tu coach local para League of Legends" />
+<meta property="og:description" content="Recomendaciones de compra explicadas en directo, análisis de champ select, detección de puntos débiles e informes post-partida. Local, gratis y dentro de las normas de Riot." />
+<meta property="og:image" content="media/live-ingame.png" />
+<style>
+  :root {
+    --bg: #05060e;
+    --bg-2: #0a0d1c;
+    --panel: #0d1122;
+    --panel-2: #121737;
+    --line: #1d2447;
+    --text: #dbe2f4;
+    --muted: #8891b4;
+    --pink: #ff4d6d;
+    --pink-soft: rgba(255, 77, 109, 0.14);
+    --gold: #f0b232;
+    --green: #2fd48c;
+    --mono: "SF Mono", "Cascadia Code", Consolas, "Liberation Mono", monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background:
+      radial-gradient(1100px 500px at 80% -10%, rgba(255, 77, 109, 0.09), transparent 60%),
+      radial-gradient(900px 500px at 10% 20%, rgba(90, 110, 255, 0.08), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(5, 6, 14, 0.82); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav { display: flex; align-items: center; gap: 20px; height: 60px; }
+  .wordmark {
+    font-family: var(--mono); font-weight: 700; letter-spacing: 0.14em;
+    color: var(--pink); text-shadow: 0 0 18px rgba(255, 77, 109, 0.55);
+    font-size: 15px; text-decoration: none;
+  }
+  .wordmark small { display: block; color: var(--muted); font-size: 9px; letter-spacing: 0.3em; text-shadow: none; }
+  .nav .links { margin-left: auto; display: flex; gap: 18px; align-items: center; }
+  .nav a { color: var(--muted); text-decoration: none; font-size: 14px; }
+  .nav a:hover { color: var(--text); }
+  .lang { font-family: var(--mono); font-size: 12px; border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; }
+
+  .btn {
+    display: inline-block; text-decoration: none; font-weight: 700;
+    padding: 12px 22px; border-radius: 10px; font-size: 15px;
+    background: linear-gradient(180deg, #ff5e7b, #e83a5d);
+    color: #fff; box-shadow: 0 4px 24px rgba(255, 77, 109, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn.small { padding: 8px 16px; font-size: 13px; }
+  .btn.ghost {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--line); box-shadow: none;
+  }
+
+  .hero { padding: 84px 0 40px; text-align: center; }
+  .hero h1 { font-size: clamp(30px, 5vw, 52px); line-height: 1.15; letter-spacing: -0.01em; }
+  .hero h1 em { font-style: normal; color: var(--gold); }
+  .hero p.sub { margin: 18px auto 0; max-width: 640px; color: var(--muted); font-size: 18px; }
+  .hero .cta { margin-top: 30px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .hero .fineprint { margin-top: 12px; color: var(--muted); font-size: 13px; font-family: var(--mono); }
+  .badges { margin-top: 26px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    font-family: var(--mono); font-size: 12px; color: var(--green);
+    border: 1px solid rgba(47, 212, 140, 0.35); background: rgba(47, 212, 140, 0.07);
+    padding: 5px 12px; border-radius: 999px;
+  }
+
+  .shot { margin: 44px auto 0; position: relative; }
+  .shot img {
+    width: 100%; display: block; border-radius: 14px;
+    border: 1px solid var(--line);
+    box-shadow: 0 20px 70px rgba(0, 0, 0, 0.55), 0 0 50px rgba(255, 77, 109, 0.07);
+  }
+  .shot.strip img { width: auto; max-width: 100%; margin: 0 auto; }
+  .shot figcaption { margin-top: 12px; color: var(--muted); font-size: 14px; text-align: center; }
+
+  section { padding: 72px 0 0; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.28em;
+    color: var(--pink); text-transform: uppercase; margin-bottom: 10px;
+  }
+  h2 { font-size: clamp(24px, 3.4vw, 34px); letter-spacing: -0.01em; }
+  .lede { color: var(--muted); max-width: 680px; margin-top: 10px; }
+
+  .grid { margin-top: 34px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 860px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--line); border-radius: 14px; padding: 22px;
+  }
+  .card .icon { font-size: 22px; }
+  .card h3 { margin-top: 10px; font-size: 16px; }
+  .card p { margin-top: 6px; color: var(--muted); font-size: 14px; }
+
+  .safety {
+    margin-top: 34px; border: 1px solid rgba(47, 212, 140, 0.3); border-radius: 16px;
+    background: linear-gradient(180deg, rgba(47, 212, 140, 0.06), transparent);
+    padding: 28px;
+  }
+  .safety ul { list-style: none; margin-top: 14px; display: grid; gap: 12px; }
+  .safety li { padding-left: 30px; position: relative; color: var(--text); }
+  .safety li::before { content: "✓"; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+  .safety li b { color: #fff; }
+  .safety li span { color: var(--muted); }
+
+  .steps { margin-top: 34px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: step; }
+  @media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
+  .step { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+  .step::before {
+    counter-increment: step; content: counter(step);
+    font-family: var(--mono); font-weight: 700; color: var(--gold);
+    display: inline-block; width: 30px; height: 30px; line-height: 28px; text-align: center;
+    border: 1px solid rgba(240, 178, 50, 0.45); border-radius: 8px; margin-bottom: 12px;
+  }
+  .step h3 { font-size: 15px; }
+  .step p { margin-top: 6px; color: var(--muted); font-size: 14px; }
+  .step a { color: var(--gold); }
+
+  .faq { margin-top: 30px; display: grid; gap: 10px; }
+  details {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px 20px;
+  }
+  details[open] { border-color: rgba(255, 77, 109, 0.4); }
+  summary { cursor: pointer; font-weight: 600; font-size: 15px; list-style: none; position: relative; padding-right: 26px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; position: absolute; right: 0; top: 0; color: var(--pink); font-family: var(--mono); }
+  details[open] summary::after { content: "–"; }
+  details p { margin-top: 10px; color: var(--muted); font-size: 14px; }
+  details a { color: var(--gold); }
+
+  footer { margin-top: 90px; border-top: 1px solid var(--line); padding: 40px 0 60px; }
+  footer .cols { display: flex; gap: 30px; flex-wrap: wrap; justify-content: space-between; }
+  footer p { color: var(--muted); font-size: 13px; max-width: 760px; }
+  footer .legal { margin-top: 18px; }
+  footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="wordmark" href="#">LOL COMPANION<small>TU COACH LOCAL</small></a>
+    <nav class="links">
+      <a href="#funciones">Funciones</a>
+      <a href="#debiles">Tu juego</a>
+      <a href="#seguro">¿Es seguro?</a>
+      <a href="#empezar">Cómo empezar</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/carlo23666/lolcompanion">GitHub</a>
+      <a class="lang" href="index.html" hreflang="en" lang="en">EN</a>
+      <a class="btn small" href="https://github.com/carlo23666/lolcompanion/releases/latest">Descargar</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <h1>Tu coach de compras y picks,<br /><em>local y explicado</em></h1>
+    <p class="sub">
+      LoL Companion mira TU partida en directo y tu historial, y te dice qué comprar y por qué —
+      con datos de partidas Master+ y sin sacar nada de tu PC.
+    </p>
+    <div class="cta">
+      <a class="btn" href="https://github.com/carlo23666/lolcompanion/releases/latest">Descargar para Windows</a>
+      <a class="btn ghost" href="#seguro">¿Es seguro para mi cuenta?</a>
+    </div>
+    <div class="fineprint">gratis · sin cuentas · sin servidor · se actualiza sola</div>
+    <div class="badges">
+      <span class="badge">solo APIs oficiales de Riot</span>
+      <span class="badge">local-first: tus datos no salen de tu PC</span>
+      <span class="badge">gratis y de código abierto</span>
+    </div>
+
+    <figure class="shot">
+      <img src="media/live-ingame.png" alt="Vista Live: recomendación de compra explicada con alternativas, equipos y análisis de la composición enemiga" />
+      <figcaption>En partida: cada recomendación llega con sus razones — nunca un "cómprate esto" sin más.</figcaption>
+    </figure>
+  </section>
+
+  <section id="funciones">
+    <div class="eyebrow">Funciones</div>
+    <h2>Todo lo que hace por ti</h2>
+    <div class="grid">
+      <div class="card"><div class="icon">🧠</div><h3>Recomendaciones explicadas</h3>
+        <p>Cada consejo lleva sus motivos: "el 78% del daño enemigo es físico", "Zed va fed +7". La explicación es el producto.</p></div>
+      <div class="card"><div class="icon">📊</div><h3>Datos Master+ de tu parche</h3>
+        <p>Las sugerencias se apoyan en miles de partidas de Master, GM y Challenger con tu campeón — incluido el ORDEN real en que se compran los objetos, agregado en tu propio PC.</p></div>
+      <div class="card"><div class="icon">🎯</div><h3>Champ select con plan</h3>
+        <p>Análisis de la composición enemiga, plan de compra contra esa comp y sugerencias de pick según tu propio historial.</p></div>
+      <div class="card"><div class="icon">⚔️</div><h3>Alertas en directo</h3>
+        <p>Power-spikes enemigos visibles (objetos completados, niveles 6/11/16), ventanas de objetivo y avisos de oro sin gastar.</p></div>
+      <div class="card"><div class="icon">🔍</div><h3>Detección de puntos débiles</h3>
+        <p>Tu historial convertido en veredictos: mueres demasiado en líneas, te gankean una y otra vez, casi no pones visión, los objetivos caen justo tras tus muertes.</p></div>
+      <div class="card"><div class="icon">👾</div><h3>Mascota + overlay + temas</h3>
+        <p>Un coach con personalidad, un overlay in-game opcional con la recomendación principal y varios temas visuales.</p></div>
+    </div>
+
+    <figure class="shot strip" style="margin-top: 28px">
+      <img src="media/overlay.png" alt="Overlay in-game: recomendación compacta junto a la mascota" />
+      <figcaption>El overlay opcional mantiene la recomendación principal en pantalla mientras juegas (ventana/sin bordes).</figcaption>
+    </figure>
+  </section>
+
+  <section id="debiles">
+    <div class="eyebrow">Tu juego</div>
+    <h2>Te dice dónde eres débil — con números</h2>
+    <p class="lede">
+      La página de estadísticas no solo pinta gráficas: agrega todo tu historial y señala patrones —
+      muertes por fase de partida, facilidad de gankeo, visión por debajo del suelo de tu rol,
+      objetivos cedidos estando muerto, baja participación en kills — cada uno con un consejo accionable.
+    </p>
+    <figure class="shot">
+      <img src="media/stats.png" alt="Vista de estadísticas: puntos débiles detectados con evidencia, tabla por campeón y curva de farmeo personal" />
+      <figcaption>Puntos débiles detectados, números por campeón, tu curva de farmeo personal, indicadores de tilt.</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="media/history.png" alt="Vista de historial: lista de partidas filtrable con indicador de forma y agregados por campeón" />
+      <figcaption>Historial completo con filtros, racha de forma y agregados por campeón.</figcaption>
+    </figure>
+  </section>
+
+  <section id="seguro">
+    <div class="eyebrow">Cumplimiento</div>
+    <h2>¿Es seguro para mi cuenta?</h2>
+    <p class="lede">La primera pregunta que hay que hacerle a cualquier herramienta de LoL. Respuesta corta: sí. La larga:</p>
+    <div class="safety">
+      <ul>
+        <li><b>Solo APIs oficiales de Riot.</b> <span>Live Client Data API, cliente de LoL (LCU), API web de Riot y Data Dragon. Nada de leer memoria, ni tráfico de red, ni repeticiones.</span></li>
+        <li><b>Solo información visible en pantalla.</b> <span>Todo lo que la app sabe de la partida podrías verlo tú mismo en el marcador. Sin tracking de cooldowns ni ultimates enemigos (prohibido por Riot desde marzo de 2025 — y aquí, regla innegociable del proyecto).</span></li>
+        <li><b>Local-first.</b> <span>No hay servidor, no hay cuentas, no hay telemetría. Tu historial y tus estadísticas viven en una base de datos en tu PC.</span></li>
+        <li><b>Código abierto.</b> <span>Puedes leer exactamente qué hace en <a href="https://github.com/carlo23666/lolcompanion">GitHub</a>.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="champselect">
+    <figure class="shot">
+      <img src="media/champ-select.png" alt="Vista de selección de campeones: plan de compra contra la composición enemiga y plan personal para el campeón elegido" />
+      <figcaption>Champ select: plan contra la comp enemiga + tu plan personal, derivado solo de lo visible en pantalla.</figcaption>
+    </figure>
+  </section>
+
+  <section id="empezar">
+    <div class="eyebrow">Instalación</div>
+    <h2>Cómo empezar</h2>
+    <div class="steps">
+      <div class="step">
+        <h3>Instala</h3>
+        <p>Descarga el <a href="https://github.com/carlo23666/lolcompanion/releases/latest">setup para Windows</a> y ejecútalo. SmartScreen avisará porque la app no está firmada: pulsa <b>Más información → Ejecutar de todas formas</b>. Se instala solo para tu usuario, sin permisos de administrador, y a partir de ahí se actualiza sola.</p>
+      </div>
+      <div class="step">
+        <h3>Consigue tu clave de Riot (gratis)</h3>
+        <p>Para leer tu historial necesitas una clave personal de la API de Riot: regístrala una sola vez como "Personal App" en <a href="https://developer.riotgames.com">developer.riotgames.com</a> y pégala en Ajustes. Las normas de Riot exigen que cada persona use la suya.</p>
+      </div>
+      <div class="step">
+        <h3>Juega</h3>
+        <p>Deja la app abierta (un segundo monitor va perfecto). Detecta sola el cliente, el champ select y la partida: no hay que tocar nada más.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="eyebrow">FAQ</div>
+    <h2>Preguntas frecuentes</h2>
+    <div class="faq">
+      <details>
+        <summary>¿Me pueden banear por usarla?</summary>
+        <p>La app se construyó con las normas de Riot para herramientas de terceros como reglas duras del proyecto: solo fuentes oficiales, solo información visible en pantalla y nada de tracking de cooldowns enemigos. No debería suponer ningún riesgo para tu cuenta — dicho esto, es un proyecto personal y se ofrece sin garantías.</p>
+      </details>
+      <details>
+        <summary>¿Por qué Windows avisa al instalar?</summary>
+        <p>Porque el instalador no está firmado digitalmente (los certificados de firma cuestan cientos de euros al año y esto es un proyecto gratuito). El aviso de SmartScreen es genérico para cualquier app sin firma; el código es público y puedes compilarla tú mismo desde GitHub si prefieres.</p>
+      </details>
+      <details>
+        <summary>¿Es gratis? ¿Qué gano yo y qué ganas tú?</summary>
+        <p>Es gratis y de código abierto para uso no comercial (licencia PolyForm Noncommercial). No hay anuncios ni recogida de datos: nació como herramienta personal y se comparte tal cual.</p>
+      </details>
+      <details>
+        <summary>¿Qué datos usa y dónde acaban?</summary>
+        <p>Tu partida en directo (la misma API local que usa el propio juego en el puerto 2999), el cliente de LoL para el champ select, y tu historial vía la API web de Riot con TU clave. Todo se guarda en una base de datos SQLite en tu PC. No hay servidor del proyecto: nada sale de tu máquina.</p>
+      </details>
+      <details>
+        <summary>¿Por qué tengo que poner una clave de la API?</summary>
+        <p>Riot prohíbe que las apps compartan una clave embebida: cada usuario debe registrar la suya (gratis, una vez). A cambio, tu historial va directo de Riot a tu PC sin intermediarios. Está en el roadmap un modo sin clave mediante un servicio propio con clave de producción de Riot.</p>
+      </details>
+      <details>
+        <summary>¿Funciona en pantalla completa?</summary>
+        <p>La app principal sí (segundo monitor o alt-tab). El overlay in-game opcional necesita LoL en modo ventana o sin bordes — la pantalla completa exclusiva no permite superponer ventanas.</p>
+      </details>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <a class="wordmark" href="#">LOL COMPANION<small>TU COACH LOCAL</small></a>
+      <p>
+        <a href="https://github.com/carlo23666/lolcompanion">Código en GitHub</a> ·
+        <a href="https://github.com/carlo23666/lolcompanion/releases/latest">Descargas</a> ·
+        <a href="https://github.com/carlo23666/lolcompanion/issues">Reportar un problema</a> ·
+        <a href="index.html" lang="en">English version</a>
+      </p>
+    </div>
+    <p class="legal">
+      LoL Companion no está respaldada por Riot Games y no refleja los puntos de vista u opiniones de
+      Riot Games ni de nadie involucrado oficialmente en la producción o gestión de las propiedades de
+      Riot Games. Riot Games y todas las propiedades asociadas son marcas comerciales o marcas
+      registradas de Riot Games, Inc.
+    </p>
+    <p class="legal">
+      Software bajo licencia <a href="https://polyformproject.org/licenses/noncommercial/1.0.0/">PolyForm
+      Noncommercial 1.0.0</a> — libre para uso no comercial.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

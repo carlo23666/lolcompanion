@@ -187,7 +187,7 @@ export function computeWeaknesses(games: WeaknessGameInput[]): WeaknessInsight[]
     insights.push({
       key: 'low-vision',
       severity: deficit >= T.HIGH_FACTOR ? 'high' : 'medium',
-      finding: `Tu visión media es ${fmt(visionPerMin)}/min, por debajo del suelo de tu rol (${fmt(visionFloor)}/min)`,
+      finding: `Tu visión media es ${visionPerMin.toFixed(2)}/min, por debajo del suelo de tu rol (${visionFloor.toFixed(2)}/min)`,
       advice:
         'Compra guardianes rosas cada base y usa el trinket al salir de línea: la visión es la estadística más barata de mejorar',
       games: games.length
