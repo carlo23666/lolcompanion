@@ -13,5 +13,5 @@ mkdir -p /tmp/_site/media && cp site/index.html /tmp/_site/ \
   && open /tmp/_site/index.html
 ```
 
-One-time setup: repo Settings → Pages → Source: **GitHub Actions**.
+One-time setup (done 2026-07-08): repo Settings → Pages → Source: **GitHub Actions**.
 Published at: https://carlo23666.github.io/lolcompanion/
