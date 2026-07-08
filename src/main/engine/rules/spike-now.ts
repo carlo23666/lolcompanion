@@ -1,5 +1,5 @@
 import { THRESHOLDS } from './thresholds'
-import { itemName } from './helpers'
+import { defaultTranslator, itemName } from './helpers'
 import type { Rule, RuleOutput } from './types'
 
 /**
@@ -7,7 +7,7 @@ import type { Rule, RuleOutput } from './types'
  * cheapest reachable completion, and answers "buy now or wait N gold" for the
  * current recall. Boots tier-3 upgrades are excluded (feat-gated).
  */
-export const spikeNowRule: Rule = (state, staticData) => {
+export const spikeNowRule: Rule = (state, staticData, _meta, t = defaultTranslator) => {
   const gold = state.self.currentGold
   const graph = staticData.itemGraph
 
@@ -65,8 +65,12 @@ export const spikeNowRule: Rule = (state, staticData) => {
       action: 'prioritize',
       score: 70,
       reasons: [
-        `Puedes completar ${name} YA: te cuesta ${String(best.missingGold)} de oro y llevas ${String(Math.floor(gold))}`,
-        'Completar un objeto es casi siempre mejor spike que acumular componentes sueltos'
+        t('engine.spike.now', {
+          item: name,
+          cost: String(best.missingGold),
+          gold: String(Math.floor(gold))
+        }),
+        t('engine.spike.nowExplain')
       ]
     }
     return [output]
@@ -80,8 +84,13 @@ export const spikeNowRule: Rule = (state, staticData) => {
       action: 'delay',
       score: 50,
       reasons: [
-        `Te faltan solo ${String(shortfall)} de oro para ${name} (${String(best.missingGold)} restantes, llevas ${String(Math.floor(gold))})`,
-        `Espera una oleada más antes de basear: completarlo vale más que comprar piezas pequeñas`
+        t('engine.spike.close', {
+          shortfall: String(shortfall),
+          item: name,
+          remaining: String(best.missingGold),
+          gold: String(Math.floor(gold))
+        }),
+        t('engine.spike.closeExplain')
       ]
     }
     return [output]
@@ -94,7 +103,7 @@ export const spikeNowRule: Rule = (state, staticData) => {
       action: 'add',
       score: 30,
       reasons: [
-        `${name} está a ${String(Math.round(best.missingGold))} de oro de completarse; tenlo como objetivo de la próxima base`
+        t('engine.spike.target', { item: name, cost: String(Math.round(best.missingGold)) })
       ]
     }
     return [output]

@@ -1,7 +1,9 @@
 import type { GameState } from '@shared/gamestate'
 import type { Recommendation } from '@shared/recommendation'
+import type { Translator } from '@shared/i18n'
 import type { StaticData } from '../staticdata/manager'
 import type { MetaItemsInput } from './meta-items'
+import { defaultTranslator } from './rules/helpers'
 import { antihealRule } from './rules/antiheal'
 import { antiBurstRule } from './rules/anti-burst'
 import { antiTankRule } from './rules/anti-tank'
@@ -32,8 +34,9 @@ export const RULES_V1: Rule[] = [
 export function runEngine(
   state: GameState,
   staticData: StaticData,
-  meta?: MetaItemsInput
+  meta?: MetaItemsInput,
+  t: Translator = defaultTranslator
 ): Recommendation[] {
-  const outputs = RULES_V1.flatMap((rule) => rule(state, staticData, meta))
+  const outputs = RULES_V1.flatMap((rule) => rule(state, staticData, meta, t))
   return combine(outputs, staticData)
 }

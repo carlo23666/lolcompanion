@@ -7,7 +7,7 @@ import {
   suggestionReason
 } from '../meta-items'
 import { THRESHOLDS } from './thresholds'
-import { availableOptions, clampScore, itemName, ownsAny, pct } from './helpers'
+import { availableOptions, clampScore, defaultTranslator, itemName, ownsAny, pct } from './helpers'
 import type { Rule, RuleOutput } from './types'
 
 /** Defensive options per (damage type to resist, own class). Exported so the
@@ -27,7 +27,7 @@ function isTanky(tags: string[]): boolean {
  * class-based lists only shape the candidate set); when Master+ players buy
  * none of them on this champion, the advice ships capped + labeled.
  */
-export const armorVsMrRule: Rule = (state, staticData, meta) => {
+export const armorVsMrRule: Rule = (state, staticData, meta, t = defaultTranslator) => {
   const outputs: RuleOutput[] = []
   const { physicalShare, magicShare } = state.enemyAggregates
   const selfTags = staticData.champions.get(state.self.championId)?.tags ?? []
@@ -48,7 +48,12 @@ export const armorVsMrRule: Rule = (state, staticData, meta) => {
             (item.stats['FlatPhysicalDamageMod'] ?? 0) > 0 ||
             (item.stats['FlatMagicDamageMod'] ?? 0) > 0
         ).length
-        return `${enemy.championName}${damageItems > 0 ? ` con ${String(damageItems)} objetos de daño` : ''}`
+        return damageItems > 0
+          ? t('engine.armorMr.dealerItems', {
+              champion: enemy.championName,
+              count: String(damageItems)
+            })
+          : enemy.championName
       })
 
   // Every viable option becomes its own output (same reasons) so the UI can
@@ -79,13 +84,11 @@ export const armorVsMrRule: Rule = (state, staticData, meta) => {
         reasons: [
           ...reasons,
           ...(stat !== null
-            ? [metaPickReason(state.self.championName, itemName(staticData, itemId), stat)]
+            ? [metaPickReason(state.self.championName, itemName(staticData, itemId), stat, t)]
             : []),
-          ...(preFirstItem && index === 0
-            ? ['Aún sin tu primer objeto: prioriza tu build y deja esta defensa para después']
-            : []),
+          ...(preFirstItem && index === 0 ? [t('engine.armorMr.preFirst')] : []),
           ...(capped && !preFirstItem && index === 0
-            ? [suggestionReason(state.self.championName)]
+            ? [suggestionReason(state.self.championName, t)]
             : [])
         ]
       })
@@ -96,13 +99,16 @@ export const armorVsMrRule: Rule = (state, staticData, meta) => {
     const options = tanky ? ARMOR_TANK : ARMOR_SQUISHY
     pushOptions(
       options,
-      'armadura',
+      t('engine.cat.armor'),
       clampScore(40 + (physicalShare - THRESHOLDS.DAMAGE_SKEW_SHARE) * 150),
       [
-        `El ${pct(physicalShare)} del daño enemigo estimado es físico (${topDealers('physical').join(', ')})`,
-        `Prioriza armadura: ${options
-          .map((id) => itemName(staticData, id))
-          .join(' / ')} encajan con tu campeón`
+        t('engine.armorMr.physical', {
+          pct: pct(physicalShare),
+          dealers: topDealers('physical').join(', ')
+        }),
+        t('engine.armorMr.prioArmor', {
+          items: options.map((id) => itemName(staticData, id)).join(' / ')
+        })
       ]
     )
   }
@@ -111,13 +117,16 @@ export const armorVsMrRule: Rule = (state, staticData, meta) => {
     const options = tanky ? MR_TANK : MR_SQUISHY
     pushOptions(
       options,
-      'resistencia mágica',
+      t('engine.cat.mr'),
       clampScore(40 + (magicShare - THRESHOLDS.DAMAGE_SKEW_SHARE) * 150),
       [
-        `El ${pct(magicShare)} del daño enemigo estimado es mágico (${topDealers('magic').join(', ')})`,
-        `Prioriza resistencia mágica: ${options
-          .map((id) => itemName(staticData, id))
-          .join(' / ')} encajan con tu campeón`
+        t('engine.armorMr.magic', {
+          pct: pct(magicShare),
+          dealers: topDealers('magic').join(', ')
+        }),
+        t('engine.armorMr.prioMr', {
+          items: options.map((id) => itemName(staticData, id)).join(' / ')
+        })
       ]
     )
   }

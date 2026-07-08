@@ -1,6 +1,8 @@
 import type { Recommendation } from '@shared/recommendation'
+import type { Translator } from '@shared/i18n'
 import type { StaticData } from '../staticdata/manager'
 import { itemConflict } from '../staticdata/itemgraph'
+import { defaultTranslator } from './rules/helpers'
 
 /**
  * Final exclusivity pass over the sorted recommendation list: never advise an
@@ -11,7 +13,8 @@ import { itemConflict } from '../staticdata/itemgraph'
 export function applyExclusivity(
   recommendations: Recommendation[],
   ownedItemIds: number[],
-  staticData: StaticData
+  staticData: StaticData,
+  t: Translator = defaultTranslator
 ): Recommendation[] {
   const graph = staticData.itemGraph
   const kept: Recommendation[] = []
@@ -31,7 +34,10 @@ export function applyExclusivity(
         ...winner,
         reasons: [
           ...winner.reasons,
-          `Antes que ${rec.itemName ?? 'la alternativa'}: no se pueden llevar a la vez (comparten ${group})`
+          t('engine.exclusivity.over', {
+            other: rec.itemName ?? t('engine.word.theAlternative'),
+            group
+          })
         ]
       }
       mergedIntoWinner = true

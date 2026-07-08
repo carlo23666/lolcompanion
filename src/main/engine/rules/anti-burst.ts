@@ -7,7 +7,7 @@ import {
   suggestionReason
 } from '../meta-items'
 import { THRESHOLDS } from './thresholds'
-import { clampScore, itemName, kdaLabel, ownsAny } from './helpers'
+import { clampScore, defaultTranslator, itemName, kdaLabel, ownsAny } from './helpers'
 import type { Rule, RuleOutput } from './types'
 
 const ZHONYA = 3157
@@ -34,7 +34,7 @@ function isFedBurst(enemy: PlayerState, tags: string[]): boolean {
  * champion (no more Zhonya on ADCs); the class heuristic only breaks the tie
  * when there is no meta signal, and then the advice ships capped + labeled.
  */
-export const antiBurstRule: Rule = (state, staticData, meta) => {
+export const antiBurstRule: Rule = (state, staticData, meta, t = defaultTranslator) => {
   if (ownsAny(state.self, DEFENSIVES)) return []
 
   const threats = state.enemies.filter((enemy) =>
@@ -56,7 +56,7 @@ export const antiBurstRule: Rule = (state, staticData, meta) => {
   if (metaPick !== null) {
     pick = metaPick.itemId
     metaReasons.push(
-      metaPickReason(state.self.championName, itemName(staticData, pick), metaPick)
+      metaPickReason(state.self.championName, itemName(staticData, pick), metaPick, t)
     )
   } else {
     // No signal → class heuristic; with a trusted sample that says "nobody
@@ -65,7 +65,7 @@ export const antiBurstRule: Rule = (state, staticData, meta) => {
     pick = selfIsAp ? ZHONYA : threatIsPhysical ? GUARDIAN_ANGEL : MERCURIAL
     if (metaTrusted(meta)) {
       capped = true
-      metaReasons.push(suggestionReason(state.self.championName))
+      metaReasons.push(suggestionReason(state.self.championName, t))
     }
   }
 
@@ -75,15 +75,19 @@ export const antiBurstRule: Rule = (state, staticData, meta) => {
   const output: RuleOutput = {
     ruleId: 'anti-burst',
     itemId: pick,
-    category: 'supervivencia',
+    category: t('engine.cat.survival'),
     action: 'add',
     score,
     reasons: [
-      `${kdaLabel(worst)} va fed (+${String(kdDiff)}) y su burst ${threatIsPhysical ? 'físico' : 'mágico'} te mata sin respuesta`,
-      `${itemName(staticData, pick)} te da una ventana de supervivencia contra su patrón de entrada`,
+      t('engine.antiburst.threat', {
+        kda: kdaLabel(worst),
+        diff: String(kdDiff),
+        type: threatIsPhysical ? t('engine.word.physical') : t('engine.word.magic')
+      }),
+      t('engine.antiburst.window', { item: itemName(staticData, pick) }),
       ...metaReasons,
       ...(threats.length > 1
-        ? [`Amenazas adicionales: ${threats.slice(1).map(kdaLabel).join(', ')}`]
+        ? [t('engine.antiburst.more', { threats: threats.slice(1).map(kdaLabel).join(', ') })]
         : [])
     ]
   }

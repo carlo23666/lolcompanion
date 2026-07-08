@@ -1,8 +1,10 @@
 import type { GameState } from '@shared/gamestate'
 import type { Recommendation } from '@shared/recommendation'
 import type { BaselinePool } from '@shared/schemas/baselines'
+import type { Translator } from '@shared/i18n'
 import type { StaticData } from '../staticdata/manager'
 import { applyExclusivity } from './exclusivity'
+import { defaultTranslator } from './rules/helpers'
 import { runEngine } from './index'
 import {
   endgameRecommendation,
@@ -26,19 +28,21 @@ export function recommend(
   state: GameState,
   staticData: StaticData,
   pool: BaselinePool = loadBaselinePool(),
-  meta?: MetaItemsInput
+  meta?: MetaItemsInput,
+  t: Translator = defaultTranslator
 ): Recommendation[] {
   const baseline = resolveBaseline(state, staticData, pool, meta)
-  const ruleRecommendations = runEngine(state, staticData, meta).map((rec) => {
+  const ruleRecommendations = runEngine(state, staticData, meta, t).map((rec) => {
     if (rec.itemId !== null && baseline?.situational.includes(rec.itemId) === true) {
+      const item = rec.itemName ?? t('engine.word.thisItem')
       return {
         ...rec,
         score: Math.min(100, rec.score + 10),
         reasons: [
           ...rec.reasons,
           baseline.source === 'pool'
-            ? `${rec.itemName ?? 'Este objeto'} está en tus situacionales de ${state.self.championName}`
-            : `${rec.itemName ?? 'Este objeto'} es compra habitual en Master+ con ${state.self.championName}`
+            ? t('engine.recommend.situPool', { item, champion: state.self.championName })
+            : t('engine.endgame.situMeta', { item, champion: state.self.championName })
         ]
       }
     }
@@ -48,8 +52,8 @@ export function recommend(
   // Core first; once it's done, the endgame layer fills slots 5-6 and flags
   // leftover starter items — the engine must never go silent mid-game.
   const nextBuy =
-    nextBuyRecommendation(state, staticData, pool, meta) ??
-    endgameRecommendation(state, staticData, pool, meta)
+    nextBuyRecommendation(state, staticData, pool, meta, t) ??
+    endgameRecommendation(state, staticData, pool, meta, t)
   const all = nextBuy ? [nextBuy, ...ruleRecommendations] : ruleRecommendations
 
   // Dedupe by item: keep the highest score, merge every reason.
@@ -87,7 +91,11 @@ export function recommend(
         ...rec,
         reasons: [
           ...rec.reasons,
-          `en Master+ con ${state.self.championName}: ${String(wr)}% WR llevando este objeto (${String(stat.games)} partidas)`
+          t('engine.recommend.metaWr', {
+            champion: state.self.championName,
+            wr: String(wr),
+            games: String(stat.games)
+          })
         ]
       }
     }
@@ -98,7 +106,8 @@ export function recommend(
   return applyExclusivity(
     annotated.sort((a, b) => b.score - a.score),
     state.self.items.map((item) => item.id),
-    staticData
+    staticData,
+    t
   )
 }
 

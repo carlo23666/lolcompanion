@@ -4,6 +4,8 @@
  * mostly, logic only adjusts"). The caller does the DB lookup (the engine
  * stays pure); everything here is synchronous set math over that snapshot.
  */
+import type { Translator } from '@shared/i18n'
+
 export interface MetaItemStat {
   itemId: number
   games: number
@@ -87,11 +89,21 @@ export function orderByMeta(
   })
 }
 
-export function metaPickReason(championName: string, itemName: string, stat: MetaItemStat): string {
+export function metaPickReason(
+  championName: string,
+  itemName: string,
+  stat: MetaItemStat,
+  t: Translator
+): string {
   const wr = Math.round((stat.wins / stat.games) * 100)
-  return `${itemName} es lo que compran los Master+ con ${championName} en este caso (${String(stat.games)} partidas, ${String(wr)}% WR)`
+  return t('engine.meta.pickReason', {
+    item: itemName,
+    champion: championName,
+    games: String(stat.games),
+    wr: String(wr)
+  })
 }
 
-export function suggestionReason(championName: string): string {
-  return `Pocos Master+ con ${championName} lo compran: sugerencia situacional, no prioridad`
+export function suggestionReason(championName: string, t: Translator): string {
+  return t('engine.meta.suggestion', { champion: championName })
 }

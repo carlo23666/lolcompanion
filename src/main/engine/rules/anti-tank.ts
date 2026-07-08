@@ -8,7 +8,14 @@ import {
   suggestionReason
 } from '../meta-items'
 import { THRESHOLDS } from './thresholds'
-import { availableOptions, clampScore, itemName, ownsAny, selfIsPhysical } from './helpers'
+import {
+  availableOptions,
+  clampScore,
+  defaultTranslator,
+  itemName,
+  ownsAny,
+  selfIsPhysical
+} from './helpers'
 import type { Rule } from './types'
 
 const ANTITANK_PHYSICAL = [3036, 6694] as const // LDR, Serylda
@@ -24,7 +31,7 @@ function effectiveHp(player: PlayerState): number {
  * Rule 3 — anti-tank: enemy team (or a single raid boss) over the effective-HP
  * baseline → % pen / BotRK / Liandry per own damage type.
  */
-export const antiTankRule: Rule = (state, staticData, meta) => {
+export const antiTankRule: Rule = (state, staticData, meta, t = defaultTranslator) => {
   const baseline =
     THRESHOLDS.TANK_BASELINE_BASE + THRESHOLDS.TANK_BASELINE_PER_S * state.gameTimeS
   const teamTanky =
@@ -58,18 +65,27 @@ export const antiTankRule: Rule = (state, staticData, meta) => {
   const reasons: string[] = []
   if (teamTanky) {
     reasons.push(
-      `HP efectiva media enemiga ${String(Math.round(state.enemyAggregates.tankinessIndex))} (esperada a este minuto: ~${String(Math.round(baseline))})`
+      t('engine.antitank.teamEhp', {
+        ehp: String(Math.round(state.enemyAggregates.tankinessIndex)),
+        baseline: String(Math.round(baseline))
+      })
     )
   }
   for (const boss of raidBosses.slice(0, 2)) {
     reasons.push(
-      `${boss.championName} acumula ${String(Math.round(effectiveHp(boss)))} de HP efectiva (nivel ${String(boss.level)} + ${String(boss.items.filter((i) => i.isCompleted).length)} objetos)`
+      t('engine.antitank.boss', {
+        champion: boss.championName,
+        ehp: String(Math.round(effectiveHp(boss))),
+        level: String(boss.level),
+        items: String(boss.items.filter((i) => i.isCompleted).length)
+      })
     )
   }
+  const penItems = options.map((id) => itemName(staticData, id)).join(' / ')
   reasons.push(
-    `${physical ? 'Penetración/daño % con' : 'Penetración mágica con'} ${options
-      .map((id) => itemName(staticData, id))
-      .join(' / ')}`
+    physical
+      ? t('engine.antitank.penPhysical', { items: penItems })
+      : t('engine.antitank.penMagic', { items: penItems })
   )
 
   const intensity = raidBosses.length > 0 ? effectiveHp(raidBosses[0] as PlayerState) / baseline : state.enemyAggregates.tankinessIndex / baseline
@@ -83,7 +99,7 @@ export const antiTankRule: Rule = (state, staticData, meta) => {
     return {
       ruleId: 'anti-tank',
       itemId,
-      category: 'anti-tanque',
+      category: t('engine.cat.antitank'),
       action: 'add' as const,
       score: capped
         ? Math.min(clampScore(score - index * 8), SUGGESTION_SCORE_CAP)
@@ -91,9 +107,9 @@ export const antiTankRule: Rule = (state, staticData, meta) => {
       reasons: [
         ...reasons,
         ...(stat !== null
-          ? [metaPickReason(state.self.championName, itemName(staticData, itemId), stat)]
+          ? [metaPickReason(state.self.championName, itemName(staticData, itemId), stat, t)]
           : []),
-        ...(capped && index === 0 ? [suggestionReason(state.self.championName)] : [])
+        ...(capped && index === 0 ? [suggestionReason(state.self.championName, t)] : [])
       ]
     }
   })

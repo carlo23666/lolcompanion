@@ -1,7 +1,7 @@
 import { HEALER_CHAMPION_WEIGHTS } from '../normalize'
 import { metaPickReason, metaPreferred } from '../meta-items'
 import { THRESHOLDS } from './thresholds'
-import { clampScore, itemCost, itemName, ownsAny, selfIsPhysical } from './helpers'
+import { clampScore, defaultTranslator, itemCost, itemName, ownsAny, selfIsPhysical } from './helpers'
 import type { Rule, RuleOutput } from './types'
 
 /** Grievous wounds lines: [cheap component, ...full items] per damage class. */
@@ -17,7 +17,7 @@ const ALL_ANTIHEAL = [...ANTIHEAL_PHYSICAL, ...ANTIHEAL_MAGIC]
  * decides when there is no meta signal. Antiheal is never capped — the need
  * is generic and the component is cheap.
  */
-export const antihealRule: Rule = (state, staticData, meta) => {
+export const antihealRule: Rule = (state, staticData, meta, t = defaultTranslator) => {
   const healingIndex = state.enemyAggregates.healingIndex
   if (healingIndex < THRESHOLDS.ANTIHEAL_MIN_INDEX) return []
   if (ownsAny(state.self, ALL_ANTIHEAL)) return []
@@ -46,22 +46,31 @@ export const antihealRule: Rule = (state, staticData, meta) => {
   if (!affordable) score -= 10
 
   const reasons = [
-    `Índice de curación enemiga ${healingIndex.toFixed(1)}${
-      healers.length > 0 ? ` (${healers.join(', ')})` : ''
-    } — heridas graves reduce su curación un 40%`
+    t('engine.antiheal.index', {
+      index: healingIndex.toFixed(1),
+      healers: healers.length > 0 ? ` (${healers.join(', ')})` : ''
+    })
   ]
   reasons.push(
     affordable
-      ? `${itemName(staticData, componentId)} cuesta ${String(cost)} de oro y llevas ${String(Math.floor(gold))}: cómpralo en la próxima base`
-      : `${itemName(staticData, componentId)} cuesta ${String(cost)} de oro, te faltan ${String(Math.ceil(cost - gold))}`
+      ? t('engine.antiheal.buy', {
+          item: itemName(staticData, componentId),
+          cost: String(cost),
+          gold: String(Math.floor(gold))
+        })
+      : t('engine.antiheal.short', {
+          item: itemName(staticData, componentId),
+          cost: String(cost),
+          missing: String(Math.ceil(cost - gold))
+        })
   )
   if (metaPick !== null) {
     reasons.push(
-      metaPickReason(state.self.championName, itemName(staticData, metaPick.itemId), metaPick)
+      metaPickReason(state.self.championName, itemName(staticData, metaPick.itemId), metaPick, t)
     )
   }
   if (allyHasIt) {
-    reasons.push('Un aliado ya lleva antiheal; menos urgente pero cubre tus propios objetivos')
+    reasons.push(t('engine.antiheal.allyHas'))
   }
 
   const output: RuleOutput = {

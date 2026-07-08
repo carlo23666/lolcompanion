@@ -11,6 +11,7 @@ import { SettingsRepo, SETTING_KEYS } from '../db/repos/settings'
 import { diffGameStates } from '../engine/diff'
 import { normalizeSnapshot } from '../engine/normalize'
 import { recommend, type MetaItemsInput } from '../engine/recommend'
+import { createTranslator, normalizeLocale } from '@shared/i18n'
 import { broadcast } from '../ipc'
 import { getStaticDataManager } from '../staticdata'
 import type { StaticData } from '../staticdata/manager'
@@ -119,7 +120,10 @@ export function createSnapshotProcessor(
         metaKey = key
         metaItems = lookupMetaItems(state.self.championId, state.self.position)
       }
-      const recommendations = recommend(state, staticData, undefined, metaItems)
+      // Reasons render in the active UI language (ADR-009); resolved per tick
+      // so a mid-session language switch takes effect on the next update.
+      const translate = createTranslator(normalizeLocale(coachSettings.get(SETTING_KEYS.locale)))
+      const recommendations = recommend(state, staticData, undefined, metaItems, translate)
       broadcast('gamestate:recommendations', {
         gameTimeS: state.gameTimeS,
         recommendations

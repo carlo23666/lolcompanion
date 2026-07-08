@@ -1,5 +1,6 @@
 import type { GameState } from '@shared/gamestate'
 import type { RecommendationAction } from '@shared/recommendation'
+import type { Translator } from '@shared/i18n'
 import type { StaticData } from '../../staticdata/manager'
 import type { MetaItemsInput } from '../meta-items'
 
@@ -22,5 +23,7 @@ export interface RuleOutput {
 export type Rule = (
   state: GameState,
   staticData: StaticData,
-  meta?: MetaItemsInput
+  meta?: MetaItemsInput,
+  /** Locale-bound translator; defaults to Spanish when omitted (ADR-009). */
+  t?: Translator
 ) => RuleOutput[]

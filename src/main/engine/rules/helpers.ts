@@ -1,6 +1,14 @@
 import type { GameState, PlayerState } from '@shared/gamestate'
+import { t } from '@shared/i18n'
 import type { StaticData } from '../../staticdata/manager'
 import { playerDamageSplit } from '../normalize'
+
+/**
+ * The engine's fallback translator: Spanish, so any call site that doesn't
+ * pass one (older tests, internal helpers) keeps the pre-i18n behavior. The
+ * live path passes the translator resolved from the locale setting (ADR-009).
+ */
+export const defaultTranslator = t.es
 
 /** Own build leans physical? (champion profile + bought items) */
 export function selfIsPhysical(state: GameState): boolean {
@@ -13,7 +21,8 @@ export function ownsAny(player: PlayerState, itemIds: readonly number[]): boolea
 }
 
 export function itemName(staticData: StaticData, itemId: number): string {
-  return staticData.itemGraph.nodes.get(itemId)?.name ?? `objeto ${String(itemId)}`
+  // Fallback is language-neutral: it only fires for ids missing from the graph.
+  return staticData.itemGraph.nodes.get(itemId)?.name ?? `#${String(itemId)}`
 }
 
 export function itemCost(staticData: StaticData, itemId: number): number {

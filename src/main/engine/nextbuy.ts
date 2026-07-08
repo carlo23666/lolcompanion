@@ -5,9 +5,21 @@ import {
   type BaselineChampion,
   type BaselinePool
 } from '@shared/schemas/baselines'
+import type { Translator, MessageKey } from '@shared/i18n'
 import type { StaticData } from '../staticdata/manager'
 import { isFinishedBuildItem, itemConflict } from '../staticdata/itemgraph'
+import { defaultTranslator } from './rules/helpers'
 import poolJson from './baselines/pool.json'
+
+/** 1-based completion-slot labels, localized (engine.ordinal.1..6). */
+const ORDINAL_KEYS: readonly MessageKey[] = [
+  'engine.ordinal.1',
+  'engine.ordinal.2',
+  'engine.ordinal.3',
+  'engine.ordinal.4',
+  'engine.ordinal.5',
+  'engine.ordinal.6'
+]
 import {
   avgCompletionSlot,
   META_ITEM_MIN_GAMES,
@@ -155,7 +167,8 @@ export function nextBuyRecommendation(
   state: GameState,
   staticData: StaticData,
   pool: BaselinePool = loadBaselinePool(),
-  meta?: MetaItemsInput
+  meta?: MetaItemsInput,
+  t: Translator = defaultTranslator
 ): Recommendation | null {
   const baseline = resolveBaseline(state, staticData, pool, meta)
   if (!baseline) return null
@@ -209,13 +222,13 @@ export function nextBuyRecommendation(
     break
   }
   if (target === null) return null
-  const targetName = graph.nodes.get(target)?.name ?? `objeto ${String(target)}`
-  const ordinal = ['1º', '2º', '3º', '4º', '5º', '6º'][coreIndex] ?? `${String(coreIndex + 1)}º`
+  const targetName = graph.nodes.get(target)?.name ?? `#${String(target)}`
+  const ordinal = t(ORDINAL_KEYS[Math.min(coreIndex, 5)] ?? 'engine.ordinal.6')
   const gold = state.self.currentGold
   const buildLabel =
     baseline.source === 'pool'
-      ? `${ordinal} objeto de tu build de ${state.self.championName}`
-      : `${ordinal} objeto más comprado en Master+ con ${state.self.championName} este parche`
+      ? t('engine.nextbuy.labelPool', { ordinal, champion: state.self.championName })
+      : t('engine.nextbuy.labelMeta', { ordinal, champion: state.self.championName })
 
   const { missingGold, missingComponents } = missingFor(
     target,
@@ -225,10 +238,7 @@ export function nextBuyRecommendation(
 
   const withBootsNote = (rec: Recommendation): Recommendation =>
     bootsSkippedForRune
-      ? {
-          ...rec,
-          reasons: [...rec.reasons, 'Botas en pausa: Calzado Mágico (runa) te las dará gratis']
-        }
+      ? { ...rec, reasons: [...rec.reasons, t('engine.nextbuy.bootsPaused')] }
       : rec
 
   if (gold >= missingGold) {
@@ -239,8 +249,11 @@ export function nextBuyRecommendation(
       action: 'prioritize',
       score: 80,
       reasons: [
-        `${targetName} es el ${buildLabel}`,
-        `Puedes completarlo YA: te cuesta ${String(Math.round(missingGold))} de oro y llevas ${String(Math.floor(gold))}`
+        t('engine.nextbuy.isLabel', { item: targetName, label: buildLabel }),
+        t('engine.nextbuy.canFinishNow', {
+          cost: String(Math.round(missingGold)),
+          gold: String(Math.floor(gold))
+        })
       ]
     })
   }
@@ -260,8 +273,17 @@ export function nextBuyRecommendation(
       action: 'add',
       score: 65,
       reasons: [
-        `${component.name} (${String(component.totalGold)} de oro) avanza el ${buildLabel}: ${targetName}`,
-        `A ${targetName} le faltan ${String(Math.round(missingGold))} de oro en total; llevas ${String(Math.floor(gold))}`
+        t('engine.nextbuy.component', {
+          component: component.name,
+          cost: String(component.totalGold),
+          label: buildLabel,
+          target: targetName
+        }),
+        t('engine.nextbuy.componentGold', {
+          target: targetName,
+          missing: String(Math.round(missingGold)),
+          gold: String(Math.floor(gold))
+        })
       ]
     })
   }
@@ -273,8 +295,12 @@ export function nextBuyRecommendation(
     action: 'delay',
     score: 50,
     reasons: [
-      `Guarda oro para ${targetName} (${buildLabel}): te faltan ${String(Math.round(missingGold - gold))}`,
-      `Ninguna pieza suelta merece la pena ahora mismo (llevas ${String(Math.floor(gold))} de oro)`
+      t('engine.nextbuy.saveFor', {
+        target: targetName,
+        label: buildLabel,
+        missing: String(Math.round(missingGold - gold))
+      }),
+      t('engine.nextbuy.noPiece', { gold: String(Math.floor(gold)) })
     ]
   })
 }
@@ -289,7 +315,8 @@ export function endgameRecommendation(
   state: GameState,
   staticData: StaticData,
   pool: BaselinePool = loadBaselinePool(),
-  meta?: MetaItemsInput
+  meta?: MetaItemsInput,
+  t: Translator = defaultTranslator
 ): Recommendation | null {
   const baseline = resolveBaseline(state, staticData, pool, meta)
   if (!baseline) return null
@@ -320,8 +347,11 @@ export function endgameRecommendation(
     const affordable = gold >= missingGold
     const situationalLabel =
       baseline.source === 'pool'
-        ? `${targetNode.name} es tu situacional`
-        : `${targetNode.name} es compra habitual en Master+ con ${state.self.championName}`
+        ? t('engine.endgame.situPool', { item: targetNode.name })
+        : t('engine.endgame.situMeta', {
+            item: targetNode.name,
+            champion: state.self.championName
+          })
     return {
       itemId: targetNode.id,
       itemName: targetNode.name,
@@ -329,10 +359,20 @@ export function endgameRecommendation(
       action: affordable ? 'prioritize' : 'add',
       score: affordable ? 75 : 60,
       reasons: [
-        `Tu build principal de ${state.self.championName} está completa y te queda hueco: ${situationalLabel}`,
+        t('engine.endgame.coreDone', {
+          champion: state.self.championName,
+          situational: situationalLabel
+        }),
         affordable
-          ? `Puedes comprarlo YA: te cuesta ${String(Math.round(missingGold))} de oro y llevas ${String(Math.floor(gold))}`
-          : `Te faltan ${String(Math.round(missingGold - gold))} de oro (cuesta ${String(Math.round(missingGold))} y llevas ${String(Math.floor(gold))})`
+          ? t('engine.endgame.buyNow', {
+              cost: String(Math.round(missingGold)),
+              gold: String(Math.floor(gold))
+            })
+          : t('engine.endgame.shortGold', {
+              missing: String(Math.round(missingGold - gold)),
+              cost: String(Math.round(missingGold)),
+              gold: String(Math.floor(gold))
+            })
       ]
     }
   }
@@ -346,8 +386,12 @@ export function endgameRecommendation(
     action: 'replace',
     score: 75,
     reasons: [
-      `Inventario lleno pero sigues llevando ${starter.name}: véndelo para liberar hueco`,
-      `Con el hueco libre, compra ${targetNode.name} (${String(targetNode.totalGold)} de oro; llevas ${String(Math.floor(gold))})`
+      t('engine.endgame.sellStarter', { starter: starter.name }),
+      t('engine.endgame.thenBuy', {
+        item: targetNode.name,
+        cost: String(targetNode.totalGold),
+        gold: String(Math.floor(gold))
+      })
     ]
   }
 }
