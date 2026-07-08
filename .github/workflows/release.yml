@@ -1,0 +1,48 @@
+name: release
+
+# Builds a DRAFT release on tag push. Publishing is deliberately manual:
+# the packaged smoke test (worklog 2026-07-07 (19) — install the setup exe,
+# confirm the window opens and userData/updater.log appears) cannot run
+# headless, and auto-updating users must never receive an unsmoked build.
+#
+# Per release: git tag vX.Y.Z && git push --tags → download the installer
+# from the draft → smoke-test → Publish. The electron-updater feed needs
+# latest.yml + .blockmap + setup exe together; meta-seed.json.gz is carried
+# over from the previous published release (re-upload a fresh export first
+# when the local aggregates deserve it: npm run meta:export).
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - name: Build Windows installer (no publish)
+        run: npm run dist -- --publish never
+      - name: Carry meta-seed from previous release (best effort)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download --repo "$GITHUB_REPOSITORY" --pattern 'meta-seed.json.gz' --dir dist \
+            || echo "no previous meta-seed.json.gz — fresh installs will crawl from zero"
+      - name: Create draft release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          assets=(dist/*-setup.exe dist/latest.yml dist/*.blockmap)
+          [ -f dist/meta-seed.json.gz ] && assets+=(dist/meta-seed.json.gz)
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+            --draft --title "$GITHUB_REF_NAME" --generate-notes "${assets[@]}"
