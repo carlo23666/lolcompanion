@@ -36,6 +36,9 @@ jobs:
           cp docs/media/*.png _site/media/
           cp resources/icon.png _site/icon.png
       - uses: actions/configure-pages@v5
+        with:
+          # Creates the Pages site on first run — no manual Settings step.
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
