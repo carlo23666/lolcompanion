@@ -36,6 +36,28 @@ if (!patch) {
   process.exit(1)
 }
 
+// Staleness guard (WP-019): builds shift every patch, so warn loudly if the
+// newest local aggregate isn't the current live patch — shipping an old-patch
+// seed would bootstrap fresh installs with stale builds. Offline → skip.
+try {
+  const res = await globalThis.fetch('https://ddragon.leagueoflegends.com/api/versions.json', {
+    signal: globalThis.AbortSignal.timeout(8000)
+  })
+  if (res.ok) {
+    const versions = await res.json()
+    const live = Array.isArray(versions) ? versions[0] : null
+    const livePatch = typeof live === 'string' ? live.split('.').slice(0, 2).join('.') : null
+    if (livePatch && livePatch !== patch) {
+      console.warn(
+        `⚠ newest local patch is ${patch} but the live patch is ${livePatch} — ` +
+          'exporting a STALE seed. Crawl the current patch before publishing.'
+      )
+    }
+  }
+} catch {
+  // offline / ddragon unreachable: skip the guard, export anyway.
+}
+
 // Order rows only exist if the exporting DB reached migration 006 (WP-015);
 // an empty table still exports as version 2 with itemOrder: [] — importers
 // then mark seeded matches as timeline-done, which is correct because the

@@ -50,12 +50,18 @@ export interface MetaCrawlProgress {
   stored: number
   seedsDone: number
   seedsTotal: number
+  /** Matches aggregated per hour this run (0 until enough has elapsed). */
+  gamesPerHour: number
   error: string | null
 }
 
 export interface MetaStatusPayload extends MetaCrawlProgress {
   /** Aggregated matches per patch, newest patch first. */
   patches: { patch: string; matches: number }[]
+  /** The shared Master+ base this install imported (WP-019), if any. */
+  seed: { patch: string; exportedAt: string } | null
+  /** Current live patch (2-segment), for the current-patch total. */
+  livePatch: string | null
 }
 
 export interface IngestProgressPayload {

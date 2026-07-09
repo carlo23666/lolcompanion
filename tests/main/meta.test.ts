@@ -192,6 +192,96 @@ describe('MetaCrawler', () => {
     await vipollUntilDone(crawler)
     expect(crawler.status().error).toContain('403')
   })
+
+  it('deep-pages a seed with a resumable cursor (WP-020)', async () => {
+    const db = new Database(':memory:')
+    runMigrations(db)
+    const meta = new MetaRepo(db)
+    const ids = Array.from({ length: 150 }, (_, i) => `M_${String(i)}`)
+    const byId = new Map(
+      ids.map((id) => {
+        const match = structuredClone(baseMatch)
+        match.metadata.matchId = id
+        return [id, match] as const
+      })
+    )
+    const matchFetches: string[] = []
+    const client: MetaCrawlerClient = {
+      apexLeague: (tier) =>
+        Promise.resolve({
+          ok: true as const,
+          value: { tier, entries: tier === 'master' ? [{ puuid: 'SEED_1' }] : [] }
+        }),
+      matchIds: (_puuid, options) => {
+        const start = options?.start ?? 0
+        const count = options?.count ?? 100
+        return Promise.resolve({ ok: true as const, value: ids.slice(start, start + count) })
+      },
+      match: (matchId) => {
+        matchFetches.push(matchId)
+        const match = byId.get(matchId)
+        return Promise.resolve(
+          match
+            ? { ok: true as const, value: match }
+            : { ok: false as const, error: new RiotApiError('notFound', '404') }
+        )
+      },
+      timeline: (matchId) =>
+        Promise.resolve({
+          ok: true as const,
+          value: { metadata: { matchId, participants: [] }, info: { frames: [] } }
+        })
+    }
+    const crawler = new MetaCrawler({ client, repo: meta, onProgress: () => undefined, isOrderable: anyOrderable })
+    crawler.start()
+    await vipollUntilDone(crawler)
+    expect(crawler.status().stored).toBe(150)
+    expect(meta.status()[0]?.matches).toBe(150)
+    // Two pages of 100 → cursor at 200 and marked exhausted.
+    const cursor = db
+      .prepare('SELECT nextStart, exhausted FROM meta_crawl_seeds WHERE puuid = ?')
+      .get('SEED_1') as { nextStart: number; exhausted: number }
+    expect(cursor).toEqual({ nextStart: 200, exhausted: 1 })
+
+    // A BRAND-NEW crawler on the same DB resumes from the cursor: nothing left,
+    // so it refetches no matches (checkpoint survives an app "restart").
+    matchFetches.length = 0
+    const resumed = new MetaCrawler({ client, repo: meta, onProgress: () => undefined, isOrderable: anyOrderable })
+    resumed.start()
+    await vipollUntilDone(resumed)
+    expect(matchFetches).toEqual([])
+    expect(meta.status()[0]?.matches).toBe(150)
+  })
+
+  it('seeds the frontier from all three apex ladders (WP-020)', async () => {
+    const db = new Database(':memory:')
+    runMigrations(db)
+    const meta = new MetaRepo(db)
+    const client: MetaCrawlerClient = {
+      apexLeague: (tier) =>
+        Promise.resolve({
+          ok: true as const,
+          value: {
+            tier,
+            entries:
+              tier === 'challenger'
+                ? [{ puuid: 'C1' }, { puuid: 'C2' }]
+                : tier === 'grandmaster'
+                  ? [{ puuid: 'G1' }]
+                  : [{ puuid: 'M1' }]
+          }
+        }),
+      matchIds: () => Promise.resolve({ ok: true as const, value: [] }),
+      match: () => Promise.resolve({ ok: false as const, error: new RiotApiError('notFound', '404') }),
+      timeline: () =>
+        Promise.resolve({ ok: false as const, error: new RiotApiError('notFound', '404') })
+    }
+    const crawler = new MetaCrawler({ client, repo: meta, onProgress: () => undefined, isOrderable: anyOrderable })
+    crawler.start()
+    await vipollUntilDone(crawler)
+    // 4 apex players registered, each with an empty (immediately exhausted) history.
+    expect(meta.seedCounts()).toEqual({ total: 4, exhausted: 4 })
+  })
 })
 
 /** Waits until the crawler's async loop finishes (bounded). */
@@ -272,6 +362,26 @@ describe('meta seed (export → import)', () => {
     const { meta: source } = seededSource()
     const seed = { version: 1 as const, exportedAt: 'test', ...source.exportSeed('16.13') }
     expect(source.importSeed(seed)).toBe(false)
+  })
+
+  it('records the imported base patch + exportedAt for freshness (WP-019)', () => {
+    const { meta: source } = seededSource()
+    const seed = { version: 2 as const, exportedAt: '2026-07-09T00:00:00.000Z', ...source.exportSeed('16.13') }
+    const target = new MetaRepo(makeDb())
+    expect(target.seedInfo()).toBeNull()
+    target.importSeed(seed)
+    expect(target.seedInfo()).toEqual({ patch: '16.13', exportedAt: '2026-07-09T00:00:00.000Z' })
+  })
+
+  it('matchCountForPatch counts one patch (WP-020 current-patch total)', () => {
+    const meta = new MetaRepo(makeDb())
+    const aggregate = aggregateMatch(baseMatch)
+    if (!aggregate) throw new Error('aggregate null')
+    meta.applyAggregate({ ...aggregate, matchId: 'A', patch: '16.13' })
+    meta.applyAggregate({ ...aggregate, matchId: 'B', patch: '16.13' })
+    meta.applyAggregate({ ...aggregate, matchId: 'C', patch: '16.9' })
+    expect(meta.matchCountForPatch('16.13')).toBe(2)
+    expect(meta.matchCountForPatch('16.9')).toBe(1)
   })
 })
 

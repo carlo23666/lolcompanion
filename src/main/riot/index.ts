@@ -8,6 +8,7 @@ import { RiotClient } from './client'
 import { ingestHistory } from './ingest'
 import { RiotRateLimiter } from './limiter'
 import { MetaCrawler } from './metacrawler'
+import { patchOf } from './meta-aggregate'
 import { normalizeRiotId } from './riotid'
 import { getStaticDataManager } from '../staticdata'
 import { isFinishedBuildItem } from '../staticdata/itemgraph'
@@ -184,17 +185,23 @@ export function registerRiotIpc(db: AppDatabase): void {
   })
 
   const metaRepo = new MetaRepo(db)
-  handleInvoke('meta:status', () => ({
-    ...(metaCrawler?.status() ?? {
-      running: false,
-      processed: 0,
-      stored: 0,
-      seedsDone: 0,
-      seedsTotal: 0,
-      error: null
-    }),
-    patches: metaRepo.status()
-  }))
+  handleInvoke('meta:status', () => {
+    const loaded = getStaticDataManager().getLoadedPatch()
+    return {
+      ...(metaCrawler?.status() ?? {
+        running: false,
+        processed: 0,
+        stored: 0,
+        seedsDone: 0,
+        seedsTotal: 0,
+        gamesPerHour: 0,
+        error: null
+      }),
+      patches: metaRepo.status(),
+      seed: metaRepo.seedInfo(),
+      livePatch: loaded !== null ? patchOf(loaded) : null
+    }
+  })
 
   handleInvoke('meta:crawl:start', async () => {
     const apiKey = resolveApiKey(settings, keyCodec)

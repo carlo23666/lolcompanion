@@ -49,12 +49,32 @@ function MetaSection(): React.JSX.Element {
 
   const running = status?.running === true
   const totalMatches = status?.patches.reduce((sum, patch) => sum + patch.matches, 0) ?? 0
+  const currentPatchMatches =
+    status?.livePatch != null
+      ? (status.patches.find((entry) => entry.patch === status.livePatch)?.matches ?? 0)
+      : 0
+  const seedDays =
+    status?.seed != null
+      ? Math.max(
+          0,
+          Math.floor((Date.now() - new Date(status.seed.exportedAt).getTime()) / 86_400_000)
+        )
+      : 0
 
   return (
     <section className="max-w-md rounded-lg border border-slate-800 bg-slate-900 p-4">
       <h2 className="mb-1 text-sm font-semibold text-slate-300">{t('set.meta.title')}</h2>
       <p className="mb-3 text-[11px] text-slate-500">{t('set.meta.desc')}</p>
       <div className="flex flex-col gap-2 text-xs">
+        {status !== null && (
+          <p className="text-slate-500">
+            {status.seed === null
+              ? t('set.meta.noBase')
+              : seedDays === 0
+                ? t('set.meta.baseToday', { patch: status.seed.patch })
+                : t('set.meta.base', { patch: status.seed.patch, days: String(seedDays) })}
+          </p>
+        )}
         {totalMatches > 0 && status !== null && (
           <p className="text-slate-400">
             📦 {t('set.meta.aggregated', { n: String(totalMatches) })}
@@ -72,13 +92,23 @@ function MetaSection(): React.JSX.Element {
             )}
           </p>
         )}
+        {status?.livePatch != null && (
+          <p className="text-slate-400">
+            🎯{' '}
+            {t('set.meta.currentPatch', {
+              patch: status.livePatch,
+              n: String(currentPatchMatches)
+            })}
+          </p>
+        )}
         {running && status !== null && (
           <p className="text-indigo-300">
             ⛏{' '}
             {t('set.meta.crawling', {
               stored: String(status.stored),
               done: String(status.seedsDone),
-              total: String(status.seedsTotal)
+              total: String(status.seedsTotal),
+              rate: String(status.gamesPerHour)
             })}
           </p>
         )}

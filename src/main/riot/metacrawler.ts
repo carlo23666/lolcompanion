@@ -25,13 +25,17 @@ export interface MetaCrawlStatus {
   processed: number
   /** Matches aggregated this run. */
   stored: number
+  /** Seed players fully paged / total in the frontier. */
   seedsDone: number
   seedsTotal: number
+  /** Matches aggregated per hour this run (0 until enough has elapsed). */
+  gamesPerHour: number
   error: string | null
 }
 
 const RANKED_SOLO_QUEUE = 420
-const MATCHES_PER_PLAYER = 20
+/** match-v5 returns up to 100 ids per call; deep, resumable paging per seed. */
+const PAGE_SIZE = 100
 /** Lowest priority: the crawler must never starve owner-facing requests. */
 const CRAWL_PRIORITY = 50
 /** Timeline backfill per run: 2 API calls each, bounded so seeds still crawl. */
@@ -40,19 +44,23 @@ const BACKFILL_PER_RUN = 2000
 /**
  * Background Master+ meta crawler: seeds from the apex league lists
  * (challenger/grandmaster/master — every game in those histories is Master+
- * by construction), walks each player's recent ranked-solo matches, and folds
- * them into the aggregate tables. Only aggregates are stored; puuids stay in
- * memory for the run. Resumable: meta_matches dedupes across runs.
+ * by construction) and deep-pages each player's ranked-solo history into the
+ * aggregate tables. Only AGGREGATES leave the machine; seed puuids live in the
+ * local `meta_crawl_seeds` cursor table purely for resume and are never
+ * exported or shown. Fully resumable: `meta_matches` dedupes fetched matches
+ * and each seed's pagination cursor survives restarts.
  */
 export class MetaCrawler {
   private running = false
   private stopRequested = false
+  private runStartMs = 0
   private state: MetaCrawlStatus = {
     running: false,
     processed: 0,
     stored: 0,
     seedsDone: 0,
     seedsTotal: 0,
+    gamesPerHour: 0,
     error: null
   }
 
@@ -74,14 +82,30 @@ export class MetaCrawler {
   }
 
   status(): MetaCrawlStatus {
-    return { ...this.state, running: this.running }
+    return { ...this.state, running: this.running, gamesPerHour: this.gamesPerHour() }
+  }
+
+  /** Aggregated matches / hour this run — needs ≥30 s of runtime to settle. */
+  private gamesPerHour(): number {
+    const elapsed = Date.now() - this.runStartMs
+    if (this.runStartMs === 0 || elapsed < 30_000) return 0
+    return Math.round(this.state.stored / (elapsed / 3_600_000))
   }
 
   start(): { started: boolean; error?: string } {
     if (this.running) return { started: false, error: this.t('err.crawlInProgress') }
     this.running = true
     this.stopRequested = false
-    this.state = { running: true, processed: 0, stored: 0, seedsDone: 0, seedsTotal: 0, error: null }
+    this.runStartMs = Date.now()
+    this.state = {
+      running: true,
+      processed: 0,
+      stored: 0,
+      seedsDone: 0,
+      seedsTotal: 0,
+      gamesPerHour: 0,
+      error: null
+    }
     void this.loop().finally(() => {
       this.running = false
       this.emit()
@@ -142,53 +166,72 @@ export class MetaCrawler {
   private async loop(): Promise<void> {
     await this.backfillTimelines()
     if (this.stopRequested || this.state.error !== null) return
-    const seeds = await this.collectSeeds()
-    if (seeds.length === 0) {
+
+    // Refresh the seed frontier from the apex ladders (idempotent — keeps any
+    // existing pagination cursors so a restart resumes deep paging).
+    const apex = await this.collectSeeds()
+    if (this.state.error !== null) return
+    if (apex.length > 0) this.options.repo.addSeeds(apex)
+    if (this.options.repo.seedCounts().total === 0) {
       this.state.error ??= this.t('err.noSeeds')
       return
     }
-    this.state.seedsTotal = seeds.length
-    this.emit()
 
-    for (const puuid of seeds) {
+    // Page seeds round-robin (least-recently-touched first) until stopped or
+    // every seed's history is exhausted. Runs for as long as the owner leaves
+    // it on; the cursor table means the next run picks up where this left off.
+    while (!this.stopRequested && this.state.error === null) {
+      const seed = this.options.repo.nextPendingSeed()
+      if (seed === null) break
+      await this.crawlSeedPage(seed.puuid, seed.nextStart)
+      const counts = this.options.repo.seedCounts()
+      this.state.seedsTotal = counts.total
+      this.state.seedsDone = counts.exhausted
+      this.emit()
+    }
+  }
+
+  /** One page of a seed player's ranked-solo history; advances its cursor. */
+  private async crawlSeedPage(puuid: string, start: number): Promise<void> {
+    const ids = await this.options.client.matchIds(
+      puuid,
+      { start, count: PAGE_SIZE, queue: RANKED_SOLO_QUEUE },
+      CRAWL_PRIORITY
+    )
+    if (!ids.ok) {
+      if (ids.error.kind === 'forbidden') {
+        this.state.error = this.t('err.apiKeyRejected')
+        return
+      }
+      // Transient: touch the cursor (unchanged start) so we rotate to another
+      // seed now and retry this one later instead of spinning on it.
+      this.options.repo.advanceSeed(puuid, start, false, Date.now())
+      return
+    }
+    const exhausted = ids.value.length < PAGE_SIZE
+    for (const matchId of ids.value) {
       if (this.stopRequested) return
-      const ids = await this.options.client.matchIds(
-        puuid,
-        { count: MATCHES_PER_PLAYER, queue: RANKED_SOLO_QUEUE },
-        CRAWL_PRIORITY
-      )
-      if (!ids.ok) {
-        if (ids.error.kind === 'forbidden') {
+      if (this.options.repo.hasMatch(matchId)) continue // dedupe/resume
+      const match = await this.options.client.match(matchId, CRAWL_PRIORITY)
+      if (!match.ok) {
+        if (match.error.kind === 'forbidden') {
           this.state.error = this.t('err.apiKeyRejected')
           return
         }
-        continue // transient: move to the next seed
+        continue
       }
-      for (const matchId of ids.value) {
-        if (this.stopRequested) return
-        if (this.options.repo.hasMatch(matchId)) continue
-        const match = await this.options.client.match(matchId, CRAWL_PRIORITY)
-        if (!match.ok) {
-          if (match.error.kind === 'forbidden') {
-            this.state.error = this.t('err.apiKeyRejected')
-            return
-          }
-          continue
-        }
-        const aggregate = aggregateMatch(match.value)
-        if (aggregate) {
-          this.options.repo.applyAggregate(aggregate)
-          await this.foldTimeline(match.value)
-          this.state.stored += 1
-        } else {
-          this.options.repo.markSkipped(matchId)
-        }
-        this.state.processed += 1
-        if (this.state.processed % 5 === 0) this.emit()
+      const aggregate = aggregateMatch(match.value)
+      if (aggregate) {
+        this.options.repo.applyAggregate(aggregate)
+        await this.foldTimeline(match.value)
+        this.state.stored += 1
+      } else {
+        this.options.repo.markSkipped(matchId)
       }
-      this.state.seedsDone += 1
-      this.emit()
+      this.state.processed += 1
+      if (this.state.processed % 5 === 0) this.emit()
     }
+    this.options.repo.advanceSeed(puuid, start + PAGE_SIZE, exhausted, Date.now())
   }
 
   /** Apex league puuids, interleaved across tiers and shuffled. */

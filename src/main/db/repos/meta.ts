@@ -293,6 +293,7 @@ export class MetaRepo {
       `INSERT OR REPLACE INTO meta_champion_item_order
        (patch, champion, role, itemId, games, slotSum, firstGames) VALUES (?, ?, ?, ?, ?, ?, ?)`
     )
+    const putKv = this.db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)')
     this.db.transaction(() => {
       for (const matchId of seed.matchIds) mark.run(matchId, seed.patch, hasOrderData ? 1 : 0)
       for (const row of seed.championStats) {
@@ -315,8 +316,73 @@ export class MetaRepo {
           row.firstGames
         )
       }
+      // Remember what shared base this install started from (WP-019 freshness).
+      putKv.run('meta.seed.patch', seed.patch)
+      putKv.run('meta.seed.exportedAt', seed.exportedAt)
+      putKv.run('meta.seed.version', String(seed.version))
     })()
     return true
+  }
+
+  /** The shared base this install imported, if any (WP-019 seed freshness). */
+  seedInfo(): { patch: string; exportedAt: string } | null {
+    const row = this.db
+      .prepare(
+        `SELECT
+           (SELECT value FROM meta WHERE key = 'meta.seed.patch') AS patch,
+           (SELECT value FROM meta WHERE key = 'meta.seed.exportedAt') AS exportedAt`
+      )
+      .get() as { patch: string | null; exportedAt: string | null }
+    return row.patch !== null && row.exportedAt !== null
+      ? { patch: row.patch, exportedAt: row.exportedAt }
+      : null
+  }
+
+  /** Aggregated (non-skip) matches for one patch — current-patch total. */
+  matchCountForPatch(patch: string): number {
+    const row = this.db
+      .prepare("SELECT COUNT(*) AS n FROM meta_matches WHERE patch = ? AND patch != 'skip'")
+      .get(patch) as { n: number }
+    return row.n
+  }
+
+  // ---- WP-020 resumable crawl frontier (meta_crawl_seeds) ----
+
+  /** Registers apex seed players; keeps any existing cursor (INSERT OR IGNORE). */
+  addSeeds(puuids: string[]): void {
+    const put = this.db.prepare(
+      'INSERT OR IGNORE INTO meta_crawl_seeds (puuid, nextStart, exhausted, updatedAt) VALUES (?, 0, 0, 0)'
+    )
+    this.db.transaction(() => {
+      for (const puuid of puuids) put.run(puuid)
+    })()
+  }
+
+  /** {total, exhausted} seed players — drives the seedsTotal/seedsDone gauge. */
+  seedCounts(): { total: number; exhausted: number } {
+    const row = this.db
+      .prepare(
+        'SELECT COUNT(*) AS total, COALESCE(SUM(exhausted), 0) AS exhausted FROM meta_crawl_seeds'
+      )
+      .get() as { total: number; exhausted: number }
+    return { total: row.total, exhausted: row.exhausted }
+  }
+
+  /** Least-recently-touched unfinished seed (round-robin paging). */
+  nextPendingSeed(): { puuid: string; nextStart: number } | null {
+    const row = this.db
+      .prepare(
+        'SELECT puuid, nextStart FROM meta_crawl_seeds WHERE exhausted = 0 ORDER BY updatedAt ASC LIMIT 1'
+      )
+      .get() as { puuid: string; nextStart: number } | undefined
+    return row ?? null
+  }
+
+  /** Advances a seed's pagination cursor (and marks it done when exhausted). */
+  advanceSeed(puuid: string, nextStart: number, exhausted: boolean, now: number): void {
+    this.db
+      .prepare('UPDATE meta_crawl_seeds SET nextStart = ?, exhausted = ?, updatedAt = ? WHERE puuid = ?')
+      .run(nextStart, exhausted ? 1 : 0, now, puuid)
   }
 
   /** Aggregated matches per patch (status panel). */

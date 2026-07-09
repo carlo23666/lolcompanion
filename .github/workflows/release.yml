@@ -5,11 +5,12 @@ name: release
 # confirm the window opens and userData/updater.log appears) cannot run
 # headless, and auto-updating users must never receive an unsmoked build.
 #
-# Per release: git tag vX.Y.Z && git push --tags → download the installer
-# from the draft → smoke-test → Publish. The electron-updater feed needs
-# latest.yml + .blockmap + setup exe together; meta-seed.json.gz is carried
-# over from the previous published release (re-upload a fresh export first
-# when the local aggregates deserve it: npm run meta:export).
+# Per release: git tag vX.Y.Z && git push --tags → (draft is built) →
+# `npm run meta:publish -- vX.Y.Z` to attach a FRESH Master+ seed from the
+# maintainer's local crawl (WP-019) → download the installer → smoke-test →
+# Publish. The electron-updater feed needs latest.yml + .blockmap + setup exe
+# together. If meta:publish is skipped, the job below carries the previous
+# release's meta-seed.json.gz forward so fresh installs still get a base.
 on:
   push:
     tags: ['v*']

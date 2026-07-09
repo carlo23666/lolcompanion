@@ -53,6 +53,12 @@ Declined (Riot policy — hard rule 1, do NOT promote to a WP):
 
 - (2026-07-07) Champ select pick suggestions still rank by OWN winrate first with Master+ as a +/-0.15 blend; the in-game engine is now Master+-first — consider the same inversion in champselect if the owner confirms.
 
+## 2026-07-09 (owner request: scale the Master+ base)
+- Owner: "crawl ~1M Master+ games, aggregate, ship as a base, users pull new ones on top; regenerate each release; also aggregate from user gameplay, not only history." → specced as **WP-019** (refresh seed every release) + **WP-020** (crawler scale-up). The "ship a base + users pull new ones" model already exists (seed export → release asset → first-run download-if-empty → local crawl on top).
+- **1M reframe** (captured in WP-020): rate limits (~2k games/h ⇒ ~3 weeks for 1M) + ~2-week patch rotation make a giant historical pile stale. Target = freshest CURRENT-patch aggregate each cycle, not 1M once.
+- **User-gameplay aggregation** ("not only history"): largely already done — WP-018 `personalBuildFor` aggregates the player's own match history (item WR + openers) to personalize on the meta base. Match history IS the authoritative record of completed games; live-capture adds little.
+- (phase-2 ADR candidate) **Crowdsourced seed**: every user's crawler contributes anonymized AGGREGATES back to a shared pool — users both pull the base AND push new data, so the community builds the seed together instead of one owner crawling for weeks. Needs a small collection backend + opt-in + Riot Developer Agreement / privacy review (aggregates only, no PII, no identities). Ties to the phase-2 proxy backend already noted (2026-07-07). NOT phase-1 (ADR-002 zero-cost/no-backend) — revisit with an ADR alongside ADR-007/008.
+
 - (2026-07-07) Owner proposed password-encrypted bundled API key as a "license" for friends. Declined (shared personal-key use violates Riot ToS + per-key rate limit collapses with N users; cipher only protects the repo copy, not post-install use). The RIGHT version of his idea for phase 2 / monetization: small proxy backend holding a Riot PRODUCTION key, friends authenticate with owner-issued revocable tokens (the "license"), server enforces per-user quotas. Needs ADR revisiting ADR-002 (zero-cost/no-backend) + Riot production key application (ADR-007).
 
 ## 2026-07-08 (owner planning session: exclusivity + go-public track)

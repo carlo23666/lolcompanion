@@ -10,6 +10,7 @@ import m004 from './004_session_gamemode.sql?raw'
 import m005 from './005_meta_stats.sql?raw'
 import m006 from './006_meta_item_order.sql?raw'
 import m007 from './007_locale_default.sql?raw'
+import m008 from './008_meta_crawl_frontier.sql?raw'
 
 export interface Migration {
   id: number
@@ -24,5 +25,6 @@ export const migrations: Migration[] = [
   { id: 4, name: '004_session_gamemode', sql: m004 },
   { id: 5, name: '005_meta_stats', sql: m005 },
   { id: 6, name: '006_meta_item_order', sql: m006 },
-  { id: 7, name: '007_locale_default', sql: m007 }
+  { id: 7, name: '007_locale_default', sql: m007 },
+  { id: 8, name: '008_meta_crawl_frontier', sql: m008 }
 ]
