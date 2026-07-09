@@ -6,8 +6,8 @@
  * follows the active theme).
  *
  *  - neon   — "Neón Grieta": void navy + Bitxo pink + coin gold, rift aurora.
- *  - abismo — "Abismo": abyss black + blood crimson, knife-sharp, icon rail.
- *  - anime  — "Estrella": light pastel Star-Guardian kawaii, floating chrome.
+ *  - abismo — "Abismo": deep void + neon-blood crimson, knife-sharp, icon rail.
+ *  - anime  — "Sakura": warm washi + sakura pink + kintsugi gold, hanami petals.
  */
 export interface AppTheme {
   id: string
@@ -21,24 +21,24 @@ export const THEMES: AppTheme[] = [
   {
     id: 'neon',
     label: 'Neón Grieta',
-    hint: 'azul vacío · rosa + oro · mascota Bitxo (ajolote píxel)',
+    hint: 'azul vacío · rosa + oro · mascota Bitxo (ajolote)',
     mascot: 'Bitxo'
   },
   {
     id: 'abismo',
     label: 'Abismo',
-    hint: 'negro abisal · carmesí · mascota Sombra (gato negro)',
+    hint: 'vacío negro · carmesí neón · mascota Sombra (gato sombra)',
     mascot: 'Sombra'
   },
   {
     id: 'anime',
-    label: 'Estrella',
-    hint: 'pastel guardiana estelar · rosa + oro · mascota Yuki (chibi)',
+    label: 'Sakura',
+    hint: 'papel washi · rosa sakura + oro · mascota Yuki (anime)',
     mascot: 'Yuki'
   }
 ]
 
-export const DEFAULT_THEME = 'neon'
+export const DEFAULT_THEME = 'abismo'
 
 /** Pre-2.0 ids collapse onto the closest identity. */
 const LEGACY_THEME_MAP: Record<string, string> = {

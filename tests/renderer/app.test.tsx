@@ -76,9 +76,11 @@ describe('App shell', () => {
     const stub = stubApi()
     render(<App />)
     expect(await screen.findByText('Descansando el cristal…')).toBeInTheDocument()
+    // Default identity (abismo) uses the icon rail: the phase label lives in the
+    // indicator's title rather than as visible text.
     stub.emit('session:phase', 'clientOpen')
-    expect(screen.getByText('Cliente abierto')).toBeInTheDocument()
+    expect(screen.getByTitle('Cliente abierto')).toBeInTheDocument()
     stub.emit('session:phase', 'postGame')
-    expect(screen.getByText('Partida terminada')).toBeInTheDocument()
+    expect(screen.getByTitle('Partida terminada')).toBeInTheDocument()
   })
 })

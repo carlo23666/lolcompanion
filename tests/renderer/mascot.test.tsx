@@ -6,39 +6,43 @@ function ThemeProbe(): React.JSX.Element {
   return <span data-testid="theme">{useTheme()}</span>
 }
 
-describe('Mascot (Bitxo)', () => {
+describe('Mascot', () => {
   it('mood follows the session phase', () => {
+    // Default identity is abismo → Sombra (see DEFAULT_THEME).
     const { rerender } = render(<Mascot phase="idle" />)
-    expect(screen.getByRole('img', { name: /Bitxo/, hidden: true })).toHaveAttribute(
+    expect(screen.getByRole('img', { name: /Sombra/, hidden: true })).toHaveAttribute(
       'data-mood',
       'sleepy'
     )
 
     rerender(<Mascot phase="champSelect" />)
-    expect(screen.getByRole('img', { name: /Bitxo/, hidden: true })).toHaveAttribute(
+    expect(screen.getByRole('img', { name: /Sombra/, hidden: true })).toHaveAttribute(
       'data-mood',
       'hyped'
     )
 
     rerender(<Mascot phase="inGame" />)
-    expect(screen.getByRole('img', { name: /Bitxo/, hidden: true })).toHaveAttribute(
+    expect(screen.getByRole('img', { name: /Sombra/, hidden: true })).toHaveAttribute(
       'data-mood',
       'focused'
     )
   })
 
-  it('the mascot swaps live with the identity (Sombra on abismo, Yuki on anime)', () => {
+  it('the mascot swaps live with the identity (Bitxo/Sombra/Yuki)', () => {
     render(
       <>
         <Mascot phase="idle" />
         <ThemeProbe />
       </>
     )
-    act(() => {
-      window.dispatchEvent(new CustomEvent('app-theme', { detail: 'abismo' }))
-    })
+    // Starts on the default identity, Sombra (abismo).
     expect(screen.getByTestId('theme').textContent).toBe('abismo')
     expect(screen.getByRole('img', { name: /Sombra/, hidden: true })).toBeInTheDocument()
+
+    act(() => {
+      window.dispatchEvent(new CustomEvent('app-theme', { detail: 'neon' }))
+    })
+    expect(screen.getByRole('img', { name: /Bitxo/, hidden: true })).toBeInTheDocument()
 
     act(() => {
       window.dispatchEvent(new CustomEvent('app-theme', { detail: 'anime' }))
