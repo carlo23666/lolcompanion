@@ -108,10 +108,6 @@
   h2 { font-size: clamp(23px, 4.2vw, 34px); letter-spacing: -0.01em; }
   .lede { color: var(--muted); margin-top: 10px; }
 
-  /* two-up screenshot rows collapse to one column on mobile */
-  .duo { margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
-  @media (max-width: 780px) { .duo { grid-template-columns: 1fr; } }
-
   /* ---------- overlay hover demo ---------- */
   .overlay-demo {
     position: relative; max-width: 660px; margin: 30px auto 0;
@@ -285,16 +281,14 @@
         low kill participation — each with an actionable fix. Plus a full, filterable match history.
       </p>
     </div>
-    <div class="duo">
-      <figure class="shot" style="margin-top:0">
-        <img src="media/en/stats.png" alt="Stats view: detected weak points with evidence, per-champion table and winrate breakdowns" />
-        <figcaption>Detected weak points, per-champion numbers, streaks and tilt indicators.</figcaption>
-      </figure>
-      <figure class="shot" style="margin-top:0">
-        <img src="media/en/history.png" alt="History view: filterable match list with form indicator and per-champion aggregates" />
-        <figcaption>Full match history with filters, form strip and per-champion aggregates.</figcaption>
-      </figure>
-    </div>
+    <figure class="shot">
+      <img src="media/en/stats.png" alt="Stats view: detected weak points with evidence, per-champion table and winrate breakdowns" />
+      <figcaption>Detected weak points with the numbers behind them, per-champion table, streaks and tilt indicators.</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="media/en/history.png" alt="History view: filterable match list with form indicator and per-champion aggregates" />
+      <figcaption>Full match history with filters, form strip and per-champion aggregates.</figcaption>
+    </figure>
   </section>
 
   <!-- FEATURES -->

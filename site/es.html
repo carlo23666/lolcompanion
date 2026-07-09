@@ -103,9 +103,6 @@
   h2 { font-size: clamp(23px, 4.2vw, 34px); letter-spacing: -0.01em; }
   .lede { color: var(--muted); margin-top: 10px; }
 
-  .duo { margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
-  @media (max-width: 780px) { .duo { grid-template-columns: 1fr; } }
-
   .overlay-demo {
     position: relative; max-width: 660px; margin: 30px auto 0;
     aspect-ratio: 484 / 300;
@@ -274,16 +271,14 @@
         completo y filtrable.
       </p>
     </div>
-    <div class="duo">
-      <figure class="shot" style="margin-top:0">
-        <img src="media/es/stats.png" alt="Vista de estadísticas: puntos débiles detectados con evidencia, tabla por campeón y desgloses de winrate" />
-        <figcaption>Puntos débiles detectados, números por campeón, rachas e indicadores de tilt.</figcaption>
-      </figure>
-      <figure class="shot" style="margin-top:0">
-        <img src="media/es/history.png" alt="Vista de historial: lista de partidas filtrable con indicador de forma y agregados por campeón" />
-        <figcaption>Historial completo con filtros, racha de forma y agregados por campeón.</figcaption>
-      </figure>
-    </div>
+    <figure class="shot">
+      <img src="media/es/stats.png" alt="Vista de estadísticas: puntos débiles detectados con evidencia, tabla por campeón y desgloses de winrate" />
+      <figcaption>Puntos débiles detectados con los números que los respaldan, tabla por campeón, rachas e indicadores de tilt.</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="media/es/history.png" alt="Vista de historial: lista de partidas filtrable con indicador de forma y agregados por campeón" />
+      <figcaption>Historial completo con filtros, racha de forma y agregados por campeón.</figcaption>
+    </figure>
   </section>
 
   <!-- FUNCIONES -->
