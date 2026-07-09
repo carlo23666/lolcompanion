@@ -475,8 +475,11 @@ export function installMockApi(): void {
             stored: 0,
             seedsDone: 0,
             seedsTotal: 0,
+            gamesPerHour: 0,
             error: null,
-            patches: [{ patch: '16.13', matches: 13835 }]
+            patches: [{ patch: '16.13', matches: 13835 }],
+            seed: { patch: '16.13', exportedAt: '2026-07-01T00:00:00.000Z' },
+            livePatch: '16.13'
           })
         default:
           return respond({})
