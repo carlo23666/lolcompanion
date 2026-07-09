@@ -6,11 +6,12 @@ import type { LiveClientSnapshot } from '@shared/schemas/liveclient'
 import { DEFAULT_COACH_MODEL, generateWithInstalledModel } from '../coach'
 import { LiveCoach } from '../coach-live'
 import type { AppDatabase } from '../db'
-import { LiveSessionRepo, MetaRepo } from '../db/repos'
+import { LiveSessionRepo, MatchRepo, MetaRepo, TimelineRepo } from '../db/repos'
 import { SettingsRepo, SETTING_KEYS } from '../db/repos/settings'
 import { diffGameStates } from '../engine/diff'
 import { normalizeSnapshot } from '../engine/normalize'
 import { recommend, type MetaItemsInput } from '../engine/recommend'
+import { personalBuildFor } from '../personal-build'
 import { createTranslator, normalizeLocale } from '@shared/i18n'
 import { broadcast } from '../ipc'
 import { getStaticDataManager } from '../staticdata'
@@ -102,6 +103,23 @@ export function createSnapshotProcessor(
     return { items: found.items, games: found.games }
   }
 
+  // The player's OWN build results for the champion (WP-018): Master+ is the
+  // base, this nudges order/inclusion. Champion-only (personal samples are
+  // small; role-splitting would starve them). Cached per champion like meta.
+  let personalKey = ''
+  let personalItems: MetaItemsInput | undefined
+  const lookupPersonalItems = (
+    champion: string,
+    staticData: StaticData
+  ): MetaItemsInput | undefined => {
+    const puuid = new SettingsRepo(db).get(SETTING_KEYS.puuid)
+    if (puuid === null || puuid === '') return undefined
+    return personalBuildFor(new MatchRepo(db), new TimelineRepo(db), staticData, {
+      puuid,
+      champion
+    })
+  }
+
   return {
     process(snapshot, raw): void {
       broadcast('live:snapshot', snapshot)
@@ -123,10 +141,21 @@ export function createSnapshotProcessor(
         metaKey = key
         metaItems = lookupMetaItems(state.self.championId, state.self.position)
       }
+      if (state.self.championId !== personalKey) {
+        personalKey = state.self.championId
+        personalItems = lookupPersonalItems(state.self.championId, staticData)
+      }
       // Reasons render in the active UI language (ADR-009); resolved per tick
       // so a mid-session language switch takes effect on the next update.
       const translate = createTranslator(normalizeLocale(coachSettings.get(SETTING_KEYS.locale)))
-      const recommendations = recommend(state, staticData, undefined, metaItems, translate)
+      const recommendations = recommend(
+        state,
+        staticData,
+        undefined,
+        metaItems,
+        translate,
+        personalItems
+      )
       broadcast('gamestate:recommendations', {
         gameTimeS: state.gameTimeS,
         recommendations
@@ -156,6 +185,8 @@ export function createSnapshotProcessor(
       // Re-query next game: the crawler may have aggregated more since.
       metaKey = ''
       metaItems = undefined
+      personalKey = ''
+      personalItems = undefined
     }
   }
 }

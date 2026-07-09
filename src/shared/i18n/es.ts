@@ -508,6 +508,10 @@ export const es: Catalog = {
   'engine.recommend.situPool': '{item} está en tus situacionales de {champion}',
   'engine.recommend.metaWr':
     'en Master+ con {champion}: {wr}% WR llevando este objeto ({games} partidas)',
+  'engine.personal.winrate':
+    'tus datos: ganas más con {item} ({wr}% en {games} partidas), así que sube',
+  'engine.personal.order':
+    'tus datos: abres con {item} y ganas {wr}% ({games} partidas), así que va primero',
 
   // --- Stats: weakness insights (WP-016) ---
   'weakness.deaths.early.finding': 'Mueres {avg} veces por partida antes del minuto 14',

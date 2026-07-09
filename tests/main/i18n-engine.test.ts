@@ -40,7 +40,8 @@ describe('engine reasons honor the translator (ADR-009)', () => {
   })
 
   it('armor-vs-mr category + reasons localize', () => {
-    const english = armorVsMrRule(mid, staticData, undefined, enT)
+    const meta = { games: 300, items: [{ itemId: 3026, games: 40, wins: 22 }] }
+    const english = armorVsMrRule(mid, staticData, meta, enT)
     expect(english[0]?.category).toBe('armor')
     expect(english[0]?.reasons[0]).toMatch(/of estimated enemy damage is physical/)
   })

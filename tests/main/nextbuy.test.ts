@@ -179,18 +179,28 @@ describe('meta fallback baseline (Master+ items)', () => {
     expect(rec?.reasons.join(' ')).not.toContain('tu build')
   })
 
-  it('pool remains the fallback when the meta sample is thin', () => {
+  it('pool is the fallback only when the meta build is unusable (<3 finished items)', () => {
     const state = selfWith('Jinx', [], 1200)
-    const rec = nextBuyRecommendation(state, staticData, TEST_POOL, { ...META, games: 10 })
+    // Two usable items → no meta build → pool carries it.
+    const rec = nextBuyRecommendation(state, staticData, TEST_POOL, {
+      games: 200,
+      items: META.items.slice(0, 2)
+    })
     expect(rec?.reasons.join(' ')).toContain('tu build')
     expect(rec?.reasons.join(' ')).not.toContain('más comprado en Master+')
   })
 
-  it('thin samples are rejected (champion games and per-item games gates)', () => {
+  it('WP-018 never-silent: a thin-but-usable Master+ sample still builds from meta', () => {
+    // Champion only played 10 times, but the core items each clear the per-item
+    // floor → the build comes from Master+, not the pool (no more empty advice).
     const state = selfWith('Teemo', [], 1200)
-    expect(
-      resolveBaseline(state, staticData, TEST_POOL, { ...META, games: 10 })
-    ).toBeNull()
+    const baseline = resolveBaseline(state, staticData, TEST_POOL, { ...META, games: 10 })
+    expect(baseline?.source).toBe('meta')
+    expect(baseline?.core[0]).toBe(3031)
+  })
+
+  it('per-item sample gate: items below the floor are rejected', () => {
+    const state = selfWith('Teemo', [], 1200)
     expect(
       resolveBaseline(state, staticData, TEST_POOL, {
         games: 120,
@@ -370,7 +380,10 @@ describe('recommend (baseline + rules merged)', () => {
     if (!zed) throw new Error('Zed missing')
     zed.scores.kills = 9
     zed.scores.deaths = 2
-    const recommendations = recommend(state, staticData, TEST_POOL)
+    // GA meta-backed (so anti-burst fires it) but a single item → no meta build,
+    // so the Jinx pool carries the baseline and GA sits in its situationals.
+    const gaMeta = { games: 100, items: [{ itemId: 3026, games: 40, wins: 22 }] }
+    const recommendations = recommend(state, staticData, TEST_POOL, gaMeta)
     const ga = recommendations.find((rec) => rec.itemId === 3026)
     expect(ga).toBeDefined()
     expect(ga?.reasons.join(' ')).toContain('situacionales')
@@ -384,5 +397,86 @@ describe('recommend (baseline + rules merged)', () => {
     }
     const perRun = (performance.now() - start) / iterations
     expect(perRun).toBeLessThan(50)
+  })
+})
+
+describe('WP-018: personalize the Master+ build with the player\'s own results', () => {
+  // META core (per the meta-fallback tests) = [3031, 3085, 3006, 3036, 3026].
+  const META: MetaItemsInput = {
+    games: 120,
+    items: [
+      { itemId: 3031, games: 100, wins: 55 },
+      { itemId: 3085, games: 90, wins: 50 },
+      { itemId: 3006, games: 85, wins: 47 },
+      { itemId: 3036, games: 60, wins: 33 },
+      { itemId: 3026, games: 40, wins: 22 }
+    ]
+  }
+
+  it('swaps in an item the player wins meaningfully more with (A→B→D)', () => {
+    const state = selfWith('Teemo', [], 1200)
+    const personal: MetaItemsInput = {
+      games: 20,
+      items: [
+        { itemId: 3153, games: 12, wins: 11 }, // 92% — not in the meta core
+        { itemId: 3026, games: 8, wins: 2 } // 25% — the meta core's GA
+      ]
+    }
+    const baseline = resolveBaseline(state, staticData, TEST_POOL, META, personal)
+    expect(baseline?.source).toBe('meta')
+    expect(baseline?.core).toContain(3153) // the player's high-WR item is now core
+    expect(baseline?.core).not.toContain(3026) // the low-WR GA dropped to situational
+    expect(baseline?.personal?.get(3153)?.kind).toBe('winrate')
+  })
+
+  it('reorders the core to the player\'s own opener (A→C→B)', () => {
+    const state = selfWith('Teemo', [], 1200)
+    const personal: MetaItemsInput = {
+      games: 18,
+      items: [
+        // The player opens Berserker's (3006) far more than the meta's IE (3031).
+        { itemId: 3006, games: 15, wins: 9, firstGames: 11, orderGames: 15, slotSum: 20 }
+      ]
+    }
+    const baseline = resolveBaseline(state, staticData, TEST_POOL, META, personal)
+    expect(baseline?.core[0]).toBe(3006)
+    expect(baseline?.personal?.get(3006)?.kind).toBe('order')
+  })
+
+  it('leaves Master+ untouched below the personal-sample floor', () => {
+    const state = selfWith('Teemo', [], 1200)
+    const thin: MetaItemsInput = { games: 4, items: [{ itemId: 3153, games: 4, wins: 4 }] }
+    const baseline = resolveBaseline(state, staticData, TEST_POOL, META, thin)
+    expect(baseline?.core).toEqual([3031, 3085, 3006, 3036, 3026])
+    expect(baseline?.personal).toBeUndefined()
+  })
+
+  it('no Master+ data but personal history → builds from the player\'s own results', () => {
+    const state = selfWith('Teemo', [], 1200)
+    const personal: MetaItemsInput = {
+      games: 12,
+      items: [
+        { itemId: 3031, games: 10, wins: 7 },
+        { itemId: 3085, games: 9, wins: 5 },
+        { itemId: 3006, games: 8, wins: 5 }
+      ]
+    }
+    const baseline = resolveBaseline(state, staticData, TEST_POOL, undefined, personal)
+    expect(baseline?.source).toBe('personal')
+    expect(baseline?.core).toContain(3031)
+  })
+
+  it('the personal reason reaches the end-to-end recommendation', () => {
+    // Owns everything but IE (3031) and GA (3026). The player opens GA far more
+    // than the meta → order nudge moves GA to the front, so it's the next buy
+    // and its "your data" reason surfaces.
+    const state = selfWith('Teemo', [3006, 3085, 3036], 4000)
+    const personal: MetaItemsInput = {
+      games: 18,
+      items: [{ itemId: 3026, games: 12, wins: 8, firstGames: 9, orderGames: 12, slotSum: 15 }]
+    }
+    const recs = recommend(state, staticData, TEST_POOL, META, undefined, personal)
+    const ga = recs.find((rec) => rec.itemId === 3026)
+    expect(ga?.reasons.join(' ')).toContain('tus datos')
   })
 })

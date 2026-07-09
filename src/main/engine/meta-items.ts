@@ -46,11 +46,6 @@ export const META_ITEM_MIN_GAMES = 5
  */
 export const SUGGESTION_SCORE_CAP = 45
 
-/** Enough sample to trust the champion's Master+ item distribution at all. */
-export function metaTrusted(meta: MetaItemsInput | undefined): meta is MetaItemsInput {
-  return meta !== undefined && meta.games >= META_TRUST_MIN_GAMES
-}
-
 export function metaUsage(
   meta: MetaItemsInput | undefined,
   itemId: number
@@ -89,6 +84,21 @@ export function orderByMeta(
   })
 }
 
+/**
+ * The class candidates the champion's Master+ players ACTUALLY build, most-used
+ * first (WP-018). This is the only set a reactive carry-item rule may surface:
+ * a defensive/pen item that Master+ never buys on this champion (Guardian Angel
+ * on a support, %pen on an enchanter) must never be recommended, no matter the
+ * enemy comp. When this returns empty the rule has no anchor and stays silent —
+ * the meta build line carries the recommendation instead.
+ */
+export function metaBackedOptions(
+  candidates: readonly number[],
+  meta: MetaItemsInput | undefined
+): number[] {
+  return orderByMeta(candidates, meta).filter((id) => metaUsage(meta, id) !== null)
+}
+
 export function metaPickReason(
   championName: string,
   itemName: string,
@@ -104,6 +114,3 @@ export function metaPickReason(
   })
 }
 
-export function suggestionReason(championName: string, t: Translator): string {
-  return t('engine.meta.suggestion', { champion: championName })
-}

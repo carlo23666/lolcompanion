@@ -1,11 +1,4 @@
-import {
-  metaPickReason,
-  metaTrusted,
-  metaUsage,
-  orderByMeta,
-  SUGGESTION_SCORE_CAP,
-  suggestionReason
-} from '../meta-items'
+import { metaBackedOptions, metaPickReason, metaUsage, SUGGESTION_SCORE_CAP } from '../meta-items'
 import { THRESHOLDS } from './thresholds'
 import { availableOptions, clampScore, defaultTranslator, itemName, ownsAny, pct } from './helpers'
 import type { Rule, RuleOutput } from './types'
@@ -65,12 +58,16 @@ export const armorVsMrRule: Rule = (state, staticData, meta, t = defaultTranslat
     score: number,
     reasons: string[]
   ): void => {
-    // Master+ usage on the own champion decides the order within the class.
-    const viable = orderByMeta(availableOptions(staticData, options), meta)
-    if (viable.length === 0 || ownsAny(state.self, viable)) return
-    const anyMetaBacked = viable.some((id) => metaUsage(meta, id) !== null)
-    const capped = (!anyMetaBacked && metaTrusted(meta)) || preFirstItem
-    viable.forEach((itemId, index) => {
+    // Master+ anchor (WP-018): only resists this champion's Master+ players
+    // actually build, most-used first. No meta-backed option → this champion
+    // never buys a reactive resist here (e.g. a support vs an AD comp): stay
+    // silent rather than invent an off-role item like Guardian Angel.
+    const backed = metaBackedOptions(availableOptions(staticData, options), meta)
+    if (backed.length === 0 || ownsAny(state.self, backed)) return
+    // Pre-first-item a skewed comp is still a PLAN, not a purchase (WP-015):
+    // capped + 'add' so it can't outrank the build path before the first back.
+    const capped = preFirstItem
+    backed.forEach((itemId, index) => {
       const stat = metaUsage(meta, itemId)
       outputs.push({
         ruleId: 'armor-vs-mr',
@@ -86,10 +83,7 @@ export const armorVsMrRule: Rule = (state, staticData, meta, t = defaultTranslat
           ...(stat !== null
             ? [metaPickReason(state.self.championName, itemName(staticData, itemId), stat, t)]
             : []),
-          ...(preFirstItem && index === 0 ? [t('engine.armorMr.preFirst')] : []),
-          ...(capped && !preFirstItem && index === 0
-            ? [suggestionReason(state.self.championName, t)]
-            : [])
+          ...(preFirstItem && index === 0 ? [t('engine.armorMr.preFirst')] : [])
         ]
       })
     })

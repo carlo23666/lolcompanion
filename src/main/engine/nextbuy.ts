@@ -23,7 +23,7 @@ const ORDINAL_KEYS: readonly MessageKey[] = [
 import {
   avgCompletionSlot,
   META_ITEM_MIN_GAMES,
-  META_TRUST_MIN_GAMES,
+  type MetaItemStat,
   type MetaItemsInput
 } from './meta-items'
 
@@ -61,56 +61,170 @@ export function findBaseline(
 
 export type { MetaItemsInput } from './meta-items'
 
+/** The player's own results moved this item's place/inclusion (WP-018). */
+export interface PersonalNote {
+  games: number
+  wins: number
+  kind: 'order' | 'winrate'
+}
+
 export interface EffectiveBaseline {
   core: number[]
   situational: number[]
-  /** Reason wording differs: "build Master+" (meta) vs "tu build" (pool). */
-  source: 'pool' | 'meta'
+  /** Reason wording differs: Master+ vs the player's own build. */
+  source: 'pool' | 'meta' | 'personal'
+  /** itemId → why the player's data changed its place (surfaced in reasons). */
+  personal?: Map<number, PersonalNote>
+}
+
+// WP-018 personalization gates — conservative on purpose: Master+ is the base,
+// the player's own results only nudge it, and only with a real sample + edge.
+/** Games on the champion before the player's own results are trusted at all. */
+const PERSONAL_MIN_GAMES = 8
+/** Per-item sample before it can move within/into the build. */
+const PERSONAL_ITEM_MIN_GAMES = 5
+/** The player's win rate must beat the displaced item's by this to swap. */
+const PERSONAL_WR_DELTA = 0.06
+/** First-completed sample before we reorder the core to the player's opener. */
+const PERSONAL_ORDER_MIN = 4
+
+function winRate(stat: { games: number; wins: number }): number {
+  return stat.games > 0 ? stat.wins / stat.games : 0
 }
 
 /**
- * The build the engine advises from. Since 2026-07-07 the hierarchy is
- * inverted (owner request): the Master+ frequency build is PRIMARY whenever
- * the sample is trustworthy — frequency order approximates build order — and
- * the owner's own pool entry is only the fallback for uncrawled champions.
+ * Finished-item build straight from a Master+ (or personal) item distribution,
+ * order-aware. Components are excluded (never build SLOTS — the "Bramble first
+ * on Nasus" bug, WP-015). Returns null below three usable finished items.
+ */
+function buildFromDistribution(
+  staticData: StaticData,
+  items: MetaItemStat[]
+): { core: number[]; situational: number[] } | null {
+  const usable = items.filter((entry) => {
+    if (entry.games < META_ITEM_MIN_GAMES) return false
+    const node = staticData.itemGraph.nodes.get(entry.itemId)
+    return node !== undefined && isFinishedBuildItem(node)
+  })
+  // With enough timeline coverage, REAL completion order beats frequency (a
+  // popular-but-late Thornmail must not become the "first core item"). Items
+  // without an order sample keep their frequency rank at the tail.
+  const ordered = usable.filter((entry) => avgCompletionSlot(entry) !== null)
+  if (ordered.length >= 3) {
+    usable.sort((a, b) => {
+      const slotA = avgCompletionSlot(a)
+      const slotB = avgCompletionSlot(b)
+      if (slotA !== null && slotB !== null) return slotA - slotB
+      if (slotA !== null) return -1
+      if (slotB !== null) return 1
+      return b.games - a.games
+    })
+  }
+  if (usable.length < 3) return null
+  return {
+    core: usable.slice(0, 5).map((entry) => entry.itemId),
+    situational: usable.slice(5, 10).map((entry) => entry.itemId)
+  }
+}
+
+/**
+ * Blend the player's OWN results onto the Master+ base (owner mandate
+ * 2026-07-09: "Master+ is the base, my own results only tweak it"). Two
+ * conservative, sample-gated nudges: (1) reorder the core to the player's own
+ * opener when they clearly start elsewhere, (2) swap in an item the player
+ * wins meaningfully more with. Master+ order is untouched below the gates.
+ */
+function personalize(
+  base: { core: number[]; situational: number[] },
+  personal: MetaItemsInput | undefined,
+  staticData: StaticData
+): EffectiveBaseline {
+  if (personal === undefined || personal.games < PERSONAL_MIN_GAMES) {
+    return { core: base.core, situational: base.situational, source: 'meta' }
+  }
+  const core = [...base.core]
+  const situational = [...base.situational]
+  const notes = new Map<number, PersonalNote>()
+  const statOf = (id: number): MetaItemStat | undefined =>
+    personal.items.find((entry) => entry.itemId === id)
+
+  // (1) Order nudge: the item the player finishes FIRST most often, if it's a
+  // core item they don't already open with, moves to the front.
+  const opener = personal.items
+    .filter((entry) => (entry.firstGames ?? 0) >= PERSONAL_ORDER_MIN && core.includes(entry.itemId))
+    .sort((a, b) => (b.firstGames ?? 0) - (a.firstGames ?? 0))[0]
+  if (opener !== undefined && core[0] !== opener.itemId) {
+    core.splice(core.indexOf(opener.itemId), 1)
+    core.unshift(opener.itemId)
+    notes.set(opener.itemId, {
+      games: opener.firstGames ?? 0,
+      wins: opener.wins,
+      kind: 'order'
+    })
+  }
+
+  // (2) Win-rate swap: an item the player wins more with, not already core,
+  // displaces the weakest-for-the-player core item (at most one swap).
+  const candidate = personal.items
+    .filter((entry) => {
+      if (entry.games < PERSONAL_ITEM_MIN_GAMES || core.includes(entry.itemId)) return false
+      const node = staticData.itemGraph.nodes.get(entry.itemId)
+      return node !== undefined && node.availableOnSR && isFinishedBuildItem(node)
+    })
+    .sort((a, b) => winRate(b) - winRate(a))[0]
+  if (candidate !== undefined) {
+    // Weakest core item BY THE PLAYER'S OWN results (unknown = neutral 0.5).
+    const weakest = core
+      .map((id) => ({ id, stat: statOf(id) }))
+      .filter((entry) => entry.id !== opener?.itemId)
+      .sort(
+        (a, b) => (a.stat ? winRate(a.stat) : 0.5) - (b.stat ? winRate(b.stat) : 0.5)
+      )[0]
+    const weakestWr = weakest?.stat ? winRate(weakest.stat) : 0.5
+    if (weakest !== undefined && winRate(candidate) - weakestWr >= PERSONAL_WR_DELTA) {
+      core[core.indexOf(weakest.id)] = candidate.itemId
+      situational.unshift(weakest.id)
+      notes.set(candidate.itemId, {
+        games: candidate.games,
+        wins: candidate.wins,
+        kind: 'winrate'
+      })
+    }
+  }
+
+  return {
+    core,
+    situational,
+    source: 'meta',
+    personal: notes.size > 0 ? notes : undefined
+  }
+}
+
+/**
+ * The build the engine advises from. Master+ is the PRIMARY base whenever any
+ * usable sample exists (thin data still beats nothing — WP-018 never-silent);
+ * the player's own results then nudge order/inclusion; the bundled pool and the
+ * player's raw build are the last resorts before giving up.
  */
 export function resolveBaseline(
   state: GameState,
   staticData: StaticData,
   pool: BaselinePool,
-  meta?: MetaItemsInput
+  meta?: MetaItemsInput,
+  personal?: MetaItemsInput
 ): EffectiveBaseline | null {
-  if (meta && meta.games >= META_TRUST_MIN_GAMES) {
-    // Finished pieces only: components (Bramble, Sheen…) appear in final
-    // builds but are never build SLOTS — advising them as such was the
-    // "Bramble first on Nasus" bug (WP-015).
-    const usable = meta.items.filter((entry) => {
-      if (entry.games < META_ITEM_MIN_GAMES) return false
-      const node = staticData.itemGraph.nodes.get(entry.itemId)
-      return node !== undefined && isFinishedBuildItem(node)
-    })
-    // With enough timeline coverage, REAL completion order beats frequency
-    // (a popular-but-late Thornmail must not become the "first core item").
-    // Items without order sample keep their frequency rank at the tail.
-    const ordered = usable.filter((entry) => avgCompletionSlot(entry) !== null)
-    if (ordered.length >= 3) {
-      usable.sort((a, b) => {
-        const slotA = avgCompletionSlot(a)
-        const slotB = avgCompletionSlot(b)
-        if (slotA !== null && slotB !== null) return slotA - slotB
-        if (slotA !== null) return -1
-        if (slotB !== null) return 1
-        return b.games - a.games
-      })
-    }
-    if (usable.length >= 3) {
-      return {
-        core: usable.slice(0, 5).map((entry) => entry.itemId),
-        situational: usable.slice(5, 10).map((entry) => entry.itemId),
-        source: 'meta'
-      }
+  const metaBuild = meta ? buildFromDistribution(staticData, meta.items) : null
+  if (metaBuild) return personalize(metaBuild, personal, staticData)
+
+  // No Master+ data for this champion → the player's own build carries it,
+  // so an off-meta champ they've played before is never left without advice.
+  if (personal && personal.games >= PERSONAL_MIN_GAMES) {
+    const personalBuild = buildFromDistribution(staticData, personal.items)
+    if (personalBuild) {
+      return { core: personalBuild.core, situational: personalBuild.situational, source: 'personal' }
     }
   }
+
   const own = findBaseline(pool, state.self.championId, state.self.position)
   if (own) return { core: own.core, situational: own.situational, source: 'pool' }
   return null
@@ -168,9 +282,10 @@ export function nextBuyRecommendation(
   staticData: StaticData,
   pool: BaselinePool = loadBaselinePool(),
   meta?: MetaItemsInput,
-  t: Translator = defaultTranslator
+  t: Translator = defaultTranslator,
+  personal?: MetaItemsInput
 ): Recommendation | null {
-  const baseline = resolveBaseline(state, staticData, pool, meta)
+  const baseline = resolveBaseline(state, staticData, pool, meta, personal)
   if (!baseline) return null
 
   const graph = staticData.itemGraph
@@ -236,10 +351,21 @@ export function nextBuyRecommendation(
     staticData
   )
 
-  const withBootsNote = (rec: Recommendation): Recommendation =>
-    bootsSkippedForRune
-      ? { ...rec, reasons: [...rec.reasons, t('engine.nextbuy.bootsPaused')] }
-      : rec
+  // Personal note (WP-018): if the player's own results moved this item, say
+  // so — Master+ is the base, this is the "your data" tweak on top of it.
+  const personalNote = baseline.personal?.get(target)
+  const personalReason = (note: PersonalNote): string =>
+    t(note.kind === 'order' ? 'engine.personal.order' : 'engine.personal.winrate', {
+      item: targetName,
+      games: String(note.games),
+      wr: String(Math.round((note.wins / Math.max(1, note.games)) * 100))
+    })
+  const withBootsNote = (rec: Recommendation): Recommendation => {
+    let reasons = rec.reasons
+    if (personalNote !== undefined) reasons = [...reasons, personalReason(personalNote)]
+    if (bootsSkippedForRune) reasons = [...reasons, t('engine.nextbuy.bootsPaused')]
+    return reasons === rec.reasons ? rec : { ...rec, reasons }
+  }
 
   if (gold >= missingGold) {
     return withBootsNote({
@@ -316,9 +442,10 @@ export function endgameRecommendation(
   staticData: StaticData,
   pool: BaselinePool = loadBaselinePool(),
   meta?: MetaItemsInput,
-  t: Translator = defaultTranslator
+  t: Translator = defaultTranslator,
+  personal?: MetaItemsInput
 ): Recommendation | null {
-  const baseline = resolveBaseline(state, staticData, pool, meta)
+  const baseline = resolveBaseline(state, staticData, pool, meta, personal)
   if (!baseline) return null
 
   const graph = staticData.itemGraph

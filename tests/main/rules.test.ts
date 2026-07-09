@@ -48,6 +48,31 @@ beforeAll(async () => {
   late = load('late')
 })
 
+/**
+ * WP-018: reactive rules only surface items the champion's Master+ players
+ * actually build. This backs every reactive candidate (defensives, resists,
+ * %pen) so the rules that SHOULD fire have their anchor; tests for the
+ * silent-without-backing behavior pass their own (or no) meta.
+ */
+const REACTIVE_META = {
+  games: 300,
+  items: [
+    { itemId: 3026, games: 40, wins: 22 }, // Guardian Angel
+    { itemId: 3157, games: 30, wins: 16 }, // Zhonya
+    { itemId: 3075, games: 40, wins: 22 }, // Thornmail
+    { itemId: 3143, games: 30, wins: 16 }, // Randuin
+    { itemId: 3110, games: 20, wins: 11 }, // Frozen Heart
+    { itemId: 3102, games: 35, wins: 19 }, // Banshee
+    { itemId: 2504, games: 30, wins: 16 }, // Kaenic Rookern
+    { itemId: 3036, games: 40, wins: 22 }, // Lord Dominik's
+    { itemId: 6694, games: 30, wins: 16 }, // Serylda
+    { itemId: 3135, games: 40, wins: 22 }, // Void Staff
+    { itemId: 6653, games: 30, wins: 16 }, // Liandry
+    { itemId: 3153, games: 20, wins: 11 }, // BotRK
+    { itemId: 3139, games: 25, wins: 14 } // Mercurial
+  ]
+}
+
 describe('rule: antiheal', () => {
   it('triggers on high enemy healing (Aatrox+Soraka) with gold-aware action', () => {
     const outputs = antihealRule(mid, staticData)
@@ -91,21 +116,21 @@ describe('rule: antiheal', () => {
 
 describe('rule: armor-vs-mr', () => {
   it('recommends every squishy armor option against the 80% physical comp, preferred first', () => {
-    const outputs = armorVsMrRule(mid, staticData)
+    const outputs = armorVsMrRule(mid, staticData, REACTIVE_META)
     // Jinx (Marksman) → squishy options: GA preferred, Zhonya as alternative.
     expect(outputs.map((o) => o.itemId)).toEqual([3026, 3157])
     const [preferred, alternative] = outputs
     expect(preferred?.category).toBe('armadura')
     expect(preferred?.reasons[0]).toMatch(/El \d+% del daño enemigo estimado es físico/)
-    // Same advice on both outputs, alternative ranked just below.
-    expect(alternative?.reasons).toEqual(preferred?.reasons)
+    // Shared situational reasons; each option carries its own Master+ WR line.
+    expect(alternative?.reasons.slice(0, 2)).toEqual(preferred?.reasons.slice(0, 2))
     expect(alternative?.score).toBeLessThan(preferred?.score ?? 0)
   })
 
   it('recommends tank armor items for a tank self', () => {
     const tankSelf = structuredClone(mid)
     tankSelf.self.championId = 'Malphite' // Tank tag
-    const outputs = armorVsMrRule(tankSelf, staticData)
+    const outputs = armorVsMrRule(tankSelf, staticData, REACTIVE_META)
     expect(outputs[0]?.itemId).toBe(3075)
     expect(outputs.length).toBeGreaterThan(1)
   })
@@ -114,9 +139,18 @@ describe('rule: armor-vs-mr', () => {
     const magicComp = structuredClone(mid)
     magicComp.enemyAggregates.physicalShare = 0.3
     magicComp.enemyAggregates.magicShare = 0.7
-    const outputs = armorVsMrRule(magicComp, staticData)
+    const outputs = armorVsMrRule(magicComp, staticData, REACTIVE_META)
     expect(outputs.length).toBeGreaterThan(0)
     expect(outputs.every((o) => o.category === 'resistencia mágica')).toBe(true)
+  })
+
+  it('WP-018: no meta-backed resist → silent (a support never gets Guardian Angel)', () => {
+    // Trusted Master+ sample that builds NONE of the squishy armor options
+    // (an enchanter): the AD comp must not conjure GA/Zhonya anyway.
+    const supportMeta = { games: 300, items: [{ itemId: 3031, games: 120, wins: 66 }] }
+    expect(armorVsMrRule(mid, staticData, supportMeta)).toEqual([])
+    // And with no meta at all, still nothing (no anchor).
+    expect(armorVsMrRule(mid, staticData)).toEqual([])
   })
 
   it('goes silent when self already owns any option of the advised class', () => {
@@ -139,7 +173,7 @@ describe('rule: armor-vs-mr', () => {
 
 describe('rule: anti-tank', () => {
   it('triggers on the late-game raid boss (Aatrox, ~7600 eHP)', () => {
-    const outputs = antiTankRule(late, staticData)
+    const outputs = antiTankRule(late, staticData, REACTIVE_META)
     // Self AD, Aatrox stacks resists → % armor pen: LDR preferred, Serylda alternative.
     expect(outputs.map((o) => o.itemId)).toEqual([3036, 6694])
     const output = outputs[0]
@@ -152,7 +186,7 @@ describe('rule: anti-tank', () => {
     const apSelf = structuredClone(late)
     apSelf.self.damageType = 'magic'
     apSelf.self.items = []
-    const outputs = antiTankRule(apSelf, staticData)
+    const outputs = antiTankRule(apSelf, staticData, REACTIVE_META)
     expect(outputs[0]?.itemId).toBe(3135)
   })
 
@@ -172,20 +206,19 @@ describe('rule: anti-tank', () => {
 })
 
 describe('rule: anti-burst', () => {
-  it('triggers on fed Zed (8/3) late and suggests GA for the AD self', () => {
-    const outputs = antiBurstRule(late, staticData)
+  it('triggers on fed Zed (8/3) late and picks the meta-backed defensive (GA)', () => {
+    const outputs = antiBurstRule(late, staticData, REACTIVE_META)
     expect(outputs).toHaveLength(1)
     const output = outputs[0]
-    expect(output?.itemId).toBe(3026)
+    expect(output?.itemId).toBe(3026) // GA is this champion's most-built defensive
     expect(output?.reasons[0]).toContain('Zed (8/3)')
     expect(output?.reasons[0]).toContain('+5')
   })
 
-  it('suggests Zhonya for an AP self', () => {
-    const apSelf = structuredClone(late)
-    apSelf.self.stats.abilityPower = 400
-    apSelf.self.stats.attackDamage = 100
-    const outputs = antiBurstRule(apSelf, staticData)
+  it('picks whichever survival item Master+ builds most (Zhonya here)', () => {
+    // The pick follows Master+ usage, not the self AD/AP split (WP-018).
+    const zhonyaMeta = { games: 300, items: [{ itemId: 3157, games: 60, wins: 33 }] }
+    const outputs = antiBurstRule(late, staticData, zhonyaMeta)
     expect(outputs[0]?.itemId).toBe(3157)
   })
 
@@ -210,13 +243,11 @@ describe('rules are Master+-aware (meta primero, 2026-07-07)', () => {
     expect(outputs[0]?.reasons.join(' ')).toContain('Master+')
   })
 
-  it('anti-burst without meta backing ships capped and labeled as suggestion', () => {
-    // Trusted sample, but no defensive appears in the champion distribution.
+  it('WP-018: no meta-backed defensive → anti-burst stays silent (no heuristic)', () => {
+    // Trusted sample, but no defensive appears in the champion distribution:
+    // the rule must NOT invent GA/Zhonya — it stays silent.
     const meta = { games: 300, items: [{ itemId: 3031, games: 200, wins: 110 }] }
-    const outputs = antiBurstRule(late, staticData, meta)
-    expect(outputs[0]?.itemId).toBe(3026) // heuristic still names the least-bad option
-    expect(outputs[0]?.score).toBeLessThanOrEqual(45)
-    expect(outputs[0]?.reasons.join(' ')).toContain('sugerencia situacional')
+    expect(antiBurstRule(late, staticData, meta)).toEqual([])
   })
 
   it('antiheal line follows Master+ (Morello line despite a physical self)', () => {
@@ -231,10 +262,8 @@ describe('rules are Master+-aware (meta primero, 2026-07-07)', () => {
     expect(outputs[0]?.reasons.join(' ')).toContain('Master+')
   })
 
-  it('without any meta the heuristics behave as before (no cap, no label)', () => {
-    const outputs = antiBurstRule(late, staticData)
-    expect(outputs[0]?.itemId).toBe(3026)
-    expect(outputs[0]?.reasons.join(' ')).not.toContain('sugerencia situacional')
+  it('without any meta anti-burst stays silent (nothing to anchor to)', () => {
+    expect(antiBurstRule(late, staticData)).toEqual([])
   })
 })
 
@@ -309,7 +338,7 @@ describe('combiner + runEngine', () => {
 
   it('produces a ranked, explained top for mid and late game', () => {
     for (const state of [mid, late]) {
-      const recommendations = runEngine(state, staticData)
+      const recommendations = runEngine(state, staticData, REACTIVE_META)
       expect(recommendations.length).toBeGreaterThanOrEqual(2)
       for (const rec of recommendations) {
         expect(rec.reasons.length).toBeGreaterThan(0)
@@ -322,7 +351,7 @@ describe('combiner + runEngine', () => {
   })
 
   it('late game: anti-burst and armor advice both surface GA and merge', () => {
-    const recommendations = runEngine(late, staticData)
+    const recommendations = runEngine(late, staticData, REACTIVE_META)
     const ga = recommendations.find((r) => r.itemId === 3026)
     expect(ga).toBeDefined()
     // Two rules supported it → reasons from both.

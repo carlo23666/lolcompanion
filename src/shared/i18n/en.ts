@@ -497,6 +497,10 @@ export const en = {
   'engine.recommend.situPool': '{item} is in your {champion} situationals',
   'engine.recommend.metaWr':
     'in Master+ with {champion}: {wr}% WR carrying this item ({games} games)',
+  'engine.personal.winrate':
+    'your data: you win more with {item} ({wr}% over {games} games), so it moves up',
+  'engine.personal.order':
+    'your data: you open {item} and win {wr}% ({games} games), so it goes first',
 
   // --- Stats: weakness insights (WP-016) ---
   'weakness.deaths.early.finding': 'You die {avg} times per game before minute 14',

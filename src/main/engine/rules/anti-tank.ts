@@ -1,12 +1,5 @@
 import type { PlayerState } from '@shared/gamestate'
-import {
-  metaPickReason,
-  metaTrusted,
-  metaUsage,
-  orderByMeta,
-  SUGGESTION_SCORE_CAP,
-  suggestionReason
-} from '../meta-items'
+import { metaBackedOptions, metaPickReason, metaUsage } from '../meta-items'
 import { THRESHOLDS } from './thresholds'
 import {
   availableOptions,
@@ -46,8 +39,10 @@ export const antiTankRule: Rule = (state, staticData, meta, t = defaultTranslato
   const hpStacking =
     raidBosses.length > 0 &&
     raidBosses.every((boss) => boss.estimatedStats.armor + boss.estimatedStats.magicResist < 200)
-  // Class list shapes the candidates; Master+ usage on the champion orders them.
-  const options = orderByMeta(
+  // Master+ anchor (WP-018): only the %pen items this champion's Master+
+  // players build, most-used first. No meta-backed option → this champion
+  // never itemizes anti-tank (an enchanter never buys %pen): stay silent.
+  const options = metaBackedOptions(
     availableOptions(
       staticData,
       physical
@@ -90,10 +85,8 @@ export const antiTankRule: Rule = (state, staticData, meta, t = defaultTranslato
 
   const intensity = raidBosses.length > 0 ? effectiveHp(raidBosses[0] as PlayerState) / baseline : state.enemyAggregates.tankinessIndex / baseline
   const score = clampScore(35 + (intensity - 1) * 60)
-  const anyMetaBacked = options.some((id) => metaUsage(meta, id) !== null)
-  const capped = !anyMetaBacked && metaTrusted(meta)
   // One output per option (shared reasons) so the UI can show alternatives;
-  // the Master+-preferred option ranks first.
+  // the Master+-preferred option ranks first. Every option is meta-backed.
   return options.map((itemId, index) => {
     const stat = metaUsage(meta, itemId)
     return {
@@ -101,15 +94,12 @@ export const antiTankRule: Rule = (state, staticData, meta, t = defaultTranslato
       itemId,
       category: t('engine.cat.antitank'),
       action: 'add' as const,
-      score: capped
-        ? Math.min(clampScore(score - index * 8), SUGGESTION_SCORE_CAP)
-        : clampScore(score - index * 8),
+      score: clampScore(score - index * 8),
       reasons: [
         ...reasons,
         ...(stat !== null
           ? [metaPickReason(state.self.championName, itemName(staticData, itemId), stat, t)]
-          : []),
-        ...(capped && index === 0 ? [suggestionReason(state.self.championName, t)] : [])
+          : [])
       ]
     }
   })

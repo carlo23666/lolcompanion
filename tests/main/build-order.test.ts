@@ -237,9 +237,19 @@ describe('armor-vs-mr early-game damping', () => {
     return state
   }
 
+  // Nasus (Fighter/Tank) → the armor rule anchors to his Master+ tank-armor.
+  const TANK_ARMOR_META: MetaItemsInput = {
+    games: 200,
+    items: [
+      { itemId: 3075, games: 60, wins: 33 }, // Thornmail
+      { itemId: 3143, games: 40, wins: 22 }, // Randuin
+      { itemId: 3110, games: 20, wins: 11 } // Frozen Heart
+    ]
+  }
+
   it('caps the armor advice while the self has no completed item', () => {
     const state = makeState(fullAdScenario)
-    const outputs = armorVsMrRule(state, staticData)
+    const outputs = armorVsMrRule(state, staticData, TANK_ARMOR_META)
     expect(outputs.length).toBeGreaterThan(0)
     expect(outputs.every((output) => output.score <= SUGGESTION_SCORE_CAP)).toBe(true)
     expect(outputs[0]?.reasons.join(' ')).toContain('primer objeto')
@@ -250,7 +260,7 @@ describe('armor-vs-mr early-game damping', () => {
     scenario.gameTimeS = 1200
     scenario.self.level = 11
     scenario.self.items = [ICEBORN, 1054]
-    const outputs = armorVsMrRule(makeState(scenario), staticData)
+    const outputs = armorVsMrRule(makeState(scenario), staticData, TANK_ARMOR_META)
     expect(outputs.length).toBeGreaterThan(0)
     expect((outputs[0]?.score ?? 0) > SUGGESTION_SCORE_CAP).toBe(true)
   })

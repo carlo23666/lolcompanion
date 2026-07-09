@@ -29,9 +29,10 @@ export function recommend(
   staticData: StaticData,
   pool: BaselinePool = loadBaselinePool(),
   meta?: MetaItemsInput,
-  t: Translator = defaultTranslator
+  t: Translator = defaultTranslator,
+  personal?: MetaItemsInput
 ): Recommendation[] {
-  const baseline = resolveBaseline(state, staticData, pool, meta)
+  const baseline = resolveBaseline(state, staticData, pool, meta, personal)
   const ruleRecommendations = runEngine(state, staticData, meta, t).map((rec) => {
     if (rec.itemId !== null && baseline?.situational.includes(rec.itemId) === true) {
       const item = rec.itemName ?? t('engine.word.thisItem')
@@ -52,8 +53,8 @@ export function recommend(
   // Core first; once it's done, the endgame layer fills slots 5-6 and flags
   // leftover starter items — the engine must never go silent mid-game.
   const nextBuy =
-    nextBuyRecommendation(state, staticData, pool, meta, t) ??
-    endgameRecommendation(state, staticData, pool, meta, t)
+    nextBuyRecommendation(state, staticData, pool, meta, t, personal) ??
+    endgameRecommendation(state, staticData, pool, meta, t, personal)
   const all = nextBuy ? [nextBuy, ...ruleRecommendations] : ruleRecommendations
 
   // Dedupe by item: keep the highest score, merge every reason.
