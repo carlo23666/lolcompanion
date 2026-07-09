@@ -8,7 +8,7 @@
 <link rel="icon" href="icon.png" />
 <meta property="og:title" content="LoL Companion — your local coach for League of Legends" />
 <meta property="og:description" content="Explained build recommendations in real time, champ select analysis, weakness detection and post-game reports. Local, free, and within Riot's rules." />
-<meta property="og:image" content="media/live-ingame.png" />
+<meta property="og:image" content="media/en/live-ingame.png" />
 <style>
   :root {
     --bg: #05060e;
@@ -34,95 +34,134 @@
     color: var(--text);
     font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     line-height: 1.6;
+    overflow-x: hidden;
   }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; width: 100%; }
+  img { max-width: 100%; }
 
+  /* ---------- header / nav ---------- */
   header {
     position: sticky; top: 0; z-index: 10;
-    background: rgba(5, 6, 14, 0.82); backdrop-filter: blur(10px);
+    background: rgba(5, 6, 14, 0.85); backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--line);
   }
-  .nav { display: flex; align-items: center; gap: 20px; height: 60px; }
+  .nav { display: flex; align-items: center; gap: 14px; min-height: 58px; flex-wrap: nowrap; }
   .wordmark {
-    font-family: var(--mono); font-weight: 700; letter-spacing: 0.14em;
+    font-family: var(--mono); font-weight: 700; letter-spacing: 0.12em;
     color: var(--pink); text-shadow: 0 0 18px rgba(255, 77, 109, 0.55);
-    font-size: 15px; text-decoration: none;
+    font-size: 14px; text-decoration: none; white-space: nowrap; flex-shrink: 0;
   }
-  .wordmark small { display: block; color: var(--muted); font-size: 9px; letter-spacing: 0.3em; text-shadow: none; }
-  .nav .links { margin-left: auto; display: flex; gap: 18px; align-items: center; }
-  .nav a { color: var(--muted); text-decoration: none; font-size: 14px; }
-  .nav a:hover { color: var(--text); }
-  .lang { font-family: var(--mono); font-size: 12px; border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; }
+  .wordmark small { display: block; color: var(--muted); font-size: 9px; letter-spacing: 0.28em; text-shadow: none; }
+  .nav .links { margin-left: auto; display: flex; gap: 16px; align-items: center; }
+  .nav a.navlink { color: var(--muted); text-decoration: none; font-size: 14px; white-space: nowrap; }
+  .nav a.navlink:hover { color: var(--text); }
+  .lang { font-family: var(--mono); font-size: 12px; border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; color: var(--muted); text-decoration: none; flex-shrink: 0; }
+  .lang:hover { color: var(--text); }
 
   .btn {
     display: inline-block; text-decoration: none; font-weight: 700;
     padding: 12px 22px; border-radius: 10px; font-size: 15px;
     background: linear-gradient(180deg, #ff5e7b, #e83a5d);
     color: #fff; box-shadow: 0 4px 24px rgba(255, 77, 109, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.14); white-space: nowrap;
   }
   .btn:hover { filter: brightness(1.08); }
-  .btn.small { padding: 8px 16px; font-size: 13px; }
-  .btn.ghost {
-    background: transparent; color: var(--text);
-    border: 1px solid var(--line); box-shadow: none;
+  .btn.small { padding: 8px 15px; font-size: 13px; flex-shrink: 0; }
+  .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); box-shadow: none; }
+
+  /* Collapse the section anchors on narrow screens; keep lang + download. */
+  @media (max-width: 760px) {
+    .nav .links { gap: 10px; }
+    .nav a.navlink { display: none; }
   }
 
-  .hero { padding: 84px 0 40px; text-align: center; }
-  .hero h1 { font-size: clamp(30px, 5vw, 52px); line-height: 1.15; letter-spacing: -0.01em; }
+  /* ---------- hero ---------- */
+  .hero { padding: 72px 0 8px; text-align: center; }
+  .hero h1 { font-size: clamp(28px, 5.4vw, 52px); line-height: 1.14; letter-spacing: -0.01em; }
   .hero h1 em { font-style: normal; color: var(--gold); }
-  .hero p.sub { margin: 18px auto 0; max-width: 640px; color: var(--muted); font-size: 18px; }
-  .hero .cta { margin-top: 30px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .hero p.sub { margin: 18px auto 0; max-width: 640px; color: var(--muted); font-size: clamp(15px, 2.6vw, 18px); }
+  .hero .cta { margin-top: 28px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
   .hero .fineprint { margin-top: 12px; color: var(--muted); font-size: 13px; font-family: var(--mono); }
-  .badges { margin-top: 26px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .badges { margin-top: 24px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
   .badge {
     font-family: var(--mono); font-size: 12px; color: var(--green);
     border: 1px solid rgba(47, 212, 140, 0.35); background: rgba(47, 212, 140, 0.07);
     padding: 5px 12px; border-radius: 999px;
   }
 
-  .shot { margin: 44px auto 0; position: relative; }
-  .shot img {
+  /* ---------- shots ---------- */
+  figure.shot { margin: 30px auto 0; }
+  figure.shot img {
     width: 100%; display: block; border-radius: 14px;
     border: 1px solid var(--line);
     box-shadow: 0 20px 70px rgba(0, 0, 0, 0.55), 0 0 50px rgba(255, 77, 109, 0.07);
   }
-  .shot.strip img { width: auto; max-width: 100%; margin: 0 auto; }
-  .shot figcaption { margin-top: 12px; color: var(--muted); font-size: 14px; text-align: center; }
+  figcaption { margin-top: 12px; color: var(--muted); font-size: 14px; text-align: center; }
 
-  section { padding: 72px 0 0; }
+  /* ---------- sections ---------- */
+  section { padding: 66px 0 0; }
   .eyebrow {
-    font-family: var(--mono); font-size: 12px; letter-spacing: 0.28em;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.26em;
     color: var(--pink); text-transform: uppercase; margin-bottom: 10px;
   }
-  h2 { font-size: clamp(24px, 3.4vw, 34px); letter-spacing: -0.01em; }
-  .lede { color: var(--muted); max-width: 680px; margin-top: 10px; }
+  .sec-head { text-align: center; max-width: 680px; margin: 0 auto; }
+  h2 { font-size: clamp(23px, 4.2vw, 34px); letter-spacing: -0.01em; }
+  .lede { color: var(--muted); margin-top: 10px; }
 
-  .grid { margin-top: 34px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  /* two-up screenshot rows collapse to one column on mobile */
+  .duo { margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  @media (max-width: 780px) { .duo { grid-template-columns: 1fr; } }
+
+  /* ---------- overlay hover demo ---------- */
+  .overlay-demo {
+    position: relative; max-width: 660px; margin: 30px auto 0;
+    aspect-ratio: 484 / 300;
+    border: 1px solid var(--line); border-radius: 14px;
+    background:
+      radial-gradient(120% 120% at 20% 0%, rgba(90, 110, 255, 0.10), transparent 60%),
+      linear-gradient(180deg, #0b0f20, #070912);
+    box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+  }
+  .overlay-demo img { position: absolute; top: 10px; left: 10px; width: calc(100% - 20px); height: auto; }
+  /* Touch / no-hover: show the full expanded panel (no hover to trigger it). */
+  .overlay-demo .compact { opacity: 0; }
+  .overlay-demo .expanded { opacity: 1; }
+  @media (hover: hover) and (pointer: fine) {
+    .overlay-demo .compact { opacity: 1; transition: opacity 0.18s ease; }
+    .overlay-demo .expanded { opacity: 0; transition: opacity 0.18s ease; }
+    .overlay-demo:hover .compact { opacity: 0; }
+    .overlay-demo:hover .expanded { opacity: 1; }
+  }
+
+  /* ---------- feature grid ---------- */
+  .grid { margin-top: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   @media (max-width: 860px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  @media (max-width: 540px) { .grid { grid-template-columns: 1fr; } }
   .card {
     background: linear-gradient(180deg, var(--panel-2), var(--panel));
-    border: 1px solid var(--line); border-radius: 14px; padding: 22px;
+    border: 1px solid var(--line); border-radius: 14px; padding: 20px;
   }
   .card .icon { font-size: 22px; }
-  .card h3 { margin-top: 10px; font-size: 16px; }
+  .card h3 { margin-top: 8px; font-size: 16px; }
   .card p { margin-top: 6px; color: var(--muted); font-size: 14px; }
 
+  /* ---------- safety ---------- */
   .safety {
-    margin-top: 34px; border: 1px solid rgba(47, 212, 140, 0.3); border-radius: 16px;
+    margin-top: 30px; border: 1px solid rgba(47, 212, 140, 0.3); border-radius: 16px;
     background: linear-gradient(180deg, rgba(47, 212, 140, 0.06), transparent);
-    padding: 28px;
+    padding: 24px;
   }
-  .safety ul { list-style: none; margin-top: 14px; display: grid; gap: 12px; }
-  .safety li { padding-left: 30px; position: relative; color: var(--text); }
+  .safety ul { list-style: none; margin-top: 6px; display: grid; gap: 12px; }
+  .safety li { padding-left: 28px; position: relative; }
   .safety li::before { content: "✓"; position: absolute; left: 0; color: var(--green); font-weight: 700; }
   .safety li b { color: #fff; }
   .safety li span { color: var(--muted); }
 
-  .steps { margin-top: 34px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: step; }
-  @media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
-  .step { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+  /* ---------- steps ---------- */
+  .steps { margin-top: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: step; }
+  @media (max-width: 780px) { .steps { grid-template-columns: 1fr; } }
+  .step { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
   .step::before {
     counter-increment: step; content: counter(step);
     font-family: var(--mono); font-weight: 700; color: var(--gold);
@@ -133,11 +172,9 @@
   .step p { margin-top: 6px; color: var(--muted); font-size: 14px; }
   .step a { color: var(--gold); }
 
-  .faq { margin-top: 30px; display: grid; gap: 10px; }
-  details {
-    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
-    padding: 16px 20px;
-  }
+  /* ---------- faq ---------- */
+  .faq { margin-top: 26px; display: grid; gap: 10px; max-width: 820px; margin-left: auto; margin-right: auto; }
+  details { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 15px 18px; }
   details[open] { border-color: rgba(255, 77, 109, 0.4); }
   summary { cursor: pointer; font-weight: 600; font-size: 15px; list-style: none; position: relative; padding-right: 26px; }
   summary::-webkit-details-marker { display: none; }
@@ -147,15 +184,15 @@
   details a { color: var(--gold); }
 
   .note {
-    margin-top: 20px; padding: 12px 16px; border-radius: 10px; font-size: 13px;
+    margin: 22px auto 0; max-width: 820px; padding: 12px 16px; border-radius: 10px; font-size: 13px;
     border: 1px solid rgba(240, 178, 50, 0.35); background: rgba(240, 178, 50, 0.06); color: var(--muted);
   }
   .note b { color: var(--gold); }
 
-  footer { margin-top: 90px; border-top: 1px solid var(--line); padding: 40px 0 60px; }
-  footer .cols { display: flex; gap: 30px; flex-wrap: wrap; justify-content: space-between; }
-  footer p { color: var(--muted); font-size: 13px; max-width: 760px; }
-  footer .legal { margin-top: 18px; }
+  footer { margin-top: 80px; border-top: 1px solid var(--line); padding: 34px 0 56px; }
+  footer p { color: var(--muted); font-size: 13px; }
+  footer .top { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+  footer .legal { margin-top: 16px; max-width: 760px; }
   footer a { color: var(--muted); }
 </style>
 </head>
@@ -165,12 +202,11 @@
   <div class="wrap nav">
     <a class="wordmark" href="#">LOL COMPANION<small>YOUR LOCAL COACH</small></a>
     <nav class="links">
-      <a href="#features">Features</a>
-      <a href="#weaknesses">Know your game</a>
-      <a href="#safe">Is it safe?</a>
-      <a href="#start">Get started</a>
-      <a href="#faq">FAQ</a>
-      <a href="https://github.com/carlo23666/lolcompanion">GitHub</a>
+      <a class="navlink" href="#champ">Champ select</a>
+      <a class="navlink" href="#overlay">Overlay</a>
+      <a class="navlink" href="#know">Know your game</a>
+      <a class="navlink" href="#safe">Is it safe?</a>
+      <a class="navlink" href="#faq">FAQ</a>
       <a class="lang" href="es.html" hreflang="es" lang="es">ES</a>
       <a class="btn small" href="https://github.com/carlo23666/lolcompanion/releases/latest">Download</a>
     </nav>
@@ -179,7 +215,8 @@
 
 <main class="wrap">
 
-  <section class="hero">
+  <!-- HERO — the in-game money shot -->
+  <section class="hero" style="padding-top:72px">
     <h1>Your buy-and-pick coach,<br /><em>local and explained</em></h1>
     <p class="sub">
       LoL Companion watches YOUR live game and your match history, and tells you what to buy
@@ -197,14 +234,75 @@
     </div>
 
     <figure class="shot">
-      <img src="media/live-ingame.png" alt="Live view: explained build recommendation with alternatives, both teams and enemy composition analysis" />
+      <img src="media/en/live-ingame.png" alt="Live view: explained build recommendation with alternatives, both teams and enemy composition analysis" />
       <figcaption>In game: every recommendation comes with its reasons — never a bare "buy this".</figcaption>
     </figure>
   </section>
 
+  <!-- BEFORE THE GAME -->
+  <section id="champ">
+    <div class="sec-head">
+      <div class="eyebrow">Before you lock in</div>
+      <h2>Champ select, with a plan</h2>
+      <p class="lede">
+        The moment picks appear, you get an enemy-composition read, a buy plan against that comp,
+        and pick suggestions ranked from your own history and Master+ data — all derived only from
+        what's on screen.
+      </p>
+    </div>
+    <figure class="shot">
+      <img src="media/en/champ-select.png" alt="Champion select: enemy composition analysis, pick suggestions from your history, and a buy plan against the enemy comp" />
+      <figcaption>Pick suggestions from your games + Master+ data, and a buy plan against the enemy comp.</figcaption>
+    </figure>
+  </section>
+
+  <!-- DURING THE GAME: overlay hover demo -->
+  <section id="overlay">
+    <div class="sec-head">
+      <div class="eyebrow">While you play</div>
+      <h2>A tiny overlay that expands on demand</h2>
+      <p class="lede">
+        Keep the top recommendation on screen while you play. Hover it and it opens into the full
+        match panel — buys, objective timers, team gold and your live stats. Needs LoL in windowed
+        or borderless mode.
+      </p>
+    </div>
+    <div class="overlay-demo" title="Hover to expand">
+      <img class="expanded" src="media/en/overlay-expanded.png" alt="Expanded overlay: top buys, dragon and baron timers, team gold and live stats" />
+      <img class="compact" src="media/en/overlay.png" alt="Compact overlay: the top recommendation next to the mascot" />
+    </div>
+    <figcaption>Hover the card — it grows into the full match panel, exactly like in game.</figcaption>
+  </section>
+
+  <!-- AFTER THE GAME -->
+  <section id="know">
+    <div class="sec-head">
+      <div class="eyebrow">After the game</div>
+      <h2>It tells you where you're weak — with numbers</h2>
+      <p class="lede">
+        The stats page aggregates your whole stored history and calls out patterns: deaths by game
+        phase, gank susceptibility, vision below your role's floor, objectives conceded while dead,
+        low kill participation — each with an actionable fix. Plus a full, filterable match history.
+      </p>
+    </div>
+    <div class="duo">
+      <figure class="shot" style="margin-top:0">
+        <img src="media/en/stats.png" alt="Stats view: detected weak points with evidence, per-champion table and winrate breakdowns" />
+        <figcaption>Detected weak points, per-champion numbers, streaks and tilt indicators.</figcaption>
+      </figure>
+      <figure class="shot" style="margin-top:0">
+        <img src="media/en/history.png" alt="History view: filterable match list with form indicator and per-champion aggregates" />
+        <figcaption>Full match history with filters, form strip and per-champion aggregates.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
   <section id="features">
-    <div class="eyebrow">Features</div>
-    <h2>Everything it does for you</h2>
+    <div class="sec-head">
+      <div class="eyebrow">Features</div>
+      <h2>Everything it does for you</h2>
+    </div>
     <div class="grid">
       <div class="card"><div class="icon">🧠</div><h3>Explained recommendations</h3>
         <p>Every advice carries its reasons: "78% of enemy damage is physical", "Zed is fed +7". The explanation is the product.</p></div>
@@ -219,35 +317,15 @@
       <div class="card"><div class="icon">👾</div><h3>Mascot + overlay + themes</h3>
         <p>A coach with personality, an optional in-game overlay with the top recommendation, and selectable visual themes.</p></div>
     </div>
-
-    <figure class="shot strip" style="margin-top: 28px">
-      <img src="media/overlay.png" alt="In-game overlay: compact recommendation next to the mascot" />
-      <figcaption>The optional overlay keeps the top recommendation on screen while you play (windowed/borderless).</figcaption>
-    </figure>
   </section>
 
-  <section id="weaknesses">
-    <div class="eyebrow">Know your game</div>
-    <h2>It tells you where you're weak — with numbers</h2>
-    <p class="lede">
-      The stats page doesn't just chart your games: it aggregates your whole stored history and
-      calls out patterns — deaths by game phase, gank susceptibility, vision below your role's
-      floor, objectives conceded while dead, low kill participation — each with an actionable fix.
-    </p>
-    <figure class="shot">
-      <img src="media/stats.png" alt="Stats view: detected weak points with evidence, per-champion table and personal farming curve" />
-      <figcaption>Detected weak points, per-champion numbers, your personal farming curve, tilt indicators.</figcaption>
-    </figure>
-    <figure class="shot">
-      <img src="media/history.png" alt="History view: filterable match list with form indicator and per-champion aggregates" />
-      <figcaption>Full match history with filters, form strip and per-champion aggregates.</figcaption>
-    </figure>
-  </section>
-
+  <!-- SAFE -->
   <section id="safe">
-    <div class="eyebrow">Compliance</div>
-    <h2>Is it safe for my account?</h2>
-    <p class="lede">The first question to ask of any LoL tool. Short answer: yes. The long one:</p>
+    <div class="sec-head">
+      <div class="eyebrow">Compliance</div>
+      <h2>Is it safe for my account?</h2>
+      <p class="lede">The first question to ask of any LoL tool. Short answer: yes. The long one:</p>
+    </div>
     <div class="safety">
       <ul>
         <li><b>Official Riot APIs only.</b> <span>Live Client Data API, the LoL client (LCU), Riot Web API and Data Dragon. No memory reading, no traffic sniffing, no replay parsing.</span></li>
@@ -258,16 +336,12 @@
     </div>
   </section>
 
-  <section id="champselect">
-    <figure class="shot">
-      <img src="media/champ-select.png" alt="Champion select view: buy plan against the enemy composition and a personal plan for the hovered champion" />
-      <figcaption>Champ select: a plan against the enemy comp + your personal plan — derived only from what's on screen.</figcaption>
-    </figure>
-  </section>
-
+  <!-- GET STARTED -->
   <section id="start">
-    <div class="eyebrow">Setup</div>
-    <h2>Get started</h2>
+    <div class="sec-head">
+      <div class="eyebrow">Setup</div>
+      <h2>Get started</h2>
+    </div>
     <div class="steps">
       <div class="step">
         <h3>Install</h3>
@@ -282,12 +356,15 @@
         <p>Leave the app open (a second monitor is perfect). It detects the client, champ select and the game by itself — nothing else to do.</p>
       </div>
     </div>
-    <p class="note"><b>Languages:</b> the app is available in English and Spanish — pick your language in Settings (English is the default). The screenshots above happen to show the Spanish UI.</p>
+    <p class="note"><b>Languages:</b> the app is available in English and Spanish — pick your language in Settings (English is the default). Everything it generates — recommendations, tips and the optional AI coach — follows your chosen language.</p>
   </section>
 
+  <!-- FAQ -->
   <section id="faq">
-    <div class="eyebrow">FAQ</div>
-    <h2>Frequently asked questions</h2>
+    <div class="sec-head">
+      <div class="eyebrow">FAQ</div>
+      <h2>Frequently asked questions</h2>
+    </div>
     <div class="faq">
       <details>
         <summary>Can I get banned for using it?</summary>
@@ -315,7 +392,7 @@
       </details>
       <details>
         <summary>Is the app in English?</summary>
-        <p>Yes. The app ships in both English and Spanish — choose your language in Settings (English is the default; the screenshots above show the Spanish UI). Everything the app generates, including the coach's advice, follows your chosen language.</p>
+        <p>Yes. The app ships in both English and Spanish — choose your language in Settings (English is the default). Everything the app generates, including the coach's advice, follows your chosen language.</p>
       </details>
     </div>
   </section>
@@ -324,7 +401,7 @@
 
 <footer>
   <div class="wrap">
-    <div class="cols">
+    <div class="top">
       <a class="wordmark" href="#">LOL COMPANION<small>YOUR LOCAL COACH</small></a>
       <p>
         <a href="https://github.com/carlo23666/lolcompanion">Source on GitHub</a> ·

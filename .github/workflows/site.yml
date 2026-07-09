@@ -1,8 +1,9 @@
 name: site
 
 # Deploys site/ to GitHub Pages. One-time setup: Settings → Pages → Source:
-# "GitHub Actions". Screenshots live in docs/media/ (single source of truth,
-# also embedded in the README) and are staged into the artifact here.
+# "GitHub Actions". Screenshots live in docs/media/{en,es}/ (single source of
+# truth, also embedded in the README) and are staged into the artifact here so
+# the English page shows the English UI and the Spanish page the Spanish UI.
 on:
   push:
     branches: [main]
@@ -31,9 +32,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Stage site with media and favicon
         run: |
-          mkdir -p _site/media
+          mkdir -p _site/media/en _site/media/es
           cp -r site/. _site/
-          cp docs/media/*.png _site/media/
+          cp docs/media/en/*.png _site/media/en/
+          cp docs/media/es/*.png _site/media/es/
           cp resources/icon.png _site/icon.png
       - uses: actions/configure-pages@v5
         with:
