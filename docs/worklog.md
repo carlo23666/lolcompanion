@@ -1,10 +1,333 @@
 # Worklog
+
 Builder sessions append entries here (date, WP, summary, deviations, gaps, files touched). Newest first.
 
+## 2026-07-13 (38) — WP-028 COMPLETE: WinCon 1.6 overlay intelligence and public release
+
+**Why (owner):** purchase/recall speech needed the actual item at a glance, clear visible 1v1 leads
+needed a restrained live signal, and the complete professionalization batch needed to ship through
+the existing installer, updater and Pages paths.
+
+**Done (check green, 419; no dependencies):**
+
+- **Typed purchase speech.** The live-insight layer now receives recommendation objects directly
+  and carries optional `itemId`/localized `itemName` on purchase alerts. The overlay renders the
+  matching `ddicon://item/...` icon, item label and reason in the transient bubble while preserving
+  the separate persistent next-buy dock. No item name is parsed back out of prose.
+- **Conservative isolated-fight signal.** Added a pure material comparison over visible level,
+  current health when exposed, purchased-item value, completed-item count, CS and KDA. It requires
+  a strong multi-factor lead, remains silent on even/ambiguous or low-health states, prefers the
+  same-role opponent and phrases every result conditionally. It never reads estimated hidden gold,
+  cooldowns, fog, positions or incoming help. Main broadcasts the typed signal once per opponent
+  per game and the renderer localizes it.
+- **Current public story.** Re-captured the 420×220 EN/ES overlay states with the item icon and
+  localized name, updated the landing's recall/fight-window copy, responsive staging and cache key,
+  and verified every local image plus both desktop and mobile compositions.
+- **Release 1.6.0.** Updated package/install metadata and rebuilt the per-user NSIS installer.
+  Static checks matched `latest.yml` size + SHA-512, ASAR and executable versions are 1.6.0,
+  `app-update.yml` still targets `carlo23666/lolcompanion`, and the final unpacked build launched
+  as four normal Electron processes against isolated user data. An install-over-1.4.4 smoke
+  replaced the legacy executable with `WinCon.exe`, retained the existing local database and left
+  the updater feed operational. The unsigned status is intentional under the zero-cost rule.
+- **Publication.** Conventional commits were pushed from `testing-codex`, merged into `main`, tagged
+  `v1.6.0` and published with installer, blockmap and `latest.yml`; the resulting updater path and
+  GitHub Pages deployment were verified after publication.
+
+**Verified:** `npm run check` passes (51 files, 419 tests; strict typecheck + ESLint + Vitest).
+`npm run dist` passes from the final tree. The 121,956,628-byte installer matches the SHA-512 and
+size recorded in `latest.yml`; packaged product/file versions, updater provider and ASAR package
+version all match 1.6.0. Browser QA loaded all nine EN landing images, exercised the real-HUD
+overlay section and compared EN/ES mobile frames without broken assets.
+
+**Deviations / known gaps:** the Live Client sample does not consistently expose enemy current
+health, so that factor is optional and ignored when absent rather than estimated. Bundling or
+redesigning the optional local-AI coach remains a separate usefulness decision in INBOX. The
+installer is not code-signed because signing is not zero-cost. No cooldown, de-anonymization,
+memory, packet or hidden-information behavior was introduced.
+
+**Files:** `src/main/engine/duel.ts`, live-client normalizer/pipeline, shared GameState/duel/IPC and
+external schemas, renderer live hooks/overlay/feed/i18n, duel/schema/overlay tests,
+`site/{index.html,es.html}`, refreshed overlay media, package/build metadata, release/install docs,
+`backlog/{INBOX.md,WP-028-wincon-1-6-release.md}` and this worklog.
+
+## 2026-07-13 (37) — WP-027 COMPLETE: distinct capture story and real in-game overlay placement
+
+**Why (owner):** the draft story repeated one capture at two zoom levels, theme coverage across the
+site was implicit, and the compact overlay needed to be shown in the exact League HUD context it
+was designed for.
+
+**Done (check green, 411; no dependencies):**
+
+- **One draft, three useful outputs.** Replaced the duplicated champ-select cards with one current
+  Dark/Sombra capture and a separate decision readout for pick priority, composition pressure and
+  the opening purchase route. The section now explains three outputs without pretending that a crop
+  is a second product screen.
+- **Real HUD placement.** Cropped the owner-provided 1920×1080 gameplay capture to the lower
+  centre/right HUD strip and composited the compact Rift overlay in the genuine empty lane between
+  the ability bar and minimap. The expanded advice state remains beside it so the persistent and
+  transient states can be compared.
+- **Visible theme coverage.** Product captures now carry Rift/Hexi, Dark/Sombra or Sakura/Kohaku
+  identifiers, and the theme section maps each identity to the site stages where it appears.
+- **Responsive polish.** Reworked the draft/overlay layouts into responsive grids with mobile
+  stacking, concise captions and no new scripts or runtime dependencies. After owner review, the
+  initial oversized-minimap example was replaced with the supplied normal-HUD capture and the dock
+  baseline was aligned with the bottom HUD instead of floating above it.
+
+**Verified:** `npm run check` passes (50 files, 411 tests; typecheck + ESLint + Vitest). Staged EN
+and ES pages load all local images and CSS/SVG/mascot assets; each language references champ select
+exactly once. Browser QA at 1280×720 confirmed no horizontal overflow, the overlay clears both HUD
+regions. A 390 px iframe harness covered draft, overlay, theme-key and review stacking in both
+languages without horizontal clipping.
+
+**Deviations / known gaps:** the gameplay backdrop is an owner-provided capture rather than an
+AI-generated image; it is stored as a 1500×480 quality-90 JPEG crop to keep the Pages payload small.
+Interactive screenshot theme switching and re-capturing every screen in every identity remain out
+of scope. No publish, push, PR or merge was performed.
+
+**Files:** `site/{index.html,es.html,styles.css,README.md,lol-gameplay-hud.jpg}`,
+`backlog/WP-027-site-capture-storytelling.md` and this worklog.
+
+## 2026-07-13 (36) — WP-026 COMPLETE: decision-led WinCon site and current product captures
+
+**Why (owner):** the public site needed the final WinCon name/logo, the current product scope and
+fresh screenshots after the engine, themes and movable overlay were professionalized.
+
+**Done (check green, 411; no dependencies):**
+
+- **Decision-led product story.** Rebuilt the EN/ES landing pages around WinCon's actual value:
+  Master+ patch routes + visible live context + sufficiently strong personal history produce one
+  ranked, explained decision. Draft, live play and post-game review now read as one lifecycle
+  instead of a generic feature grid.
+- **Accurate public claims.** Replaced the incorrect “open source” claim with “source available”
+  under PolyForm Noncommercial, described history/API-key and LCU constraints honestly, preserved
+  the screen-visible/no-hidden-information boundary and framed the local coach as optional,
+  experimental and outside the deterministic core.
+- **Production visual system.** Added a shared responsive stylesheet with the route/signal identity,
+  editorial product typography, decision diagrams, HUD-style overlay staging, three full theme
+  cards, review surfaces, compliance/setup/FAQ and conversion sections. The site remains static,
+  bilingual, JavaScript-free and compatible with the existing zero-cost Pages job.
+- **Current image set.** Re-captured all six app states in English and Spanish at their real preview
+  sizes: Rift live, Dark draft, Sakura history/stats, plus the current 420×220 overlay both docked
+  and with a contextual speech bubble. Every capture uses the WinCon logo and current adult copy.
+
+**Verified:** `npm run check` passes (50 files, 411 tests; typecheck + ESLint + Vitest). Local Pages
+staging loaded every image and both SVG/CSS assets. Browser QA covered EN/ES at 1440×940 and
+390×844: document width matched the viewport at both breakpoints, every image had a non-zero
+natural size, the language switch navigated correctly and browser console logs were empty. The
+refreshed English site remains open at `127.0.0.1:4174/index.html` for owner review.
+
+**Deviations / known gaps:** the site intentionally does not advertise the queued item-icon speech
+or visible-material 1v1 signal because they are not shipped. Publishing Pages, pushing, merging,
+renaming the GitHub repository/domain and bundling an AI model remain out of scope. No push, PR or
+merge was performed.
+
+**Files:** `site/{index.html,es.html,styles.css,README.md}`,
+`docs/media/{en,es}/*.png`, `backlog/WP-026-wincon-site-refresh.md` and this worklog.
+
+## 2026-07-13 (35) — WP-025 COMPLETE: reliable focusless overlay dragging on Windows
+
+**Why (owner):** dragging the visible `···` hint selected text instead of moving the overlay.
+
+**Done (check green, 411; no dependencies):**
+
+- **Reliable input surface.** Replaced the tiny inline style with a full-width 20 px grip and
+  disabled text/image selection. Windows/Linux now use Electron's native window shape so only the
+  dock and its approach strip accept input; transparent pixels continue falling through to League.
+  The shape temporarily expands while a speech bubble is visible and collapses afterwards.
+- **Focusless manual drag.** Kept `focusable: false` so the overlay cannot take keyboard focus from
+  the game. Pointer deltas travel over a typed `overlay:move` channel and the main process clamps
+  every native move to the active display; existing move-event persistence stores the result.
+- **Regression coverage.** Renderer tests cover the wide grip, non-selectable root, approach band,
+  pointer delta IPC and existing speech/theme/layout contracts.
+
+**Verified:** `npm run check` passes (50 files, 411 tests; typecheck + ESLint + Vitest). A real
+Windows/Electron probe loaded the dev in-game scenario, hit the shaped grip directly, dragged the
+native window from `(1698, 1088)` to `(1578, 1018)` and confirmed an empty text selection. A second
+probe confirmed transparent pixels fall through, speech expands the input shape, and collapse
+restores fall-through. The development app is open with that scenario and debug tools enabled.
+
+**Deviations / known gaps:** Electron's CSS native drag region was recognized but did not move this
+focusless overlay, so pointer-delta movement preserves the no-focus requirement instead. The full
+EN/ES WinCon landing refresh, item icons in transient buy/recall speech and a conservative
+visible-material 1v1 signal are recorded in `backlog/INBOX.md` as separate WPs. No push, PR or merge
+was performed.
+
+**Files:** `src/main/{overlay,index}.ts`, `src/shared/ipc.ts`, renderer OverlayApp/CSS and overlay
+tests; WP-025, INBOX and this worklog.
+
+## 2026-07-13 (34) — WP-024 COMPLETE: collision-free overlay, live themes and HUD placement
+
+**Why (owner):** transient speech could overlap the persistent overlay dock, an open overlay kept
+the previous theme after changing it in Settings, and the fixed size/position could cover different
+League HUD and minimap layouts.
+
+**Done (check green, 411; no dependencies):**
+
+- **Collision-free layout.** Speech and the persistent dock now share a bottom-aligned flex layout
+  with an explicit gap instead of competing absolute positions. The bubble has a bounded height and
+  four-line clamp, so long advice cannot add an internal scrollbar or cover the recommendation.
+- **Live identity sync.** Theme preview is sent over typed IPC to every open renderer. The overlay
+  applies the saved theme when it starts and updates theme plus companion immediately when the main
+  window switches among Rift/Hexi, Dark/Sombra and Sakura/Kohaku.
+- **HUD-aware placement.** Added a localized 70–150% scale control with live preview, persistent
+  coordinates after native drag, display-aware clamping after resolution/monitor changes and a
+  reset-position action. BrowserWindow bounds and renderer zoom scale together, preserving the
+  authored proportions instead of cropping content.
+- **Regression coverage.** Added pure scale/bounds tests for both extremes and off-screen restores,
+  renderer tests for theme propagation and speech/dock flow, and app-shell coverage for the typed
+  Settings actions.
+
+**Verified:** `npm run check` passes (50 files, 411 tests; typecheck + ESLint + Vitest). Browser QA
+at the real 360×220 overlay size confirmed a stable bottom dock without overflow; Settings exposes
+the enabled scale slider, drag guidance and reset action, with no renderer warnings or errors.
+The Electron development app was restarted for owner testing with the existing debug tools enabled.
+
+**Deviations / known gaps:** automatic local-model installation was raised during this WP but is a
+separate product decision, not overlay scope. `backlog/INBOX.md` records a usefulness gate and three
+outcomes: refocus AI on cross-match improvement synthesis, retain it as an invisible optional
+in-app download, or remove it if it adds no actionable signal. No model is added to the base
+installer by default. No push, PR or merge was performed.
+
+**Files:** `src/main/{overlay,overlay-position,index}.ts`, settings repo and Riot IPC handlers;
+`src/shared/{ipc,overlay}.ts` and EN/ES catalogs; renderer appearance/bootstrap, OverlayApp,
+SettingsView, mock API and CSS; overlay/app/placement tests; WP-024, INBOX and this worklog.
+
+
+## 2026-07-13 (33) — WP-023 COMPLETE: WinCon brand, three production identities and release smoke
+
+**Why (owner):** the selected product name is WinCon and the selected logo direction is the
+route/signal node. The approved Dark and Sakura concepts needed to become real themes with their
+own adult visual language and companions, while the site, screenshots and Windows release path
+needed to move to the same identity without breaking updates from existing installs.
+
+**Done (check green, 406; no dependencies):**
+
+- **WinCon identity.** Replaced the visible LoL Companion/Hexi product lockup with WinCon across the
+  Electron window, renderer, site, README/install docs, updater dialog and NSIS product/artifact.
+  Hexi remains only the Rift companion. Added an original vector route-signal mark (two candidate
+  inputs converging on a decision node and one selected output), a zero-dependency deterministic
+  256px rasterizer for the Windows icon, and SVG favicons/site assets.
+- **Three authored themes.** Restored the selector as Rift/Hexi, Dark/Sombra and Sakura/Kohaku.
+  Dark uses carbon surfaces, hard geometry and restrained crimson; Sakura uses a calm ivory-washi
+  workspace, plum rail, editorial Mincho stack and pink/gold state accents. Legacy ids normalize
+  safely (`abismo`/`noche` to Dark, `anime` to Sakura, older Rift ids to Rift); settings preview
+  immediately and persist normally. The shared semantic six-pose animation respects reduced motion.
+- **Original companion sheets.** Added transparent 3×2 sheets for Sombra and Kohaku matching the
+  existing six semantic poses (idle/focused/alert/celebrate/sleepy/thinking). Built-in image
+  generation produced the green-background sources at
+  `C:/Users/carlo/.codex/generated_images/019f5bdb-ddce-7973-bd91-c3b76cc3f56a/exec-040b6ecc-3002-42f1-9d25-69712d2baaa2.png`
+  ("original sleek black shadow cat,
+  crimson eyes and smoke tail; six 3×2 poses") and
+  `C:/Users/carlo/.codex/generated_images/019f5bdb-ddce-7973-bd91-c3b76cc3f56a/exec-b729fe24-8f12-4b2d-bdb1-cac5c3a652db.png`
+  ("original ivory/plum Japanese spirit fox,
+  scarf and six 3×2 poses"). The imagegen skill's `remove_chroma_key.py` produced the committed
+  transparent PNGs; final assets were visually inspected at original resolution. No League art or
+  character geometry was used.
+- **Current public site.** Updated EN/ES metadata, lockups, product voice, three-identity showcase,
+  mascot assets and the stable bottom-overlay explanation. Re-captured Live, draft, history, stats
+  and 420×220 speech-overlay screens in both languages at the real preview sizes. GitHub Pages now
+  stages the companion sheets from the renderer instead of duplicating them.
+- **Release compatibility.** Kept `appId: dev.carlo.lol-companion`, package/user-data identity,
+  updater cache and GitHub feed (`carlo23666/lolcompanion`) unchanged. Only the visible product and
+  installer filename changed, allowing the established updater line to move into WinCon.
+
+**Verified:** `npm run check` passes (50 files, 406 tests; typecheck + ESLint + Vitest). Browser QA
+covered all three Live identities at 1440×940, settings switching (`Sakura → Dark` changed both
+`data-theme` and Kohaku → Sombra), the draft/history/stats screens, the real 420×220 overlay and
+the EN/ES site. `npm run dist` produced `dist/WinCon-1.5.0-setup.exe` (121,953,367 bytes), blockmap
+and `latest.yml`; manifest size and SHA-512 match the installer. The unpacked `WinCon.exe` launched
+with title/product/version `WinCon`/`1.5.0`, wrote a successful GitHub update check to
+`%APPDATA%/lol-companion/updater.log`, and its packaged `app-update.yml` retains the expected feed.
+The development app is open with F12 and the dev-only scenario/replay tools enabled; the staged
+Spanish site is open at `127.0.0.1:4174/es.html`.
+
+**Deviations / known gaps:** npm forwards `npm run dist -- --publish never` as
+`electron-builder --win never`, where `never` is interpreted as an invalid Windows target; the
+project's normal `npm run dist` already builds locally without publishing and is the verified
+command. The NSIS artifact and packaged updater were smoke-tested, but the unsigned installer was
+not installed over the owner's current per-user installation before approval. Product signing,
+repository renaming and publishing remain intentionally out of scope. No push, PR or merge was
+performed.
+
+**Files:** brand/config `resources/{icon.png,wincon-mark.svg}`, `scripts/make-icon.mjs`,
+`electron-builder.yml`, `package.json`; shared themes/i18n; renderer shell, mascot, settings,
+overlay, CSS and `public/{brand,mascot}`; `site/{index,es,README,wincon-mark.svg}` and Pages workflow;
+`docs/media/{en,es}/*.png`, README/install/handoff docs, WP-023 and this worklog.
+
+## 2026-07-13 (32) — WP-022 COMPLETE: adult voice, session isolation, bottom overlay, and theme concepts
+
+**Why (owner):** Spanish draft/live copy sounded translated or childish, defensive advice lectured
+the player, the overlay occupied the right edge and showed scrollbars, and switching debug
+snapshots could surface an Ahri alert from the previous source. Dark and Sakura also needed a new
+adult visual direction before being restored.
+
+**Done (check green, 406; no dependencies):**
+
+- **Adult product voice.** Rewrote Spanish draft, live-alert, mascot, home, report and local-coach
+  language around concise decision support. Heavy AD/AP draft copy now reserves a compatible
+  defensive option after core instead of warning carries not to buy tank items. Coach prompts ban
+  self-introductions, role-play, emoji, filler and invented state; a final sanitizer also strips
+  those introductions if the local model ignores the prompt. English contract copy was kept in
+  sync where the same surfaces are shared.
+- **Clean debug/session ownership.** Added typed `gamestate:reset`, clearing live alerts, timers,
+  enemy-role caches, top-card state and overlay speech. Replay and forced-scenario sources now stop
+  one another and reset the normalized pipeline before taking ownership, preventing stale players
+  or purchases from leaking between snapshots.
+- **Bottom in-game overlay.** Replaced the right-edge enter/leave panel with a draggable 420×220
+  bottom dock: recommendation, route progress, game facts and Hexi remain stable; meaningful
+  events use one temporary upward bubble. The transparent root hides overflow and scrollbars and
+  stays click-through outside the dock.
+- **Theme direction, not production themes.** Added two generated high-fidelity concept boards:
+  `docs/concepts/theme-dark-concept.png` (Sombra, an original shadow cat) and
+  `docs/concepts/theme-sakura-concept.png` (Kohaku, an original spirit fox). Dark/Sakura remain
+  retired in settings until the owner approves a direction.
+- **Regression coverage.** Added reset/source-coordination/overlay-position tests, an explicit
+  stale-Ahri role-cache regression, copy-contract checks and model-output sanitation tests; updated
+  older assertions to the conditional objective/defensive language.
+
+**Verified:** `npm run check` passes (50 files, 406 tests; typecheck + ESLint + Vitest). Browser QA
+covered Spanish champ select at 1280×720 and the overlay at its real 420×220 viewport; the overlay
+reported viewport-sized scroll dimensions with no overflow. The EN landing page loaded locally at
+`127.0.0.1:4174` and the Electron development renderer at `localhost:5173`.
+
+**Deviations / known gaps:** The requested themes are concepts only by design; production tokens,
+selectors and mascot sprites wait for owner approval. The landing-page overlay section and captures
+still describe the retired hover-to-expand panel; this follow-up is in `backlog/INBOX.md` so the
+captures can be refreshed together with the approved theme direction. Overlay placement estimates
+the safe gap from screen work-area dimensions and remains draggable because League does not expose
+HUD-scale/minimap geometry through an approved API.
+
+**Files:** `src/shared/ipc.ts`, `src/shared/i18n/{en,es}.ts`,
+`src/main/{coach,coach-live,devtools,dev-source-coordinator,overlay,overlay-position}.ts`,
+`src/main/liveclient/index.ts`, renderer `App`, hooks, live insights, overlay, mascot/copy mocks and
+CSS, related main/renderer tests, `docs/concepts/*.png`,
+`backlog/{WP-022-copy-session-overlay-concepts.md,INBOX.md}`, and this worklog.
+
+## 2026-07-13 (31) — WP-021 COMPLETE: professional decision engine, product identity, and honest public site
+
+**Why (owner):** the app looked generic and its item engine could optimize one defensive signal while ignoring champion/role coherence (off-role tank/AD items, no starter, or reactive components before mandatory core). The product also needed a distinctive animated companion, current screenshots, and a clearer zero-cost product direction.
+
+**Done (check green, 398; new migration 009; no dependencies):**
+
+- **Coherent Master+ build routes.** Timeline aggregation now stores observed starter + ordered finished-item routes by patch/champion/role in `meta_build_routes`. Seed export/import is version 3 and remains backward compatible with v1/v2. The pure engine selects a coherent route first, protects the starter and first two non-boots core items, and only adapts among observed alternatives. Team damage balance can choose AD/AP Kai'Sa-style branches only when both are valid routes; situational recommendations are capped beneath protected core instead of hijacking the build.
+- **Conservative personalization and evidence.** Personal history is a shrinkage-gated nudge on top of Master+ evidence, never a raw item-win-rate swap. Recommendations now expose plan steps, source, confidence, core commitment, and evidence/reasons. Squishy carries only react defensively to a relevant damage dealer who is actually ahead; an assassin-heavy team that is far behind no longer forces Guardian Angel. Fallbacks remain deterministic and role/meta-safe.
+- **Regression harness.** Added golden scenarios for starters, mandatory core, support role safety, behind assassins, and valid AD-vs-AP route selection. Backtest now reports recommendation coverage and route-primary agreement, explicitly labelled as purchase-agreement regression signals rather than proof of recommendation quality.
+- **Professional renderer and overlay.** Consolidated the abandoned theme experiments into one Rift identity: navy command surface, magenta tactical accents, restrained gold, denser information architecture, a responsive icon rail, live route strip, core lock, confidence/evidence, composition telemetry, and full-height draft board. Overlay has real compact/expanded layouts and a genuinely transparent window surface. User-facing phrasing is conditional rather than pretending uncertain calls are commands.
+- **Hexi mascot.** Replaced the loose mascot/theme system with one original project-owned astral salamander-dragon sprite sheet (six moods/poses), transparent bitmap rendering, semantic mood selection, subtle CSS motion, and `prefers-reduced-motion` support. It does not reproduce League IP.
+- **Site and documentation.** Rewrote both landing pages around the actual decision workspace, coherent route engine, and single Hexi identity; replaced all 12 English/Spanish app and overlay captures; updated README/install/architecture decisions; and corrected the Riot/API disclosure. The site now distinguishes documented Live Client/Riot Web/Data Dragon access from the unsupported LCU integration and does not imply that a personal development key is sufficient for a public product.
+
+**Verified:** `npm run check` passes (47 files, 398 tests; typecheck + ESLint + Vitest). `npm run backtest` processed 100 matches / 3,119 frames / 2,003 comparisons: coverage 75.1%, route-primary 77.7%, top-1 purchase agreement 55.5%, top-3 59.6% (early 72.8/73.7, mid 42.3/49.1, late 27.8/36.1). Browser QA covered app at 1440x940 and 980px, overlay at 400x560, and EN/ES site at desktop + 390px mobile: no horizontal overflow or broken images.
+
+**Deviations / known gaps:** Existing v1/v2 seeds contain no ordered routes until timelines are reprocessed or a fresh v3 seed is exported; the conservative legacy fallback remains active meanwhile. Late-game purchase agreement is weak and dominated by boots/contextual choices; it is not an outcome-quality metric. Exact recall timing, ward placement, wave state, player position, and trinket charges are not reliably available from the approved inputs, so those prompts remain explicitly conditional rather than invented. Public match-history sync still requires Riot product registration and a production key; no backend or paid service was added.
+
+**Files:** `src/main/db/migrations/009_meta_build_routes.sql`, `src/main/{meta,liveclient}/`, `src/main/engine/`, `src/main/staticdata/starters.ts`, `src/shared/{gamestate,ipc,themes}.ts`, `src/shared/i18n/`, renderer shell/live/draft/overlay/mascot CSS and components, `src/renderer/public/mascot/hexi-sheet.png`, meta seed/export scripts, backtest + engine tests, `site/{index,es}.html`, `docs/media/{en,es}/*.png`, README/install/architecture/decisions, and `backlog/WP-021-professionalization.md`.
+
 ## 2026-07-09 (30) — WP-019 + WP-020: meta-seed per release + crawler scale-up
+
 **Why (owner):** ship a big Master+ base with every release so new users start strong and pull new games on top; scale the crawler toward that (owner asked for ~1M — reframed, see WP-020).
 
 **Done (check green, 392; new migration 008):**
+
 - **WP-020 — resumable, higher-volume crawler (`metacrawler.ts`, `meta.ts`, migration `008_meta_crawl_frontier.sql`).** New `meta_crawl_seeds` cursor table (puuid PK + `nextStart`/`exhausted`/`updatedAt`) makes the crawl a **resumable, round-robin deep page** over the apex ladders instead of a single 20-match-per-player pass: `collectSeeds()` → `repo.addSeeds()` (idempotent), then loop `nextPendingSeed()` → `crawlSeedPage()` paging `matchIds(start,count=100)`, advancing the cursor and marking exhausted, dedup via `hasMatch` unchanged. Survives restarts (cursor persisted). Added **games/hour** (run timer in `status()`) and threaded it + **current-patch total** + **livePatch** through `MetaStatusPayload`/`MetaCrawlProgress` to the Ajustes meta panel. puuids stay LOCAL (cursor table only) — never exported, never shown (hard rule 2). Limiter/priority-50 unchanged.
 - **WP-019 — fresh seed every release + freshness surfaced.** New `npm run meta:publish -- <tag>` (`scripts/publish-meta-seed.mjs`) = export + `gh release upload … --clobber` to attach a fresh seed to the draft (CI can't crawl; the maintainer's local DB is the source). `release.yml` header + carry-over fallback documented. `MetaRepo.importSeed` now persists `meta.seed.patch`/`exportedAt`/`version`; `meta:status` surfaces `seed` → Ajustes shows "Base compartida: parche X · hace N d" / "sin base". `export-meta-seed.mjs` warns when the newest local patch ≠ live ddragon patch (staleness guard).
 - **Tests:** cursor deep-paging + brand-new-instance resume (no refetch), apex-ladder frontier seeding, seed-freshness persistence, `matchCountForPatch`.
@@ -12,9 +335,11 @@ Builder sessions append entries here (date, WP, summary, deviations, gaps, files
 **Deviations / gaps:** "1M games" not literally targeted — rate limits (~2k/h) + ~2-week patch rotation make it stale; the design ships the freshest current-patch base each cycle (WP-020 Why). CI still cannot crawl (no key), so `meta:publish` is a maintainer-run local step, not fully automated. Crowdsourced seed (users push aggregates back) remains a phase-2 ADR (INBOX 2026-07-09). ETA-to-target gauge skipped (was optional).
 
 ## 2026-07-09 (29) — Mascot & theme overhaul + AI/3D avatars (interactive, not a WP)
+
 **Why (owner):** the pixel mascots looked cheap; wanted real cartoon/anime characters (esp. a nendoroid Yuki), an edgier dark theme + a proper Japanese sakura theme, and the dark identity as the app default.
 
 **Done (check green, 388; production build green):**
+
 - **Themes (`main.css`):** abismo reworked deeper/edgier (neon-blood crimson `#ff2d55`, violet-black void, crimson-bloom + vignette atmosphere); the anime identity fully redone as **Sakura** (warm washi paper, plum ink, sakura pink, kintsugi gold, real drifting-blossom petal layers via data-URI SVG). `DEFAULT_THEME='abismo'` (+ `index.html data-theme`) so the app opens dark with Sombra; icon redrawn to the Sombra shadow-cat (`scripts/make-icon.mjs`). `themes.ts` label/hints updated (Estrella→Sakura). Tests updated for the new default (icon-rail chrome → phase label via `title`).
 - **Mascots — code-drawn (`Mascot.tsx`):** replaced pixel art with smooth animated SVG (axolotl/cat/anime), then superseded by rendered art (below). Kept as the always-available offline fallback.
 - **Mascots — rendered art (AI):** new drop-in pipeline: `assets/mascots/<identity>/<mood>.(png|webp)` via `import.meta.glob`, else SVG fallback. Added AI-generated nendoroid renders (ChatGPT image-gen, owner's account, OpenAI grants usage) for all three identities, **idle** pose only so far — trimmed/cut to transparent WebP (~40–67 KB) with a Pillow dev script. Gap: other 3 moods (sleepy/focused/hyped) not yet generated → those phases still show the SVG.
@@ -26,9 +351,11 @@ Builder sessions append entries here (date, WP, summary, deviations, gaps, files
 **RESOLVED (owner call, 2026-07-09):** owner KEEPS the code-drawn SVG mascots + reworked themes + `DEFAULT_THEME='abismo'` + the Sombra icon, and DELETED everything from the later revisions — the **AI-generated nendoroid images** (webp + the `import.meta.glob` art pipeline in `Mascot.tsx`) and the **live 3D VRM avatar** (`Vrm3DMascot.tsx`, the Home 3D toggle, `home.avatar.*` i18n keys, the `three` + `@pixiv/three-vrm` + `@types/three` deps, the 10.7 MB `yuki-3d.vrm` asset). Check still green (388). Why it didn't work: images "don't move" (owner wants a moving character); no free/shippable **chibi-anime** VRM exists (Polygonal Mind 100avatars = CC0 but not chibi; ToxSam xmas-chibis = chibi but `Redistribution_Prohibited`), and a proper moving-chibi would need 3 bespoke rigged models incl. non-humanoid creatures (Bitxo/Sombra) — out of scope without commissioned/authored art. Visuals shelved; focus moved to functionality (WP-019/020 meta-seed). Still UNCOMMITTED. **Follow-up when visuals resume:** the overlay was touched (i18n + mascot swap) and `docs/media/*` screenshots are now stale — re-capture after the next visual pass.
 
 ## 2026-07-09 (28) — WP-018: meta-anchored, role-aware, personalized recommendations (v1.4.4)
+
 **Why (owner reports):** (1) a friend on a never-played champ got NO recommendation; (2) Thresh support was recommended Guardian Angel vs an AD comp — an item no support builds anywhere; (3) mandate restated: Master+ is the base of every rec, the player's own results only tweak it (A→B→C but you win more with A→C→B / A→B→D → adapt).
 
 **Done (check green, 388; engine-only, no deps, no migration):**
+
 - **Role safety (fixes 2).** `armor-vs-mr`, `anti-tank`, `anti-burst` now surface ONLY items the champion's Master+ players actually build (`metaBackedOptions`/`metaPreferred`): no meta-backed option → the rule stays **silent**. Killed the inverted cap that shipped unbacked class-heuristic items uncapped when meta was absent — that was the exact GA-on-Thresh path. `antiheal` (grievous is universal) and `spike-now` (completes owned components) unchanged. Dropped now-dead `metaTrusted`/`suggestionReason`.
 - **Never-silent (fixes 1).** `resolveBaseline` builds from Master+ whenever the distribution yields ≥3 usable finished items — the old 20-game champion gate no longer blanks thin-but-real data. Order: meta build → (personalized) → player's own build → bundled pool → null.
 - **Personalization (mandate 3).** New `personalBuildFor` aggregates the player's OWN results for the champion from stored `participants.items` (win rate) + `timelines` (opener, best-effort) into the same shape as the meta distribution. `resolveBaseline` blends it conservatively (gates: 8 champ games, 5 per-item, +6pp WR delta, 4 opener games): **reorder** the core to the player's opener, **swap in** an item they win meaningfully more with — each with a "your data" reason (`engine.personal.*`). Master+ order untouched below the gates. Threaded `recommend → nextbuy → resolveBaseline`, and `liveclient` now looks up the personal build per champion (puuid from settings). Champ-select picks already did meta-first+personal-nudge (`champselect.ts`); this closes the same for the in-game build (INBOX 2026-07-07).
@@ -39,191 +366,236 @@ Builder sessions append entries here (date, WP, summary, deviations, gaps, files
 **Files:** src/main/engine/{meta-items,nextbuy,recommend}.ts, src/main/engine/rules/{armor-vs-mr,anti-tank,anti-burst}.ts, src/main/personal-build.ts (new), src/main/liveclient/index.ts, src/shared/i18n/{en,es}.ts, tests/main/{rules,nextbuy,build-order,i18n-engine}.test.ts, backlog/WP-018-*.md, package.json.
 
 ## 2026-07-09 (27) — Site polish: per-language screenshots, mobile fix, overlay hover-to-expand
+
 **Done (check green, 381):** owner feedback on the landing site — "shit on mobile", Spanish screenshots on the English page, disjointed image order, no overlay interactivity. All addressed:
+
 - **Per-language screenshots.** Both pages now show the app in their OWN language: `index.html` → `media/en/`, `es.html` → `media/es/`. Regenerated all shots (live, champ-select, history, stats, overlay compact + expanded) for BOTH locales from the browser preview harness (`mockapi.ts` + headless Chrome/CDP; scratchpad `shots.mjs`). Made the mock **bilingual** (canned copy switches on `?lang=`, real cached item ids, a populated WP-016 weakness panel) and **cache-friendly** (remaps the streamed fixture onto champions/items the local icon cache actually holds, so no broken icons) — dev-only file. No image was downloaded from the internet (owner constraint): the preview cache is copied from the app's own `staticdata/icons`.
 - **Mobile.** Rebuilt both pages responsive: nav collapses to wordmark + language + Download under 760px (was overflowing and breaking centering), `overflow-x:hidden`, fluid `clamp()` type, grids/`.duo` reflow to one column, `img{max-width:100%}`.
 - **Narrative order.** Reordered into before → during → after: hero (Live) → "Champ select, with a plan" → "A tiny overlay that expands on demand" → "It tells you where you're weak" (stats + history side by side) → features → safety → setup → FAQ. Every screenshot now has an eyebrow + heading + lede — no more unexplained images.
 - **Overlay hover-to-expand.** Zero-JS CSS cross-fade: the compact overlay swaps to the full match panel on hover (`@media (hover:hover)`), just like in game; touch devices show the expanded panel by default. Uses the matched compact/expanded capture pair per language.
 - **Fixed a real i18n bug found while capturing:** `ObjectivesRow.tsx` hardcoded "Aliados"/"Enemigos" + Spanish objective tooltips (WP-017 missed it) → now `t('live.allies'/'live.enemies')` + new `live.obj.*` keys in en/es.
-**Deviation / note:** the English screenshots are rendered from the preview mock (this Mac's icon cache is sparse), not a live game; they're representative, not a real match. The flat `docs/media/*.png` were replaced by `docs/media/{en,es}/`; README + `site.yml` staging updated to match. **Owner:** regenerate richer real-game shots on the Windows PC (full icon cache) if desired.
-**Files:** site/{index,es}.html, docs/media/{en,es}/*.png (new; flat set removed), .github/workflows/site.yml, README.md, src/renderer/src/mockapi.ts, src/renderer/src/components/ObjectivesRow.tsx, src/shared/i18n/{en,es}.ts.
+  **Deviation / note:** the English screenshots are rendered from the preview mock (this Mac's icon cache is sparse), not a live game; they're representative, not a real match. The flat `docs/media/*.png` were replaced by `docs/media/{en,es}/`; README + `site.yml` staging updated to match. **Owner:** regenerate richer real-game shots on the Windows PC (full icon cache) if desired.
+  **Files:** site/{index,es}.html, docs/media/{en,es}/*.png (new; flat set removed), .github/workflows/site.yml, README.md, src/renderer/src/mockapi.ts, src/renderer/src/components/ObjectivesRow.tsx, src/shared/i18n/{en,es}.ts.
 
 ## 2026-07-08 (26) — WP-017 COMPLETE — App i18n rolled out end to end (ADR-009)
+
 **Done (check green, 381; ~13 commits across the WP):** the whole product is now bilingual (English default, Spanish grandfathered) via the `src/shared/i18n/` catalog. Beyond the engine/analysis + in-game surface finished in entry (25), this session localized every remaining user-facing surface:
+
 - **Renderer**: HomeDashboard, HistoryView (incl. locale-aware date formatting via a new `useLocale()`/`intlLocale`), StatsView, PostGameReport, ChampSelectPanel, SettingsView (all panels), Mascot bubbles, the in-game OverlayApp (a separate window root — it loads its own locale from settings and wraps its own `LocaleProvider`), and the live-alert text builders in `hooks.ts`.
 - **Main process**: post-game report summaries (`report.ts`), all sync/crawler error messages (`riot/index.ts`, `metacrawler.ts`), the electron-updater dialog (`updater.ts`), and the **entire local-AI coach** — persona, post-game/draft/live prompts and macro reads now instruct the model in the UI language and feed it same-language event facts (`coach.ts`, `coach-live.ts`, `coach-ipc.ts`), each resolving the translator from the locale setting.
 - Renderer tests that assert Spanish now render under an `es` LocaleProvider (existing-install default); pure main-process functions default their translator to Spanish so pre-existing tests are unchanged.
 - Docs: English `INSTALL.md` beside `INSTALAR.md`; the site's EN page note + FAQ updated from "Spanish-only" to "English & Spanish, pick in Settings".
-**Intentionally NOT localized (documented):** dev-only tooling (DevScenario, the Settings dev-tools panel, `devtools*.ts`, `backtest/cli.ts`) — hidden in packaged builds; theme identity names/hints in `shared/themes.ts` (brand identities, kept as-is). **Follow-up gap:** Data Dragon is fetched `es_ES` (StaticDataManager default), so item/champion/passive NAMES stay Spanish regardless of UI locale — fixing that needs per-locale ddragon fetch + cache; tracked here.
-**Files (this session):** src/shared/i18n/{en,es,index,types}.ts, src/renderer/src/{i18n.tsx,hooks.ts}, src/renderer/src/components/{HomeDashboard,HistoryView,StatsView,PostGameReport,ChampSelectPanel,SettingsView,Mascot}.tsx, src/renderer/src/OverlayApp.tsx, src/main/{report,coach,coach-ipc,coach-live,updater,index}.ts, src/main/riot/{index,metacrawler}.ts, src/main/liveclient/index.ts, docs/INSTALL.md, site/index.html, tests/renderer/{history,overlay}.test.tsx.
+  **Intentionally NOT localized (documented):** dev-only tooling (DevScenario, the Settings dev-tools panel, `devtools*.ts`, `backtest/cli.ts`) — hidden in packaged builds; theme identity names/hints in `shared/themes.ts` (brand identities, kept as-is). **Follow-up gap:** Data Dragon is fetched `es_ES` (StaticDataManager default), so item/champion/passive NAMES stay Spanish regardless of UI locale — fixing that needs per-locale ddragon fetch + cache; tracked here.
+  **Files (this session):** src/shared/i18n/{en,es,index,types}.ts, src/renderer/src/{i18n.tsx,hooks.ts}, src/renderer/src/components/{HomeDashboard,HistoryView,StatsView,PostGameReport,ChampSelectPanel,SettingsView,Mascot}.tsx, src/renderer/src/OverlayApp.tsx, src/main/{report,coach,coach-ipc,coach-live,updater,index}.ts, src/main/riot/{index,metacrawler}.ts, src/main/liveclient/index.ts, docs/INSTALL.md, site/index.html, tests/renderer/{history,overlay}.test.tsx.
 
 ## 2026-07-08 (25) — WP-017 (started) — App i18n: English default, Spanish second (ADR-009)
+
 **Done (check green, 381; 5 committed slices):**
+
 1. **Infra**: zero-dep catalog `src/shared/i18n/` (`en.ts` source of truth, `es.ts` enforced complete by the `Catalog` type, `{param}` interpolation, `createTranslator`). Locale is a normal setting (IPC `AppSettings.locale`, `SETTING_KEYS.locale`); migration **007** grandfathers EXISTING installs to `es` (fresh installs default `en` via the app default). Renderer `LocaleProvider`/`useT` + a live language switcher in Ajustes/Settings. `getLocale(db)` helper. 8 i18n/migration tests.
 2. **Recommendation engine**: a `Translator` threads through rules (antiheal, armor-vs-mr, anti-tank, anti-burst, spike-now), nextbuy/endgame, meta-items, exclusivity and `recommend()` — engine stays pure (t is an explicit param; default = Spanish for back-compat, so pre-existing tests are unchanged). Live path resolves the translator from the locale setting. Both-locale engine test added.
 3. **Champ select + weaknesses**: `pickSuggestions`/`champSelectInsights` and `computeWeaknesses` take the translator; StatsService + the champ-select IPC handler resolve it from the setting.
 4. **In-game renderer**: Shell (nav + phase + tagline), LiveView (HUD, empty states, game-plan/game-over), RecommendationCard, LiveInsights, Gauges all via `useT`. Renderer tests that assert Spanish now wrap in an `es` LocaleProvider (matches the existing-install default).
 5. **CLAUDE.md** language convention rewritten (was "all strings in Spanish") + ADR-009 recorded.
-**REMAINING (next session, mechanical — infra + pattern fully established):** renderer views still hardcoded ES — HistoryView, StatsView, SettingsView (rest; the language picker is done), PostGameReport, ChampSelectPanel, HomeDashboard, Mascot, OverlayApp (own root — needs its own locale load, no LocaleProvider yet), DevScenario (dev-only). Main-process strings — updater dialogs (`updater.ts`), coach personas (`coach.ts` per-locale voice), ingest/error messages in `riot/index.ts` ("Sincronización ya en curso", "Cuenta no encontrada", etc.), tray/menu. Docs — an English INSTALL.md beside INSTALAR.md; remove the site's "app is Spanish-only" note once the UI ships EN. Data caveat: Data Dragon is fetched `es_ES` (StaticDataManager default), so item/passive NAMES stay Spanish regardless of UI locale — a separate follow-up (fetch per locale) tracked here.
-**Files:** src/shared/i18n/*, src/shared/ipc.ts, src/renderer/src/{i18n.tsx,App.tsx,mockapi.ts}, src/renderer/src/components/{SettingsView,Shell,LiveView,LiveInsights,RecommendationCard,Gauges}.tsx, src/main/db/migrations/{007_locale_default.sql,index.ts}, src/main/db/repos/{settings,meta}.ts, src/main/riot/index.ts, src/main/liveclient/index.ts, src/main/index.ts, src/main/champselect.ts, src/main/stats.ts, src/main/stats-weaknesses.ts, src/main/engine/**, src/shared/stats.ts, docs/decisions.md, CLAUDE.md, tests/main/{i18n,i18n-engine}.test.ts, tests/renderer/{app,liveview,recommendation-card}.test.tsx.
+   **REMAINING (next session, mechanical — infra + pattern fully established):** renderer views still hardcoded ES — HistoryView, StatsView, SettingsView (rest; the language picker is done), PostGameReport, ChampSelectPanel, HomeDashboard, Mascot, OverlayApp (own root — needs its own locale load, no LocaleProvider yet), DevScenario (dev-only). Main-process strings — updater dialogs (`updater.ts`), coach personas (`coach.ts` per-locale voice), ingest/error messages in `riot/index.ts` ("Sincronización ya en curso", "Cuenta no encontrada", etc.), tray/menu. Docs — an English INSTALL.md beside INSTALAR.md; remove the site's "app is Spanish-only" note once the UI ships EN. Data caveat: Data Dragon is fetched `es_ES` (StaticDataManager default), so item/passive NAMES stay Spanish regardless of UI locale — a separate follow-up (fetch per locale) tracked here.
+   **Files:** src/shared/i18n/*, src/shared/ipc.ts, src/renderer/src/{i18n.tsx,App.tsx,mockapi.ts}, src/renderer/src/components/{SettingsView,Shell,LiveView,LiveInsights,RecommendationCard,Gauges}.tsx, src/main/db/migrations/{007_locale_default.sql,index.ts}, src/main/db/repos/{settings,meta}.ts, src/main/riot/index.ts, src/main/liveclient/index.ts, src/main/index.ts, src/main/champselect.ts, src/main/stats.ts, src/main/stats-weaknesses.ts, src/main/engine/**, src/shared/stats.ts, docs/decisions.md, CLAUDE.md, tests/main/{i18n,i18n-engine}.test.ts, tests/renderer/{app,liveview,recommendation-card}.test.tsx.
 
 ## 2026-07-08 (24) — Site v2: English-first + new screenshots; WP-017 (app i18n) specced
+
 **Done:** landing site rebuilt bilingual — **English is now the default** (`index.html`), Spanish at `es.html`, EN/ES toggle in the header, cross-linked footers, per-page `lang`/OG metadata. Owner copy feedback applied: the negative hero badge ("sin tracking de cooldowns enemigos") replaced with positive claims (official APIs / local-first / free & open source) — the no-cooldowns detail stays where it belongs, in the compliance section. New content: "Weakness detection" feature card, a "Know your game / Te dice dónde eres débil" section (stats + history screenshots), inline overlay strip, and an honest note on the EN page that the app UI is Spanish-only for now (+ FAQ entry). New screenshots captured from the dev app via CDP with a **seeded demo history** (64 synthetic-but-realistic ADC games incl. timelines, scratchpad script `seed-demo.mjs` — dev Mac's DB only, rows prefixed DEMO_): `history.png`, `stats.png` (shows the live WP-016 panel), `overlay.png` (CDP clip capture of the real overlay window). Vision finding format fixed to two decimals (screenshot exposed 0.3 vs 0.3 rounding).
 **Also:** WP-017 specced (app i18n, EN default ES second — owner request; needs a message-catalog layer since engine reasons are assembled programmatically, plus ADR-009 + CLAUDE.md language-convention rewrite; deliberately NOT started this session).
 **Files:** site/{index,es}.html, docs/media/{history,stats,overlay}.png, src/main/stats-weaknesses.ts, backlog/WP-017-app-i18n.md.
 
 ## 2026-07-08 (23) — WP-016 — Weakness insights from personal history (owner request)
+
 **Done (check green, 370):** the stats page now SAYS where the player is weak instead of just showing numbers. New pure module `src/main/stats-weaknesses.ts`: `computeWeaknesses` over per-game inputs + `extractWeaknessEvents` (timeline CHAMPION_KILL/ELITE_MONSTER_KILL parsing, defensive reads per WP-003 policy). Five detectors, thresholds documented in-code: deaths by game phase (early <14 / mid 14-25 / late >25, late normalized to games that reached it), gank susceptibility (enemy-jungler-involved early deaths/game ≥0.8), low vision vs role-aware floors (UTILITY 1.0/min, JUNGLE 0.55, rest 0.3), objectives conceded within 45 s of an own death (≥25% of enemy elite kills), and kill participation under 40%. Sample gates: ≥8 games overall, ≥5 timeline games for timeline detectors — silent on fresh installs. Severity medium/high (high = 1.35× past threshold), high first. Output rides `stats:overview` (`StatsOverview.weaknesses`) and renders as a "Puntos débiles detectados" panel in StatsView (severity-colored, finding + one advice line + sample size). 10 new tests (every detector fires and gates, event extractor against a synthetic timeline).
 **Files:** src/main/stats-weaknesses.ts (new), src/main/stats.ts, src/shared/stats.ts, src/renderer/src/components/StatsView.tsx, tests/main/weaknesses.test.ts, backlog/WP-016-weakness-insights.md.
 
 ## 2026-07-08 (22) — WP-015 — Build-order intelligence ("Bramble first on Nasus", owner escalation)
+
 **Done (check green, 360):** the engine now knows WHEN items are built, not just how often. Three coordinated fixes: (1) **Crawler recovers completion order from match timelines** — new `aggregateTimelineOrder` (pure; first-occurrence dedupe, ITEM_UNDO/SOLD ignored as noise), fetched per new match (2 API calls/match now, ~1k matches/h accepted) and **backfilled** for already-aggregated matches (up to 2000/run at crawl priority; the existing 13.8k games upgrade over a few background runs). Migration 006: `meta_matches.hasTimeline` + `meta_champion_item_order (games, slotSum, firstGames)`. Seed bumped to v2 (v1 still imports; v2 seeds mark ledger rows timeline-done so importers never double-count slots). (2) **Baseline uses real order**: `resolveBaseline` sorts the meta core by average completion slot when ≥3 items have ≥3-game order samples (frequency stays the fallback and the tail order), and **components are excluded from the baseline entirely** via new `isFinishedBuildItem` (legendaries + finished boots; kills Bramble/Sheen/Hexdrinker as pseudo-cores — the exact mechanism behind the reported bug: frequency put Thornmail early → partial-buy advised its affordable component Bramble at min 3). (3) **Phase awareness**: armor-vs-mr is capped at SUGGESTION_SCORE_CAP with action 'add' and an explicit "aún sin tu primer objeto" reason until the first completed item exists — a skewed comp pre-first-back is a plan, not a purchase. Regression test locks it: early Nasus vs full-AD comp with Thornmail-heavy frequency data → top pick advances the real build (Iceborn tree), never a component or reactive armor. 17 new tests (timeline aggregation, repo order stats + backfill queue, order-aware baseline, damping, crawler timeline flow, seed v2 round-trip + v1 compat).
 **Deviations:** `matchParticipantSchema` gained `participantId` (was passthrough-only, typed `{}`); crawl-start IPC went async (needs static data for the orderable predicate) — channel contract unchanged.
 **Owner actions:** order data starts flowing on the next crawl run on the Windows PC (backfill first); re-export + re-upload `meta-seed.json.gz` afterwards so fresh installs get order-aware builds.
 **Files:** src/main/db/migrations/{006_meta_item_order.sql,index.ts}, src/main/db/repos/meta.ts, src/main/riot/{meta-aggregate,metacrawler,index}.ts, src/main/engine/{meta-items,nextbuy}.ts, src/main/engine/rules/armor-vs-mr.ts, src/main/staticdata/itemgraph.ts, src/shared/schemas/{riot,meta-seed}.ts, scripts/export-meta-seed.mjs, tests/main/{build-order.test.ts,meta.test.ts}, backlog/WP-015-build-order-intelligence.md.
 
 ## 2026-07-08 (21) — WP-013 + WP-014 — Landing site + CI draft releases (go-public track)
+
 **Done:** (1) **Landing page** `site/index.html` — single self-contained HTML+CSS file, zero deps/JS, Spanish, matching the app's neon identity: hero + download CTA, both screenshots, feature grid, a prominent "¿Es seguro?" compliance section, install steps mirroring INSTALAR.md (SmartScreen + Riot API key), 6-question FAQ, Riot boilerplate + PolyForm license footer. Rendered and reviewed headless at 1440px before committing. Deploy via `.github/workflows/site.yml` (GitHub Pages, official actions); screenshots stay single-sourced in `docs/media/` and are staged into the artifact at deploy time. (2) **Release pipeline** `.github/workflows/release.yml` — on tag push: windows runner, `npm ci` → `npm run check` → `npm run dist -- --publish never` → **draft** release with setup exe + latest.yml + .blockmap, carrying `meta-seed.json.gz` over from the previous published release (best effort). Draft by design: the mandatory packaged smoke test (worklog entry 19) stays a human gate before Publish. (3) ADR-007 revised (public distribution track accepted, zero-cost items only; signing/crash-reporting/onboarding/i18n explicitly deferred) and ADR-008 added (OPEN: proxy backend + monetization, blocked on owner's Riot production-key application). README links the site.
 **Verified:** repo confirmed public (site's "código abierto" claim + Pages free tier hold); both workflow YAMLs parse; page previewed top-to-bottom via headless Chrome.
 **Owner actions pending:** enable Pages (Settings → Pages → Source: GitHub Actions) — the site workflow fails until then; next release flow is tag → wait for draft → download installer → smoke test → Publish; ADR-008 blocked on the Riot Developer Portal product registration.
 **Files:** site/{index.html,README.md}, .github/workflows/{site,release}.yml, docs/decisions.md, docs/worklog.md, README.md, backlog/{WP-013-landing-site,WP-014-release-ci}.md.
 
 ## 2026-07-08 (20) — WP-012 — Item exclusivity in recommendations (owner request)
+
 **Done (check green, 343):** the engine can no longer advise two items that can't (or shouldn't) be carried together — Maw+Shieldbow, Trinity+Essence Reaper, two Hydras, two boots — nor an item colliding with one already owned. Exclusivity is **derived from Data Dragon, no curated table**: items sharing a named `<passive>` in the description markup map 1:1 onto the in-game "Limited to 1 X item" groups on the cached patch (verified across all 706 items of 16.13.1: Salvavidas/Lifeline, Hoja encantada/Spellblade, Hender/Hydra, Inmolar, Heridas graves, Anular, …), plus one tag-based group for finished boots ("Botas"). Two guards kill the false-positive classes found in the data: depth-1 starters never conflict (Doran's + Tear share the "Mano amiga" gold passive but coexist), and items in each other's recursive component tree never conflict (Sheen→Trinity, Hexdrinker→Maw, Bramble→Thornmail, Orbe del olvido→Morellonomicón). Implementation: `ItemNode.passives` + `itemConflict()` in `itemgraph.ts`; pure `applyExclusivity()` final pass in `recommend()` (drops owned-conflicts silently; between colliding candidates the best-scored survives and gains a Spanish reason naming what it beat); `nextBuyRecommendation` skips core slots covered by an owned same-group item (same pattern as the Magical Footwear skip — prevents the "pinned unbuyable target, engine silent" failure mode) and `endgameRecommendation` skips conflicting situationals. 16 new fixture tests incl. recommend() end-to-end (owned Edge of Night suppresses a meta-forced Banshee via shared Anular, with a positive control).
 **Judgment call:** shared-passive pairs that the shop technically allows (e.g. two Heridas graves items) are filtered too — advising a second copy of a non-stacking passive is redundant advice, so over-filtering is treated as a feature. If a future patch introduces a legit same-passive double-buy, the exemption belongs in `itemConflict`.
 **Machine note:** dev machine (Mac, no LoL) was missing `electron-updater` in node_modules — `npm install` fixed it; unrelated to the WP.
 **Files:** src/main/staticdata/itemgraph.ts, src/main/engine/{exclusivity,recommend,nextbuy}.ts, tests/main/exclusivity.test.ts, backlog/WP-012-item-exclusivity.md, backlog/INBOX.md (2026-07-08 planning block).
 
 ## 2026-07-07 (19) — CRITICAL: 1.4.0-1.4.2 crashed at startup; real cause found + fixed (v1.4.3)
+
 **Done (check green, 327):** the owner's "JavaScript error on open" was NOT (only) the double-instance lock: since 1.4.0 the packaged app crashed at startup because the ESM main bundle did `import { autoUpdater } from 'electron-updater'` — electron-updater is CJS with getter-defined exports that Node's ESM named-import interop can't see, so the main process threw before creating any window (the "running" processes were native error dialogs; diagnosed by the missing renderer process + absent updater.log). Fixed with the default-import interop (`import updaterPackage from 'electron-updater'`).
 **Verified live**: packaged 1.4.3 boots (4 processes incl. renderer), `updater.log` shows the full check pipeline against GitHub ("Checking for update → latest version compared, downgrade disallowed"). Releases v1.4.0-v1.4.2 DELETED from GitHub (broken installers; git tags kept). Release workflow now includes a mandatory smoke test: launch `dist/win-unpacked` and confirm window + updater.log BEFORE publishing.
 **Lesson recorded:** `npm run check` can't catch packaged-only failures (vitest runs the TS sources, not the ESM bundle); anything touching main-process imports needs the win-unpacked smoke test.
 **Files:** src/main/updater.ts.
 
 ## 2026-07-07 (18) — Single-instance lock (owner hit "JavaScript error" on open)
+
 **Done (check green, 327):** launching a second copy opened the same SQLite file and crashed with the main-process JS error dialog (reproduced: three stacked instances after the release day's repeated launches). `app.requestSingleInstanceLock()` now quits the newcomer and `second-instance` restores/focuses the running window — double-clicking the icon while the app lives in the tray/background just brings it forward. Shipped as v1.4.1, which doubles as the first real-world auto-updater test (1.4.0 installs should offer it on next start).
 **Files:** src/main/index.ts.
 
 ## 2026-07-07 (17) — Auto-update from GitHub releases (owner request)
+
 **Done (check green, 327):** `electron-updater` (NEW dependency — the standard electron-builder companion; zero-cost: the feed is the latest GitHub release) wired in `src/main/updater.ts`: packaged builds check on startup + every 4h, auto-download, Spanish dialog offers "Reiniciar ahora / Luego", and `autoInstallOnAppQuit` applies postponed updates on close. Dev builds skip entirely. `electron-builder.yml` gains the `publish: github` block so builds emit `latest.yml` + `.blockmap` — **every release from now on must upload `latest.yml`, the `.blockmap`, the setup exe and `meta-seed.json.gz`** (release-workflow updated). Settings/history/API key already survive updates (userData + `deleteAppDataOnUninstall: false`) — confirmed across 1.0.1→1.3.0 upgrades. INSTALAR.md tells friends the 1.4.0+ app updates itself.
 **Notes:** app is unsigned — electron-updater installs fine without a signature (no `publisherName` verification configured); revisit if code signing ever lands.
 **Files:** src/main/{updater(new),index}.ts, electron-builder.yml, docs/INSTALAR.md, package.json.
 
 ## 2026-07-07 (16) — Meta first EVERYWHERE + shareable meta seed (owner: friend's fresh install was mute)
+
 **Done (check green, 327):** a friend's install recommended nothing (custom game + empty meta DB + owner-specific pool fallback). Three fixes:
+
 1. **Role fallback in the live lookup** (`MetaRepo.itemsFor` + `topRoleFor`): custom/blind lobbies carry no position, and an uncrawled role said nothing — both now fall back to the champion's most-played Master+ role. The engine no longer goes silent for lack of a label.
 2. **Champ select inverted too** (owner: "meta first, personal after — as I've said several times"): when the Master+ sample is real (≥30 games), the Master+ winrate IS the score's base and the owner's record only adjusts (±0.35 max); own-vs-comp matchup nudge reduced 0.25→0.15. Reasons now lead with the Master+ line ("la base de la sugerencia"). Own data is the base only for champions the meta hasn't sampled.
 3. **Shareable meta seed**: `npm run meta:export` dumps the local aggregates (latest patch, aggregates + match-id ledger, zod-validated schema in `shared/schemas/meta-seed.ts`) as `dist/meta-seed.json.gz` (~330 KB for 13.8k matches). On startup, an install with an EMPTY meta store downloads the seed from the latest GitHub release and imports it (`src/main/meta-seed.ts`) — fresh installs get Master+ builds from minute one, offline/missing-asset degrade silently, and the imported ledger means a later local crawl never double-counts. Import is only-empty by design (aggregate merges can't dedupe).
-**Notes:** the seed carries only anonymous aggregates + public match ids — no personal data. Release workflow now includes exporting + uploading the seed asset. Candidate pool in champ select is still the owner's played champions (you can only pick what you know) — only the RANKING is meta-first.
-**Files:** src/main/db/repos/meta.ts, src/main/{meta-seed(new),champselect,index}.ts, src/main/liveclient/index.ts, src/shared/schemas/meta-seed.ts (new), scripts/export-meta-seed.mjs (new), package.json, tests/main/meta.test.ts.
+   **Notes:** the seed carries only anonymous aggregates + public match ids — no personal data. Release workflow now includes exporting + uploading the seed asset. Candidate pool in champ select is still the owner's played champions (you can only pick what you know) — only the RANKING is meta-first.
+   **Files:** src/main/db/repos/meta.ts, src/main/{meta-seed(new),champselect,index}.ts, src/main/liveclient/index.ts, src/shared/schemas/meta-seed.ts (new), scripts/export-meta-seed.mjs (new), package.json, tests/main/meta.test.ts.
 
 ## 2026-07-07 (15) — Historial drawer utilities: rival, oro/min, build vs Master+, colas, racha (owner: "include everything useful")
+
 **Done (check green, 318):** the deeper utilities proposed in session 14 are wired end to end.
+
 1. **HistoryDetail extended (main + shared)**: `role`; `laneOpponent` — same-position enemy derived from stored participants (opposite win flag = other team; ARAM/empty roles stay null); `metaBuild` — Master+ final-build distribution for the champion+role from the crawler aggregates, exact match patch when crawled (≥20 games) else the newest crawled patch, always labeled with the patch used.
 2. **Drawer**: "Rival de carril" with portrait; oro/min next to total gold; **"Build Master+" comparison row** — top 6 meta items with pick %, the ones in YOUR final build get an emerald ring, plus a "coincides en X/Y" verdict. This is the op.gg-style loop the owner wanted: every stored game auditable against what Master+ finishes.
 3. **List**: queue filter ("Todas las colas" — SoloQ/Flex/Normal/ARAM… labels from queueId) + queue label per row; summary strip gains the current **racha** within the filtered set.
 4. mockapi serves a full detail now (drawer verifiable in the browser preview); renderer tests +2 (drawer utilities, summary strip), test detail literal extended.
-**Notes:** metaBuild needs crawl data — on champions/roles without ≥20 Master+ games the section simply doesn't render (no fake comparisons).
-**Files:** src/shared/history.ts, src/main/history.ts, src/renderer/src/components/HistoryView.tsx, src/renderer/src/mockapi.ts, tests/renderer/history.test.tsx.
+   **Notes:** metaBuild needs crawl data — on champions/roles without ≥20 Master+ games the section simply doesn't render (no fake comparisons).
+   **Files:** src/shared/history.ts, src/main/history.ts, src/renderer/src/components/HistoryView.tsx, src/renderer/src/mockapi.ts, tests/renderer/history.test.tsx.
 
 ## 2026-07-07 (14) — Information redistribution per phase + Historial as analysis desk (owner request)
+
 **Done (check green, 316):** each surface now has ONE declared job and its layout follows it.
+
 1. **Historial** (the "for sure more utilities" ask): a question bar (campeón · resultado · rol · parche · orden — result/role/patch/sort are client-side over the fetched rows, instant), a **summary strip that answers the active filter** (partidas, WR, KDA, CS/min + last-10 form dots, newest first), champion chips became clickable filters, role chip per row, and a filtered-empty state distinct from no-data. Sorting: fecha/KDA/CS/duración.
 2. **Champ select**: the screen's job flips at lock-in. Before: pick suggestions lead (unchanged). After locking: suggestions disappear, "Tu plan" (bigger icons, amber frame) + "Plan de compra contra esta comp" take the stage — nobody needs pick advice after picking.
 3. **In game**: objective timers promoted to the top of the instruments column (they were buried under two team panels; they're the only time-critical element there).
 4. **Post game**: "Ver en historial" CTA under the report (LiveView gains optional onOpenHistory, wired in App) — the report now flows into deeper analysis.
 5. **Overlay**: intentionally untouched — its glance hierarchy (top rec → alert takeover → hover expand → pin) already matches its job.
-**Files:** src/renderer/src/components/{HistoryView(rewritten),ChampSelectPanel,LiveView}.tsx, src/renderer/src/App.tsx.
+   **Files:** src/renderer/src/components/{HistoryView(rewritten),ChampSelectPanel,LiveView}.tsx, src/renderer/src/App.tsx.
 
 ## 2026-07-07 (13) — Engine inverted: Master+ primero, la lógica solo ajusta (owner: "no more Zhonya on ADCs")
+
 **Done (check green, 316):** the recommendation hierarchy is inverted per owner feedback ("rely on Master+ games mostly, add logic to modify a bit or offer suggestions").
+
 1. **New `engine/meta-items.ts`** — the Master+ item distribution (per champion+role, from the crawler's migration-005 aggregates) is now a first-class engine input: trust gates (≥20 champion games, ≥5 item games), `metaPreferred`/`metaUsage`/`orderByMeta` set math, `SUGGESTION_SCORE_CAP = 45`, and shared Spanish reason builders.
 2. **Baseline flipped** (`resolveBaseline`): the Master+ frequency build is PRIMARY whenever trusted (core = top 5, situational = next 5); the owner's pool.json is now only the fallback for uncrawled champions (it was the other way around).
 3. **Rules are Master+-aware** (`Rule` signature gains `meta`): anti-burst picks the defensive Master+ players actually build on the champion (Zhonya-on-ADC is now structurally impossible: no usage → no pick); antiheal chooses its LINE (physical/magic) from meta full-item usage before falling back to the self-damage heuristic (also fixed: owning Mortal Reminder now silences the rule — 3033 was missing from the owned-check list); armor-vs-mr and anti-tank order their class options by champion usage. When a rule's need is real but NO candidate is Master+-backed on a trusted sample, the advice ships capped at 45 and labeled "sugerencia situacional, no prioridad" — it can never outrank the meta build line.
 4. Live lookup widened to 30 items so rules can intersect beyond the core build.
-**Deviations / notes:**
+   **Deviations / notes:**
+
 - Rules WITHOUT any meta data (uncrawled champion/patch) behave exactly as before — heuristics uncapped; degradation only kicks in when data says otherwise. Backtest harness intentionally stays meta-less (historical patches wouldn't match today's aggregates).
 - Champ select pick suggestions still weigh the owner's own winrate first with Master+ as a ±0.15 blend — flagged in INBOX for the same inversion if the owner wants it there too.
-**Files:** src/main/engine/{meta-items(new),nextbuy,recommend,index}.ts, src/main/engine/rules/{types,antiheal,anti-burst,armor-vs-mr,anti-tank}.ts, src/main/liveclient/index.ts, tests/main/{nextbuy,rules}.test.ts.
+  **Files:** src/main/engine/{meta-items(new),nextbuy,recommend,index}.ts, src/main/engine/rules/{types,antiheal,anti-burst,armor-vs-mr,anti-tank}.ts, src/main/liveclient/index.ts, tests/main/{nextbuy,rules}.test.ts.
 
 ## 2026-07-07 (12) — Two new identities (Abismo · Estrella), image layers, new app icon, v1.1.0 release (owner request)
+
 **Done (check green, 311):**
+
 1. **Theme system back to three FULL identities** (`themes.ts`): `neon` (unchanged default), **`abismo`** — abyss black + blood crimson over the same class names (indigo-*→crimson, amber-*→bone gold), knife-sharp 0-2px radii, Russo One display, breathing crimson floor vignette, mascot **Sombra** (black cat, glowing crimson eyes, collar with gold tag, predatory tail sway) — and **`anime`/"Estrella"** — a LIGHT pastel Star-Guardian identity: the whole slate scale inverts (950 = sakura paper, 100 = ink, `color-scheme: light`), magical-girl pink brand, star gold, 16-24px bubbly radii, Mochiy Pop One display, falling petal/stardust bokeh, mascot **Yuki** (chibi coach: twin-tails that bob, star clips, star eyes when hyped, determined brows when focused). Legacy ids remap (noche→abismo, sakura→anime, rest→neon). Settings picker reappears automatically (it was `hidden={THEMES.length < 2}`).
 2. **Chrome follows the identity** (Shell.tsx): neon keeps the Blitz sidebar; abismo renders a stealth 56px icon-only rail (monogram wordmark, tooltips, aria-labels preserved); anime renders a floating rounded-3xl card sidebar with pill nav. Same DOM roles/accessible names in all three.
 3. **Transparent image layers**: in-game gets the player's champion splash as a 320px backdrop fading into the page color (name sanitized, `onError` removes the layer when the splash isn't cached); the recommendation hero card gets oversized rotated item art bleeding off the corner at 7%; alternatives rows got bigger icons + hover chrome. (Champ select + dashboard already had splash banners.)
 4. **New app icon** (`scripts/make-icon.mjs` rewritten, same zero-dep PNG encoder): pixel Bitxo face with the gold coach headband over the void-navy rounded square with rift-aurora glows. Verified by rendering the PNG.
 5. Fonts vendored (OFL latin): russo-one-400 (7KB), mochiy-pop-one-400 (18KB); LICENSE.txt updated.
-**Deviations / notes:**
+   **Deviations / notes:**
+
 - The in-game splash uses the LIVE champion display name sanitized to letters; names whose ddragon id differs (Wukong→MonkeyKing, Renata Glasc) will 404 and the layer hides itself — cosmetic-only degradation, noted in INBOX as a future championName→id map.
 - Anime is the app's first light theme: hardcoded emerald/rose/sky utilities keep their Tailwind defaults on light surfaces (checked: readable), but a dedicated pass was not done — flagged in INBOX.
 - Coach persona text is shared by the three mascots (only the name changes); per-mascot voice flavor → INBOX.
-**Files:** src/shared/themes.ts, src/renderer/src/assets/{main.css,fonts/*}, src/renderer/src/components/{Shell,Mascot,LiveView,RecommendationCard}.tsx, src/renderer/src/mockapi.ts, scripts/make-icon.mjs, resources/icon.png, tests/renderer/mascot.test.tsx.
+  **Files:** src/shared/themes.ts, src/renderer/src/assets/{main.css,fonts/*}, src/renderer/src/components/{Shell,Mascot,LiveView,RecommendationCard}.tsx, src/renderer/src/mockapi.ts, scripts/make-icon.mjs, resources/icon.png, tests/renderer/mascot.test.tsx.
 
 ## 2026-07-07 (11) — ONE identity "Neón Grieta": phase-reactive illumination, Bitxo upgraded, Chakra Petch (owner: "gaming app, animations everywhere, proper mascot, illuminations, a specific recognizable theme like Blitz")
+
 **Done (check green, 310):** the three identities collapse into ONE recognizable theme (`neon`) — this settles the INBOX item "once the owner picks a winner, deepen that one"; the brief asked for "a specific theme", singular.
+
 1. **Identity**: void-navy surfaces + **Bitxo pink** `#ff5d8f` as the brand color (mapped onto the `indigo-*` scale so no component changed class names; no LoL tool owns pink — that is the recognizability play) + coin gold for economy/hero accents. `themes.ts` keeps its full API; every legacy id (hextech/void/noche/recreativa/sakura/cabina) normalizes to `neon`, so stored settings migrate silently and the coach persona is always Bitxo.
 2. **Signature — phase-reactive rift aurora**: `body::before` carries three slow-drifting radial glows whose hue/intensity follow `html[data-phase]` (set by Shell): dim blue-pink idle → brighter clientOpen → gold champSelect → intense pink inGame → warm postGame. The app literally lights up when the player steps into the Rift.
 3. **Typography**: Chakra Petch (OFL, latin 500/600/700 vendored, ~10KB each; fallback Bahnschrift) as `--font-display` inside `@theme` → Tailwind `font-display` utility. Global rule: h1-h3 and buttons speak the display face. Press Start 2P survives ONLY in the mascot speech bubbles (`.pixel-bubble`).
 4. **Mascot upgraded**: Bitxo redrawn at 16×13 cells (eye shine, cheek blush, brand-pink gill fronds, 2-frame walk with tail flick) + mood accessories drawn as overlays: gold coach headband when focused (in game), sparkles when hyped, z when sleepy. He stands on a `.neon-dock` pulsing light pool in the sidebar; Kumo and Byte removed.
 5. **Illumination & motion layer**: gradient-border + breathing glow hero card (`.hex-card`, gradient wins over utility bg because unlayered), `.btn-glow` primary CTA with sheen sweep (dashboard CTA, "Sincronizar historial"), glowing focus rings, pink selection/scrollbar hover, `.stat-glow` gold HUD numerals, live phase dot `dot-ping`, nav active state with neon bar + shadow, sidebar glass (`bg-slate-900/80` + backdrop blur) over the aurora. All animation off under `prefers-reduced-motion`.
-**Deviations / notes:**
+   **Deviations / notes:**
+
 - Theme picker in Ajustes is hidden (`hidden={THEMES.length < 2}`), not removed — it reappears if THEMES ever grows.
 - `preview_screenshot` in the harness times out consistently (snapshot/eval/inspect fine, Chrome extension disconnected) — visual verification this session was computed-style based (aurora stops per phase, gradients, fonts loaded, sprite rects). Owner: eyeball a real run when convenient.
-**Files:** src/shared/{themes,ipc}.ts, src/renderer/src/assets/{main.css(rewritten),fonts/chakra-petch-*.woff2(new),fonts/LICENSE.txt}, src/renderer/src/components/{Shell,Mascot}(rewritten),{LiveView,HomeDashboard,SettingsView}.tsx, src/renderer/src/mockapi.ts, src/main/coach.ts (comment), tests/renderer/mascot.test.tsx.
+  **Files:** src/shared/{themes,ipc}.ts, src/renderer/src/assets/{main.css(rewritten),fonts/chakra-petch-*.woff2(new),fonts/LICENSE.txt}, src/renderer/src/components/{Shell,Mascot}(rewritten),{LiveView,HomeDashboard,SettingsView}.tsx, src/renderer/src/mockapi.ts, src/main/coach.ts (comment), tests/renderer/mascot.test.tsx.
 
 ## 2026-07-06 (10) — AI game direction + ONE professional design system (owner: "from scratch, Blitz/U.GG/Discord")
+
 **Done (check green, 310):**
+
 1. **Plan de partida (AI strategic read)**: LiveCoach second track — every ~150s (own throttle/in-flight/failure discipline) it serializes the full visible scoreboard (all 10 players: champion/position/level/KDA/CS) plus the tip facts and ROLE GUIDANCE (jungla → qué línea gankear; ADC → posicionamiento; support/mid/top variants) into `buildDirectionPrompt` (2-4 frases, anti-hallucination) and broadcasts `coach:direction`. New "Plan de partida · {mascota}" panel in the Live advice column. Tested (cadence + facts content).
 2. **Design system rebuilt from scratch** per the frontend-design guidance: the three identities are now accent+surface-tint+mascot variations over ONE professional base (the Discord/Blitz model) instead of competing chromes. Removed: scanlines/grids, per-theme radii, arcade hard shadows, pixel h1s, brush pills, bezel switches, conic energy border, per-theme shells and layouts. Base: flat tinted surfaces (3 palettes), unified 4-16px radii, quiet controls (transition + press scale only; utilities own color), accent-framed hero card, display font ONLY in the sidebar wordmark. ONE shell: Discord-style left sidebar (wordmark, icon+label nav with accent bar, mascot + phase at the bottom). ONE in-game layout: HUD strip + 7:5 console grid (advice left: hero/plan/alerts · instruments right: teams/gauges/objectives).
-**Files:** src/main/coach-live.ts, src/main/liveclient/index.ts, src/shared/{ipc,themes}.ts, src/renderer/src/assets/main.css (rewritten), src/renderer/src/components/{Shell(rewritten),LiveView}.tsx, src/renderer/src/mockapi.ts, tests/main/coach-live.test.ts.
+   **Files:** src/main/coach-live.ts, src/main/liveclient/index.ts, src/shared/{ipc,themes}.ts, src/renderer/src/assets/main.css (rewritten), src/renderer/src/components/{Shell(rewritten),LiveView}.tsx, src/renderer/src/mockapi.ts, tests/main/coach-live.test.ts.
 
 ## 2026-07-06 (9) — Screenshot-driven pro polish + BROWSER PREVIEW HARNESS (owner: "aim at Blitz")
+
 **Done (check green, 309):** first design pass done with EYES — the app was screenshotted and iterated against real renders.
+
 1. **Browser preview harness** (design tool, dev-only, permanent): `src/renderer/src/mockapi.ts` fills `window.api` with fixture-backed data when the preload is absent, so `http://localhost:5173/?phase=inGame|champSelect|idle&theme=recreativa|sakura|cabina` renders any state in a plain browser. Icons: copy `%APPDATA%/lol-companion/staticdata/icons` → `src/renderer/public/ddcache` (gitignored) — the mock rewrites `ddicon://` to it. `.claude/launch.json` starts the server; screenshots via a read-tier browser grant. THIS is how visual work should be done from now on.
 2. **Findings from the first real screenshots**: content stretched edge-to-edge on 2560px (the "empty" feeling), recommendation card 80% dead space, status row microscopic. Fixes: `max-w-6xl` centered content on all views; status row → HUD strip (champion portrait + TIEMPO/ORO/KDA/CS labeled blocks, tabular-nums, 20px numerals); recommendation card → 3-zone grid (icon+action | reasons | ALTERNATIVAS rail with icons+scores, Master+ reasons gold); champ select picks+tips → 2-column grid with uppercase eyebrow labels.
 3. Verified per-theme shells render as designed (arcade marquee+coin strip; sakura notebook rail with Kumo; icons/splashes live).
-**Files:** src/renderer/src/{mockapi(new),main}.tsx|ts, src/renderer/src/components/{LiveView,RecommendationCard,ChampSelectPanel,HistoryView,SettingsView}.tsx, .claude/launch.json (new), .gitignore, tests/renderer/{recommendation-card,liveview}.test.tsx.
+   **Files:** src/renderer/src/{mockapi(new),main}.tsx|ts, src/renderer/src/components/{LiveView,RecommendationCard,ChampSelectPanel,HistoryView,SettingsView}.tsx, .claude/launch.json (new), .gitignore, tests/renderer/{recommendation-card,liveview}.test.tsx.
 
 ## 2026-07-06 (8) — Structural per-identity redesign: shells, grids, control chrome (owner: "not just colors")
+
 **Done (check green, 309):** the identities now differ in STRUCTURE, not just skin.
+
 1. **Per-theme app shells** (`Shell.tsx` replaces TopBar): Recreativa = arcade cabinet (marquee header with pixel-font nav buttons, coin-slot status strip at the BOTTOM: phase + "INSERT COIN · 1UP"); Sakura = notebook (washi bookmark tabs in a LEFT rail, mascot hanging at the rail's foot); Cabina = cockpit (narrow icon instrument rail left + telemetry readout strip top). Nav buttons keep accessible names (Live/Historial/Ajustes) in all three (uppercase via CSS only).
 2. **Per-theme Live layouts** (`InGameLayout` in LiveView): Recreativa stacks (arcade screen list); Sakura = centered max-w-2xl reading scroll with teams stacked; Cabina = two-column cockpit grid (instruments/teams left, advice console right).
 3. **Global control chrome** (element-level CSS, colors still from utilities): Recreativa buttons have hard offset shadows and physically SINK on press, 2px input borders, panels carry 4px hard shadows; Sakura buttons are borderless brush pills (scale press), inputs are underline-only, panels lose borders for a single ink edge; Cabina buttons are engraved bezel switches (uppercase mono, inset press), 1px inputs, flat panels.
-**Files:** src/renderer/src/components/{Shell(new),LiveView}.tsx (TopBar.tsx removed), src/renderer/src/App.tsx, src/renderer/src/assets/main.css.
+   **Files:** src/renderer/src/components/{Shell(new),LiveView}.tsx (TopBar.tsx removed), src/renderer/src/App.tsx, src/renderer/src/assets/main.css.
 
 ## 2026-07-06 (7) — Three OWN identities replace hextech: Recreativa / Tinta y sakura / Cabina (owner redesign request)
+
 **Done (check green, 309):** owner rejected the hextech look and wanted an identity "that is ours" — and wanted to try several before deciding. Guided by the artifact-design skill + anthropics/skills frontend-design (fetched from GitHub).
+
 1. **Deep themes** (`src/shared/themes.ts` single source; main.css): each identity overrides palette (slate/amber/indigo scales), `--font-display`, Tailwind `--radius-*` (corner language!), body background and the hero-card treatment. **Recreativa** (default): arcade — ink blue + coin gold + CRT teal, ZERO radius everywhere, scanline background, pixel-stepped hero corners, vendored 'Press Start 2P' headings (OFL, `assets/fonts/`, 12KB, no CDN). **Sakura**: ink indigo + sakura pink + gold seal, soft radii, brush-warm headings (Yu Gothic UI), hero = gold left seal. **Cabina**: abyssal green + instrument amber + ice blue, 2px radii, mono display, faint instrument grid, hairline amber bezel hero. Legacy themes migrate (hextech→recreativa, void→sakura, noche→cabina) via `normalizeTheme` at settings:get; switching stays instant (no restart).
 2. **Per-theme mascots** (Mascot.tsx; export name `HexiSprite` kept so no call site changed): **Bitxo** — pixel axolotl with a REAL 2-frame sprite walk cycle (`steps(1)` frame swap; slow shuffle idle, fast when hyped); **Kumo** — brush kitsune (swaying tail, blink, gold seal); **Byte** — copilot drone (scanning visor light, status LED). `useTheme()`/`useMascotName()` hooks listen to the `app-theme` CustomEvent dispatched by `applyTheme`. Mood system unchanged.
 3. **Persona follows the identity**: `buildPersona(name)` replaces HEXI_PERSONA; coach-ipc + LiveCoach read settings.theme → Bitxo/Kumo/Byte speak as themselves; UI headers ("Análisis de {mascota}", "{mascota} analiza el draft") use the hook.
-**Notes:** the three identities share ONE layout (structure) — differentiation is palette/type/corners/framing/mascot; a per-theme layout fork was rejected as triple maintenance. Once the owner picks a winner, deepen that one (INBOX).
-**Files:** src/shared/themes.ts (new), src/renderer/src/assets/{main.css,fonts/*(new)}, src/renderer/src/components/{Mascot,SettingsView,LiveView,PostGameReport,ChampSelectPanel}.tsx, src/renderer/src/App.tsx, src/main/{coach,coach-ipc,coach-live}.ts, src/main/liveclient/index.ts, src/main/riot/index.ts, tests/renderer/mascot.test.tsx.
+   **Notes:** the three identities share ONE layout (structure) — differentiation is palette/type/corners/framing/mascot; a per-theme layout fork was rejected as triple maintenance. Once the owner picks a winner, deepen that one (INBOX).
+   **Files:** src/shared/themes.ts (new), src/renderer/src/assets/{main.css,fonts/*(new)}, src/renderer/src/components/{Mascot,SettingsView,LiveView,PostGameReport,ChampSelectPanel}.tsx, src/renderer/src/App.tsx, src/main/{coach,coach-ipc,coach-live}.ts, src/main/liveclient/index.ts, src/main/riot/index.ts, tests/renderer/mascot.test.tsx.
 
 ## 2026-07-06 (6) — Live AI coach: Hexi real-time macro tips in game (owner request)
+
 **Done (check green, 304):** `LiveCoach` (`src/main/coach-live.ts`, pure facts/prompt + injected generator, fully tested): every ~60s of game time (≥min 3, throttled, one in flight, goes quiet after 3 Ollama failures) it serializes SCREEN-VISIBLE facts — minute, own KDA/CS/level/gold, both teams' estimated gold, dragon/Barón spawn countdowns (event-tracked, same constants as the renderer hook), last-45s events (deaths, enemy spikes ≥2400g, objectives), engine top recommendation — into a Spanish prompt (≤22 palabras, una frase, anti-hallucination) and broadcasts `coach:tip`. Hexi delivers it: overlay bubble takeover (indigo, 12s) + 🔮 entry in the alert feed + mascot reaction (no sound — deliberate). Gated by new `settings.coachLive` (Ajustes checkbox under the coach panel, requires the master coach toggle). Runs through the shared snapshot processor, so REPLAYS exercise it — that's the test path without playing.
 **Notes:** wave/minion state is NOT in the Live Client API, so "freeze/push the wave" style advice comes from the model reasoning over timing facts (objective spawns, gold in pocket), never from invented wave data; the prompt forbids inventing. Riot §4 respected: every input is on the player's screen.
 **Files:** src/main/{coach-live(new),coach-ipc}.ts, src/main/liveclient/index.ts, src/main/db/repos/settings.ts, src/shared/ipc.ts, src/renderer/src/{hooks.ts,App.tsx,OverlayApp.tsx}, src/renderer/src/components/{LiveInsights,SettingsView}.tsx, tests/main/coach-live.test.ts (new).
 
 ## 2026-07-06 (5) — Champ select: role-less meta fix, coach draft advice, unpicked-ADC tip (owner feedback round 2)
+
 **Done (check green, 298):** owner reported no Master+ reasons, no AI, and tank armor advice while unpicked.
+
 1. **Meta with no assigned position**: verified the crawler data is fine (13.8k matches on 16.13; Kaisa BOTTOM 1809 games) — the lookups missed because blind pick/custom sims carry no `ownPosition` and meta tables are role-keyed. `pickSuggestions` now infers each candidate's role as the mode of the owner's own games with that champion when the position is empty.
 2. **Coach in champ select**: new `coach:draft` invoke + `buildDraftPrompt` (facts: splits, tips, ranked picks with reasons, own plan; anti-hallucination frame, ≤4 frases). ChampSelectPanel gains an on-demand "🔮 Consejo de Hexi" button (never automatic — local latency vs draft timer); hidden unless the coach is enabled AND Ollama answers.
 3. **Unpicked-ADC tip**: while the own champion is unknown, assigned position BOTTOM now counts as squishy carry (GA phrasing; ADC damage assumed physical).
-**Files:** src/main/{champselect,coach,coach-ipc}.ts, src/shared/ipc.ts, src/renderer/src/components/ChampSelectPanel.tsx, tests/main/{champselect,coach}.test.ts.
+   **Files:** src/main/{champselect,coach,coach-ipc}.ts, src/shared/ipc.ts, src/renderer/src/components/ChampSelectPanel.tsx, tests/main/{champselect,coach}.test.ts.
 
 ## 2026-07-06 (4) — Champ select: class-aware defense tips + kit-trait pick signals (owner feedback)
+
 **Done (check green, 295):** owner (ADC) got tank-armor advice from the comp tip and pick ranking ignored kit fit vs the enemy comp.
+
 1. **Class-aware tips**: when the own pick/intent is squishy (no Tank/Fighter tag), heavy-AD/AP tips now advise the SAME per-class options as the in-game armor-vs-mr rule (constants exported): GA for physical carries / Zhonya for AP (both when mixed), Banshee/Kaenic for MR — "como carry no compres armadura de tanque…". Tanks/unpicked keep the generic cheap-component tip.
 2. **Kit traits**: new hand-curated `src/main/staticdata/champion-traits.json` (25 entries: marksmen + Graves; schema `src/shared/schemas/traits.ts`; mobility 0-2, antiTank 0-2; missing entry = no signal). pickSuggestions: vs ≥2 enemy Assassins → +0.05 mobility 2 / −0.05 mobility 0 (warning reason "pick inmóvil… dependerás del peel"); vs ≥2 enemy Tanks → +0.06 antiTank 2 ("tu daño por % de vida los derrite") / −0.04 antiTank 0. Validity test asserts every curated id exists in the patch.
-**Notes:** traits are game knowledge (curated like champion-damage-profile.json) — owner should sanity-check values for HIS champions; new/reworked champions simply lack entries until curated. Yunara (post-2025) deliberately omitted (kit unknown).
-**Files:** src/main/{champselect}.ts, src/main/engine/rules/armor-vs-mr.ts (exports), src/main/staticdata/champion-traits.json (new), src/shared/schemas/traits.ts (new), tests/main/champselect.test.ts.
+   **Notes:** traits are game knowledge (curated like champion-damage-profile.json) — owner should sanity-check values for HIS champions; new/reworked champions simply lack entries until curated. Yunara (post-2025) deliberately omitted (kit unknown).
+   **Files:** src/main/{champselect}.ts, src/main/engine/rules/armor-vs-mr.ts (exports), src/main/staticdata/champion-traits.json (new), src/shared/schemas/traits.ts (new), tests/main/champselect.test.ts.
 
 ## 2026-07-06 (3) — 1.0.1: window icon + no menu bar (owner feedback on 1.0.0)
+
 **Done:** the runtime window showed Electron's default icon (only the exe had ours) and the default File/Edit/View menu. Icon now lives COMMITTED at `resources/icon.png` (make-icon.mjs writes there; electron-builder `icon:` updated; `?asset` import + `*.png?asset` declaration) and is set on the BrowserWindow. `Menu.setApplicationMenu(null)` removes the bar app-wide; since that kills menu shortcuts, dev builds re-add F12 (devtools) and F5 (reload) via `before-input-event`. Version 1.0.1, installer rebuilt, released.
 **Files:** src/main/{index,modules.d}.ts, scripts/make-icon.mjs, electron-builder.yml, .gitignore, resources/icon.png (new), package.json.
 
 ## 2026-07-06 (2) — Release 1.0.0 batch (owner-directed): pending fixes, overlay v2, visuals, sounds, meta-in-engine, local-AI coach
+
 **Done (7 commits, one per group; check green):**
+
 1. **Loading state** — partial :2999 payloads → `loading` live state (machine: inGame; Live shows "Cargando partida…"); validation errors once per streak (was ~7.7k lines/load).
 2. **Catch-up ingest** — `catchUpMissedMatches` on app start (10s delay): newest 5 matchIds, missing ones ingested + timelines, Historial refreshes (closes the close-client-right-after-game gap).
 3. **Meta in the engine** — `resolveBaseline`: pool entry, else synthetic baseline from `meta_champion_items` (≥20 champ games, ≥5/item, completed SR items; top-5 core + 3 situational; frequency ≈ order). Reasons labeled ("más comprado en Master+" vs "tu build"). Lookup lives in the live pipeline (one repo query per champion+role) — engine stays pure.
@@ -231,57 +603,66 @@ Builder sessions append entries here (date, WP, summary, deviations, gaps, files
 5. **Overlay v2** — window click-through by default (`setIgnoreMouseEvents(true, {forward})`), interactive only while hovered (`overlay:interactive` invoke). Hover expands a panel: top-3 recs, dragon/Barón countdown chips, KDA/CS/gold + personal curve, team gold, last alerts; 📌 pins. **Tab-expand declined** (globalShortcut steals the key from the game; native hook = new dep) → INBOX.
 6. **Visual pass** — recommendation card is the Live hero: hex-cut corners, rotating gold-teal energy border (@property conic), glowing icon, moved above insights; gold counts up (`AnimatedNumber`); `objective-live` breathing; reduced-motion respected.
 7. **Local-AI coach (owner request "gemini flash local")** — Gemini is cloud-only; implemented the local equivalent via **Ollama** (localhost:11434, free): Ajustes panel (detect server, enable, model pick, default gemma3:4b), report card gains "Análisis de Hexi" — report facts serialized into a Spanish prompt with an anti-hallucination frame, ≤5 sentences out. Narrative only; the pure engine remains the sole recommendation source. Degrades silently without Ollama. `coach-ipc.ts` split from `coach.ts` so the pure part tests without electron.
-**Also:** version → 1.0.0, installer rebuilt, pushed to GitHub + tag v1.0.0 (owner authorized push).
-**Gaps (owner):** judge overlay hover/pin + visuals in a real game; coach quality depends on the pulled model (try `gemma3:4b` first); meta-items order is frequency-based until the crawler aggregates purchase order (INBOX).
-**Files:** src/main/{liveclient/poller,liveclient/index,session/machine,postgame,overlay,coach(new),coach-ipc(new),index}.ts, src/main/engine/{nextbuy,recommend}.ts, src/main/db/repos/settings.ts, src/shared/ipc.ts, src/renderer/src/{App,OverlayApp,sounds}.ts(x), src/renderer/src/components/{LiveView,RecommendationCard,SettingsView,PostGameReport,AnimatedNumber(new)}.tsx, src/renderer/src/assets/main.css, tests/main/{liveclient-poller,postgame,nextbuy,coach(new)}.test.ts, tests/renderer/overlay.test.tsx (new), backlog/INBOX.md, package.json.
+   **Also:** version → 1.0.0, installer rebuilt, pushed to GitHub + tag v1.0.0 (owner authorized push).
+   **Gaps (owner):** judge overlay hover/pin + visuals in a real game; coach quality depends on the pulled model (try `gemma3:4b` first); meta-items order is frequency-based until the crawler aggregates purchase order (INBOX).
+   **Files:** src/main/{liveclient/poller,liveclient/index,session/machine,postgame,overlay,coach(new),coach-ipc(new),index}.ts, src/main/engine/{nextbuy,recommend}.ts, src/main/db/repos/settings.ts, src/shared/ipc.ts, src/renderer/src/{App,OverlayApp,sounds}.ts(x), src/renderer/src/components/{LiveView,RecommendationCard,SettingsView,PostGameReport,AnimatedNumber(new)}.tsx, src/renderer/src/assets/main.css, tests/main/{liveclient-poller,postgame,nextbuy,coach(new)}.test.ts, tests/renderer/overlay.test.tsx (new), backlog/INBOX.md, package.json.
 
 ## 2026-07-06 — Installer + API key in Ajustes + master handoff (owner request: distribute to friends)
+
 **Done (session-final; check green):**
+
 1. **API key from the UI** (`src/main/riot/apikey.ts`, tested with injected codec): friends'
-installs have no `.env`, so Ajustes → Cuenta gains a password field. Stored in the settings repo
-encrypted with Electron `safeStorage` (DPAPI; `plain:` fallback when unavailable), `enc1:`-prefixed
-base64. Precedence: env `RIOT_API_KEY` (dev) → stored key. Only `apiKeySet: boolean` crosses IPC —
-the key never reaches the renderer. All consumers (`getRiotContext`, ingest, meta crawler, puuid
-re-resolution — which now also fires when a key arrives for an unresolved account) use
-`resolveApiKey`; error strings point at Ajustes instead of `.env`. New key setting `settings.apiKey`.
+   installs have no `.env`, so Ajustes → Cuenta gains a password field. Stored in the settings repo
+   encrypted with Electron `safeStorage` (DPAPI; `plain:` fallback when unavailable), `enc1:`-prefixed
+   base64. Precedence: env `RIOT_API_KEY` (dev) → stored key. Only `apiKeySet: boolean` crosses IPC —
+   the key never reaches the renderer. All consumers (`getRiotContext`, ingest, meta crawler, puuid
+   re-resolution — which now also fires when a key arrives for an unresolved account) use
+   `resolveApiKey`; error strings point at Ajustes instead of `.env`. New key setting `settings.apiKey`.
 2. **Windows installer**: `npm run dist` → per-user one-click NSIS (`dist/LoL Companion-0.1.0-setup.exe`,
-~110MB, no admin needed). `electron-builder.yml`: nsis target, buildResources, icon. App icon
-(hextech hexagon) generated by zero-dep `scripts/make-icon.mjs` (hand-rolled PNG encoder, gitignored
-output, regenerated by `dist`). Packaged app smoke-tested (launches, native modules load). Unsigned —
-friends see SmartScreen (documented).
+   ~110MB, no admin needed). `electron-builder.yml`: nsis target, buildResources, icon. App icon
+   (hextech hexagon) generated by zero-dep `scripts/make-icon.mjs` (hand-rolled PNG encoder, gitignored
+   output, regenerated by `dist`). Packaged app smoke-tested (launches, native modules load). Unsigned —
+   friends see SmartScreen (documented).
 3. **Docs**: `docs/HANDOFF.md` rewritten as the master handoff for future models (state, codebase map,
-gaps, roadmap near/mid/long, visual-identity direction, dev-toolkit ops, AI-session gotchas, policy
-precedent); `docs/INSTALAR.md` — Spanish install guide for friends (SmartScreen, key generation/24h
-expiry, setup).
-**Deviations:** CLAUDE.md says the key is read from env — extended (not replaced) with the encrypted
-setting for installed machines; env still wins. Dev-key 24h expiry makes the friends beta clunky —
-production key application recommended (HANDOFF §4.1, ADR-007 still open).
-**Files:** src/main/riot/{apikey(new),index,limiter}.ts, src/main/db/repos/settings.ts,
-src/shared/ipc.ts, src/renderer/src/components/SettingsView.tsx, tests/main/apikey.test.ts (new),
-electron-builder.yml, package.json, scripts/make-icon.mjs (new), .gitignore,
-docs/{HANDOFF,INSTALAR(new)}.md.
+   gaps, roadmap near/mid/long, visual-identity direction, dev-toolkit ops, AI-session gotchas, policy
+   precedent); `docs/INSTALAR.md` — Spanish install guide for friends (SmartScreen, key generation/24h
+   expiry, setup).
+   **Deviations:** CLAUDE.md says the key is read from env — extended (not replaced) with the encrypted
+   setting for installed machines; env still wins. Dev-key 24h expiry makes the friends beta clunky —
+   production key application recommended (HANDOFF §4.1, ADR-007 still open).
+   **Files:** src/main/riot/{apikey(new),index,limiter}.ts, src/main/db/repos/settings.ts,
+   src/shared/ipc.ts, src/renderer/src/components/SettingsView.tsx, tests/main/apikey.test.ts (new),
+   electron-builder.yml, package.json, scripts/make-icon.mjs (new), .gitignore,
+   docs/{HANDOFF,INSTALAR(new)}.md.
 
 ## 2026-07-04 (2) — Scenario builder (owner request: force specific situations)
+
 **Done (1 commit; 267/267 green):** the debug toolkit can now fabricate situations instead of only replaying:
+
 1. **Forced game situations** — `GameScenario` (`src/shared/scenario.ts`): minute, own gold, Magical Footwear toggle, and per-player champion/position/level/kills/items for self + 4 allies + 5 enemies. `buildScenarioSnapshot` (`src/main/devtools-scenario.ts`, tested end-to-end: schema-valid → normalizes → engine emits explained recommendations incl. antiheal vs Soraka) synthesizes a Live Client snapshot with base+growth champion stats and position-based CS defaults; placeholder identities (PLAYER_n#SIM). The devtools driver holds the scenario live (re-emits every 2s, time advances) so the whole app behaves in-game; **Aplicar cambios** rebuilds the snapshot at monotonic time so the diff engine fires real events (item completions → spike alerts, deaths → objective windows, level-ups). Starting a scenario stops any running replay.
 2. **Custom champ select** — `dev:champselect:custom` takes a full ChampSelectState built in the UI: own position, own champion empty = still picking (last-pick simulation, pick suggestions visible), intent vs locked toggle, partial enemy picks, bans by name.
 3. **UI** — Ajustes dev panel (now gated by `dev:enabled` instead of the replay-list heuristic) gains two editors with champion/item datalists from static data (`staticdata:itemCatalog` new invoke), item entry by name or id, an example scenario (fed Zed mid, Mundo top, Soraka support — showcases anti-burst/anti-tank/antiheal) and a blank template.
-**Files:** src/shared/{scenario(new),ipc}.ts, src/main/{devtools-scenario(new),devtools,index}.ts, src/renderer/src/components/{DevScenario(new),SettingsView}.tsx, tests/main/scenario.test.ts (new).
+   **Files:** src/shared/{scenario(new),ipc}.ts, src/main/{devtools-scenario(new),devtools,index}.ts, src/renderer/src/components/{DevScenario(new),SettingsView}.tsx, tests/main/scenario.test.ts (new).
 
 ## 2026-07-04 — Master+ meta pipeline (owner-directed): crawler, aggregates, blended signals
+
 **Done (2 commits; 262/262 green):**
+
 1. **Crawler** (`src/main/riot/metacrawler.ts` + `meta-aggregate.ts`, both tested with a fake client / the real match fixture): seeds from league-v4 apex lists (challenger/GM/master — verified live: 10k master entries with puuids on EUW), walks each seed's recent ranked-solo matches (queue 420) at limiter priority 50 (never starves owner traffic), aggregates into migration-005 tables: `meta_champion_stats` (patch+champion+role WR), `meta_matchups` (same-lane pairs), `meta_champion_items` (final-build frequencies), `meta_matches` (dedupe/resume ledger; remakes/other queues marked skipped). Only aggregates stored — no identities, no payloads. New client methods: `apexLeague(tier)`, `matchIds` queue filter; `leagueListSchema`.
 2. **Blending**: `MetaSource` injected into `pickSuggestions` — champion WR this patch (≥30 games, weight ±0.15) and lane matchup vs visible enemies (≥10 games, ±0.10), each as a labeled Spanish reason ("…en Master+…"); thresholds tested. Report summary gains a meta-build line (final items vs top-10 most-bought for champ+role, only when notable) — summary cap now 5. Ajustes: "Datos meta (Master+)" panel (start/stop, per-patch counts, live progress via `meta:progress`).
-**Notes:** owner provided a fresh API key (stored in `.env`, key was pasted in chat → advised regeneration at will). Master+ scope per owner instruction. Crawl rate ≈ app limit bound (~100 req/2min → ~1.7k matches/h). Latest-patch selection is numeric (`comparePatchDesc`). Ban-rate aggregation deliberately out (no feature consumes it yet).
-**Files:** src/main/riot/{metacrawler(new),meta-aggregate(new),client,index}.ts, src/shared/schemas/riot.ts, src/main/db/migrations/005_meta_stats.sql, src/main/db/repos/{meta(new),index}.ts, src/main/{champselect,report,history-ipc,index}.ts, src/shared/ipc.ts, src/renderer/src/components/SettingsView.tsx, tests/main/{meta(new),champselect,report-service}.test.ts.
+   **Notes:** owner provided a fresh API key (stored in `.env`, key was pasted in chat → advised regeneration at will). Master+ scope per owner instruction. Crawl rate ≈ app limit bound (~100 req/2min → ~1.7k matches/h). Latest-patch selection is numeric (`comparePatchDesc`). Ban-rate aggregation deliberately out (no feature consumes it yet).
+   **Files:** src/main/riot/{metacrawler(new),meta-aggregate(new),client,index}.ts, src/shared/schemas/riot.ts, src/main/db/migrations/005_meta_stats.sql, src/main/db/repos/{meta(new),index}.ts, src/main/{champselect,report,history-ipc,index}.ts, src/shared/ipc.ts, src/renderer/src/components/SettingsView.tsx, tests/main/{meta(new),champselect,report-service}.test.ts.
 
 ## 2026-07-03 (5) — Pick suggestions v2: matchup + team-needs signals (owner follow-up)
+
 **Done (1 commit; 251/251 green):** pick ranking is no longer history-only. New signals on top of the Laplace-smoothed per-role winrate: (a) **matchup component** — the owner's record with each candidate against the champions visible on the enemy team (`OwnerHistoryRow.enemyChampions`, filled from stored participants), ≥2 overlapping games required, contribution capped at ±0.125 so small samples nudge instead of dominate, surfaced as "contra campeones de esta comp: X de Y ganadas"; (b) **frontline need** — +bonus to Tank/Fighter candidates when no picked ally has those tags; (c) **anti-assassin durability** — small Tank bonus when the enemy shows ≥2 Assassin tags; plus the existing damage-type complement and pool bonuses. Every signal adds a Spanish reason line.
 **Notes:** no external tierlists/meta winrates — the zero-cost constraint forbids them, so "good vs their comp" means the owner's own matchup record + class heuristics from Data Dragon tags. `champselect:insights` now queries participants per owner match (200 sync queries per invoke, sub-ms each).
 **Files:** src/main/{champselect,index}.ts, tests/main/champselect.test.ts.
 
 ## 2026-07-03 (4) — Simulation toolkit (owner request: test without playing)
+
 **Done (2 commits; 249/249 green):**
+
 1. **Game replay** — the snapshot pipeline was extracted from `startLiveClient` into `createSnapshotProcessor(db, {persist})` and is now shared with a new `ReplayDriver` (`src/main/liveclient/replay.ts`, fake-timer tested): plays any `fixtures/recordings/<dir>` (and the bundled `fixtures/liveclient/session`) through the REAL pipeline — session machine goes inGame, Live view/engine/overlay/alerts all behave as in a real game — at x4/x8/x20 speed. Replays don't persist (no live_sessions pollution). Dev-only IPC (`dev:replays`, `dev:replay:start/stop/status`), refused/empty in the packaged app; id parsing rejects path escapes.
 2. **Champ select simulation** — `dev:champselect:start/stop` broadcasts a canned 5v5 draft (real champion keys: own cell hovers Kai'Sa unlocked so both pick suggestions and the plan render; enemies 3 AD + Soraka so comp tips fire).
 3. **Report for any stored match** — `report:forMatch` IPC; `ReportService.forMatch` reuses the extracted `buildReport` (recommendation outcomes included when a live session links to the match; empty otherwise). "Ver informe" button in the Historial detail drawer renders the extracted presentational `ReportCard`. This is a normal feature (not dev-gated) — reports become browsable per match.
@@ -292,12 +673,15 @@ docs/{HANDOFF,INSTALAR(new)}.md.
 **Files:** src/main/liveclient/{index,replay}.ts, src/main/{devtools(new),report,history-ipc,index}.ts, src/main/db/repos/liveSessions.ts, src/shared/ipc.ts, src/renderer/src/components/{PostGameReport,HistoryView,SettingsView}.tsx, tests/main/{replay(new),report-service}.test.ts.
 
 ## 2026-07-03 (3) — Champ select pick suggestions (owner follow-up)
+
 **Done (1 commit; 242/242 green):** `pickSuggestions` in `src/main/champselect.ts` (pure, tested): owner's stored history filtered to his assigned position → per-champion winrate, Laplace-smoothed ranking (2-0 doesn't beat 15-5), min 2 games, top 3; excludes champions visible on the board (bans + both teams' picks/intents); +bonus and Spanish note when the champion's damage type complements the picked allies or when it's in the baseline pool. Wired into `champselect:insights` (handler now reads the owner's last 200 matches via MatchRepo); suggestions clear once the owner locks. Panel section "¿Qué te pego?" with portraits, WR and the complement note.
 **Notes:** only own history + on-screen champions (compliant). Role mapping relies on match-v5 `teamPosition` == uppercased LCU `assignedPosition`; games without position data are only used when the owner has no assigned position.
 **Files:** src/main/{champselect,index}.ts, src/shared/champselect.ts, src/renderer/src/components/ChampSelectPanel.tsx, tests/main/champselect.test.ts.
 
 ## 2026-07-03 (2) — Owner visual batch — home dashboard, champ select v2 with images and comp insights
+
 **Done (2 commits; 239/239 green):**
+
 1. **Champ select v2**: new `champselect:insights` invoke — pure main-side `champSelectInsights(state, staticData, pool)` (tested): ally/enemy damage splits from champion damage profiles, Spanish tips (3+ AP → RM with the cheap component's real name, 3+ AD → armor, healers ≥2 weight → grievous wounds reminder, 4+ same-type allies → diversification note), and the owner's baseline core/situationals for his picked champion (pick intent counts). Panel shows champion portraits (allies with position badges, enemies, dimmed bans) over the own pick's splash as ambient banner. `staticdata:championNames` replaced by `staticdata:championMeta` (ddragon id + name + damageType). `ddicon://` gains a `splash` kind (jpg, patchless CDN path `cdn/img/champion/splash/`, cached under `shared/splash/` so patch bumps don't re-download).
 2. **Home dashboard** (idle/clientOpen instead of empty states): Hexi hero over the most-played champion's splash with phase-aware copy, games/streak chips, top-3 champions (portrait, games, KDA, CS/min, WR), last-game mini report (reuses `report:last`, incl. first summary line), rotating Hexi tips (9s), and a setup nudge to Ajustes when there's no history.
 
@@ -308,10 +692,12 @@ docs/{HANDOFF,INSTALAR(new)}.md.
 **Files:** src/main/{champselect(new),icons,index}.ts, src/shared/{champselect(new),ipc}.ts, src/renderer/src/components/{ChampSelectPanel(new),HomeDashboard(new),LiveView}.tsx, src/renderer/src/App.tsx, tests/main/champselect.test.ts (new), tests/renderer/{app,liveview}.test.tsx.
 
 ## 2026-07-03 — Owner playtest feedback batch (unplanned WP, owner-directed) — engine bugs, report fixes, Hexi overlay, objective alerts, themes
+
 **Done (5 commits, one per group; 232/232 tests green):**
+
 1. **Engine: boots + endgame** (`nextbuy.ts`): (a) Magical Footwear (perk 8304, in `runeIds`) no longer stalls the next-buy on unpurchasable boots — the boots core slot is skipped with an explaining reason until the rune grants them, then resumes as upgrade advice; substitute tier-2 boots (e.g. Mercs when core says Berserker's) satisfy a boots slot. (b) New `endgameRecommendation` once the core is complete: fills free slots from the champion's situationals, and with 6 slots + a leftover starter (Doran's/Dark Seal/Cull) emits the new `replace` action ("véndelo…"). `recommend()` chains it after next-buy and preserves `replace` through dedup merges.
 2. **Report: Practice Tool** — `live_sessions.gameMode` (migration 004, filled by the persister); `report:last` now returns `PostGameReportResult` (`report` | `unsupported`): a newest non-matchmade session (PRACTICETOOL/TUTORIAL*) reports "sin informe para este modo" instead of silently showing an older linked game (owner hit this after a practice game).
-3. **Report v2**: vision score and deaths vs the owner's per-champion averages (new `deathsPerGame`/`visionPerGame` in ChampionStat), deaths cell marks *lower* as better, plus `buildReportSummary` (pure, tested): up to 4 Spanish takeaways (deaths vs media, vision, farm, damage share, recommendation adherence).
+3. **Report v2**: vision score and deaths vs the owner's per-champion averages (new `deathsPerGame`/`visionPerGame` in ChampionStat), deaths cell marks _lower_ as better, plus `buildReportSummary` (pure, tested): up to 4 Spanish takeaways (deaths vs media, vision, farm, damage share, recommendation adherence).
 4. **Objective-window alerts** (`useLiveInsights`): visible enemy death (jungler by scoreboard position, or 2+ deaths in one tick) while dragon/baron is up or ≤60s out → distinct `objective` alert (🎯, emerald, sound + Hexi reaction). Timers mirrored in a ref so the state updater stays pure.
 5. **Hexi overlay + UI restyle**: `HexiSprite` extracted and reused in the overlay — Hexi now delivers the top recommendation in a speech bubble and alerts take it over for 6s; overlay window 390px; in-game hint when the overlay is off pointing at Ajustes. Selectable themes (`settings.theme`: hextech/void/noche) as CSS-variable overrides with instant preview in Ajustes and applied in both windows; sidebar replaced by a top bar (tabs with animated underline, session dot, Hexi).
 
@@ -324,7 +710,9 @@ docs/{HANDOFF,INSTALAR(new)}.md.
 **Files:** src/main/engine/{nextbuy,recommend}.ts, src/main/engine/rules/combiner.ts, src/shared/{recommendation,report,stats,ipc}.ts, src/main/{report,stats,overlay}.ts, src/main/db/migrations/{004_session_gamemode.sql,index.ts}, src/main/db/repos/{liveSessions,settings}.ts, src/main/liveclient/persist.ts, src/main/riot/index.ts, src/renderer/src/{App,OverlayApp,main,hooks}.ts(x), src/renderer/src/components/{TopBar(new),Mascot,LiveView,LiveInsights,PostGameReport,RecommendationCard,SettingsView}.tsx (Sidebar removed), src/renderer/src/assets/main.css, tests/main/{nextbuy,report-service,live-persist}.test.ts, tests/renderer/objective-window.test.ts (new), backlog/INBOX.md.
 
 ## 2026-07-02 — Owner feature batch (unplanned WP, owner-directed) — stats, live insights, visual identity, overlay, post-game report
+
 **Done (5 commits, one per group; 206/206 tests green):**
+
 1. **Personal statistics** (`src/main/stats.ts`, Estadísticas tab in Historial): per-champion WR/KDA/CS-min/gold-min/damage-share/vision-min, personal farm curves (CS+gold @10/@15 from stored timelines), streaks + session-position tilt indicator (games 1-2 vs 3+, 45-min session gap), WR by duration bucket, WR by first dragon (timeline events), best/worst same-lane matchups (≥2 games), WR by weekday. Cached, self-invalidating on newest-match change.
 2. **Live insights** (renderer over existing gamestate channels): live CS vs personal average chip (championId-keyed), enemy power-spike alert feed (completed items ≥2400g, levels 6/11/16 — visible info only, team-relative), dragon/baron spawn countdowns from objective events (constants documented, adjust per patch), estimated team gold bar, dead-gold reminder (≥2500).
 3. **Visual identity**: hextech palette remapped over the slate scale (app-wide reskin), gold/teal accents, ambient gradients, themed scrollbars, card/alert entrance animations, gold glow pulse on top-pick change, prefers-reduced-motion respected; **Hexi** mascot (original SVG hextech spirit, mood per phase, phrases, reacts to spikes); WebAudio-synthesized sounds (rec chime, spike blip) behind persisted `soundsEnabled` toggle.
@@ -338,6 +726,7 @@ docs/{HANDOFF,INSTALAR(new)}.md.
 **Files:** src/main/{stats,report,overlay}.ts, src/main/history-ipc.ts, src/main/index.ts, src/main/riot/index.ts, src/main/db/repos/settings.ts, src/shared/{stats,report,ipc}.ts, src/renderer/src/{App,OverlayApp,main,sounds,hooks}.ts(x), src/renderer/src/components/{StatsView,LiveInsights,Mascot,PostGameReport,Sidebar,SettingsView,HistoryView,LiveView,RecommendationCard}.tsx, src/renderer/src/assets/main.css, tests/main/{stats-service,report-service}.test.ts, tests/renderer/{mascot.test.tsx,liveview.test.tsx,app.test.tsx,setup.ts}, docs/decisions.md.
 
 ## 2026-07-02 — Real-client validation (first findings) — Riot ID sanitization fix
+
 **Done:** first real bug found by the Windows validation pass: Riot IDs copied from the League client carry invisible Unicode BiDi isolate characters (U+2066/U+2069 around name and tag), the app stored them raw, and account-v1 404'd → "Cuenta no encontrada" for a perfectly valid account. New `src/main/riot/riotid.ts` `normalizeRiotId()` strips all format-category characters (`\p{Cf}`, covers BiDi isolates, zero-width chars, BOM) and trims whitespace around name and tag. Applied at both boundaries in `registerRiotIpc`: `settings:set` (stores normalized, uses normalized for the changed-riotId puuid re-resolution) and `ingest:start` (normalizes on read, healing values stored before the fix). 6 new tests incl. the exact real-world captured string. `npm run check` green: **191/191**.
 
 **Validation results so far (real client/API):** app idles cleanly with LoL closed (WP-001 criterion); RIOT_API_KEY configured and verified against status-v4/account-v1 (note: freshly generated dev keys take a few minutes to activate — both return "Unknown apikey" 401 until then); owner account resolves once sanitized. Pending: full phase cycle, 200-match sync, real game recording, post-game auto-ingest.
@@ -353,6 +742,7 @@ docs/{HANDOFF,INSTALAR(new)}.md.
 **Also (owner feedback, first real champ select + game):** champ select panel showed raw numeric championIds — new `staticdata:championNames` invoke channel (championsByKey → display name), resolved in `ChampSelectPanel` with raw-id fallback when static data is unavailable; test extended. Two engine observations went to INBOX instead of code (scope discipline): team-damage-diversification rule idea, and a visible hint when the champion has no baseline in the pool (ADR-006 pending — owner's real pool proposed from the fresh 200-match sync: Kai'Sa/Graves/Samira/Twitch/Jinx + confirmations pending). 200-match sync completed against the real API. Files: src/shared/ipc.ts, src/main/index.ts, src/renderer/src/{App,components/LiveView}.tsx, tests/renderer/liveview.test.tsx, backlog/INBOX.md.
 
 ## 2026-07-02 — Windows migration — cross-platform fixes, first green check on Windows
+
 **Done:** the three known Windows blockers from `docs/HANDOFF.md` step 2. New zero-dep launcher `scripts/electron-node.mjs` (resolves the Electron binary via `createRequire('electron')` and spawns it with `ELECTRON_RUN_AS_NODE=1`) replaces the POSIX-only env prefix in the `test` script — chosen over adding `cross-env`, keeping the dependency list unchanged. `scripts/backtest.mjs` now spawns the Electron binary directly instead of `spawnSync('npx', …)` (which needs `shell: true` on Windows). `defaultUserData()` in `src/main/backtest/cli.ts` is platform-aware (win32 `%APPDATA%`, darwin `Library/Application Support`, linux `$XDG_CONFIG_HOME`/`.config`), matching Electron's userData defaults, dependency-free. `npm run check` green on Windows 11: typecheck + lint + **185/185 tests**. Backtest CLI smoke-tested: spawns under Electron and resolves the correct `%APPDATA%` DB path (fails with the expected "no database" — app not yet run here).
 
 **Machine notes (not repo):** working copy restored from a GitHub zip extract by `git init` + fetch + pointing main at origin/main (tree matched HEAD exactly). Toolchain installed for the better-sqlite3 Electron-ABI rebuild (no prebuild exists for Electron 43 / ABI v148): Python 3.12 (winget, user scope) + VS Build Tools 2022 with VCTools. PowerShell quirk: it strips a bare `--`, so pass CLI flags as `npm run backtest '--' --last 50` (quoted) or run from Git Bash.
@@ -362,11 +752,13 @@ docs/{HANDOFF,INSTALAR(new)}.md.
 **Files:** scripts/electron-node.mjs (new), scripts/backtest.mjs, src/main/backtest/cli.ts, package.json, .gitignore (.claude/settings.local.json), docs/worklog.md.
 
 ## 2026-07-02 — WP-011 — Backtesting harness
+
 **Done:** `src/main/backtest/` — `reconstruct.ts` rebuilds an approximate GameState at every timeline frame: items from ITEM_PURCHASED/SOLD/DESTROYED/UNDO, levels+CS+**exact gold** from participantFrames, K/D/A from the kill feed, objectives from ELITE_MONSTER_KILL/BUILDING_KILL; documented gaps (no death state, no runes, enemy items = purchase-event visibility, which matches the live constraint). `harness.ts` replays frames through `recommend()` and computes top-1/top-3 agreement (a hit = the completed item OR any component in its tree — component-vs-completed handling), overall, by champion and by phase (early <14 / mid 14-25 / late >25), plus an inspectable worst-disagreements list with the engine's reasons. CLI: **`npm run backtest -- --champion X --last 50 [--db path]`** prints the report and dumps JSON to `reports/`. 11 new tests: reconstruction sanity (gold matches the timeline EXACTLY at every frame; final-frame items equal the final build with the enriched fixture event stream; levels/kills/objectives), harness metrics coherence, and the CLI end-to-end over a real DB file. CLI also smoke-run manually against a seeded demo DB — report attached below.
 
-**First report (synthetic fixture, 1 match):** top-1 14.3%, top-3 17.9%; mid-game 25/33%. The misses are *correct*: the synthetic player rushes IE before boots (baseline is boots-first) and the fixture's enemy comp turns magic-heavy → the engine pushes Banshee while the player builds damage. Conclusion for the reviewer: the harness discriminates as designed, but **threshold tuning must wait for real ingested games** — tuning against synthetic data would be circular. No thresholds changed this session (deviation from the "one tuning pass" criterion, justified: no real data available).
+**First report (synthetic fixture, 1 match):** top-1 14.3%, top-3 17.9%; mid-game 25/33%. The misses are _correct_: the synthetic player rushes IE before boots (baseline is boots-first) and the fixture's enemy comp turns magic-heavy → the engine pushes Banshee while the player builds damage. Conclusion for the reviewer: the harness discriminates as designed, but **threshold tuning must wait for real ingested games** — tuning against synthetic data would be circular. No thresholds changed this session (deviation from the "one tuning pass" criterion, justified: no real data available).
 
 **Deviations:**
+
 - CLI runs through vitest under Electron's node (wrapper `scripts/backtest.mjs` → `vitest.backtest.config.ts` → `scripts/backtest.runner.ts`): the harness is TS with path aliases and needs the Electron-ABI better-sqlite3 — same single-ABI strategy as `npm test`. Zero new dependencies.
 - Synthetic timeline enriched with a realistic purchase/destroy/sell event stream for the owner (needed for honest reconstruction tests); regenerated fixture committed.
 
@@ -375,18 +767,21 @@ docs/{HANDOFF,INSTALAR(new)}.md.
 **Files:** src/main/backtest/{reconstruct,harness,cli}.ts, scripts/{backtest.mjs,backtest.runner.ts}, vitest.backtest.config.ts, src/main/engine/normalize.ts (computeAggregates exported), package.json, tsconfig.node.json, fixtures/riot/timeline.json (item events), tests/main/backtest.test.ts.
 
 ## 2026-07-02 — WP-010 — Post-game auto-ingestion + history view
+
 **Done:** `PostGameIngestor` (src/main/postgame.ts) — on `postGame` phase, retries fetching the just-finished match on a 30s/60s/60s/60s/120s schedule (Riot publishes in ~1-3 min), stores match+timeline via repos, links the newest unlinked live_session (`linkMatch`: matchId + WIN/LOSS + patch), cancels on new game, gives up cleanly after the schedule, silently skips without API context. `settings:set` now re-resolves the puuid in the background when the riotId changes, so auto-ingest works without a prior full sync. `HistoryService` (pure read-side): match list with CS/min, champion filter, winrate+CS/min aggregates over the last 20, detail with final build (slots 0-5, trinket excluded) and owner per-minute gold curve from the stored timeline — fully offline for stored matches. IPC: `history:list/aggregates/champions/detail` + `history:changed` push after auto-ingest. UI Historial: aggregates chips, filterable list (result color, champion icon, KDA, CS/min, duración, parche, fecha), expandable drawer with build icons + gold SVG sparkline; auto-refreshes on `history:changed`. 16 new tests (ingestor with fake timers: success/retry/give-up/already-stored-link/no-context/cancel; service vs hand-computed aggregates and fixture gold curve; renderer view incl. filter + drawer).
 
-**Deviations:** post-game linking picks the latest *unlinked* session (championName cross-check would add safety; noted in INBOX). Aggregates window = last 20 matches overall (per spec "last 20"), not 20 per champion.
+**Deviations:** post-game linking picks the latest _unlinked_ session (championName cross-check would add safety; noted in INBOX). Aggregates window = last 20 matches overall (per spec "last 20"), not 20 per champion.
 
 **Gaps (owner):** end-to-end "finish a real game → appears in Historial within 5 min" needs a real game + API key.
 
 **Files:** src/main/{postgame,history,history-ipc}.ts, src/main/riot/index.ts (getRiotContext/getOwnerPuuid + puuid re-resolution), src/main/db/repos/{matches,liveSessions}.ts (ownerMatches, linkMatch), src/main/index.ts, src/shared/{history.ts,ipc.ts}, src/renderer/src/components/HistoryView.tsx, tests/main/{postgame,history-service}.test.ts, tests/renderer/{history.test.tsx,app.test.tsx}.
 
 ## 2026-07-02 — WP-009 — Recommendation panel + curated baselines
+
 **Done:** `baselines/pool.json` (schema-validated via `src/shared/schemas/baselines.ts`; every champion/item asserted to exist and be SR-purchasable in the cached patch). `nextbuy.ts`: baseline next-buy — first unfinished core item, recursive missing-cost over the item graph, gold-aware three-way answer (completa YA / compra componente más caro asequible camino a X / guarda oro, te faltan N), core-order reasons ("2º objeto de tu build de Jinx"). `recommend.ts`: merges next-buy with WP-007 rules, +10 boost cuando la regla recomienda un item de tus situacionales, dedupe conservando todas las razones, ranking. Wired live: `gamestate:recommendations` IPC each snapshot; persisted into new `live_recommendations` table (migration 003) only when the top-3 set changes. UI: recommendation card — item icon, nombre, acción (COMPRA YA / PRÓXIMA COMPRA / ESPERA), top-3 razones, chips con alternativas, e historial auditable de recomendaciones de la partida. 18 new tests: pool validation, missing-cost math, next-buy branches, **full build simulation per pool champion** (granting each recommendation walks the core build exactly in order), situational boost, latency (<50ms per pass, measured), UI card incl. history.
 
 **Deviations:**
+
 - **ADR-006 still open** — the pool is an explicit PLACEHOLDER (Jinx/Ahri/Malphite/Vi/Leona, matching the test fixtures). Owner must replace `pool.json` with the real champion pool; the schema test will validate it automatically. Flagged in INBOX + pool file comment.
 - Rune page in baselines is informational (`runePageName`) in v1 — rune import is phase 2.
 
@@ -395,9 +790,11 @@ docs/{HANDOFF,INSTALAR(new)}.md.
 **Files:** src/main/engine/baselines/pool.json, src/shared/schemas/baselines.ts, src/main/engine/{nextbuy,recommend}.ts, src/main/db/migrations/003_live_recommendations.sql (+index), src/main/db/repos/liveSessions.ts, src/main/liveclient/index.ts, src/shared/ipc.ts, src/renderer/src/components/{RecommendationCard,LiveView}.tsx, src/renderer/src/App.tsx, tests/main/nextbuy.test.ts, tests/renderer/recommendation-card.test.tsx.
 
 ## 2026-07-02 — WP-008 — UI shell + live panel
+
 **Done:** real app shell — sidebar (Live / Historial / Ajustes), dark theme, Spanish UI. Live view: session phase banner; designed empty states for idle / clientOpen / postGame / connecting; champ select placeholder (champion ids + own position, recommendations = phase 2); in-game panel with both teams (champion icon, level, KDA, CS, item icons, death overlay with respawn countdown, self highlighted), enemy damage-split bar + tankiness gauge (vs the engine baseline) + healing chip ("considera antiheal" at the rule threshold), objectives row (dragon subtypes, barones, heraldos, torres per team). Ajustes: riotId + region + sync with progress + **recording toggle** (persisted setting `settings.recordLive`, consulted live; env RECORD_LIVE still forces on; recorder still refuses to run packaged). Historial: designed placeholder pointing at WP-010. Icons: **`ddicon://` custom protocol** in main — serves item/champion icons from a userData cache, lazily downloading each icon from the CDN once; renderer only ever hits `ddicon://` (CSP updated accordingly). 12 renderer tests (all phase states, navigation, in-game panel against a committed normalized GameState fixture, dead overlay, icon srcs asserted to be ddicon://).
 
 **Deviations:**
+
 - WP-002 skipped icon downloads; instead of bulk-downloading ~900 icons up front, icons cache lazily on first display via the protocol. After one game the cache is warm and everything is local. Flagging vs the "icons served from local cache not CDN at runtime" checklist: first-ever display of an icon does hit the CDN once.
 - Normalized GameState fixtures (`fixtures/gamestate/*.json`) committed for renderer tests (renderer must not import main-process code to build one).
 - New dev dependency `@testing-library/user-event` (standard companion of testing-library, for navigation tests).
@@ -407,9 +804,11 @@ docs/{HANDOFF,INSTALAR(new)}.md.
 **Files:** src/renderer/src/{App.tsx,hooks.ts,components/{Sidebar,LiveView,TeamPanel,Gauges,ObjectivesRow,SettingsView,HistoryView}.tsx}, src/renderer/index.html (CSP), src/main/icons.ts, src/main/index.ts, src/main/staticdata/manager.ts (getLoadedPatch), src/main/liveclient/index.ts (recording toggle), src/main/riot/index.ts + src/main/db/repos/settings.ts (recordLive), src/shared/ipc.ts, fixtures/gamestate/*.json, tests/renderer/{app.test.tsx,liveview.test.tsx}; removed SettingsStub.tsx.
 
 ## 2026-07-02 — WP-007 — Rules engine v1
+
 **Done:** `src/main/engine/rules/` — five rules, each in its own file, all pure: **antiheal** (healing index ≥3.5 → Executioner's/Oblivion Orb per own damage class, gold-aware buy-now vs te-faltan-N, ally-coverage discount), **armor-vs-mr** (damage share ≥62% → concrete options per own class: tanks Thornmail/Randuin/Frozen Heart o Visage/FoN; squishies GA/Zhonya o Banshee/Kaenic), **anti-tank** (effective-HP baseline `900+1.9·t`; team ≥1.15× o raid boss ≥1.45× → LDR/Serylda, BotRK vs HP-stackers sin resistencias, Void/Liandry para AP), **anti-burst** (asesino/mago fed: K-D≥4 y ≥5 kills → GA/Zhonya/Mercurial según amenaza y perfil propio), **spike-now** (completar objetos desde componentes en inventario: "puedes completar X YA" / "espera N oro" / objetivo de próxima base; prefiere items finales sobre épicos intermedios; excluye botas t3 feat-gated). Combiner: agrupa por item/categoría, score = max + 10 por regla extra (cap 100), conserva TODAS las razones, prioritize > add > delay, ranking desc. Thresholds en `thresholds.ts` con cada número justificado. Todas las razones en español con números concretos. 28 tests table-driven (positivos + negativos por regla, combiner, purity test que escanea los fuentes del engine buscando imports de I/O prohibidos).
 
 **Deviations:**
+
 - Item ids are constants verified against the cached patch at rule-time via `availableOnSR` (rule skips missing ids); ids checked by hand against 16.13.1 during the session.
 - Tankiness baseline calibrated on the synthetic fixtures — first tuning pass belongs to WP-011 as specced.
 
@@ -418,9 +817,11 @@ docs/{HANDOFF,INSTALAR(new)}.md.
 **Files:** src/main/engine/rules/{types,thresholds,helpers,antiheal,armor-vs-mr,anti-tank,anti-burst,spike-now,combiner}.ts, src/main/engine/index.ts, src/shared/recommendation.ts, tests/main/rules.test.ts.
 
 ## 2026-07-02 — WP-006 — GameState normalizer + diff engine
+
 **Done:** `src/shared/gamestate.ts` (GameState: self with exact gold/stats/runes, allies[4]/enemies[5], objectives by team, team aggregates). Pure normalizer `src/main/engine/normalize.ts`: item resolution via the WP-002 graph (isCompleted = depth≥2 ∧ (no upgrades ∨ Boots — tier-3 boot upgrades exist in 16.x)), estimated combat stats (base+growth+visible items), **documented gold model** (500 start + 2.04/s from 1:50 + 21/CS + 300/kill + 150/assist), damage split (60% curated champion profile + 40% AD-vs-AP item gold, weighted by estimated gold), tankiness = mean effective HP vs 50/50 attacker, healing index (curated champion weights + lifesteal item tags), objectives parsed from the event feed (turret side from `Turret_T1/T2` naming; killer names used ONLY internally for team attribution). Deterministic diff engine (`itemCompleted` count-aware, levelUp, died/respawned, objectiveTaken incl. dragon subtype). Wired: snapshots → normalize → `gamestate:update` IPC + `gamestate:events`; renderer placeholder shows enemy damage split / tankiness / healing / own gold. 25 new tests (normalizer over early/mid/late fixtures with hand-computed expectations, split/tankiness/healing invariants, objectives, diff replay over a 6-snapshot session, gold-vs-timeline ±15% at min 10/20 for all 10 participants).
 
 **Deviations / honesty notes:**
+
 - Early/mid/late snapshots and the diff session are **synthetic fixtures** (10 players, real item ids and es_ES names pulled from the committed ddragon patch). The acceptance criterion asks for real recorded ones — owner records, then these tests rerun unchanged.
 - The gold ±15% comparison currently runs against the **synthetic timeline** (realistic shape, per-role ±10% deviation from the model), so it validates wiring, not real-world calibration. True calibration comes with WP-011 over real ingested timelines. Flagged clearly.
 - `allies` excludes self (spec says "allies[5]" — self is its own field; documented in gamestate.ts).
@@ -429,9 +830,11 @@ docs/{HANDOFF,INSTALAR(new)}.md.
 **Files:** src/shared/gamestate.ts, src/main/engine/{normalize,diff}.ts, src/main/liveclient/index.ts, src/shared/ipc.ts, src/renderer/src/App.tsx, fixtures/liveclient/{early,mid,late}.json, fixtures/liveclient/session/*.json, fixtures/riot/timeline.json (gold recalibrated), tests/main/{normalize,diff,gold-vs-timeline}.test.ts, tests/main/helpers/staticdata.ts.
 
 ## 2026-07-02 — WP-005 — LCU connector + session phase state machine
-**Done:** `src/main/lcu/` wrapping league-connect 6.0.0-rc13 (only these files import it): credential discovery with `awaitConnection`, WS connect with retries, reconnect loop surviving client kills, subscriptions to `/lol-gameflow/v1/gameflow-phase` + `/lol-champ-select/v1/session`, initial phase fetched via REST (subscriptions only fire on change). `src/main/session/machine.ts`: pure `computeSessionPhase` — :2999 polling is the source of truth for `inGame`; LCU distinguishes `champSelect`/`postGame`/`clientOpen`; nothing connected → `idle`; loading screen (LCU InProgress, port down) → `clientOpen`. `SessionMachine` emits only on change → `session:phase` IPC + `session:get` invoke. Champ select sanitized in `src/shared/schemas/lcu.ts` **using plain z.object() which strips unknown keys — puuid/summonerId/gameName/tagLine/obfuscated* are actively removed** before `session:champselect` leaves main; enemy entries carry championId+cellId only. `docs/lcu-endpoints.md` written. 21 new tests (phase table incl. full cycle + client-kill recovery, sanitizer identity-stripping asserted on a fixture that contains identity fields).
+
+**Done:** `src/main/lcu/` wrapping league-connect 6.0.0-rc13 (only these files import it): credential discovery with `awaitConnection`, WS connect with retries, reconnect loop surviving client kills, subscriptions to `/lol-gameflow/v1/gameflow-phase` + `/lol-champ-select/v1/session`, initial phase fetched via REST (subscriptions only fire on change). `src/main/session/machine.ts`: pure `computeSessionPhase` — :2999 polling is the source of truth for `inGame`; LCU distinguishes `champSelect`/`postGame`/`clientOpen`; nothing connected → `idle`; loading screen (LCU InProgress, port down) → `clientOpen`. `SessionMachine` emits only on change → `session:phase` IPC + `session:get` invoke. Champ select sanitized in `src/shared/schemas/lcu.ts` _*using plain z.object() which strips unknown keys — puuid/summonerId/gameName/tagLine/obfuscated* are actively removed_* before `session:champselect` leaves main; enemy entries carry championId+cellId only. `docs/lcu-endpoints.md` written. 21 new tests (phase table incl. full cycle + client-kill recovery, sanitizer identity-stripping asserted on a fixture that contains identity fields).
 
 **Deviations:**
+
 - New dependency `league-connect@6.0.0-rc13` — mandated by CLAUDE.md stack; rc is the only 6.x line published.
 - Champ select fixture is synthetic (shape-accurate, WITH identity fields to prove stripping); owner should record a real session for the acceptance criterion.
 
@@ -440,9 +843,11 @@ docs/{HANDOFF,INSTALAR(new)}.md.
 **Files:** src/main/lcu/{connector,index}.ts, src/main/session/machine.ts, src/shared/{session.ts,schemas/lcu.ts}, src/shared/ipc.ts, src/main/{index.ts,liveclient/index.ts}, docs/lcu-endpoints.md, fixtures/lcu/champselect-session.json, tests/main/{session-machine,lcu-champselect}.test.ts.
 
 ## 2026-07-02 — WP-004 — Riot API client + rate limiter + history ingestion
+
 **Done:** `src/main/riot/` — `RiotRateLimiter` (token buckets for app limits 20/1s + 100/120s AND per-method limits, fixed windows; priority queue with no head-of-line blocking across methods; `Retry-After` honored on 429 with replay through the queue so retries consume fresh tokens; 403 → persistent `RiotKeyInvalidError`, everything fails fast until `reset()`, no retry storm). Typed `RiotClient` (account-v1 by-riot-id, match-v5 ids/match/timeline, league-v4 entries by-puuid) with platform→regional routing map, zod validation of every payload (`src/shared/schemas/riot.ts`), `Result`-style returns, API key only in the `X-Riot-Token` header and never in error messages. Resumable `ingestHistory` walking matchlist newest→oldest, skipping stored ids (resume = skip, no re-download), owner-centric `matches.win`, progress via `ingest:progress` IPC. Settings (riotId/platform/puuid cache) in the meta table; `ingest:start`/`settings:get`/`settings:set` IPC; renderer settings stub with sync button + progress bar. Zero-dep `.env` loader (`src/main/env.ts`). 18 new tests (limiter with fake timers incl. burst/120s window/429 replay/method independence/priority/403; client against fixtures; ingestion store/resume/fail/cancel/maxMatches).
 
 **Deviations:**
+
 - Match + timeline fixtures are **synthetic but shape-accurate** (anonymized PLAYER_1..10): no API key available in this session to record real ones. Owner: after configuring `.env`, run one sync and consider re-recording fixtures from a real response (INBOX).
 - Per-method limits use conservative defaults (200/10s for match-v5) rather than parsing `X-Method-Rate-Limit` response headers dynamically; noted in INBOX as an improvement.
 - `maxMatches` for the UI sync is set to 200 per the acceptance criterion ("last 200 matches").
@@ -453,9 +858,11 @@ docs/{HANDOFF,INSTALAR(new)}.md.
 **Files:** src/main/riot/{limiter,client,ingest,index}.ts, src/shared/schemas/riot.ts, src/main/env.ts, src/main/modules.d.ts, src/main/db/repos/settings.ts, src/shared/ipc.ts, src/preload/index.ts, src/main/index.ts, src/renderer/src/{SettingsStub.tsx,App.tsx}, fixtures/riot/{match,timeline}.json, tests/main/riot-*.test.ts.
 
 ## 2026-07-02 — WP-003 — SQLite store + schema
+
 **Done:** migration 002 creating `matches`, `participants` (items0-6 + kda/cs/gold/damage/vision aggregates), `timelines`, `live_sessions`, `live_snapshots`, with indices on participants.champion, participants.puuid, matches.gameCreation, all STRICT tables with FK cascade. Repo layer `src/main/db/repos/` (`MatchRepo`, `TimelineRepo`, `LiveSessionRepo`) — idempotent inserts via INSERT OR IGNORE inside transactions, no SQL outside repos. Live Client wired to persist every validated snapshot into live_sessions/live_snapshots (`LiveSessionPersister`: new session on game-time reset, session closed when port drops; file recorder unchanged for fixtures). 10 new tests: round-trips for every table, idempotency, champion/recency queries, session lifecycle, and a 900-snapshot size check.
 
 **Deviations:**
+
 - **Snapshots stored gzip-compressed (BLOB)**: 900 × ~30KB raw JSON ≈ 27MB > the 20MB acceptance budget; gzip is lossless and brings a padded 900-snapshot game to well under 20MB (verified by test). Transparent in the repo API.
 - `live_sessions.championName` stores the champion display name (string) rather than a numeric id — that's what the Live Client exposes; `patch` stays NULL until WP-010 links the real match.
 - Raw JSON columns are re-validated on read as JSON objects only; full match-v5 zod validation happens at ingestion (WP-004) — reads shouldn't re-run 1000-line schemas on every query. Flagging for review vs the checklist wording.
@@ -464,19 +871,23 @@ docs/{HANDOFF,INSTALAR(new)}.md.
 **Files:** src/main/db/migrations/002_match_storage.sql, src/main/db/migrations/index.ts, src/main/db/repos/{matches,liveSessions,index}.ts, src/main/liveclient/{persist,index}.ts, src/main/index.ts, tests/main/{repos,live-persist}.test.ts.
 
 ## 2026-07-02 — WP-002 — Static data manager (Data Dragon)
+
 **Done:** `src/main/staticdata/` — `StaticDataManager` downloading item/champion/runesReforged (es_ES) for the latest patch into `<userData>/staticdata/<patch>/`, serving from cache when offline (newest cached patch) and never re-downloading a cached patch; zod schemas in `src/shared/schemas/ddragon.ts`; item graph (buildsFrom/buildsInto, total & recipe gold, purchasable, SR-only filter, component tree + upgrade-chain helpers); gold-efficiency helper with documented per-stat gold values (derived from basic items); champion stat-at-level using Riot's non-linear growth formula (`(n-1)*(0.7025+0.0175*(n-1))`, AS as % of base); hand-curated `champion-damage-profile.json` covering all 173 champions of patch 16.13.1. Lookup maps by ddragon id, display name and numeric key. Real fixture files committed under `fixtures/ddragon/16.13.1/`. 26 new tests (schemas, IE component/gold math, boots chain, stat-at-level vs hand-computed values, efficiency %, cache behavior with mocked fetch, profile completeness).
 
 **Deviations / judgment calls:**
+
 - Damage profile for champions released after my knowledge (Locke, Yunara, Zaahen) is a best-effort guess (physical/physical/mixed) — **owner should verify these three**. The completeness test will also fail loudly whenever a new patch adds a champion, which is the desired behavior.
 - Gold-per-stat table is constants (matching current basic items) rather than recomputed per patch; documented in `goldefficiency.ts`. Fine while basic item ratios stay stable — revisit if Riot rebalances basics.
 - Per-champion detail files (`champion/<Name>.json`) deferred until something needs spell data; base `champion.json` covers all WP-006/007 needs. Noted in INBOX.
 
-**Files:** src/main/staticdata/{manager,itemgraph,champstats,goldefficiency,index}.ts, src/main/staticdata/champion-damage-profile.json, src/shared/schemas/ddragon.ts, fixtures/ddragon/16.13.1/*, tests/main/{staticdata-*,itemgraph,champstats,goldefficiency}.test.ts.
+**Files:** src/main/staticdata/{manager,itemgraph,champstats,goldefficiency,index}.ts, src/main/staticdata/champion-damage-profile.json, src/shared/schemas/ddragon.ts, fixtures/ddragon/16.13.1/_, tests/main/{staticdata-_,itemgraph,champstats,goldefficiency}.test.ts.
 
 ## 2026-07-02 — WP-001 — Live Client connector + payload recorder
+
 **Done:** `src/main/liveclient/` — poller with `unavailable → polling` states, 2s cadence in game, exponential backoff 2→4→8→10s cap when port closed, never crashes with LoL closed; https transport with `certs/riotgames.pem` pinned as the ONLY trusted CA (downloaded from Riot's official docs; bundled via electron-builder `extraResources`); zod schema `src/shared/schemas/liveclient.ts` (loose objects: required fields validated, unknown tolerated); recorder (`RECORD_LIVE=1`, dev-only, refuses to run packaged) dumping raw snapshots to `fixtures/recordings/<timestamp>/<gametime>.json` with new-dir-on-game-reset; anonymizer `npm run fixtures:anonymize` (PLAYER_1..N consistent per session, also covers KillerName/VictimName/Assisters in the event feed, taglines → TAG); IPC `live:snapshot` + `live:state` push channels with typed `window.api.on` and preload allowlist; renderer placeholder shows game clock + player list. Official sample payload committed to `fixtures/`. 14 new tests (schema incl. malformed/passthrough cases, poller with fake timers, recorder, renderer).
 
 **Deviations:**
+
 - **Transport uses `node:https`, not global fetch:** Node's fetch cannot pin a per-request CA without adding the `undici` dependency; node:https is stdlib and gives explicit `ca:` control. TLS verification is never disabled.
 - **Hostname check skipped for the loopback connection only:** the game's cert doesn't carry `127.0.0.1` as SAN, so `checkServerIdentity` is a no-op for this single, hard-coded `127.0.0.1:2999` request while the chain-of-trust against the pinned Riot CA remains fully enforced. This is the standard approach for this API; flagging for review.
 - Poller validation failure (reachable but malformed) stays in `polling` cadence and reports via `onValidationError` instead of backing off — a live game is running, so backing off would just delay recovery.
@@ -486,9 +897,11 @@ docs/{HANDOFF,INSTALAR(new)}.md.
 **Files:** src/main/liveclient/{index,poller,recorder,transport}.ts, src/shared/schemas/liveclient.ts, src/shared/ipc.ts, src/main/ipc.ts (broadcast), src/main/index.ts, src/preload/index.ts, src/renderer/src/App.tsx, scripts/anonymize-fixtures.mjs, electron-builder.yml, certs/riotgames.pem, fixtures/liveclientdata_sample.json, tests/main/liveclient-*.test.ts, tests/renderer/{app.test.tsx,setup.ts}, eslint.config.js, package.json.
 
 ## 2026-07-02 — WP-000 — Repo bootstrap
+
 **Done:** electron-vite scaffold (main/preload/renderer, TS strict + noUncheckedIndexedAccess), React 18 + Tailwind 4, typed IPC (`src/shared/ipc.ts`, `app:ping` demo with preload allowlist, contextIsolation on / nodeIntegration off), better-sqlite3 with idempotent migration runner (`schema_migrations` tracking, migration 001 `meta` table, SQL imported as `?raw` so the main bundle is self-contained), vitest (node + jsdom projects) + eslint 10 flat config (typescript-eslint typeChecked) + prettier, scripts `dev/build/test/check`, `.env.example`, `certs/README.md` placeholder, GitHub Actions running `npm run check`.
 
 **Deviations:**
+
 - **Native-module ABI strategy:** Electron 43 bundles Node 24.17; system Node is 25.x, so one better-sqlite3 build cannot serve both. Decision: `postinstall` runs `electron-builder install-app-deps` (compiles for Electron ABI) and `npm test` runs vitest through Electron's own Node (`ELECTRON_RUN_AS_NODE=1 electron node_modules/vitest/vitest.mjs run`). Single ABI everywhere; verified working. Note: the test script uses POSIX env syntax (owner is on macOS, CI on ubuntu).
 - Vite pinned to ^7 and @vitejs/plugin-react to ^5: electron-vite 5.0 does not support vite 8 yet.
 - TypeScript 6 deprecates `baseUrl`; path aliases declared relative to tsconfig instead.
