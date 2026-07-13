@@ -16,9 +16,8 @@ const OLLAMA_URL = 'http://127.0.0.1:11434'
 export const DEFAULT_COACH_MODEL = 'gemma3:4b'
 
 /**
- * The mascot's voice, shared by every prompt. Gamer/geek registers well with
- * the owner; the champion in the data is always THE PLAYER — second person
- * only. The name follows the active identity (Bitxo).
+ * Shared product voice. The champion in the data is always THE PLAYER; the
+ * model addresses them directly without introducing or role-playing itself.
  */
 export function buildPersona(name: string, t: Translator = translators.es): string {
   return t('coach.persona', { name })
@@ -28,6 +27,25 @@ const tagsSchema = z.object({
   models: z.array(z.object({ name: z.string() }))
 })
 const generateSchema = z.object({ response: z.string() })
+
+/**
+ * Last-mile guard for small local models that ignore voice instructions.
+ * Removes decorative emoji and a leading mascot/coach introduction while
+ * preserving the actual analysis that follows it.
+ */
+export function sanitizeCoachText(raw: string): string {
+  let text = raw
+    .replace(/[\p{Extended_Pictographic}\uFE0F]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/^["'«]+|["'»]+$/g, '')
+    .trim()
+  const introduction =
+    /^(?:(?:hola|hello|hi)[,.!;:\s-]*)?(?:(?:soy|me llamo|i['’]?m|i am)\s+[\p{L}\p{N}_-]+|(?:como|as)\s+(?:(?:tu|your)\s+)?(?:coach|mascota|acompañante|asistente|companion|mascot|assistant))[^.!?;:]{0,100}[.!?;:]\s*/iu
+  const nameHere = /^[\p{L}\p{N}_-]+\s+(?:aquí|al habla|here)[,.!;:\s-]*/iu
+  text = text.replace(introduction, '').replace(nameHere, '').trim()
+  return text.replace(/\s+/g, ' ')
+}
 
 export interface OllamaStatus {
   available: boolean
@@ -49,7 +67,7 @@ export async function ollamaStatus(url: string = OLLAMA_URL): Promise<OllamaStat
 /** The report's facts, serialized for the model, with an anti-hallucination frame. */
 export function buildCoachPrompt(
   report: PostGameReport,
-  personaName = 'Bitxo',
+  personaName = 'Hexi',
   t: Translator = translators.es
 ): string {
   const facts = {
@@ -86,7 +104,7 @@ export function buildCoachPrompt(
 /** Champ-select facts (comp analysis + ranked picks), anti-hallucination framed. */
 export function buildDraftPrompt(
   insights: ChampSelectInsights,
-  personaName = 'Bitxo',
+  personaName = 'Hexi',
   t: Translator = translators.es
 ): string {
   const facts = {
@@ -162,7 +180,7 @@ export async function generateCoachAdvice(
     }
     const parsed = generateSchema.safeParse(await response.json())
     if (!parsed.success) return { ok: false, error: t('coach.err.invalid') }
-    const text = parsed.data.response.trim()
+    const text = sanitizeCoachText(parsed.data.response)
     if (text === '') return { ok: false, error: t('coach.err.empty') }
     return { ok: true, text }
   } catch (error) {
@@ -174,4 +192,3 @@ export async function generateCoachAdvice(
     }
   }
 }
-

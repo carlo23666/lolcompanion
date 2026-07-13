@@ -84,6 +84,8 @@ export const playerSchema = z.looseObject({
   isBot: z.boolean(),
   isDead: z.boolean(),
   respawnTimer: z.number(),
+  currentHealth: z.number().optional(),
+  maxHealth: z.number().optional(),
   position: z.string().optional(),
   items: z.array(playerItemSchema),
   scores: z.looseObject({

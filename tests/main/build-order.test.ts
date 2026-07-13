@@ -15,7 +15,12 @@ import { MetaCrawler, type MetaCrawlerClient } from '@main/riot/metacrawler'
 import { RiotApiError } from '@main/riot/client'
 import { isFinishedBuildItem } from '@main/staticdata/itemgraph'
 import type { StaticData } from '@main/staticdata/manager'
-import { matchSchema, timelineSchema, type RiotMatch, type RiotTimeline } from '@shared/schemas/riot'
+import {
+  matchSchema,
+  timelineSchema,
+  type RiotMatch,
+  type RiotTimeline
+} from '@shared/schemas/riot'
 import { metaSeedSchema } from '@shared/schemas/meta-seed'
 import type { GameState } from '@shared/gamestate'
 import type { BaselinePool } from '@shared/schemas/baselines'
@@ -91,12 +96,20 @@ describe('aggregateTimelineOrder', () => {
       [LDR, 3, false]
     ])
     expect(jinx.every((row) => row.role === 'BOTTOM')).toBe(true)
+    const jinxRoute = order.routes.find((row) => row.champion === 'Jinx')
+    expect(jinxRoute?.itemIds).toEqual([IE, BERSERKERS, LDR])
+    expect(jinxRoute?.starterId).toBe(1055)
   })
 
   it('counts a repurchased item once (first occurrence)', () => {
     const doubled = structuredClone(baseTimeline)
     const lastFrame = doubled.info.frames[doubled.info.frames.length - 1]
-    lastFrame?.events.push({ type: 'ITEM_PURCHASED', timestamp: 9999000, participantId: 3, itemId: IE })
+    lastFrame?.events.push({
+      type: 'ITEM_PURCHASED',
+      timestamp: 9999000,
+      participantId: 3,
+      itemId: IE
+    })
     const order = aggregateTimelineOrder(baseMatch, doubled, isOrderable)
     const jinxIE = order?.items.filter((row) => row.champion === 'Jinx' && row.itemId === IE)
     expect(jinxIE).toHaveLength(1)
@@ -132,6 +145,9 @@ describe('MetaRepo order stats', () => {
     const ldr = stats.find((row) => row.itemId === LDR)
     expect(ldr?.slotSum).toBe(3)
     expect(ldr?.firstGames).toBe(0)
+    expect(meta.topRoutes('Jinx', 'BOTTOM', '16.13')).toEqual([
+      { starterId: 1055, items: [IE, BERSERKERS, LDR], games: 1, wins: 1 }
+    ])
   })
 
   it('matchesNeedingTimeline lists aggregated matches without order data, never skips', () => {
@@ -186,7 +202,8 @@ describe('resolveBaseline with order data', () => {
   it('orders the core by average completion slot, not frequency', () => {
     const baseline = resolveBaseline(nasusState, staticData, emptyPool, orderedMeta())
     expect(baseline?.source).toBe('meta')
-    expect(baseline?.core.slice(0, 4)).toEqual([ICEBORN, STEELCAPS, SPIRIT_VISAGE, THORNMAIL])
+    expect(baseline?.core).toEqual([ICEBORN, STEELCAPS, SPIRIT_VISAGE])
+    expect(baseline?.situational[0]).toBe(THORNMAIL)
   })
 
   it('excludes components from the baseline even when frequent', () => {
@@ -386,8 +403,8 @@ describe('MetaCrawler with timelines', () => {
   })
 })
 
-describe('meta seed v2 (order rows)', () => {
-  it('round-trips order stats through export/import', () => {
+describe('meta seed route compatibility', () => {
+  it('v3 round-trips order and coherent route stats', () => {
     const source = makeRepo()
     const aggregate = aggregateMatch(baseMatch)
     if (!aggregate) throw new Error('aggregate null')
@@ -397,19 +414,47 @@ describe('meta seed v2 (order rows)', () => {
     source.applyOrderAggregate(order)
 
     const seed = metaSeedSchema.parse({
-      version: 2,
+      version: 3,
       exportedAt: '2026-07-08T00:00:00Z',
       ...source.exportSeed('16.13')
     })
     expect(seed.itemOrder?.some((row) => row.itemId === IE && row.firstGames === 1)).toBe(true)
+    expect(
+      seed.buildRoutes?.some(
+        (row) => row.route === `${String(IE)},${String(BERSERKERS)},${String(LDR)}`
+      )
+    ).toBe(true)
 
     const target = makeRepo()
     expect(target.importSeed(seed)).toBe(true)
-    expect(target.orderStatsFor('Jinx', 'BOTTOM', '16.13').find((row) => row.itemId === IE)).toEqual(
-      { itemId: IE, orderGames: 1, slotSum: 1, firstGames: 1 }
-    )
+    expect(
+      target.orderStatsFor('Jinx', 'BOTTOM', '16.13').find((row) => row.itemId === IE)
+    ).toEqual({ itemId: IE, orderGames: 1, slotSum: 1, firstGames: 1 })
+    expect(target.topRoutes('Jinx', 'BOTTOM', '16.13')[0]?.starterId).toBe(1055)
     // Order data came with the seed: no backfill wanted on this machine.
     expect(target.matchesNeedingTimeline(10)).toEqual([])
+  })
+
+  it('imports a true v2 seed and leaves only the missing route pass open', () => {
+    const source = makeRepo()
+    const aggregate = aggregateMatch(baseMatch)
+    if (!aggregate) throw new Error('aggregate null')
+    source.applyAggregate(aggregate)
+    const order = aggregateTimelineOrder(baseMatch, baseTimeline, isOrderable)
+    if (!order) throw new Error('order null')
+    source.applyOrderAggregate(order)
+    const exported = source.exportSeed('16.13')
+    const seed = metaSeedSchema.parse({
+      version: 2,
+      exportedAt: '2026-07-08T00:00:00Z',
+      ...exported,
+      buildRoutes: undefined
+    })
+    const target = makeRepo()
+    expect(target.importSeed(seed)).toBe(true)
+    expect(target.orderStatsFor('Jinx', 'BOTTOM', '16.13')).not.toEqual([])
+    expect(target.topRoutes('Jinx', 'BOTTOM', '16.13')).toEqual([])
+    expect(target.matchesNeedingTimeline(10)).toEqual([baseMatch.metadata.matchId])
   })
 
   it('still imports a version-1 seed (no order rows) and leaves backfill open', () => {
@@ -418,7 +463,7 @@ describe('meta seed v2 (order rows)', () => {
     if (!aggregate) throw new Error('aggregate null')
     source.applyAggregate(aggregate)
     const exported = source.exportSeed('16.13')
-    const v1Fields = { ...exported, itemOrder: undefined }
+    const v1Fields = { ...exported, itemOrder: undefined, buildRoutes: undefined }
     const seed = metaSeedSchema.parse({
       version: 1,
       exportedAt: '2026-07-08T00:00:00Z',

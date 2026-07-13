@@ -233,6 +233,9 @@ function normalizePlayer(
     position: player.position ?? '',
     isDead: player.isDead,
     respawnTimer: player.respawnTimer,
+    ...(player.currentHealth !== undefined && player.maxHealth !== undefined
+      ? { visibleHealth: { current: player.currentHealth, max: player.maxHealth } }
+      : {}),
     scores: {
       kills: player.scores.kills,
       deaths: player.scores.deaths,

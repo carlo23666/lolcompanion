@@ -24,6 +24,20 @@ describe('allGameDataSchema', () => {
     expect(allGameDataSchema.safeParse(patched).success).toBe(true)
   })
 
+  it('validates optional scoreboard health when the client provides it', () => {
+    const withHealth = structuredClone(sample) as { allPlayers: Record<string, unknown>[] }
+    const player = withHealth.allPlayers[0]
+    if (player === undefined) throw new Error('fixture missing player')
+    player['currentHealth'] = 575
+    player['maxHealth'] = 700
+    const result = allGameDataSchema.safeParse(withHealth)
+    expect(result.success).toBe(true)
+    if (result.success) expect(result.data.allPlayers[0]?.currentHealth).toBe(575)
+
+    player['currentHealth'] = 'hidden'
+    expect(allGameDataSchema.safeParse(withHealth).success).toBe(false)
+  })
+
   it('rejects a payload missing gameData', () => {
     const broken = structuredClone(sample) as Record<string, unknown>
     delete broken['gameData']

@@ -1,16 +1,17 @@
-# Install LoL Companion (beta for friends)
+# Install WinCon (beta for friends)
 
-LoL Companion is a desktop app that watches YOUR live game and history and suggests item
+WinCon is a desktop app that watches YOUR live game and history and suggests item
 buys and picks, with explanations. Everything stays on your PC: no server, no accounts,
 nothing is shared.
 
-**Riot-compliant**: it only uses screen-visible information and your own history. It doesn't
-track enemy cooldowns or read memory. It shouldn't pose any risk to your account, but it's a
-personal project with no warranties.
+The project is designed around Riot's third-party rules: screen-visible live inputs only, no
+enemy cooldown tracking, no identity exposure in ranked champ select, and no memory or packet
+access. No third-party tool can guarantee account outcomes. The local LCU integration used for
+champ select is unsupported by Riot and may change.
 
 ## 1. Install
 
-1. Run `LoL Companion-<version>-setup.exe`.
+1. Run `WinCon-<version>-setup.exe`.
 2. Windows SmartScreen will warn you ("unrecognized app") because the app isn't code-signed:
    click **More info → Run anyway**.
 3. It installs for your user only (no admin needed) and opens when it finishes.
@@ -26,19 +27,20 @@ The app is available in **English and Spanish**. On first run it defaults to Eng
 any time in **Settings → Language**. Everything the app generates — recommendations, tips and
 the optional AI coach — follows your chosen language.
 
-## 3. Get your Riot API key (free, one time)
+## 3. Configure history sync (private/development installs only)
 
-The app needs a Riot key to read your match history. The key is personal: everyone registers
-their own (Riot's rules forbid sharing keys or embedding them in the app), but you do it once
-and it doesn't expire daily.
+The live local workspace does not need an API key. Reading match history calls the Riot Web API.
+The setup below is only appropriate for the owner's private testing/development installs.
+Development and personal keys are not credentials for a publicly distributed consumer app; that
+requires Riot product registration and a production key.
 
 1. Go to <https://developer.riotgames.com> and sign in with your Riot account.
 2. Top right: your profile → **Apps** → **Register App** ("Personal App" portal).
-3. Fill in the basics: a name (e.g. "LoL Companion personal"), a short description ("local
+3. Fill in the basics: a name (e.g. "WinCon personal"), a short description ("local
    desktop companion for my own games, read-only") and choose **Personal App**.
 4. Riot approves it (usually within hours, sometimes instantly) and gives you a **persistent**
    key starting with `RGAPI-`.
-5. In LoL Companion: **Settings → Account → Riot API key** → paste it.
+5. In WinCon: **Settings → Account → Riot API key** → paste it.
 
 While you wait for approval you can use the **Development API Key** from the portal home page —
 it works the same but ⚠️ expires every 24 hours (go back to the site, *Regenerate API Key*,
@@ -61,15 +63,16 @@ In **Settings → Account**:
 - Leave the app open (a second monitor is perfect). It detects the LoL client, champ select and
   the game by itself — nothing to do.
 - **Champ select**: composition analysis and pick suggestions from your history and Master+ data.
-- **In game**: explained buy recommendations, enemy power-spike alerts and objective windows.
-  There's an optional overlay in Settings (needs LoL windowed or borderless; it doesn't work in
-  exclusive fullscreen).
+- **In game**: explained buy recommendations, enemy power-spike alerts, objective windows and
+  conservative isolated-fight hints from visible material only. The optional overlay in Settings
+  can be moved and scaled, and purchase speech includes the item icon and name. It needs LoL in
+  windowed or borderless mode; exclusive fullscreen does not support it reliably.
 - **After**: a game report vs your own averages, history and stats.
 
 ## Known issues
 
 - "Account not found" → check the Riot ID (exact name#TAG) and the region.
-- Sync fails after working yesterday → your key was the development one (24 h) and it expired;
-  register the Personal App in step 3 and it won't happen again.
+- Sync fails after working yesterday → check whether the private development key (24 h) expired
+  and regenerate the credential appropriate for your test environment.
 - The overlay doesn't show → LoL is in exclusive fullscreen; switch it to "borderless".
 - Anything else → screenshot it and send it to Carlo.

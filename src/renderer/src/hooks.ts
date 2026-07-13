@@ -1,7 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import type { IpcEventChannel, IpcEventChannels } from '@shared/ipc'
+import type { MaterialAdvantageReason, MaterialAdvantageSignal } from '@shared/duel'
 import { t as translators, type Translator } from '@shared/i18n'
 import { useT } from './i18n'
+
+const GAME_SCOPED_CHANNELS: ReadonlySet<IpcEventChannel> = new Set([
+  'gamestate:update',
+  'gamestate:events',
+  'gamestate:recommendations',
+  'gamestate:duel',
+  'coach:direction'
+])
 
 /** Subscribes to a push channel and keeps the latest payload as state. */
 export function useIpcEvent<C extends IpcEventChannel>(
@@ -9,17 +18,27 @@ export function useIpcEvent<C extends IpcEventChannel>(
   initial: IpcEventChannels[C] | null = null
 ): IpcEventChannels[C] | null {
   const [value, setValue] = useState<IpcEventChannels[C] | null>(initial)
-  useEffect(() => window.api.on(channel, setValue), [channel])
+  useEffect(() => {
+    const offValue = window.api.on(channel, setValue)
+    const offReset = GAME_SCOPED_CHANNELS.has(channel)
+      ? window.api.on('gamestate:reset', () => setValue(initial))
+      : () => undefined
+    return () => {
+      offValue()
+      offReset()
+    }
+  }, [channel, initial])
   return value
 }
 
 export interface LiveAlert {
   id: number
   gameTimeS: number
-  /** 'spike' = enemy power spike, 'objective' = window to play,
-   * 'coach' = local-AI macro tip, 'info' = neutral. */
-  kind: 'spike' | 'objective' | 'coach' | 'info'
+  /** Purchase/duel alerts are deterministic; coach is optional local-AI prose. */
+  kind: 'spike' | 'objective' | 'purchase' | 'duel' | 'coach' | 'info'
   text: string
+  itemId?: number
+  itemName?: string
 }
 
 export interface LiveInsights {
@@ -44,6 +63,30 @@ const MAX_ALERTS = 6
 /** An objective spawning within this window still counts as a play window. */
 const OBJECTIVE_SOON_S = 60
 
+function duelReasonText(reason: MaterialAdvantageReason, t: Translator): string {
+  const amount = String(reason.amount)
+  if (reason.kind === 'levels') return t('alert.duel.levels', { n: amount })
+  if (reason.kind === 'completedItems') {
+    return t(reason.amount === 1 ? 'alert.duel.completedOne' : 'alert.duel.completedMany', {
+      n: amount
+    })
+  }
+  if (reason.kind === 'itemValue') {
+    return t('alert.duel.itemValue', { value: String(Math.round(reason.amount / 100) * 100) })
+  }
+  if (reason.kind === 'health') return t('alert.duel.health', { pct: amount })
+  if (reason.kind === 'cs') return t('alert.duel.cs', { n: amount })
+  return t('alert.duel.kda')
+}
+
+export function duelAlertText(signal: MaterialAdvantageSignal, t: Translator): string {
+  const [first = '', second = ''] = signal.advantages.map((reason) => duelReasonText(reason, t))
+  return t('alert.duel', {
+    champion: signal.opponentChampionName,
+    advantages: t('alert.duel.join', { first, second })
+  })
+}
+
 function formatClock(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60)
   const seconds = Math.floor(totalSeconds % 60)
@@ -66,7 +109,8 @@ export function objectiveWindowText(
   if (!jungler && deaths.length < 2) return null
 
   const dragonIn = nextDragonS !== null ? nextDragonS - now : null
-  const baronIn = nextBaronS !== null && now >= BARON_SPAWN_S - OBJECTIVE_SOON_S ? nextBaronS - now : null
+  const baronIn =
+    nextBaronS !== null && now >= BARON_SPAWN_S - OBJECTIVE_SOON_S ? nextBaronS - now : null
   let objective: string | null = null
   if (baronIn !== null && baronIn <= 0) objective = t('alert.baronFree')
   else if (dragonIn !== null && dragonIn <= 0) objective = t('alert.dragonFree')
@@ -102,6 +146,7 @@ export function useLiveInsights(): LiveInsights {
   const selfTeamRef = useRef<'ORDER' | 'CHAOS'>('ORDER')
   const idRef = useRef(1)
   const enemyPositionsRef = useRef(new Map<string, string>())
+  const lastRecommendationRef = useRef('')
   // Mirror of the spawn timers so event handlers can read them without
   // reaching into the state updater (updaters must stay side-effect free).
   const timersRef = useRef<{ dragon: number | null; baron: number | null }>({
@@ -110,15 +155,23 @@ export function useLiveInsights(): LiveInsights {
   })
 
   useEffect(() => {
+    const resetInsights = (): void => {
+      timeRef.current = 0
+      selfTeamRef.current = 'ORDER'
+      enemyPositionsRef.current.clear()
+      lastRecommendationRef.current = ''
+      timersRef.current = { dragon: DRAGON_FIRST_SPAWN_S, baron: BARON_SPAWN_S }
+      setInsights({
+        alerts: [],
+        nextDragonS: DRAGON_FIRST_SPAWN_S,
+        nextBaronS: BARON_SPAWN_S
+      })
+    }
     const offState = window.api.on('gamestate:update', (state) => {
       if (state.gameTimeS < timeRef.current - 5) {
-        // Game time went backwards → new game.
-        timersRef.current = { dragon: DRAGON_FIRST_SPAWN_S, baron: BARON_SPAWN_S }
-        setInsights({
-          alerts: [],
-          nextDragonS: DRAGON_FIRST_SPAWN_S,
-          nextBaronS: BARON_SPAWN_S
-        })
+        // Real-client fallback: an explicit reset normally arrives first,
+        // but a backwards clock is still a safe session boundary.
+        resetInsights()
       }
       timeRef.current = state.gameTimeS
       selfTeamRef.current = state.self.team
@@ -191,6 +244,43 @@ export function useLiveInsights(): LiveInsights {
         nextBaronS: baronTaken ? now + BARON_RESPAWN_S : previous.nextBaronS
       }))
     })
+    const offRecommendations = window.api.on('gamestate:recommendations', (payload) => {
+      const top = payload.recommendations[0]
+      if (top === undefined || top.itemId === null || top.itemName === null) return
+      const itemId = top.itemId
+      const itemName = top.itemName
+      const key = `${String(itemId)}:${top.action}`
+      if (key === lastRecommendationRef.current) return
+      lastRecommendationRef.current = key
+      setInsights((previous) => ({
+        ...previous,
+        alerts: [
+          {
+            id: idRef.current++,
+            gameTimeS: payload.gameTimeS,
+            kind: 'purchase' as const,
+            text: top.reasons[0] ?? tRef.current('alert.purchaseFallback'),
+            itemId,
+            itemName
+          },
+          ...previous.alerts
+        ].slice(0, MAX_ALERTS)
+      }))
+    })
+    const offDuel = window.api.on('gamestate:duel', (signal) => {
+      setInsights((previous) => ({
+        ...previous,
+        alerts: [
+          {
+            id: idRef.current++,
+            gameTimeS: signal.gameTimeS,
+            kind: 'duel' as const,
+            text: duelAlertText(signal, tRef.current)
+          },
+          ...previous.alerts
+        ].slice(0, MAX_ALERTS)
+      }))
+    })
     const offCoach = window.api.on('coach:tip', (tip) => {
       setInsights((previous) => ({
         ...previous,
@@ -200,10 +290,14 @@ export function useLiveInsights(): LiveInsights {
         ].slice(0, MAX_ALERTS)
       }))
     })
+    const offReset = window.api.on('gamestate:reset', resetInsights)
     return () => {
       offState()
       offEvents()
+      offRecommendations()
+      offDuel()
       offCoach()
+      offReset()
     }
   }, [])
 

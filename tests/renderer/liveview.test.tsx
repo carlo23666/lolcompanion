@@ -18,10 +18,10 @@ describe('LiveView', () => {
     const { rerender } = render(<LiveView phase="idle" gameState={null} champSelect={null} />, {
       wrapper: esWrapper
     })
-    expect(screen.getByText('Descansando el cristal…')).toBeInTheDocument()
+    expect(screen.getByText('Todo listo cuando vuelvas')).toBeInTheDocument()
 
     rerender(<LiveView phase="clientOpen" gameState={null} champSelect={null} />)
-    expect(screen.getByText('¡Lista para la cola!')).toBeInTheDocument()
+    expect(screen.getByText('Cliente conectado')).toBeInTheDocument()
 
     rerender(<LiveView phase="postGame" gameState={null} champSelect={null} />)
     expect(screen.getByText(/Fin de la partida/)).toBeInTheDocument()
@@ -79,7 +79,12 @@ describe('LiveView', () => {
         champSelect={null}
         insights={{
           alerts: [
-            { id: 1, gameTimeS: 840, kind: 'spike', text: 'Zed completó Filo Duskblade — power spike' }
+            {
+              id: 1,
+              gameTimeS: 840,
+              kind: 'spike',
+              text: 'Zed completó Filo Duskblade — power spike'
+            }
           ],
           // mid fixture is at 15:00 → dragon already up, baron in 5:00.
           nextDragonS: 400,
@@ -99,7 +104,7 @@ describe('LiveView', () => {
     render(<LiveView phase="inGame" gameState={mid} champSelect={null} />, { wrapper: esWrapper })
 
     // Header: 15:00, own gold 1250, self KDA 4/1/3.
-    expect(screen.getByText(/15:00/)).toBeInTheDocument()
+    expect(screen.getAllByText(/15:00/)).not.toHaveLength(0)
     expect(screen.getByText(/1250/)).toBeInTheDocument()
 
     // Teams: self highlighted among allies, 5 enemies with items.

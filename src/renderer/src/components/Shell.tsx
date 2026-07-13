@@ -2,31 +2,48 @@ import { useEffect } from 'react'
 import type { SessionPhase } from '@shared/session'
 import type { MessageKey } from '@shared/i18n'
 import { useT } from '../i18n'
-import Mascot, { useTheme } from './Mascot'
+import Mascot from './Mascot'
+import BrandMark from './BrandMark'
 
 export type ViewId = 'live' | 'history' | 'settings'
 
-const ITEMS: { id: ViewId; labelKey: MessageKey; icon: string }[] = [
-  { id: 'live', labelKey: 'nav.live', icon: '▶' },
-  { id: 'history', labelKey: 'nav.history', icon: '▤' },
-  { id: 'settings', labelKey: 'nav.settings', icon: '⚙' }
+const ITEMS: { id: ViewId; labelKey: MessageKey }[] = [
+  { id: 'live', labelKey: 'nav.live' },
+  { id: 'history', labelKey: 'nav.history' },
+  { id: 'settings', labelKey: 'nav.settings' }
 ]
 
-const PHASE_DOT: Record<SessionPhase, { color: string; labelKey: MessageKey; live: boolean }> = {
-  idle: { color: 'bg-slate-600 text-slate-600', labelKey: 'phase.idle', live: false },
-  clientOpen: { color: 'bg-indigo-500 text-indigo-500', labelKey: 'phase.clientOpen', live: true },
-  champSelect: { color: 'bg-amber-400 text-amber-400', labelKey: 'phase.champSelect', live: true },
-  inGame: { color: 'bg-emerald-500 text-emerald-500', labelKey: 'phase.inGame', live: true },
-  postGame: { color: 'bg-indigo-300 text-indigo-300', labelKey: 'phase.postGame', live: false }
+const PHASE: Record<SessionPhase, { labelKey: MessageKey; live: boolean }> = {
+  idle: { labelKey: 'phase.idle', live: false },
+  clientOpen: { labelKey: 'phase.clientOpen', live: true },
+  champSelect: { labelKey: 'phase.champSelect', live: true },
+  inGame: { labelKey: 'phase.inGame', live: true },
+  postGame: { labelKey: 'phase.postGame', live: false }
 }
 
-/**
- * The app shell over the ambient atmosphere. The chrome FOLLOWS the identity:
- *  - neon   → Blitz-style sidebar (wordmark, labeled nav, Bitxo dock)
- *  - abismo → stealth icon-only rail, monogram brand, crimson edge
- *  - anime  → floating rounded card sidebar with pill nav
- * Same DOM roles and accessible names in all three.
- */
+function NavGlyph(props: { id: ViewId }): React.JSX.Element {
+  if (props.id === 'history') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden>
+        <path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v5h5M12 7v5l3 2" />
+      </svg>
+    )
+  }
+  if (props.id === 'settings') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden>
+        <path d="M5 6h14M8 6v4M5 12h14M16 12v4M5 18h14" />
+      </svg>
+    )
+  }
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path d="M5 17V7l7-3 7 3v10l-7 3-7-3Z" />
+      <path d="m9 9 6 3-6 3V9Z" />
+    </svg>
+  )
+}
+
 export default function Shell(props: {
   active: ViewId
   onSelect: (view: ViewId) => void
@@ -34,122 +51,67 @@ export default function Shell(props: {
   mascotReactKey?: number
   children: React.ReactNode
 }): React.JSX.Element {
-  const phase = PHASE_DOT[props.phase]
-  const theme = useTheme()
   const t = useT()
-  const phaseLabel = t(phase.labelKey)
+  const phase = PHASE[props.phase]
 
-  // The ambient layers (body::before/::after) read the phase from <html>.
   useEffect(() => {
     document.documentElement.dataset['phase'] = props.phase
   }, [props.phase])
 
-  const rail = theme === 'abismo'
-  const floating = theme === 'anime'
-
-  const asideClass = rail
-    ? 'flex w-14 shrink-0 flex-col items-center border-r border-indigo-800/50 bg-slate-900/90 py-4'
-    : floating
-      ? 'm-3 flex w-56 shrink-0 flex-col rounded-3xl border border-slate-700 bg-slate-900 py-5 shadow-[0_10px_40px_-18px_rgba(240,107,166,0.55)]'
-      : 'flex w-56 shrink-0 flex-col border-r border-slate-800 bg-slate-900/80 py-4 backdrop-blur-sm'
-
   return (
-    <div className="flex h-screen text-slate-100">
-      <aside className={asideClass}>
-        {rail ? (
-          <p className="wordmark mb-6 text-sm" title="LoL Companion">
-            LC
-          </p>
-        ) : (
-          <>
-            <div className="mb-1 px-4">
-              <p className="wordmark text-base leading-tight tracking-[0.08em]">
-                {floating ? 'LOL COMPANION ✦' : 'LOL COMPANION'}
-              </p>
-              <p className="text-[10px] tracking-[0.3em] text-slate-500 uppercase">
-                {t('shell.tagline')}
-              </p>
-            </div>
-            <div
-              className="mx-4 mt-2 mb-5 h-px bg-gradient-to-r from-amber-400/50 via-indigo-500/40 to-transparent"
-              aria-hidden
-            />
-          </>
-        )}
-        <nav className={`flex flex-col ${rail ? 'items-center gap-2' : 'gap-1 px-2'}`}>
+    <div className="app-frame flex h-screen text-slate-100">
+      <aside className="command-rail flex w-[214px] shrink-0 flex-col border-r px-3 py-4">
+        <div className="brand-lockup flex items-center gap-3 px-2">
+          <BrandMark className="brand-mark h-11 w-11 shrink-0" />
+          <div className="min-w-0">
+            <p className="wordmark truncate text-[15px] tracking-[0.16em]">WINCON</p>
+            <p className="text-[9px] font-semibold tracking-[0.28em] text-slate-500 uppercase">
+              {t('shell.productLine')}
+            </p>
+          </div>
+        </div>
+
+        <div className="signal-rule mx-2 my-5" aria-hidden />
+
+        <nav className="flex flex-col gap-1" aria-label={t('shell.primaryNav')}>
           {ITEMS.map((item) => {
             const active = props.active === item.id
-            const base = rail
-              ? `relative flex h-10 w-10 items-center justify-center rounded-md text-base ${
-                  active
-                    ? 'bg-indigo-500/15 text-indigo-300 shadow-[0_0_16px_-4px_var(--color-indigo-500)]'
-                    : 'text-slate-500 hover:bg-slate-800 hover:text-slate-200'
-                }`
-              : floating
-                ? `relative flex items-center gap-2.5 rounded-full px-4 py-2 text-left text-[13px] font-semibold ${
-                    active
-                      ? 'bg-indigo-500 text-white shadow-[0_4px_14px_-4px_var(--color-indigo-500)]'
-                      : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-                  }`
-                : `relative flex items-center gap-2.5 rounded-md px-3 py-2 text-left text-[13px] font-semibold tracking-wide uppercase transition-transform ${
-                    active
-                      ? 'bg-indigo-500/10 text-slate-100 shadow-[0_0_14px_-2px_var(--color-indigo-500)]'
-                      : 'text-slate-400 hover:translate-x-0.5 hover:bg-slate-800/60 hover:text-slate-200'
-                  }`
             return (
               <button
                 key={item.id}
+                type="button"
                 onClick={() => props.onSelect(item.id)}
                 aria-current={active ? 'page' : undefined}
-                aria-label={rail ? t(item.labelKey) : undefined}
-                title={rail ? t(item.labelKey) : undefined}
-                className={base}
+                className={`nav-command group flex items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-semibold ${
+                  active
+                    ? 'nav-command-active text-slate-100'
+                    : 'text-slate-500 hover:text-slate-200'
+                }`}
               >
-                {active && !floating && (
-                  <span
-                    className={`absolute rounded-full bg-indigo-500 shadow-[0_0_8px_var(--color-indigo-500)] ${
-                      rail ? 'top-1 bottom-1 -left-2 w-0.5' : 'top-1.5 bottom-1.5 left-0 w-0.5'
-                    }`}
-                    aria-hidden
-                  />
-                )}
-                <span
-                  className={
-                    rail
-                      ? undefined
-                      : `w-4 text-center text-xs ${
-                          active
-                            ? floating
-                              ? 'text-white'
-                              : 'text-indigo-300'
-                            : 'text-slate-500'
-                        }`
-                  }
-                  aria-hidden
-                >
-                  {item.icon}
+                <span className="nav-glyph h-5 w-5 shrink-0">
+                  <NavGlyph id={item.id} />
                 </span>
-                {!rail && t(item.labelKey)}
+                <span>{t(item.labelKey)}</span>
+                {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-amber-300" />}
               </button>
             )
           })}
         </nav>
-        <div
-          className={`mt-auto flex flex-col items-center ${rail ? 'gap-2 px-1' : 'gap-3 px-4'}`}
-        >
+
+        <div className="mt-auto flex flex-col items-center pt-8">
           <Mascot phase={props.phase} reactKey={props.mascotReactKey} />
-          <span
-            className={`flex items-center gap-1.5 font-display text-[10px] tracking-[0.14em] text-slate-500 uppercase ${
-              rail ? 'flex-col gap-1' : ''
-            }`}
-            title={phaseLabel}
+          <div
+            className="phase-console mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2"
+            title={t(phase.labelKey)}
           >
-            <span
-              className={`h-1.5 w-1.5 rounded-full ${phase.color} ${phase.live ? 'dot-ping' : ''}`}
-              aria-hidden
-            />
-            {!rail && phaseLabel}
-          </span>
+            <span className={`phase-beacon ${phase.live ? 'phase-beacon-live' : ''}`} aria-hidden />
+            <div className="min-w-0">
+              <p className="truncate text-[10px] font-semibold tracking-[0.12em] text-slate-300 uppercase">
+                {t(phase.labelKey)}
+              </p>
+              <p className="text-[9px] text-slate-600">{t('shell.localData')}</p>
+            </div>
+          </div>
         </div>
       </aside>
       <main className="min-h-0 flex-1 overflow-y-auto">{props.children}</main>

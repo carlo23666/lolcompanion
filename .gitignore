@@ -1,6 +1,7 @@
 node_modules/
 dist/
 out/
+tmp/
 # RAW live-game recordings (real riotIds — NEVER commit). Anonymize with
 # `npm run fixtures:anonymize` and promote keepers to fixtures/liveclient/.
 fixtures/recordings/

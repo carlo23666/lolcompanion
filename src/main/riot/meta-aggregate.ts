@@ -1,4 +1,5 @@
 import type { RiotMatch, RiotTimeline } from '@shared/schemas/riot'
+import { isStarterItemId } from '../staticdata/starters'
 
 /** Deltas one match contributes to the meta tables. Pure data, no I/O. */
 export interface MetaMatchAggregate {
@@ -56,7 +57,12 @@ export function aggregateMatch(match: RiotMatch): MetaMatchAggregate | null {
       ].filter((id) => id > 0)
     )
     for (const itemId of itemIds) {
-      aggregate.items.push({ champion: participant.championName, role, itemId, win: participant.win })
+      aggregate.items.push({
+        champion: participant.championName,
+        role,
+        itemId,
+        win: participant.win
+      })
     }
 
     if (role !== '') {
@@ -83,7 +89,17 @@ export interface MetaOrderAggregate {
   matchId: string
   patch: string
   items: { champion: string; role: string; itemId: number; slot: number; first: boolean }[]
+  routes: {
+    champion: string
+    role: string
+    starterId: number | null
+    itemIds: number[]
+    win: boolean
+  }[]
 }
+
+/** Four completions identify a route while avoiding late-game branch fragmentation. */
+const ROUTE_ITEM_LIMIT = 4
 
 /**
  * Extracts per-participant item COMPLETION order from a match timeline:
@@ -103,20 +119,24 @@ export function aggregateTimelineOrder(
   if (match.info.queueId !== RANKED_SOLO_QUEUE) return null
   if (match.info.gameDuration < MIN_DURATION_S) return null
 
-  const byParticipant = new Map<number, { champion: string; role: string }>()
+  const byParticipant = new Map<number, { champion: string; role: string; win: boolean }>()
   for (const [index, participant] of match.info.participants.entries()) {
     byParticipant.set(participant.participantId ?? index + 1, {
       champion: participant.championName,
-      role: participant.teamPosition ?? ''
+      role: participant.teamPosition ?? '',
+      win: participant.win
     })
   }
 
   // Purchase events arrive frame by frame, already in chronological order.
   const seen = new Map<number, Set<number>>()
+  const starterByParticipant = new Map<number, number>()
+  const routeByParticipant = new Map<number, number[]>()
   const aggregate: MetaOrderAggregate = {
     matchId: match.metadata.matchId,
     patch: patchOf(match.info.gameVersion),
-    items: []
+    items: [],
+    routes: []
   }
   for (const frame of timeline.info.frames) {
     for (const event of frame.events) {
@@ -124,6 +144,9 @@ export function aggregateTimelineOrder(
       const participantId = event.participantId
       const itemId = event.itemId
       if (participantId === undefined || itemId === undefined) continue
+      if (isStarterItemId(itemId) && !starterByParticipant.has(participantId)) {
+        starterByParticipant.set(participantId, itemId)
+      }
       if (!isOrderable(itemId)) continue
       const owner = byParticipant.get(participantId)
       if (!owner) continue
@@ -138,7 +161,24 @@ export function aggregateTimelineOrder(
         slot: owned.size,
         first: owned.size === 1
       })
+      const route = routeByParticipant.get(participantId) ?? []
+      if (route.length < ROUTE_ITEM_LIMIT) route.push(itemId)
+      routeByParticipant.set(participantId, route)
     }
+  }
+  for (const [participantId, owner] of byParticipant) {
+    const itemIds = routeByParticipant.get(participantId) ?? []
+    const starterId = starterByParticipant.get(participantId) ?? null
+    // A route needs at least one finished item so its serialized key is
+    // canonical/non-empty. Normal ranked games over the remake gate satisfy it.
+    if (itemIds.length === 0) continue
+    aggregate.routes.push({
+      champion: owner.champion,
+      role: owner.role,
+      starterId,
+      itemIds,
+      win: owner.win
+    })
   }
   return aggregate
 }

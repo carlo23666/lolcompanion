@@ -1,14 +1,13 @@
 import type { GameState, GameStateEvent } from '@shared/gamestate'
 import type { Recommendation } from '@shared/recommendation'
 import { t as translators, type MessageKey, type Translator } from '@shared/i18n'
-import { buildPersona } from './coach'
+import { buildPersona, sanitizeCoachText } from './coach'
 
 /**
  * Live macro coach: every ~60s of game time, the local model (Ollama) turns
  * the CURRENT screen-visible facts — gold, deaths, enemy spikes, objective
- * timers, next buy — into one short Spanish tip that Hexi delivers in the
- * overlay ("pon visión antes del dragón", "vais 2k arriba y su jungla está
- * muerto: forzad", "completa tu compra antes de la siguiente jugada").
+ * timers, next buy — into one short conditional read shown above the stable
+ * bottom overlay dock.
  *
  * Strictly advisory prose over facts the player can already see (Riot policy
  * §4); the rules engine remains the only source of item recommendations.
@@ -76,7 +75,7 @@ export function buildDirectionPrompt(
   facts: LiveFacts,
   players: { aliados: PlayerFact[]; enemigos: PlayerFact[] },
   ownPosition: string,
-  personaName = 'Bitxo',
+  personaName = 'Hexi',
   t: Translator = translators.es
 ): string {
   return [
@@ -114,7 +113,7 @@ export interface LiveFacts {
 
 export function buildLiveCoachPrompt(
   facts: LiveFacts,
-  personaName = 'Bitxo',
+  personaName = 'Hexi',
   t: Translator = translators.es
 ): string {
   return [
@@ -197,8 +196,7 @@ export class LiveCoach {
 
   private maybeDirection(state: GameState, topRecommendation: Recommendation | null): void {
     if (this.options.onDirection === undefined) return
-    if (!this.options.isEnabled() || this.directionInFlight || this.failures >= MAX_FAILURES)
-      return
+    if (!this.options.isEnabled() || this.directionInFlight || this.failures >= MAX_FAILURES) return
     if (state.gameTimeS < MIN_GAME_TIME_S) return
     if (state.gameTimeS - this.lastDirectionAtS < this.directionIntervalS) return
     this.directionInFlight = true
@@ -210,14 +208,14 @@ export class LiveCoach {
         enemigos: state.enemies.map(playerFact)
       },
       state.self.position,
-      this.options.personaName?.() ?? 'Bitxo',
+      this.options.personaName?.() ?? 'Hexi',
       this.t
     )
     const atS = state.gameTimeS
     void this.options.generate(prompt).then((result) => {
       this.directionInFlight = false
       if (result.ok) {
-        const text = result.text.replace(/\s+/g, ' ').trim().replace(/^["'«]+|["'»]+$/g, '')
+        const text = sanitizeCoachText(result.text)
         if (text !== '') this.options.onDirection?.({ gameTimeS: atS, text: text.slice(0, 600) })
       } else {
         this.failures += 1
@@ -239,7 +237,8 @@ export class LiveCoach {
       oroEquipoAliado: Math.round(state.allyAggregates.estimatedTotalGold),
       oroEquipoEnemigo: Math.round(state.enemyAggregates.estimatedTotalGold),
       dragonSaleEnS: Math.max(0, Math.round(this.nextDragonS - now)),
-      baronSaleEnS: now >= BARON_SPAWN_S - 120 ? Math.max(0, Math.round(this.nextBaronS - now)) : null,
+      baronSaleEnS:
+        now >= BARON_SPAWN_S - 120 ? Math.max(0, Math.round(this.nextBaronS - now)) : null,
       eventosRecientes: fresh.slice(-MAX_RECENT_EVENTS).map((event) => event.text),
       proximaCompra:
         topRecommendation === null
@@ -296,7 +295,7 @@ export class LiveCoach {
     this.lastTipAtS = state.gameTimeS
     const prompt = buildLiveCoachPrompt(
       this.buildFacts(state, topRecommendation),
-      this.options.personaName?.() ?? 'Bitxo',
+      this.options.personaName?.() ?? 'Hexi',
       this.t
     )
     const atS = state.gameTimeS
@@ -304,8 +303,7 @@ export class LiveCoach {
       this.inFlight = false
       if (result.ok) {
         this.failures = 0
-        // One clean line: models sometimes wrap in quotes or add newlines.
-        const text = result.text.replace(/\s+/g, ' ').trim().replace(/^["'«]+|["'»]+$/g, '')
+        const text = sanitizeCoachText(result.text)
         if (text !== '') this.options.onTip({ gameTimeS: atS, text: text.slice(0, 220) })
       } else {
         this.failures += 1

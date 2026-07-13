@@ -63,7 +63,7 @@ try {
 // then mark seeded matches as timeline-done, which is correct because the
 // exporter's aggregates ARE the order truth for those matches.
 const seed = {
-  version: 2,
+  version: 3,
   patch,
   exportedAt: new Date().toISOString(),
   matchIds: db
@@ -83,6 +83,11 @@ const seed = {
     .prepare(
       'SELECT champion, role, itemId, games, slotSum, firstGames FROM meta_champion_item_order WHERE patch = ?'
     )
+    .all(patch),
+  buildRoutes: db
+    .prepare(
+      'SELECT champion, role, starterId, route, games, wins FROM meta_build_routes WHERE patch = ?'
+    )
     .all(patch)
 }
 db.close()
@@ -94,5 +99,6 @@ writeFileSync(outPath, gz)
 console.log(
   `wrote ${outPath}: patch ${patch}, ${seed.matchIds.length} matches, ` +
     `${seed.championStats.length} champion rows, ${seed.matchups.length} matchups, ` +
-    `${seed.items.length} item rows (${Math.round(gz.length / 1024)} KB)`
+    `${seed.items.length} item rows, ${seed.buildRoutes.length} routes ` +
+    `(${Math.round(gz.length / 1024)} KB)`
 )

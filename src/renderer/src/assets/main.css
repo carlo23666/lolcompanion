@@ -26,14 +26,14 @@
   src: url('./fonts/press-start-2p.woff2') format('woff2');
   font-display: swap;
 }
-/* Abismo display face: heavy, industrial, knife-edged (OFL, vendored). */
+/* Dark display face: heavy, industrial, knife-edged (OFL, vendored). */
 @font-face {
   font-family: 'Russo One';
   src: url('./fonts/russo-one-400.woff2') format('woff2');
   font-weight: 400;
   font-display: swap;
 }
-/* Estrella display face: rounded kawaii pop (OFL, vendored, latin subset). */
+/* Legacy rounded face retained for old screenshots; Sakura now uses Mincho. */
 @font-face {
   font-family: 'Mochiy Pop One';
   src: url('./fonts/mochiy-pop-one-400.woff2') format('woff2');
@@ -91,7 +91,7 @@
  * knife-sharp and the display face turns industrial. Shell renders the
  * stealth icon rail for this identity.
  */
-html[data-theme='abismo'] {
+html[data-theme='dark'] {
   --color-slate-950: #040406; /* the void — near-pure black, faint violet */
   --color-slate-900: #0c0c14; /* card */
   --color-slate-800: #14141f; /* well / input */
@@ -129,7 +129,7 @@ html[data-theme='abismo'] {
  * a gold dark enough for light surfaces. Soft radii, Mochiy Pop display, real
  * blossom petals drifting down the page (see body::after below).
  */
-html[data-theme='anime'] {
+html[data-theme='sakura'] {
   color-scheme: light;
   --color-slate-950: #f7ebef; /* page (warm washi paper) */
   --color-slate-900: #fffafc; /* card */
@@ -154,7 +154,7 @@ html[data-theme='anime'] {
   --radius-lg: 15px;
   --radius-xl: 18px;
   --radius-2xl: 22px;
-  --font-display: 'Mochiy Pop One', 'Hiragino Maru Gothic Pro', 'Segoe UI', sans-serif;
+  --font-display: 'Yu Mincho', 'Hiragino Mincho ProN', 'Noto Serif JP', Georgia, serif;
   --aura-a: color-mix(in srgb, #ec6ba0 16%, transparent);
   --aura-b: color-mix(in srgb, #f6b352 16%, transparent);
   --aura-c: color-mix(in srgb, #b87ac9 10%, transparent);
@@ -209,7 +209,7 @@ body::before {
 
 /* Abismo: a crimson bloom rising from the depths + a hard corner vignette that
  * frames the void. Edgier than a flat wash — the black gains weight. */
-html[data-theme='abismo'] body::after {
+html[data-theme='dark'] body::after {
   content: '';
   position: fixed;
   inset: 0;
@@ -232,14 +232,15 @@ html[data-theme='abismo'] body::after {
 
 /* Sakura: real blossom petals (data-URI SVG) drifting down forever, two layers
  * at different scales/speeds for depth. */
-html[data-theme='anime'] body::after {
+html[data-theme='sakura'] body::after {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   opacity: 0.85;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cpath transform='translate(34 30) rotate(18) scale(1.1)' fill='%23f7a8cc' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3Cpath transform='translate(128 58) rotate(-32) scale(.8)' fill='%23ffc9e0' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3Cpath transform='translate(214 40) rotate(52) scale(1)' fill='%23ec6ba0' opacity='.7' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3Cpath transform='translate(78 138) rotate(84) scale(.95)' fill='%23f7a8cc' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3Cpath transform='translate(182 160) rotate(-16) scale(1.2)' fill='%23ffc9e0' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3Cpath transform='translate(44 214) rotate(124) scale(.85)' fill='%23ec6ba0' opacity='.6' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3Cpath transform='translate(224 216) rotate(200) scale(1.05)' fill='%23f7a8cc' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3C/svg%3E"),
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cpath transform='translate(34 30) rotate(18) scale(1.1)' fill='%23f7a8cc' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3Cpath transform='translate(128 58) rotate(-32) scale(.8)' fill='%23ffc9e0' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3Cpath transform='translate(214 40) rotate(52) scale(1)' fill='%23ec6ba0' opacity='.7' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3Cpath transform='translate(78 138) rotate(84) scale(.95)' fill='%23f7a8cc' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3Cpath transform='translate(182 160) rotate(-16) scale(1.2)' fill='%23ffc9e0' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3Cpath transform='translate(44 214) rotate(124) scale(.85)' fill='%23ec6ba0' opacity='.6' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3Cpath transform='translate(224 216) rotate(200) scale(1.05)' fill='%23f7a8cc' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='170' viewBox='0 0 170 170'%3E%3Cpath transform='translate(30 26) rotate(40) scale(.7)' fill='%23f7a8cc' opacity='.7' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3Cpath transform='translate(118 70) rotate(-20) scale(.6)' fill='%23ffc9e0' opacity='.7' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3Cpath transform='translate(70 130) rotate(150) scale(.65)' fill='%23ec6ba0' opacity='.55' d='M0 -8 C5 -3 5 7 0 13 C-5 7 -5 -3 0 -8 Z'/%3E%3C/svg%3E");
   background-size:
     260px 260px,
@@ -343,12 +344,7 @@ select:focus {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    115deg,
-    transparent 30%,
-    rgb(255 255 255 / 35%) 50%,
-    transparent 70%
-  );
+  background: linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 35%) 50%, transparent 70%);
   transform: translateX(-120%);
 }
 .btn-glow:hover::after {
@@ -584,36 +580,6 @@ select:focus {
   animation: objective-breath 1.6s ease-in-out infinite;
 }
 
-/* Walk-in mascot: the coach tip enters from off-screen right, stays, leaves. */
-@keyframes hexi-walk-in {
-  from {
-    transform: translateX(120%);
-    opacity: 0;
-  }
-  45% {
-    opacity: 1;
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-@keyframes hexi-walk-out {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(130%);
-    opacity: 0;
-  }
-}
-.hexi-walk-in {
-  animation: hexi-walk-in 900ms ease-out both;
-}
-.hexi-walk-out {
-  animation: hexi-walk-out 1200ms ease-in both;
-}
-
 /* ---------- mascots: smooth vector characters, CSS animated ----------
  * The .hexi span is the sized container; the .masc <svg> inside carries all
  * motion. Body bob/bounce follows the mood; parts (eyes, gills, tail, hair,
@@ -781,8 +747,6 @@ select:focus {
   .alert-in,
   .dot-ping,
   .objective-live,
-  .hexi-walk-in,
-  .hexi-walk-out,
   .masc,
   .masc .eye,
   .masc .gill,
@@ -792,5 +756,591 @@ select:focus {
   .masc .spark,
   .masc .zzz {
     animation: none;
+  }
+}
+
+/* -------------------------------------------------------------------------
+ * WP-021/023 — WinCon command hierarchy with three authored identities.
+ * ---------------------------------------------------------------------- */
+html[data-theme='rift'] {
+  color-scheme: dark;
+  --color-slate-950: #070a12;
+  --color-slate-900: #0d1220;
+  --color-slate-800: #151c2e;
+  --color-slate-700: #263149;
+  --color-slate-600: #43506c;
+  --color-slate-500: #6f7b98;
+  --color-slate-400: #99a4bd;
+  --color-slate-300: #c3cad9;
+  --color-slate-200: #e0e5ee;
+  --color-slate-100: #f5f7fb;
+  --color-amber-300: #f7d77c;
+  --color-amber-400: #eebf4f;
+  --color-indigo-300: #f58eb3;
+  --color-indigo-500: #e34a83;
+  --color-indigo-600: #bd3269;
+  --color-indigo-700: #7f244d;
+  --color-indigo-800: #3b1930;
+  --aura-a: color-mix(in srgb, #e34a83 10%, transparent);
+  --aura-b: color-mix(in srgb, #eebf4f 6%, transparent);
+  --aura-c: color-mix(in srgb, #4f7fe8 9%, transparent);
+  --aura-o: 0.92;
+  --font-display: 'Chakra Petch', 'Bahnschrift', 'Segoe UI', sans-serif;
+}
+
+html[data-theme='rift'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(104, 123, 166, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(104, 123, 166, 0.025) 1px, transparent 1px),
+    radial-gradient(80% 42% at 50% 110%, rgba(27, 45, 82, 0.28), transparent 70%);
+  background-size:
+    40px 40px,
+    40px 40px,
+    auto;
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 24%, #000 100%);
+}
+
+/* The overlay BrowserWindow must remain genuinely transparent over the game. */
+html[data-surface='overlay'],
+html[data-surface='overlay'] body,
+html[data-surface='overlay'] #root {
+  background: transparent !important;
+  overflow: hidden !important;
+}
+
+html[data-surface='overlay'] body::before,
+html[data-surface='overlay'] body::after {
+  display: none !important;
+}
+
+html[data-surface='overlay'] * {
+  scrollbar-width: none;
+}
+
+html[data-surface='overlay'] *::-webkit-scrollbar {
+  display: none;
+}
+
+.overlay-dock-shell {
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, 0.54),
+    inset 0 1px rgba(255, 255, 255, 0.035);
+}
+
+.overlay-speech::after {
+  content: '';
+  position: absolute;
+  right: 29px;
+  bottom: -7px;
+  width: 13px;
+  height: 13px;
+  transform: rotate(45deg);
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  background: rgba(7, 10, 18, 0.96);
+}
+.overlay-speech p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+/* The overlay stays focusless so it cannot steal keyboard input from League.
+ * Movement is handled with pointer deltas over typed IPC. */
+.overlay-native-drag {
+  app-region: no-drag;
+  -webkit-app-region: no-drag;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html[data-surface='overlay'] img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.app-frame {
+  background: linear-gradient(135deg, rgba(7, 10, 18, 0.5), rgba(7, 10, 18, 0.86));
+}
+.command-rail {
+  border-color: rgba(71, 84, 116, 0.28);
+  background:
+    linear-gradient(180deg, rgba(15, 21, 37, 0.96), rgba(8, 12, 22, 0.98)), var(--color-slate-950);
+  box-shadow: 20px 0 55px -42px rgba(0, 0, 0, 0.9);
+}
+.brand-mark {
+  overflow: visible;
+  filter: drop-shadow(0 0 16px rgba(238, 191, 79, 0.12));
+}
+.brand-mark path {
+  fill: none;
+  stroke-width: 4.5;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+.brand-route-gold {
+  stroke: var(--color-amber-400);
+}
+.brand-route-signal {
+  stroke: var(--color-indigo-500);
+}
+.brand-route-muted {
+  stroke: var(--color-slate-500);
+}
+.brand-arrow {
+  fill: var(--color-amber-400) !important;
+  stroke: none !important;
+}
+.brand-node {
+  fill: var(--color-slate-950);
+  stroke: var(--color-amber-400);
+  stroke-width: 4;
+}
+.brand-node-core {
+  fill: var(--color-slate-100);
+}
+.signal-rule {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(227, 74, 131, 0.72),
+    rgba(238, 191, 79, 0.32),
+    transparent
+  );
+}
+.nav-command {
+  border: 1px solid transparent;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+.nav-command:hover {
+  transform: translateX(2px);
+  background: rgba(24, 32, 53, 0.58);
+  border-color: rgba(79, 96, 135, 0.22);
+}
+.nav-command-active {
+  border-color: rgba(227, 74, 131, 0.25);
+  background: linear-gradient(90deg, rgba(227, 74, 131, 0.14), rgba(21, 28, 46, 0.52));
+  box-shadow: inset 2px 0 #e34a83;
+}
+.nav-glyph svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.nav-command-active .nav-glyph {
+  color: #f58eb3;
+}
+.phase-console {
+  border: 1px solid rgba(74, 88, 122, 0.24);
+  background: rgba(13, 18, 32, 0.72);
+}
+.phase-beacon {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 999px;
+  background: #4b5773;
+}
+.phase-beacon-live {
+  background: #55d6a2;
+  box-shadow: 0 0 12px rgba(85, 214, 162, 0.7);
+  animation: phase-beacon 2.4s ease-in-out infinite;
+}
+@keyframes phase-beacon {
+  50% {
+    opacity: 0.45;
+    box-shadow: 0 0 4px rgba(85, 214, 162, 0.3);
+  }
+}
+
+/* Authored 3x2 bitmap pose sheet per identity. */
+.companion-sprite {
+  display: inline-block;
+  flex: none;
+  background-image: url('/mascot/hexi-sheet.png');
+  background-repeat: no-repeat;
+  background-size: 300% 200%;
+  background-position: 0 0;
+  filter: drop-shadow(0 14px 16px rgba(0, 0, 0, 0.42));
+  transform-origin: 50% 88%;
+}
+.companion-sprite[data-mascot='dark'] {
+  background-image: url('/mascot/sombra-sheet.png');
+}
+.companion-sprite[data-mascot='sakura'] {
+  background-image: url('/mascot/kohaku-sheet.png');
+}
+.companion-sprite[data-mood='idle'] {
+  background-position: 0 0;
+  animation: companion-breathe 3.8s ease-in-out infinite;
+}
+.companion-sprite[data-mood='focused'] {
+  background-position: 50% 0;
+  animation: companion-focus 3s ease-in-out infinite;
+}
+.companion-sprite[data-mood='alert'] {
+  background-position: 100% 0;
+  animation: companion-alert 760ms ease-in-out infinite alternate;
+}
+.companion-sprite[data-mood='celebrate'] {
+  background-position: 0 100%;
+  animation: companion-celebrate 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+.companion-sprite[data-mood='sleepy'] {
+  background-position: 50% 100%;
+  animation: companion-sleep 4.4s ease-in-out infinite;
+}
+.companion-sprite[data-mood='thinking'] {
+  background-position: 100% 100%;
+  animation: companion-think 3.2s ease-in-out infinite;
+}
+@keyframes companion-breathe {
+  50% {
+    transform: translateY(-2px) scale(1.015);
+  }
+}
+@keyframes companion-focus {
+  50% {
+    transform: translateY(1px) scale(0.995);
+  }
+}
+@keyframes companion-alert {
+  to {
+    transform: translateY(-4px) rotate(1.5deg);
+  }
+}
+@keyframes companion-celebrate {
+  50% {
+    transform: translateY(-7px) rotate(-2deg);
+  }
+}
+@keyframes companion-sleep {
+  50% {
+    transform: translateY(2px) rotate(-1deg);
+    opacity: 0.94;
+  }
+}
+@keyframes companion-think {
+  50% {
+    transform: rotate(1.2deg) translateY(-2px);
+  }
+}
+.companion-alert-ring {
+  filter: drop-shadow(0 0 12px rgba(238, 191, 79, 0.62))
+    drop-shadow(0 14px 16px rgba(0, 0, 0, 0.42));
+}
+.mascot-dock::before {
+  content: '';
+  position: absolute;
+  right: 8px;
+  bottom: 2px;
+  left: 8px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(227, 74, 131, 0.16), transparent 70%);
+  filter: blur(4px);
+}
+.mascot-bubble {
+  border: 1px solid rgba(103, 119, 156, 0.42);
+  background: rgba(10, 14, 25, 0.96);
+  backdrop-filter: blur(14px);
+}
+
+.view-heading {
+  min-height: 44px;
+}
+.session-hud,
+.decision-board,
+.intel-strip,
+.coach-brief,
+.context-stack {
+  border: 1px solid rgba(71, 84, 116, 0.28);
+  background: linear-gradient(145deg, rgba(15, 21, 37, 0.93), rgba(10, 14, 25, 0.92));
+  box-shadow: 0 18px 50px -38px rgba(0, 0, 0, 0.92);
+}
+.decision-board {
+  border-color: rgba(114, 96, 90, 0.34);
+  box-shadow: 0 24px 60px -42px rgba(238, 191, 79, 0.35);
+}
+.signal-kicker {
+  width: 16px;
+  height: 2px;
+  background: linear-gradient(90deg, #e34a83, #eebf4f);
+  box-shadow: 0 0 10px rgba(227, 74, 131, 0.5);
+}
+.route-strip {
+  border: 1px solid rgba(70, 84, 118, 0.22);
+  background: rgba(6, 10, 18, 0.52);
+}
+.route-node {
+  border: 1px solid rgba(69, 82, 112, 0.38);
+  background: #0a0e19;
+}
+.route-node-owned {
+  border-color: rgba(85, 214, 162, 0.48);
+}
+.route-node-current {
+  border-color: rgba(238, 191, 79, 0.72);
+  box-shadow: 0 0 16px -5px rgba(238, 191, 79, 0.62);
+}
+.route-connector {
+  background: linear-gradient(90deg, rgba(227, 74, 131, 0.3), rgba(238, 191, 79, 0.24));
+}
+.core-lock {
+  border: 1px solid rgba(238, 191, 79, 0.28);
+  background: rgba(238, 191, 79, 0.08);
+}
+.primary-option {
+  border: 1px solid rgba(238, 191, 79, 0.18);
+  background: linear-gradient(
+    135deg,
+    rgba(238, 191, 79, 0.07),
+    rgba(21, 28, 46, 0.66) 55%,
+    rgba(227, 74, 131, 0.05)
+  );
+}
+.context-option,
+.telemetry-drawer {
+  border: 1px solid rgba(70, 84, 118, 0.22);
+  background: rgba(9, 13, 23, 0.58);
+}
+.context-option {
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+.context-option:hover {
+  border-color: rgba(227, 74, 131, 0.28);
+  background: rgba(18, 24, 40, 0.78);
+}
+.decision-chip {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 2px 7px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.9;
+}
+.decision-positive {
+  color: #79ddb3;
+  background: rgba(85, 214, 162, 0.07);
+}
+.decision-route {
+  color: #f58eb3;
+  background: rgba(227, 74, 131, 0.07);
+}
+.decision-threshold {
+  color: #f7d77c;
+  background: rgba(238, 191, 79, 0.07);
+}
+.decision-tradeoff {
+  color: #d79bb3;
+  background: rgba(190, 70, 112, 0.07);
+}
+
+/* Dark is deliberately severe: carbon surfaces, crimson routing and almost
+ * no ornamental softness. The information hierarchy stays identical. */
+html[data-theme='dark'] .app-frame {
+  background: linear-gradient(135deg, rgba(2, 2, 4, 0.76), rgba(6, 6, 10, 0.96));
+}
+html[data-theme='dark'] .command-rail {
+  border-color: rgba(255, 45, 85, 0.14);
+  background:
+    linear-gradient(180deg, rgba(8, 8, 12, 0.99), rgba(2, 2, 4, 0.99)), var(--color-slate-950);
+  box-shadow: 18px 0 48px -36px rgba(255, 45, 85, 0.24);
+}
+html[data-theme='dark'] .brand-mark {
+  filter: drop-shadow(0 0 18px rgba(255, 45, 85, 0.2));
+}
+html[data-theme='dark'] .nav-command:hover {
+  border-color: rgba(255, 45, 85, 0.18);
+  background: rgba(255, 45, 85, 0.055);
+}
+html[data-theme='dark'] .nav-command-active {
+  border-color: rgba(255, 45, 85, 0.28);
+  background: linear-gradient(90deg, rgba(255, 45, 85, 0.14), rgba(8, 8, 12, 0.74));
+  box-shadow: inset 2px 0 #ff2d55;
+}
+html[data-theme='dark'] .phase-console,
+html[data-theme='dark'] .session-hud,
+html[data-theme='dark'] .decision-board,
+html[data-theme='dark'] .intel-strip,
+html[data-theme='dark'] .coach-brief,
+html[data-theme='dark'] .context-stack,
+html[data-theme='dark'] .mascot-bubble {
+  border-color: rgba(255, 45, 85, 0.17);
+  background: linear-gradient(145deg, rgba(12, 12, 19, 0.97), rgba(4, 4, 7, 0.96));
+  box-shadow: 0 20px 50px -38px rgba(255, 45, 85, 0.34);
+}
+html[data-theme='dark'] .route-strip,
+html[data-theme='dark'] .context-option,
+html[data-theme='dark'] .telemetry-drawer {
+  border-color: rgba(255, 45, 85, 0.12);
+  background: rgba(3, 3, 6, 0.72);
+}
+html[data-theme='dark'] .route-node {
+  border-color: rgba(255, 45, 85, 0.22);
+  background: #050507;
+}
+html[data-theme='dark'] .primary-option {
+  border-color: rgba(212, 178, 95, 0.22);
+  background: linear-gradient(135deg, rgba(212, 178, 95, 0.06), rgba(7, 7, 11, 0.9));
+}
+html[data-theme='dark'] .overlay-speech::after {
+  background: rgba(4, 4, 7, 0.98);
+}
+
+/* Sakura uses a quiet washi workspace with a dark plum rail. Content stays
+ * high-contrast and professional; pink is reserved for decisions and state. */
+html[data-theme='sakura'] .app-frame {
+  background:
+    linear-gradient(130deg, rgba(255, 250, 252, 0.76), rgba(247, 235, 239, 0.94)),
+    var(--color-slate-950);
+}
+html[data-theme='sakura'] .command-rail {
+  --color-slate-100: #fff8fb;
+  --color-slate-200: #f7e6ee;
+  --color-slate-300: #e8c8d7;
+  --color-slate-400: #c99eb3;
+  --color-slate-500: #a4738b;
+  --color-slate-700: #61364f;
+  --color-slate-800: #422538;
+  --color-slate-900: #311927;
+  --color-slate-950: #21101b;
+  border-color: rgba(236, 107, 160, 0.22);
+  background:
+    linear-gradient(180deg, rgba(55, 27, 44, 0.985), rgba(30, 14, 24, 0.995)), #21101b;
+  box-shadow: 20px 0 52px -38px rgba(74, 30, 55, 0.56);
+}
+html[data-theme='sakura'] .command-rail .brand-node {
+  fill: #21101b;
+}
+html[data-theme='sakura'] .nav-command:hover {
+  border-color: rgba(247, 168, 204, 0.18);
+  background: rgba(255, 255, 255, 0.055);
+}
+html[data-theme='sakura'] .nav-command-active {
+  border-color: rgba(247, 168, 204, 0.3);
+  background: linear-gradient(90deg, rgba(236, 107, 160, 0.24), rgba(65, 32, 51, 0.54));
+  box-shadow: inset 2px 0 #f7a8cc;
+}
+html[data-theme='sakura'] .phase-console {
+  border-color: rgba(247, 168, 204, 0.18);
+  background: rgba(41, 20, 32, 0.82);
+}
+html[data-theme='sakura'] .command-rail .mascot-bubble {
+  color: #40233a !important;
+}
+html[data-theme='sakura'] .session-hud,
+html[data-theme='sakura'] .decision-board,
+html[data-theme='sakura'] .intel-strip,
+html[data-theme='sakura'] .coach-brief,
+html[data-theme='sakura'] .context-stack,
+html[data-theme='sakura'] .mascot-bubble {
+  border-color: rgba(168, 111, 144, 0.25);
+  background: linear-gradient(145deg, rgba(255, 253, 253, 0.96), rgba(250, 238, 244, 0.94));
+  box-shadow: 0 22px 54px -40px rgba(89, 37, 67, 0.38);
+}
+html[data-theme='sakura'] .decision-board {
+  border-color: rgba(169, 112, 26, 0.3);
+  box-shadow: 0 24px 56px -42px rgba(169, 112, 26, 0.42);
+}
+html[data-theme='sakura'] .decision-board .text-amber-300,
+html[data-theme='sakura'] .core-lock {
+  color: #8b5a10;
+}
+html[data-theme='sakura'] .decision-board h2 {
+  color: #8b5a10;
+}
+html[data-theme='sakura'] .route-strip,
+html[data-theme='sakura'] .context-option,
+html[data-theme='sakura'] .telemetry-drawer {
+  border-color: rgba(168, 111, 144, 0.2);
+  background: rgba(255, 250, 252, 0.72);
+}
+html[data-theme='sakura'] .route-node {
+  border-color: rgba(168, 111, 144, 0.28);
+  background: #fffafc;
+  box-shadow: 0 6px 16px -12px rgba(89, 37, 67, 0.55);
+}
+html[data-theme='sakura'] .primary-option {
+  border-color: rgba(169, 112, 26, 0.24);
+  background: linear-gradient(
+    135deg,
+    rgba(246, 179, 82, 0.1),
+    rgba(255, 250, 252, 0.88) 56%,
+    rgba(236, 107, 160, 0.09)
+  );
+}
+html[data-theme='sakura'] .context-option:hover {
+  border-color: rgba(236, 107, 160, 0.34);
+  background: rgba(255, 250, 252, 0.96);
+}
+html[data-theme='sakura'] .decision-positive {
+  color: #1e7a58;
+  background: rgba(46, 143, 104, 0.08);
+}
+html[data-theme='sakura'] .decision-route {
+  color: #b83e6e;
+  background: rgba(236, 107, 160, 0.1);
+}
+html[data-theme='sakura'] .decision-threshold {
+  color: #8b5a10;
+  background: rgba(169, 112, 26, 0.1);
+}
+html[data-theme='sakura'] .decision-tradeoff {
+  color: #8e4568;
+  background: rgba(142, 69, 104, 0.08);
+}
+html[data-theme='sakura'] .overlay-speech::after {
+  background: rgba(255, 250, 252, 0.98);
+}
+
+@media (max-width: 980px) {
+  .command-rail {
+    width: 76px;
+    align-items: center;
+  }
+  .brand-lockup > div:last-child,
+  .nav-command > span:nth-child(2),
+  .nav-command > span:last-child,
+  .phase-console > div {
+    display: none;
+  }
+  .nav-command {
+    width: 46px;
+    justify-content: center;
+    padding-inline: 0;
+  }
+  .phase-console {
+    width: auto;
+    padding-inline: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .companion-sprite,
+  .phase-beacon-live,
+  .nav-command {
+    animation: none !important;
+    transition: none !important;
   }
 }

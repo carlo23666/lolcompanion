@@ -105,6 +105,10 @@ describe('runBacktest', () => {
     expect(report.top1Rate).toBeGreaterThanOrEqual(0)
     expect(report.top1Rate).toBeLessThanOrEqual(1)
     expect(report.top3Rate).toBeGreaterThanOrEqual(report.top1Rate)
+    expect(report.coverageRate).toBeGreaterThan(0)
+    expect(report.coverageRate).toBeLessThanOrEqual(1)
+    expect(report.routePrimaryRate).toBeGreaterThanOrEqual(0)
+    expect(report.routePrimaryRate).toBeLessThanOrEqual(1)
     expect(report.byChampion['Jinx']?.comparisons).toBe(report.comparisons)
     const phaseSum =
       report.byPhase.early.comparisons +

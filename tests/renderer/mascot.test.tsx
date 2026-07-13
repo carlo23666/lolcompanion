@@ -8,49 +8,55 @@ function ThemeProbe(): React.JSX.Element {
 
 describe('Mascot', () => {
   it('mood follows the session phase', () => {
-    // Default identity is abismo → Sombra (see DEFAULT_THEME).
     const { rerender } = render(<Mascot phase="idle" />)
-    expect(screen.getByRole('img', { name: /Sombra/, hidden: true })).toHaveAttribute(
+    expect(screen.getByRole('img', { name: /Hexi/, hidden: true })).toHaveAttribute(
       'data-mood',
       'sleepy'
     )
 
     rerender(<Mascot phase="champSelect" />)
-    expect(screen.getByRole('img', { name: /Sombra/, hidden: true })).toHaveAttribute(
+    expect(screen.getByRole('img', { name: /Hexi/, hidden: true })).toHaveAttribute(
       'data-mood',
-      'hyped'
+      'thinking'
     )
 
     rerender(<Mascot phase="inGame" />)
-    expect(screen.getByRole('img', { name: /Sombra/, hidden: true })).toHaveAttribute(
+    expect(screen.getByRole('img', { name: /Hexi/, hidden: true })).toHaveAttribute(
       'data-mood',
       'focused'
     )
   })
 
-  it('the mascot swaps live with the identity (Bitxo/Sombra/Yuki)', () => {
+  it('switches to the companion authored for each identity', () => {
     render(
       <>
         <Mascot phase="idle" />
         <ThemeProbe />
       </>
     )
-    // Starts on the default identity, Sombra (abismo).
-    expect(screen.getByTestId('theme').textContent).toBe('abismo')
-    expect(screen.getByRole('img', { name: /Sombra/, hidden: true })).toBeInTheDocument()
+    expect(screen.getByTestId('theme').textContent).toBe('rift')
+    expect(screen.getByRole('img', { name: /Hexi/, hidden: true })).toBeInTheDocument()
 
     act(() => {
-      window.dispatchEvent(new CustomEvent('app-theme', { detail: 'neon' }))
+      window.dispatchEvent(new CustomEvent('app-theme', { detail: 'abismo' }))
     })
-    expect(screen.getByRole('img', { name: /Bitxo/, hidden: true })).toBeInTheDocument()
+    expect(screen.getByTestId('theme').textContent).toBe('dark')
+    expect(screen.getByRole('img', { name: /Sombra/, hidden: true })).toHaveAttribute(
+      'data-mascot',
+      'dark'
+    )
 
     act(() => {
       window.dispatchEvent(new CustomEvent('app-theme', { detail: 'anime' }))
     })
-    expect(screen.getByRole('img', { name: /Yuki/, hidden: true })).toBeInTheDocument()
+    expect(screen.getByTestId('theme').textContent).toBe('sakura')
+    expect(screen.getByRole('img', { name: /Kohaku/, hidden: true })).toHaveAttribute(
+      'data-mascot',
+      'sakura'
+    )
   })
 
-  it('legacy theme ids normalize (recreativa→neon keeps Bitxo)', () => {
+  it('maps retired Rift ids without losing Hexi', () => {
     render(
       <>
         <Mascot phase="idle" />
@@ -60,13 +66,15 @@ describe('Mascot', () => {
     act(() => {
       window.dispatchEvent(new CustomEvent('app-theme', { detail: 'recreativa' }))
     })
-    expect(screen.getByTestId('theme').textContent).toBe('neon')
-    expect(screen.getByRole('img', { name: /Bitxo/, hidden: true })).toBeInTheDocument()
+    expect(screen.getByTestId('theme').textContent).toBe('rift')
+    expect(screen.getByRole('img', { name: /Hexi/, hidden: true })).toBeInTheDocument()
   })
 
   it('shows a speech bubble on phase change', () => {
     const { container } = render(<Mascot phase="champSelect" />)
     // One of the champ-select phrases is visible right after the change.
-    expect(container.textContent).toMatch(/pick|A por todas|👀/i)
+    expect(container.textContent).toMatch(
+      /draft|options updated|composition is changing|opciones actualizadas|composición está cambiando/i
+    )
   })
 })

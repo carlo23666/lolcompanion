@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { PostGameReport as Report, PostGameReportResult } from '@shared/report'
 import type { MessageKey } from '@shared/i18n'
 import { useT } from '../i18n'
-import { HexiSprite, useMascotName } from './Mascot'
+import { CompanionSprite, useMascotName } from './Mascot'
 
 /**
  * Optional local-AI commentary (Ollama). Renders nothing unless the coach is
@@ -44,7 +44,7 @@ function CoachSection(props: { report: Report }): React.JSX.Element | null {
   return (
     <div className="mt-3 rounded border border-indigo-800/60 bg-slate-950/50 p-2.5">
       <div className="flex items-start gap-2">
-        <HexiSprite mood={thinking ? 'focused' : 'idle'} className="h-9 w-9 shrink-0" />
+        <CompanionSprite mood={thinking ? 'focused' : 'idle'} className="h-9 w-9 shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="mb-1 text-[11px] font-semibold tracking-wide text-indigo-300 uppercase">
             {t('report.coachTitle', { mascot })}

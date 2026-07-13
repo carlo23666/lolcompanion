@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ChampionMeta, ChampSelectInsights } from '@shared/champselect'
 import type { ChampSelectState } from '@shared/schemas/lcu'
 import { useT } from '../i18n'
-import { HexiSprite, useMascotName } from './Mascot'
+import { CompanionSprite, useMascotName } from './Mascot'
 
 /** Debounce so a burst of draft updates (pick + ban + intent) costs ONE run. */
 const DRAFT_ANALYZE_DEBOUNCE_MS = 1500
@@ -42,9 +42,10 @@ function CoachDraft(props: { insights: ChampSelectInsights }): React.JSX.Element
   )
 
   useEffect(() => {
-    void window.api
-      .invoke('coach:status')
-      .then((status) => setReady(status.enabled && status.available), () => undefined)
+    void window.api.invoke('coach:status').then(
+      (status) => setReady(status.enabled && status.available),
+      () => undefined
+    )
   }, [])
 
   useEffect(() => {
@@ -78,12 +79,12 @@ function CoachDraft(props: { insights: ChampSelectInsights }): React.JSX.Element
   if (!ready) return null
 
   return (
-    <div className="rounded border border-indigo-800/60 bg-slate-950/60 p-2">
+    <div className="draft-coach mt-auto rounded-xl border border-indigo-800/60 bg-slate-950/60 p-3">
       <div className="flex items-start gap-2">
-        <HexiSprite mood={thinking ? 'focused' : 'idle'} className="h-8 w-8 shrink-0" />
+        <CompanionSprite mood={thinking ? 'focused' : 'idle'} className="h-8 w-8 shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="mb-0.5 text-[10px] font-semibold tracking-wide text-indigo-300 uppercase">
-            🔮 {t('csp.coachTitle', { mascot })}{' '}
+            {t('csp.coachTitle', { mascot })}{' '}
             {thinking && (
               <span className="animate-pulse text-slate-500">{t('csp.recalculating')}</span>
             )}
@@ -191,8 +192,9 @@ export default function ChampSelectPanel(props: {
         </p>
         <ul className="space-y-1.5">
           {insights.tips.map((tip, index) => (
-            <li key={index} className="alert-in text-xs leading-snug text-slate-300">
-              💡 {tip}
+            <li key={index} className="alert-in flex gap-2 text-xs leading-snug text-slate-300">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rotate-45 bg-amber-300" aria-hidden />
+              <span>{tip}</span>
             </li>
           ))}
         </ul>
@@ -216,7 +218,11 @@ export default function ChampSelectPanel(props: {
               src={`ddicon://item/${String(item.id)}.png`}
               alt={item.name}
               title={item.name}
-              className={picked ? 'h-9 w-9 rounded border border-slate-700' : 'h-7 w-7 rounded border border-slate-700'}
+              className={
+                picked
+                  ? 'h-9 w-9 rounded border border-slate-700'
+                  : 'h-7 w-7 rounded border border-slate-700'
+              }
             />
           </span>
         ))}
@@ -251,7 +257,7 @@ export default function ChampSelectPanel(props: {
   }
 
   return (
-    <div className="card-in relative overflow-hidden rounded-lg border border-slate-800 bg-slate-900">
+    <div className="card-in relative min-h-[calc(100vh-140px)] overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
       {/* Own pick splash as ambient banner */}
       {ownMeta && (
         <div className="absolute inset-0" aria-hidden>
@@ -264,7 +270,7 @@ export default function ChampSelectPanel(props: {
         </div>
       )}
 
-      <div className="relative flex flex-col gap-3 p-4 text-sm">
+      <div className="relative flex min-h-[calc(100vh-140px)] flex-col gap-3 p-4 text-sm">
         <div className="flex items-center justify-between">
           <p className="font-semibold text-slate-100">
             {t('csp.title')}
@@ -302,7 +308,11 @@ export default function ChampSelectPanel(props: {
             <div className="flex gap-1.5">
               {cs.theirTeam.length > 0 ? (
                 cs.theirTeam.map((member) => (
-                  <ChampionPortrait key={member.cellId} championId={member.championId} meta={meta} />
+                  <ChampionPortrait
+                    key={member.cellId}
+                    championId={member.championId}
+                    meta={meta}
+                  />
                 ))
               ) : (
                 <p className="text-xs text-slate-500">{t('csp.noPicks')}</p>
@@ -336,61 +346,61 @@ export default function ChampSelectPanel(props: {
         {picked && tipsSection}
 
         <div className="grid grid-cols-1 items-start gap-3 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        {!picked && insights !== null && insights.picks.length > 0 && (
-          <div className="rounded border border-indigo-500/30 bg-slate-950/60 p-2.5">
-            <p className="mb-2 text-[10px] font-semibold tracking-widest text-indigo-300 uppercase">
-              {t('csp.whatPick')}
-            </p>
-            <div className="flex flex-col gap-2">
-              {insights.picks.map((pick, index) => (
-                <div
-                  key={pick.championId}
-                  className={`flex items-start gap-2 rounded p-1.5 ${
-                    index === 0 ? 'bg-indigo-500/10' : ''
-                  }`}
-                >
-                  <img
-                    src={`ddicon://champion/${pick.championId}.png`}
-                    alt={pick.name}
-                    className="h-10 w-10 rounded border border-slate-700"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold text-slate-200">
-                      {pick.name}{' '}
-                      <span
-                        className={`font-mono ${pick.winratePct >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}
-                      >
-                        {pick.winratePct.toFixed(0)}%
-                      </span>{' '}
-                      <span className="font-normal text-slate-500">
-                        {t('csp.inGames', { games: String(pick.games) })}
-                      </span>
-                    </p>
-                    <ul className="mt-0.5 space-y-px">
-                      {/* reasons[0] repeats the WR shown above — list the rest. */}
-                      {pick.reasons.slice(1, 5).map((reason, reasonIndex) => (
-                        <li
-                          key={reasonIndex}
-                          className={`text-[11px] ${
-                            reason.includes('Master+')
-                              ? 'text-amber-300/90'
-                              : reason.startsWith('ojo:') || reason.startsWith('watch out:')
-                                ? 'text-rose-300/90'
-                                : 'text-slate-400'
-                          }`}
+          {!picked && insights !== null && insights.picks.length > 0 && (
+            <div className="rounded border border-indigo-500/30 bg-slate-950/60 p-2.5">
+              <p className="mb-2 text-[10px] font-semibold tracking-widest text-indigo-300 uppercase">
+                {t('csp.whatPick')}
+              </p>
+              <div className="flex flex-col gap-2">
+                {insights.picks.map((pick, index) => (
+                  <div
+                    key={pick.championId}
+                    className={`flex items-start gap-2 rounded p-1.5 ${
+                      index === 0 ? 'bg-indigo-500/10' : ''
+                    }`}
+                  >
+                    <img
+                      src={`ddicon://champion/${pick.championId}.png`}
+                      alt={pick.name}
+                      className="h-10 w-10 rounded border border-slate-700"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-slate-200">
+                        {pick.name}{' '}
+                        <span
+                          className={`font-mono ${pick.winratePct >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}
                         >
-                          · {reason}
-                        </li>
-                      ))}
-                    </ul>
+                          {pick.winratePct.toFixed(0)}%
+                        </span>{' '}
+                        <span className="font-normal text-slate-500">
+                          {t('csp.inGames', { games: String(pick.games) })}
+                        </span>
+                      </p>
+                      <ul className="mt-0.5 space-y-px">
+                        {/* reasons[0] repeats the WR shown above — list the rest. */}
+                        {pick.reasons.slice(1, 5).map((reason, reasonIndex) => (
+                          <li
+                            key={reasonIndex}
+                            className={`text-[11px] ${
+                              reason.includes('Master+')
+                                ? 'text-amber-300/90'
+                                : reason.startsWith('ojo:') || reason.startsWith('watch out:')
+                                  ? 'text-rose-300/90'
+                                  : 'text-slate-400'
+                            }`}
+                          >
+                            · {reason}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {!picked && tipsSection}
+          {!picked && tipsSection}
         </div>
 
         {/* Pre-lock: the plan tags along under the suggestions. */}

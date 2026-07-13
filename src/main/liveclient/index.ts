@@ -9,6 +9,7 @@ import type { AppDatabase } from '../db'
 import { LiveSessionRepo, MatchRepo, MetaRepo, TimelineRepo } from '../db/repos'
 import { SettingsRepo, SETTING_KEYS } from '../db/repos/settings'
 import { diffGameStates } from '../engine/diff'
+import { materialAdvantageSignal } from '../engine/duel'
 import { normalizeSnapshot } from '../engine/normalize'
 import { recommend, type MetaItemsInput } from '../engine/recommend'
 import { personalBuildFor } from '../personal-build'
@@ -65,6 +66,7 @@ export function createSnapshotProcessor(
 
   let previousState: GameState | null = null
   let lastPersistedTop = ''
+  const announcedDuelOpponents = new Set<string>()
 
   // Live macro coach: Hexi speaks a short local-AI tip every ~60s in game.
   // Also runs during replays/scenarios, which is how the owner tests it.
@@ -100,23 +102,27 @@ export function createSnapshotProcessor(
     // (antiheal/defensives/pen), so it must reach past the core build.
     const found = repo.itemsFor(champion, role, patch, 30)
     if (found === null) return undefined
-    return { items: found.items, games: found.games }
+    return { items: found.items, games: found.games, routes: found.routes, role: found.role }
   }
 
-  // The player's OWN build results for the champion (WP-018): Master+ is the
-  // base, this nudges order/inclusion. Champion-only (personal samples are
-  // small; role-splitting would starve them). Cached per champion like meta.
+  // The player's own route preference is role/queue/patch aware (WP-021).
+  // It can select between observed Master+ routes, never invent or raw-WR swap.
   let personalKey = ''
   let personalItems: MetaItemsInput | undefined
   const lookupPersonalItems = (
     champion: string,
+    role: string,
+    patch: string,
     staticData: StaticData
   ): MetaItemsInput | undefined => {
     const puuid = new SettingsRepo(db).get(SETTING_KEYS.puuid)
     if (puuid === null || puuid === '') return undefined
     return personalBuildFor(new MatchRepo(db), new TimelineRepo(db), staticData, {
       puuid,
-      champion
+      champion,
+      role,
+      patch: patch.split('.').slice(0, 2).join('.'),
+      queueId: 420
     })
   }
 
@@ -129,6 +135,14 @@ export function createSnapshotProcessor(
       const state = normalizeSnapshot(snapshot, staticData)
       if (!state) return
       broadcast('gamestate:update', state)
+      const duelSignal = materialAdvantageSignal(state)
+      if (
+        duelSignal !== null &&
+        !announcedDuelOpponents.has(duelSignal.opponentChampionName)
+      ) {
+        announcedDuelOpponents.add(duelSignal.opponentChampionName)
+        broadcast('gamestate:duel', duelSignal)
+      }
       let events: GameStateEvent[] = []
       if (previousState && previousState.gameTimeS < state.gameTimeS) {
         events = diffGameStates(previousState, state)
@@ -141,9 +155,15 @@ export function createSnapshotProcessor(
         metaKey = key
         metaItems = lookupMetaItems(state.self.championId, state.self.position)
       }
-      if (state.self.championId !== personalKey) {
-        personalKey = state.self.championId
-        personalItems = lookupPersonalItems(state.self.championId, staticData)
+      const ownKey = `${state.self.championId}|${state.self.position}|${state.patch}`
+      if (ownKey !== personalKey) {
+        personalKey = ownKey
+        personalItems = lookupPersonalItems(
+          state.self.championId,
+          state.self.position,
+          state.patch,
+          staticData
+        )
       }
       // Reasons render in the active UI language (ADR-009); resolved per tick
       // so a mid-session language switch takes effect on the next update.
@@ -170,23 +190,24 @@ export function createSnapshotProcessor(
         .join('|')
       if (sessionId !== null && topKey !== lastPersistedTop) {
         lastPersistedTop = topKey
-        new LiveSessionRepo(db).appendRecommendations(
-          sessionId,
-          state.gameTimeS,
-          recommendations
-        )
+        new LiveSessionRepo(db).appendRecommendations(sessionId, state.gameTimeS, recommendations)
       }
     },
     reset(): void {
       persister?.endSession()
       previousState = null
       lastPersistedTop = ''
+      announcedDuelOpponents.clear()
       liveCoach.reset()
       // Re-query next game: the crawler may have aggregated more since.
       metaKey = ''
       metaItems = undefined
       personalKey = ''
       personalItems = undefined
+      // Renderer state must not depend on the next game's clock being lower.
+      // Debug replays/scenarios can start at any timestamp, and otherwise an
+      // old enemy spike can survive into a different snapshot source.
+      broadcast('gamestate:reset', { atMs: Date.now() })
     }
   }
 }

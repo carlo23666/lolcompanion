@@ -80,10 +80,9 @@ describe('baseline pool (placeholder — ADR-006)', () => {
   it('every champion and item resolves in the current patch, items purchasable on SR', () => {
     const pool = loadBaselinePool()
     for (const champion of pool.champions) {
-      expect(
-        staticData.champions.has(champion.championId),
-        `champion ${champion.championId}`
-      ).toBe(true)
+      expect(staticData.champions.has(champion.championId), `champion ${champion.championId}`).toBe(
+        true
+      )
       for (const itemId of [...champion.core, ...champion.situational]) {
         const node = staticData.itemGraph.nodes.get(itemId)
         expect(node?.availableOnSR, `item ${String(itemId)} (${champion.championId})`).toBe(true)
@@ -122,7 +121,7 @@ describe('nextBuyRecommendation', () => {
     const rec = nextBuyRecommendation(state, staticData, TEST_POOL)
     expect(rec?.itemId).toBe(3006)
     expect(rec?.action).toBe('prioritize')
-    expect(rec?.reasons.join(' ')).toContain('YA')
+    expect(rec?.reasons.join(' ')).toContain('disponible')
   })
 
   it('skips owned core items and moves to the next one', () => {
@@ -209,7 +208,7 @@ describe('meta fallback baseline (Master+ items)', () => {
     ).toBeNull()
   })
 
-  it('meta core keeps only completed SR items, top 5 by frequency', () => {
+  it('legacy meta keeps a conservative three-item inferred core', () => {
     const state = selfWith('Teemo', [], 1200)
     const withJunk: MetaItemsInput = {
       games: 120,
@@ -221,8 +220,8 @@ describe('meta fallback baseline (Master+ items)', () => {
     }
     const baseline = resolveBaseline(state, staticData, TEST_POOL, withJunk)
     expect(baseline?.source).toBe('meta')
-    expect(baseline?.core).toEqual([3031, 3085, 3006, 3036, 3026])
-    expect(baseline?.situational).toEqual([3139])
+    expect(baseline?.core).toEqual([3031, 3085, 3006])
+    expect(baseline?.situational).toEqual([3036, 3026, 3139])
   })
 
   it('recommend() flows the meta baseline end to end', () => {
@@ -400,8 +399,7 @@ describe('recommend (baseline + rules merged)', () => {
   })
 })
 
-describe('WP-018: personalize the Master+ build with the player\'s own results', () => {
-  // META core (per the meta-fallback tests) = [3031, 3085, 3006, 3036, 3026].
+describe('WP-021: route-aware, shrunk personal adaptation', () => {
   const META: MetaItemsInput = {
     games: 120,
     items: [
@@ -409,74 +407,71 @@ describe('WP-018: personalize the Master+ build with the player\'s own results',
       { itemId: 3085, games: 90, wins: 50 },
       { itemId: 3006, games: 85, wins: 47 },
       { itemId: 3036, games: 60, wins: 33 },
-      { itemId: 3026, games: 40, wins: 22 }
+      { itemId: 3153, games: 50, wins: 27 }
+    ],
+    routes: [
+      { starterId: 1055, items: [3031, 3006, 3085, 3036], games: 40, wins: 22 },
+      { starterId: 1055, items: [3153, 3006, 3085, 3036], games: 20, wins: 11 }
     ]
   }
 
-  it('swaps in an item the player wins meaningfully more with (A→B→D)', () => {
+  it('never swaps core solely because an off-route personal item has high win rate', () => {
     const state = selfWith('Teemo', [], 1200)
     const personal: MetaItemsInput = {
       games: 20,
-      items: [
-        { itemId: 3153, games: 12, wins: 11 }, // 92% — not in the meta core
-        { itemId: 3026, games: 8, wins: 2 } // 25% — the meta core's GA
-      ]
+      items: [{ itemId: 3026, games: 12, wins: 11 }]
     }
     const baseline = resolveBaseline(state, staticData, TEST_POOL, META, personal)
     expect(baseline?.source).toBe('meta')
-    expect(baseline?.core).toContain(3153) // the player's high-WR item is now core
-    expect(baseline?.core).not.toContain(3026) // the low-WR GA dropped to situational
-    expect(baseline?.personal?.get(3153)?.kind).toBe('winrate')
+    expect(baseline?.core[0]).toBe(3031)
+    expect(baseline?.core).not.toContain(3026)
   })
 
-  it('reorders the core to the player\'s own opener (A→C→B)', () => {
+  it('sample-gated personal route frequency can choose another observed route', () => {
     const state = selfWith('Teemo', [], 1200)
     const personal: MetaItemsInput = {
-      games: 18,
-      items: [
-        // The player opens Berserker's (3006) far more than the meta's IE (3031).
-        { itemId: 3006, games: 15, wins: 9, firstGames: 11, orderGames: 15, slotSum: 20 }
-      ]
+      games: 14,
+      items: [],
+      routes: [{ starterId: 1055, items: [3153, 3006, 3085, 3036], games: 10, wins: 6 }]
     }
     const baseline = resolveBaseline(state, staticData, TEST_POOL, META, personal)
-    expect(baseline?.core[0]).toBe(3006)
-    expect(baseline?.personal?.get(3006)?.kind).toBe('order')
+    expect(baseline?.core[0]).toBe(3153)
+    expect(baseline?.route?.personalAdjusted).toBe(true)
   })
 
   it('leaves Master+ untouched below the personal-sample floor', () => {
     const state = selfWith('Teemo', [], 1200)
-    const thin: MetaItemsInput = { games: 4, items: [{ itemId: 3153, games: 4, wins: 4 }] }
+    const thin: MetaItemsInput = {
+      games: 4,
+      items: [],
+      routes: [{ starterId: 1055, items: [3153, 3006, 3085], games: 4, wins: 4 }]
+    }
     const baseline = resolveBaseline(state, staticData, TEST_POOL, META, thin)
-    expect(baseline?.core).toEqual([3031, 3085, 3006, 3036, 3026])
-    expect(baseline?.personal).toBeUndefined()
+    expect(baseline?.core[0]).toBe(3031)
+    expect(baseline?.route?.personalAdjusted).toBe(false)
   })
 
-  it('no Master+ data but personal history → builds from the player\'s own results', () => {
+  it('no Master+ data but role-aware personal routes still provide a build', () => {
     const state = selfWith('Teemo', [], 1200)
     const personal: MetaItemsInput = {
       games: 12,
-      items: [
-        { itemId: 3031, games: 10, wins: 7 },
-        { itemId: 3085, games: 9, wins: 5 },
-        { itemId: 3006, games: 8, wins: 5 }
-      ]
+      items: [],
+      routes: [{ starterId: 1055, items: [3031, 3006, 3085], games: 8, wins: 5 }]
     }
     const baseline = resolveBaseline(state, staticData, TEST_POOL, undefined, personal)
     expect(baseline?.source).toBe('personal')
-    expect(baseline?.core).toContain(3031)
+    expect(baseline?.core).toEqual([3031, 3006, 3085])
   })
 
-  it('the personal reason reaches the end-to-end recommendation', () => {
-    // Owns everything but IE (3031) and GA (3026). The player opens GA far more
-    // than the meta → order nudge moves GA to the front, so it's the next buy
-    // and its "your data" reason surfaces.
-    const state = selfWith('Teemo', [3006, 3085, 3036], 4000)
+  it('the personal route evidence reaches the end-to-end recommendation', () => {
+    const state = selfWith('Teemo', [1055], 4000)
     const personal: MetaItemsInput = {
-      games: 18,
-      items: [{ itemId: 3026, games: 12, wins: 8, firstGames: 9, orderGames: 12, slotSum: 15 }]
+      games: 14,
+      items: [],
+      routes: [{ starterId: 1055, items: [3153, 3006, 3085, 3036], games: 10, wins: 6 }]
     }
     const recs = recommend(state, staticData, TEST_POOL, META, undefined, personal)
-    const ga = recs.find((rec) => rec.itemId === 3026)
-    expect(ga?.reasons.join(' ')).toContain('tus datos')
+    expect(recs[0]?.itemId).toBe(3153)
+    expect(recs[0]?.reasons.join(' ')).toContain('historial')
   })
 })

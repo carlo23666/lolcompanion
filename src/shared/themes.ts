@@ -1,62 +1,54 @@
-/**
- * The app's three visual identities. Each is a FULL identity: palette,
- * display face, corner language, ambient atmosphere and chrome variant (all
- * CSS-var / data-theme driven in main.css + Shell.tsx) and its own mascot.
- * Single source of truth for renderer AND main (the coach's persona name
- * follows the active theme).
- *
- *  - neon   — "Neón Grieta": void navy + Bitxo pink + coin gold, rift aurora.
- *  - abismo — "Abismo": deep void + neon-blood crimson, knife-sharp, icon rail.
- *  - anime  — "Sakura": warm washi + sakura pink + kintsugi gold, hanami petals.
- */
+import type { MessageKey } from './i18n'
+
+/** Complete visual identities shared by the main window, overlay and local coach. */
 export interface AppTheme {
   id: string
-  label: string
-  hint: string
-  /** Mascot + AI persona name for this identity. */
+  labelKey: MessageKey
+  hintKey: MessageKey
   mascot: string
 }
 
 export const THEMES: AppTheme[] = [
   {
-    id: 'neon',
-    label: 'Neón Grieta',
-    hint: 'azul vacío · rosa + oro · mascota Bitxo (ajolote)',
-    mascot: 'Bitxo'
+    id: 'rift',
+    labelKey: 'theme.rift.label',
+    hintKey: 'theme.rift.hint',
+    mascot: 'Hexi'
   },
   {
-    id: 'abismo',
-    label: 'Abismo',
-    hint: 'vacío negro · carmesí neón · mascota Sombra (gato sombra)',
+    id: 'dark',
+    labelKey: 'theme.dark.label',
+    hintKey: 'theme.dark.hint',
     mascot: 'Sombra'
   },
   {
-    id: 'anime',
-    label: 'Sakura',
-    hint: 'papel washi · rosa sakura + oro · mascota Yuki (anime)',
-    mascot: 'Yuki'
+    id: 'sakura',
+    labelKey: 'theme.sakura.label',
+    hintKey: 'theme.sakura.hint',
+    mascot: 'Kohaku'
   }
 ]
 
-export const DEFAULT_THEME = 'abismo'
+export const DEFAULT_THEME = 'rift'
 
-/** Pre-2.0 ids collapse onto the closest identity. */
 const LEGACY_THEME_MAP: Record<string, string> = {
-  hextech: 'neon',
-  void: 'neon',
-  noche: 'abismo',
-  recreativa: 'neon',
-  sakura: 'anime',
-  cabina: 'neon'
+  neon: 'rift',
+  hextech: 'rift',
+  void: 'rift',
+  recreativa: 'rift',
+  cabina: 'rift',
+  abismo: 'dark',
+  noche: 'dark',
+  anime: 'sakura'
 }
 
 export function normalizeTheme(theme: string | null | undefined): string {
   if (theme == null || theme === '') return DEFAULT_THEME
-  const mapped = LEGACY_THEME_MAP[theme] ?? theme
-  return THEMES.some((entry) => entry.id === mapped) ? mapped : DEFAULT_THEME
+  const normalized = LEGACY_THEME_MAP[theme] ?? theme
+  return THEMES.some((entry) => entry.id === normalized) ? normalized : DEFAULT_THEME
 }
 
 export function mascotNameFor(theme: string | null | undefined): string {
-  const id = normalizeTheme(theme)
-  return THEMES.find((entry) => entry.id === id)?.mascot ?? 'Bitxo'
+  const normalized = normalizeTheme(theme)
+  return THEMES.find((entry) => entry.id === normalized)?.mascot ?? 'Hexi'
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { act, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { IpcEventChannel, IpcEventChannels, RendererApi } from '@shared/ipc'
 import App from '@renderer/App'
@@ -54,7 +54,7 @@ describe('App shell', () => {
     expect(await screen.findByRole('button', { name: 'Historial' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Live' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ajustes' })).toBeInTheDocument()
-    expect(await screen.findByText('Descansando el cristal…')).toBeInTheDocument()
+    expect(await screen.findByText('Todo listo cuando vuelvas')).toBeInTheDocument()
   })
 
   it('navigates between views from the top bar', async () => {
@@ -69,15 +69,30 @@ describe('App shell', () => {
     expect(await screen.findByText('Cuenta')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Live' }))
-    expect(screen.getByText('Descansando el cristal…')).toBeInTheDocument()
+    expect(screen.getByText('Todo listo cuando vuelvas')).toBeInTheDocument()
+  })
+
+  it('previews overlay scale and theme changes through typed IPC', async () => {
+    const stub = stubApi()
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(await screen.findByRole('button', { name: 'Ajustes' }))
+    await user.click(screen.getByRole('checkbox', { name: /Overlay in-game/ }))
+    fireEvent.change(screen.getByRole('slider', { name: /Escala/ }), {
+      target: { value: '125' }
+    })
+    expect(stub.invoke).toHaveBeenCalledWith('overlay:configure', { scale: 125 })
+
+    await user.click(screen.getByRole('button', { name: 'Dark' }))
+    expect(stub.invoke).toHaveBeenCalledWith('overlay:configure', { theme: 'dark' })
   })
 
   it('updates the session indicator from session:phase events', async () => {
     const stub = stubApi()
     render(<App />)
-    expect(await screen.findByText('Descansando el cristal…')).toBeInTheDocument()
-    // Default identity (abismo) uses the icon rail: the phase label lives in the
-    // indicator's title rather than as visible text.
+    expect(await screen.findByText('Todo listo cuando vuelvas')).toBeInTheDocument()
+    // The compact phase console exposes its full localized label via title.
     stub.emit('session:phase', 'clientOpen')
     expect(screen.getByTitle('Cliente abierto')).toBeInTheDocument()
     stub.emit('session:phase', 'postGame')

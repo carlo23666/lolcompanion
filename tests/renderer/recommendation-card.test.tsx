@@ -41,7 +41,7 @@ describe('RecommendationCard', () => {
   it('shows the top recommendation with icon, action and top-3 reasons', () => {
     render(<RecommendationCard payload={payload} currentGold={1250} />, { wrapper: esWrapper })
     expect(screen.getByText('Llamada del verdugo')).toBeInTheDocument()
-    expect(screen.getByText('PRÓXIMA COMPRA')).toBeInTheDocument()
+    expect(screen.getByText('OPCIÓN DE RUTA')).toBeInTheDocument()
     expect(screen.getByText(/Índice de curación enemiga 5.0/)).toBeInTheDocument()
     expect(screen.getByText(/cuesta 800 de oro y llevas 1250/)).toBeInTheDocument()
     expect(screen.queryByText(/4ª/)).not.toBeInTheDocument()
@@ -51,14 +51,16 @@ describe('RecommendationCard', () => {
 
   it('lists secondary recommendations in the alternatives rail', () => {
     render(<RecommendationCard payload={payload} currentGold={1250} />, { wrapper: esWrapper })
-    expect(screen.getByText('Alternativas')).toBeInTheDocument()
+    expect(screen.getByText('Opciones contextuales')).toBeInTheDocument()
     expect(screen.getByText('Ángel de la guarda')).toBeInTheDocument()
     expect(screen.getByText('55')).toBeInTheDocument()
   })
 
   it('records an auditable history when the top recommendation changes', async () => {
     const user = userEvent.setup()
-    const { rerender } = render(<RecommendationCard payload={payload} currentGold={1250} />, { wrapper: esWrapper })
+    const { rerender } = render(<RecommendationCard payload={payload} currentGold={1250} />, {
+      wrapper: esWrapper
+    })
     const changed: RecommendationsPayload = {
       gameTimeS: 960,
       recommendations: [
@@ -74,8 +76,8 @@ describe('RecommendationCard', () => {
     }
     rerender(<RecommendationCard payload={changed} currentGold={2000} />)
     await user.click(screen.getByText(/historial \(2\)/))
-    expect(screen.getByText(/15:00 — Llamada del verdugo/)).toBeInTheDocument()
-    expect(screen.getByText(/16:00 — Filo infinito/)).toBeInTheDocument()
+    expect(screen.getByText(/15:00 · Llamada del verdugo/)).toBeInTheDocument()
+    expect(screen.getByText(/16:00 · Filo infinito/)).toBeInTheDocument()
   })
 
   it('renders nothing without recommendations', () => {

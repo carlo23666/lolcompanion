@@ -41,7 +41,12 @@ describe('engine reasons honor the translator (ADR-009)', () => {
 
   it('armor-vs-mr category + reasons localize', () => {
     const meta = { games: 300, items: [{ itemId: 3026, games: 40, wins: 22 }] }
-    const english = armorVsMrRule(mid, staticData, meta, enT)
+    const threatened = structuredClone(mid)
+    const zed = threatened.enemies.find((enemy) => enemy.championId === 'Zed')
+    if (zed === undefined) throw new Error('fixture has no Zed')
+    zed.scores.kills = 8
+    zed.scores.deaths = 3
+    const english = armorVsMrRule(threatened, staticData, meta, enT)
     expect(english[0]?.category).toBe('armor')
     expect(english[0]?.reasons[0]).toMatch(/of estimated enemy damage is physical/)
   })

@@ -32,6 +32,10 @@ export const SETTING_KEYS = {
   /** Comma-separated disabled categories (default: none disabled). */
   soundMuted: 'settings.soundMuted',
   overlayEnabled: 'settings.overlayEnabled',
+  /** Overlay scale percentage and last user-dragged screen position. */
+  overlayScale: 'settings.overlayScale',
+  overlayX: 'settings.overlayX',
+  overlayY: 'settings.overlayY',
   theme: 'settings.theme',
   /** UI language ('en' | 'es'); ADR-009. Migration 007 grandfathers ES. */
   locale: 'settings.locale',

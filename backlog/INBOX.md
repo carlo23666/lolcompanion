@@ -1,6 +1,17 @@
 # INBOX — discovered work
+
 Builder sessions append here instead of expanding scope. Reviewer triages into WPs.
 
+## 2026-07-13 (local AI product decision)
+
+- **Evaluate the local coach before bundling it**: the current Ollama layer mostly rewrites facts and recommendations WinCon already produces deterministically, so adding several GB to every installer is not justified. A dedicated WP should run an explicit usefulness comparison and choose among: (a) refocus AI on cross-match pattern synthesis and a personalized improvement plan, (b) keep it as an optional in-app download with no UI or disk cost until enabled, or (c) remove it if it does not add actionable information. If retained, research model redistribution license, quantization/quality, a bundled zero-install runtime, resumable model download with checksum, uninstall/cleanup, RAM/CPU/GPU fallbacks, updater impact, and antivirus/code-signing behavior. Do not ship the model inside the base installer by default.
+- ~~**Full WinCon landing refresh after WP-025**~~ **RESOLVED 2026-07-13 (WP-026/WP-027):** bilingual positioning, current feature copy, themed app captures, real-HUD overlay composition and responsive QA shipped.
+- ~~**Rich item references in overlay speech**~~ **RESOLVED 2026-07-13 (WP-028):** typed `itemId`/`itemName` now drive the Data Dragon icon and localized label in purchase speech; no prose parsing.
+- ~~**Visible 1v1 material-advantage signal**~~ **RESOLVED 2026-07-13 (WP-028):** pure conservative signal uses only visible level, health, items, CS and KDA, and keeps the advice explicitly conditional.
+
+- ~~(WP-022 follow-up) Refresh the EN/ES overlay copy and captures after theme approval.~~
+  **RESOLVED 2026-07-13 (WP-026/WP-027/WP-028):** the site now shows the stable dock,
+  temporary item-rich speech, movable/scalable placement and all three approved themes.
 - (WP-002) Per-champion Data Dragon detail files (`champion/<Name>.json`, spell data) not needed yet; add fetch-on-demand when a rule needs spell info.
 - ~~(WP-002) Verify damage profiles for post-2025 champions: Locke, Yunara, Zaahen (guessed physical/physical/mixed).~~ RESOLVED 2026-07-02: verified against 28 stored real builds — Locke=magic, Zaahen=physical, Yunara=physical. Locke's wrong guess showed up as 0% backtest agreement (engine pushed AD anti-tank items at an AP champion).
 - (WP-002) Gold-per-stat table is static constants; consider deriving from basic items of the cached patch at load time.
@@ -23,11 +34,13 @@ Builder sessions append here instead of expanding scope. Reviewer triages into W
 ## Owner playtest feedback 2026-07-03 (real game + practice tool)
 
 Bugs:
+
 - (WP-009 bug) **Next-buy stalls on boots with Magical Footwear**: owner ran the Magical Footwear rune (boots not purchasable until ~min 12-15); `nextBuyRecommendation` pinned boots as the first unfinished core item and recommended them the whole time, never advancing to later core items or components. Fix direction: read the active player's runes from Live Client (`fullRunes`, screen-visible, own player — compliant) and, when Magical Footwear is equipped and boots aren't granted yet, skip the boots slot and target the next core item instead.
 - (WP-009 bug) **Engine goes silent once core is complete**: pool cores are only 3-4 items, so `nextBuyRecommendation` returns null well before a full build. Observed twice: (a) 6 slots full with a Doran's still held → no "sell Doran's + buy X" recommendation; (b) owner sold the Doran's leaving a free slot + gold → still nothing. Needs an endgame layer: after core, recommend situational picks (rules already score them) to fill slots 5-6, and an explicit `sell` action for starter/early items when slots are full. May need a `sell`/`replace` action variant in `Recommendation`.
-- (WP-010 bug) **Post-game report shows a stale match after Practice Tool**: Practice Tool/custom games never appear in Riot match history, so the live session never links and `ReportService.lastReport` silently falls back to the most recent *linked* session (an older game). Fix direction: record `gameMode` on the live session; for non-matchmade modes show "sin informe para este tipo de partida" instead of falling back.
+- (WP-010 bug) **Post-game report shows a stale match after Practice Tool**: Practice Tool/custom games never appear in Riot match history, so the live session never links and `ReportService.lastReport` silently falls back to the most recent _linked_ session (an older game). Fix direction: record `gameMode` on the live session; for non-matchmade modes show "sin informe para este tipo de partida" instead of falling back.
 
 Feature requests (all screen-visible/own-data → compliant):
+
 - **Overlay v2 — Hexi in game**: owner wants the mascot rendered in the overlay, delivering messages/recommendations there (speech-bubble style). Also: overlay discoverability is poor — it's off by default behind Ajustes and invisible in exclusive fullscreen; consider a first-run hint and a phase-change toast.
 - **Report card v2 — richer metrics**: deaths vs owner's own average for that champ/role, vision score (in match-v5 participant data), build-order score (actual buy order vs engine recommendations over the session), build-vs-enemy-comp score (reuse rules engine on final state), and a short overall-game summary/recommendations. → 2026-07-03: deaths/vision/summary/adherence SHIPPED; still open: build-order score (needs purchase timestamps vs recommendation timestamps) and build-vs-enemy-comp score.
 - **Objective-window notifications**: on visible enemy deaths (Live Client event feed) while a major objective is up/spawning soon (timers already tracked), notify e.g. "el jungla enemigo ha muerto y el dragón está libre". Ally/team position is NOT available from the API, so scope to death + objective timers only.
@@ -45,6 +58,7 @@ Feature requests (all screen-visible/own-data → compliant):
 - **Sound settings don't reach the overlay window** (it never plays sounds today anyway); if overlay sounds ever land, configureSounds must run there too.
 
 Declined (Riot policy — hard rule 1, do NOT promote to a WP):
+
 - Enemy flash/summoner-cooldown timers (manual, ally-ping-derived, or otherwise) were requested and declined: enemy cooldown tracking of any kind is banned by Riot (March 2025), regardless of data source.
 
 - (2026-07-07) In-game splash backdrop uses sanitized display name; add a championName->ddragon-id map (Wukong->MonkeyKing etc.) so it never 404s.
@@ -54,6 +68,7 @@ Declined (Riot policy — hard rule 1, do NOT promote to a WP):
 - (2026-07-07) Champ select pick suggestions still rank by OWN winrate first with Master+ as a +/-0.15 blend; the in-game engine is now Master+-first — consider the same inversion in champselect if the owner confirms.
 
 ## 2026-07-09 (owner request: scale the Master+ base)
+
 - Owner: "crawl ~1M Master+ games, aggregate, ship as a base, users pull new ones on top; regenerate each release; also aggregate from user gameplay, not only history." → specced as **WP-019** (refresh seed every release) + **WP-020** (crawler scale-up). The "ship a base + users pull new ones" model already exists (seed export → release asset → first-run download-if-empty → local crawl on top).
 - **1M reframe** (captured in WP-020): rate limits (~2k games/h ⇒ ~3 weeks for 1M) + ~2-week patch rotation make a giant historical pile stale. Target = freshest CURRENT-patch aggregate each cycle, not 1M once.
 - **User-gameplay aggregation** ("not only history"): largely already done — WP-018 `personalBuildFor` aggregates the player's own match history (item WR + openers) to personalize on the meta base. Match history IS the authoritative record of completed games; live-capture adds little.

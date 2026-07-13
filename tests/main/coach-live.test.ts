@@ -20,7 +20,9 @@ function makeCoach(options?: {
     isEnabled: () => options?.enabled ?? true,
     generate: (prompt) => {
       prompts.push(prompt)
-      return options?.generate?.(prompt) ?? Promise.resolve({ ok: true, text: 'Consejo de prueba.' })
+      return (
+        options?.generate?.(prompt) ?? Promise.resolve({ ok: true, text: 'Consejo de prueba.' })
+      )
     },
     onTip: (tip) => tips.push(tip),
     intervalS: 60
@@ -103,13 +105,17 @@ describe('LiveCoach', () => {
     expect(tips.length).toBe(0)
   })
 
-  it('sanitizes model output (quotes, newlines, length cap)', async () => {
+  it('sanitizes model output (quotes, emoji, introductions and newlines)', async () => {
     const { coach, tips } = makeCoach({
-      generate: () => Promise.resolve({ ok: true, text: '  "Pon visión\nen el río."  ' })
+      generate: () =>
+        Promise.resolve({
+          ok: true,
+          text: '  "🔮 Soy Hexi, tu coach. Si puedes mantener prioridad, considera visión\nantes del dragón."  '
+        })
     })
     coach.onGameState(stateAt(600), [], null)
     await flush()
-    expect(tips[0]?.text).toBe('Pon visión en el río.')
+    expect(tips[0]?.text).toBe('Si puedes mantener prioridad, considera visión antes del dragón.')
   })
 })
 
@@ -135,7 +141,7 @@ describe('direction track (strategic read)', () => {
     coach.onGameState(stateAt(760), [], null) // past the interval
     await flush()
 
-    const directionPrompts = prompts.filter((prompt) => prompt.includes('LECTURA ESTRATÉGICA'))
+    const directionPrompts = prompts.filter((prompt) => prompt.includes('"jugadores"'))
     expect(directionPrompts.length).toBe(2)
     expect(directions.length).toBe(2)
     // Role guidance for the fixture's own position and the full scoreboard.
@@ -166,6 +172,7 @@ describe('buildLiveCoachPrompt', () => {
     expect(prompt).toContain('Jinx')
     expect(prompt).toContain('dragonSaleEnS')
     expect(prompt).toContain('PROHIBIDO inventar')
-    expect(prompt).toContain('22 palabras')
+    expect(prompt).toContain('26 palabras')
+    expect(prompt).toContain('opciones condicionales')
   })
 })

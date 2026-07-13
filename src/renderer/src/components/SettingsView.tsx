@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react'
 import type { IngestProgressPayload, MetaStatusPayload } from '@shared/ipc'
 import { DEFAULT_THEME, THEMES } from '@shared/themes'
+import {
+  normalizeOverlayScale,
+  OVERLAY_SCALE_DEFAULT,
+  OVERLAY_SCALE_MAX,
+  OVERLAY_SCALE_MIN
+} from '@shared/overlay'
 import { DEFAULT_LOCALE, LOCALES, LOCALE_LABELS, normalizeLocale, type Locale } from '@shared/i18n'
-import { applyTheme } from '../App'
+import { applyTheme } from '../appearance'
 import { applyLocale, useT } from '../i18n'
 import { configureSounds, playPreview, type SoundCategories } from '../sounds'
 import DevScenario from './DevScenario'
@@ -415,6 +421,7 @@ export default function SettingsView(): React.JSX.Element {
     objective: true
   })
   const [overlay, setOverlay] = useState(false)
+  const [overlayScale, setOverlayScale] = useState(OVERLAY_SCALE_DEFAULT)
   const [theme, setTheme] = useState(DEFAULT_THEME)
   const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE)
   const [status, setStatus] = useState<string | null>(null)
@@ -431,6 +438,7 @@ export default function SettingsView(): React.JSX.Element {
       if (typeof settings.soundVolume === 'number') setSoundVolume(settings.soundVolume)
       if (settings.soundCategories != null) setSoundCategories(settings.soundCategories)
       setOverlay(settings.overlayEnabled)
+      setOverlayScale(normalizeOverlayScale(settings.overlayScale))
       setTheme(settings.theme)
       setLocale(normalizeLocale(settings.locale))
     })
@@ -440,6 +448,13 @@ export default function SettingsView(): React.JSX.Element {
   const previewTheme = (id: string): void => {
     setTheme(id)
     applyTheme(id) // instant preview; persisted on Guardar
+    void window.api.invoke('overlay:configure', { theme: id })
+  }
+
+  const previewOverlayScale = (value: number): void => {
+    const normalized = normalizeOverlayScale(value)
+    setOverlayScale(normalized)
+    void window.api.invoke('overlay:configure', { scale: normalized })
   }
 
   const changeLocale = (next: Locale): void => {
@@ -457,6 +472,7 @@ export default function SettingsView(): React.JSX.Element {
       soundVolume,
       soundCategories,
       overlayEnabled: overlay,
+      overlayScale,
       theme,
       locale,
       // Only send a key when the user typed one — undefined keeps the stored one.
@@ -599,6 +615,39 @@ export default function SettingsView(): React.JSX.Element {
             />
             {t('set.overlay')}
           </label>
+          <fieldset
+            className={`rounded border border-slate-800 bg-slate-950/40 p-2 text-xs text-slate-400 ${overlay ? '' : 'opacity-45'}`}
+            disabled={!overlay}
+          >
+            <legend className="px-1">{t('set.overlayLayout')}</legend>
+            <label className="flex items-center gap-2">
+              {t('set.overlayScale')}
+              <input
+                type="range"
+                min={OVERLAY_SCALE_MIN}
+                max={OVERLAY_SCALE_MAX}
+                step={5}
+                value={overlayScale}
+                onChange={(event) => previewOverlayScale(Number(event.target.value))}
+                className="flex-1 accent-amber-400"
+              />
+              <span className="w-10 text-right font-mono">{overlayScale}%</span>
+            </label>
+            <div className="mt-2 flex items-center justify-between gap-3">
+              <p className="text-[11px] text-slate-600">{t('set.overlayMoveHint')}</p>
+              <button
+                type="button"
+                className="shrink-0 rounded border border-slate-700 bg-slate-800 px-2 py-1 text-slate-300 hover:border-slate-500"
+                onClick={() => {
+                  void window.api.invoke('overlay:configure', { resetPosition: true }).then(() => {
+                    setStatus(t('set.overlayPositionReset'))
+                  })
+                }}
+              >
+                {t('set.overlayReset')}
+              </button>
+            </div>
+          </fieldset>
           <fieldset className="text-xs text-slate-400">
             <legend className="mb-1">{t('settings.language')}</legend>
             <div className="flex gap-2">
@@ -620,15 +669,14 @@ export default function SettingsView(): React.JSX.Element {
             </div>
             <p className="mt-1 text-[11px] text-slate-600">{t('settings.language.hint')}</p>
           </fieldset>
-          {/* Single identity today — the picker reappears if THEMES grows. */}
-          <fieldset className="text-xs text-slate-400" hidden={THEMES.length < 2}>
+          <fieldset className="text-xs text-slate-400">
             <legend className="mb-1">{t('set.theme')}</legend>
             <div className="flex gap-2">
               {THEMES.map((option) => (
                 <button
                   key={option.id}
                   type="button"
-                  title={option.hint}
+                  title={t(option.hintKey)}
                   onClick={() => previewTheme(option.id)}
                   aria-pressed={theme === option.id}
                   className={`rounded border px-3 py-1.5 transition-colors ${
@@ -637,7 +685,7 @@ export default function SettingsView(): React.JSX.Element {
                       : 'border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-500'
                   }`}
                 >
-                  {option.label}
+                  {t(option.labelKey)}
                 </button>
               ))}
             </div>

@@ -25,9 +25,7 @@ const DRAVEN = 119
 const JINX = 222
 
 const TEST_POOL = baselinePoolSchema.parse({
-  champions: [
-    { championId: 'Jinx', role: 'BOTTOM', core: [3006, 3031], situational: [3026] }
-  ]
+  champions: [{ championId: 'Jinx', role: 'BOTTOM', core: [3006, 3031], situational: [3026] }]
 })
 
 function state(partial: Partial<ChampSelectState>): ChampSelectState {
@@ -73,7 +71,9 @@ describe('champSelectInsights', () => {
 
   it('AP-heavy enemy comp → magic resist tip with the cheap component', () => {
     const insights = champSelectInsights(
-      state({ theirTeam: [AHRI, LUX, ANNIE, YASUO].map((id, i) => ({ cellId: i, championId: id })) }),
+      state({
+        theirTeam: [AHRI, LUX, ANNIE, YASUO].map((id, i) => ({ cellId: i, championId: id }))
+      }),
       staticData,
       TEST_POOL
     )
@@ -83,7 +83,9 @@ describe('champSelectInsights', () => {
 
   it('AD-heavy enemy comp → armor tip', () => {
     const insights = champSelectInsights(
-      state({ theirTeam: [AATROX, YASUO, ZED, DRAVEN].map((id, i) => ({ cellId: i, championId: id })) }),
+      state({
+        theirTeam: [AATROX, YASUO, ZED, DRAVEN].map((id, i) => ({ cellId: i, championId: id }))
+      }),
       staticData,
       TEST_POOL
     )
@@ -92,7 +94,12 @@ describe('champSelectInsights', () => {
 
   it('enemy healer → grievous wounds reminder', () => {
     const insights = champSelectInsights(
-      state({ theirTeam: [{ cellId: 0, championId: SORAKA }, { cellId: 1, championId: YASUO }] }),
+      state({
+        theirTeam: [
+          { cellId: 0, championId: SORAKA },
+          { cellId: 1, championId: YASUO }
+        ]
+      }),
       staticData,
       TEST_POOL
     )
@@ -324,7 +331,7 @@ describe('champion traits (owner feedback 2026-07-06)', () => {
     }
   })
 
-  it('AD-heavy comp with own ADC picked → carry defense, not tank armor', () => {
+  it('AD-heavy comp with own ADC picked → compatible defense after core', () => {
     const insights = champSelectInsights(
       state({
         localPlayerCellId: 0,
@@ -337,7 +344,7 @@ describe('champion traits (owner feedback 2026-07-06)', () => {
     )
     const armorTip = insights.tips.find((tip) => tip.includes('muy AD'))
     const gaName = staticData.itemGraph.nodes.get(3026)?.name ?? 'GA'
-    expect(armorTip).toContain('carry')
+    expect(armorTip).toContain('opción de armadura tras el núcleo')
     expect(armorTip).toContain(gaName)
     // Jinx deals physical damage: the AP option (Zhonya) must not be offered.
     const zhonyaName = staticData.itemGraph.nodes.get(3157)?.name ?? 'Zhonya'
@@ -364,7 +371,9 @@ describe('champion traits (owner feedback 2026-07-06)', () => {
     expect(insights.picks[0]?.reasons.some((reason) => reason.includes('tanques'))).toBe(true)
     // The immobile low-shred pick carries the warning, not silence.
     const jinx = insights.picks.find((pick) => pick.championId === 'Jinx')
-    expect(jinx?.reasons.some((reason) => reason.includes('cuesta matarlos'))).toBe(true)
+    expect(
+      jinx?.reasons.some((reason) => reason.includes('cuesta atravesar la primera línea'))
+    ).toBe(true)
   })
 
   it('no assigned position (blind pick): meta lookups use the most-played role', () => {
@@ -387,7 +396,7 @@ describe('champion traits (owner feedback 2026-07-06)', () => {
     expect(insights.picks[0]?.reasons.some((reason) => reason.includes('Master+'))).toBe(true)
   })
 
-  it('unpicked but assigned BOTTOM: the armor tip already speaks carry', () => {
+  it('unpicked but assigned BOTTOM: the armor tip already follows the carry route', () => {
     const insights = champSelectInsights(
       state({
         localPlayerCellId: 0,
@@ -400,7 +409,7 @@ describe('champion traits (owner feedback 2026-07-06)', () => {
     )
     const armorTip = insights.tips.find((tip) => tip.includes('muy AD'))
     const gaName = staticData.itemGraph.nodes.get(3026)?.name ?? 'GA'
-    expect(armorTip).toContain('carry')
+    expect(armorTip).toContain('opción de armadura tras el núcleo')
     expect(armorTip).toContain(gaName)
   })
 

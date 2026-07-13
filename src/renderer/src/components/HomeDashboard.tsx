@@ -4,7 +4,7 @@ import type { PostGameReportResult } from '@shared/report'
 import type { StatsOverview } from '@shared/stats'
 import type { MessageKey } from '@shared/i18n'
 import { useT } from '../i18n'
-import { HexiSprite, useMascotName } from './Mascot'
+import { CompanionSprite, useMascotName } from './Mascot'
 
 const TIP_KEYS: readonly MessageKey[] = [
   'home.tip.1',
@@ -87,7 +87,7 @@ export default function HomeDashboard(props: {
   if (stats !== null && stats.totalGames === 0) {
     return (
       <div className="card-in flex min-h-[70vh] flex-col items-center justify-center gap-4 text-center">
-        <HexiSprite mood="idle" className="h-28 w-28" />
+        <CompanionSprite mood="idle" className="h-28 w-28" />
         <div>
           <h2 className="text-xl font-bold text-slate-100">
             {t('home.firstRun.greeting', { mascot })}
@@ -124,7 +124,7 @@ export default function HomeDashboard(props: {
           </div>
         )}
         <div className="relative flex flex-wrap items-center gap-6 p-6">
-          <HexiSprite
+          <CompanionSprite
             mood={props.phase === 'clientOpen' ? 'idle' : 'sleepy'}
             className="h-24 w-24 shrink-0"
           />
