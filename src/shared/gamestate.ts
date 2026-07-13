@@ -42,6 +42,8 @@ export interface PlayerState {
   position: string
   isDead: boolean
   respawnTimer: number
+  /** Current/max health shown on the Live Client scoreboard. Legacy fixtures may omit it. */
+  visibleHealth?: { current: number; max: number }
   scores: PlayerScores
   items: GameStateItem[]
   damageType: DamageType

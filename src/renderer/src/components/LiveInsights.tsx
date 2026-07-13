@@ -75,10 +75,7 @@ export function TeamGoldBar(props: { gameState: GameState }): React.JSX.Element 
 }
 
 /** Dragon/baron spawn countdowns + dead-gold reminder. */
-export function LiveChips(props: {
-  gameState: GameState
-  insights: Insights
-}): React.JSX.Element {
+export function LiveChips(props: { gameState: GameState; insights: Insights }): React.JSX.Element {
   const { gameState, insights } = props
   const t = useT()
   const now = gameState.gameTimeS
@@ -95,7 +92,8 @@ export function LiveChips(props: {
       )}
       {baronIn !== null && (
         <span className="rounded border border-slate-700 bg-slate-800/60 px-2 py-0.5 text-xs text-slate-300">
-          🟣 {baronIn > 0 ? t('live.baronIn', { time: formatClock(baronIn) }) : t('live.baronOnMap')}
+          🟣{' '}
+          {baronIn > 0 ? t('live.baronIn', { time: formatClock(baronIn) }) : t('live.baronOnMap')}
         </span>
       )}
       {deadGold && (
@@ -120,13 +118,20 @@ export function AlertFeed(props: { insights: Insights }): React.JSX.Element | nu
               ? 'text-amber-300'
               : alert.kind === 'objective'
                 ? 'text-emerald-300'
-                : alert.kind === 'coach'
-                  ? 'text-indigo-300'
-                  : 'text-slate-400'
+                : alert.kind === 'duel'
+                  ? 'text-cyan-300'
+                  : alert.kind === 'purchase'
+                    ? 'text-pink-300'
+                    : alert.kind === 'coach'
+                      ? 'text-indigo-300'
+                      : 'text-slate-400'
           }`}
         >
           <span className="font-mono text-slate-600">{formatClock(alert.gameTimeS)}</span>{' '}
-          {alert.kind === 'objective' ? '🎯' : alert.kind === 'coach' ? '🔮' : '⚠'} {alert.text}
+          <span aria-hidden className="mr-1 opacity-70">
+            ●
+          </span>
+          {alert.text}
         </li>
       ))}
     </ul>

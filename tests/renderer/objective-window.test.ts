@@ -9,7 +9,7 @@ describe('objectiveWindowText', () => {
     // Dragon spawned at 300, now 400 → on the map.
     const text = objectiveWindowText([jungler], 400, 300, 1200)
     expect(text).toContain('Kayn (jungla enemiga) ha muerto')
-    expect(text).toContain('dragón libre')
+    expect(text).toContain('ventana para valorar dragón')
   })
 
   it('single laner death → no alert (too noisy)', () => {
@@ -29,7 +29,7 @@ describe('objectiveWindowText', () => {
   it('baron takes precedence over dragon after 20 min', () => {
     // Both up: baron (spawned 1200) and dragon (spawned 1250), now 1300.
     const text = objectiveWindowText([jungler], 1300, 1250, 1200)
-    expect(text).toContain('Barón libre')
+    expect(text).toContain('ventana para valorar Barón')
   })
 
   it('baron ignored before its first spawn window', () => {

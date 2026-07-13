@@ -1,7 +1,9 @@
 import type { PlayerState } from '@shared/gamestate'
+import { useT } from '../i18n'
 
 function PlayerRow(props: { player: PlayerState; isSelf: boolean }): React.JSX.Element {
   const { player, isSelf } = props
+  const t = useT()
   return (
     <li
       className={`flex items-center gap-2 rounded-md px-2 py-1.5 ${
@@ -23,7 +25,9 @@ function PlayerRow(props: { player: PlayerState; isSelf: boolean }): React.JSX.E
       <div className="min-w-0 flex-1">
         <p className="truncate text-xs font-medium text-slate-200">
           {player.championName}
-          <span className="ml-1 text-[10px] text-slate-500">nv {player.level}</span>
+          <span className="ml-1 text-[10px] text-slate-500">
+            {t('live.levelShort', { n: String(player.level) })}
+          </span>
         </p>
         <p className="font-mono text-[10px] text-slate-400">
           {player.scores.kills}/{player.scores.deaths}/{player.scores.assists} ·{' '}

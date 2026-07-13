@@ -35,6 +35,27 @@ describe('i18n core', () => {
   it('exposes both supported locales', () => {
     expect(LOCALES).toEqual(['en', 'es'])
   })
+
+  it('keeps the Spanish product voice adult and direct', () => {
+    const copy = Object.values(es).join('\n')
+    expect(copy).not.toMatch(/¿Qué te pego\?|ligeramente friki|Soy \{mascot\}/i)
+    expect(copy).not.toMatch(/no compres (?:armadura|RM) de tanque/i)
+    expect(es['coach.persona']).toContain('No te presentes')
+    expect(es['coach.persona']).toContain('tono infantil')
+    expect(es['csp.whatPick']).toBe('Opciones de pick · tus partidas + Master+ + encaje')
+  })
+
+  it('frames draft defense as a later compatible option, not a tank-item lecture', () => {
+    const t = createTranslator('es')
+    const advice = t('cs.tip.carryArmor', {
+      heavy: 'Comp enemiga muy AD (3 de 5)',
+      items: 'Ángel de la guarda',
+      cheap: 'Chaleco de cadenas'
+    })
+    expect(advice).toContain('reservar una opción de armadura tras el núcleo')
+    expect(advice).toContain('Ángel de la guarda')
+    expect(advice).not.toContain('no compres')
+  })
 })
 
 /** Applies migrations up to (and including) `maxId`. */

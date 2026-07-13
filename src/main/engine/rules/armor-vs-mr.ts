@@ -15,6 +15,22 @@ function isTanky(tags: string[]): boolean {
 }
 
 /**
+ * A raw team damage split is enough to shape a tank's resists, but not enough
+ * to divert a carry into an expensive survival item. For squishy champions we
+ * require a visible, materially ahead dealer of that damage type. This keeps
+ * an all-AD team that is losing badly from creating a false GA emergency.
+ */
+function hasFedDealer(state: Parameters<Rule>[0], type: 'physical' | 'magic'): boolean {
+  return state.enemies.some((enemy) => {
+    const relevant = enemy.damageType === type || enemy.damageType === 'mixed'
+    const lead = enemy.scores.kills - enemy.scores.deaths
+    return (
+      relevant && lead >= THRESHOLDS.FED_KD_DIFF && enemy.scores.kills >= THRESHOLDS.FED_MIN_KILLS
+    )
+  })
+}
+
+/**
  * Rule 2 — armor-vs-mr: enemy damage split skewed → prioritize the matching
  * resist. Options are ordered by Master+ usage on the own champion (the
  * class-based lists only shape the candidate set); when Master+ players buy
@@ -91,38 +107,42 @@ export const armorVsMrRule: Rule = (state, staticData, meta, t = defaultTranslat
 
   if (physicalShare >= THRESHOLDS.DAMAGE_SKEW_SHARE) {
     const options = tanky ? ARMOR_TANK : ARMOR_SQUISHY
-    pushOptions(
-      options,
-      t('engine.cat.armor'),
-      clampScore(40 + (physicalShare - THRESHOLDS.DAMAGE_SKEW_SHARE) * 150),
-      [
-        t('engine.armorMr.physical', {
-          pct: pct(physicalShare),
-          dealers: topDealers('physical').join(', ')
-        }),
-        t('engine.armorMr.prioArmor', {
-          items: options.map((id) => itemName(staticData, id)).join(' / ')
-        })
-      ]
-    )
+    if (tanky || hasFedDealer(state, 'physical')) {
+      pushOptions(
+        options,
+        t('engine.cat.armor'),
+        clampScore(40 + (physicalShare - THRESHOLDS.DAMAGE_SKEW_SHARE) * 150),
+        [
+          t('engine.armorMr.physical', {
+            pct: pct(physicalShare),
+            dealers: topDealers('physical').join(', ')
+          }),
+          t('engine.armorMr.prioArmor', {
+            items: options.map((id) => itemName(staticData, id)).join(' / ')
+          })
+        ]
+      )
+    }
   }
 
   if (magicShare >= THRESHOLDS.DAMAGE_SKEW_SHARE) {
     const options = tanky ? MR_TANK : MR_SQUISHY
-    pushOptions(
-      options,
-      t('engine.cat.mr'),
-      clampScore(40 + (magicShare - THRESHOLDS.DAMAGE_SKEW_SHARE) * 150),
-      [
-        t('engine.armorMr.magic', {
-          pct: pct(magicShare),
-          dealers: topDealers('magic').join(', ')
-        }),
-        t('engine.armorMr.prioMr', {
-          items: options.map((id) => itemName(staticData, id)).join(' / ')
-        })
-      ]
-    )
+    if (tanky || hasFedDealer(state, 'magic')) {
+      pushOptions(
+        options,
+        t('engine.cat.mr'),
+        clampScore(40 + (magicShare - THRESHOLDS.DAMAGE_SKEW_SHARE) * 150),
+        [
+          t('engine.armorMr.magic', {
+            pct: pct(magicShare),
+            dealers: topDealers('magic').join(', ')
+          }),
+          t('engine.armorMr.prioMr', {
+            items: options.map((id) => itemName(staticData, id)).join(' / ')
+          })
+        ]
+      )
+    }
   }
 
   return outputs

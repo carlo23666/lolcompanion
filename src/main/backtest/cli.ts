@@ -91,6 +91,8 @@ export function printReport(report: BacktestReport, reportPath?: string): void {
     '════════ BACKTEST REPORT ════════',
     `Matches: ${String(report.matches)}  Frames: ${String(report.frames)}  Comparisons: ${String(report.comparisons)}`,
     `Top-1 agreement: ${pct(report.top1Rate)}   Top-3 agreement: ${pct(report.top3Rate)}`,
+    `Coverage: ${pct(report.coverageRate)}   Route-primary: ${pct(report.routePrimaryRate)}`,
+    "Agreement is a regression signal against the player's eventual purchase, not objective build quality.",
     '',
     'By phase:',
     ...(['early', 'mid', 'late'] as const).map(

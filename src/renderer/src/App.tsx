@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChampionMeta } from '@shared/champselect'
 import type { SessionPhase } from '@shared/session'
-import { normalizeTheme } from '@shared/themes'
 import { DEFAULT_LOCALE, normalizeLocale, type Locale } from '@shared/i18n'
 import { LocaleProvider } from './i18n'
 import Shell, { type ViewId } from './components/Shell'
@@ -10,14 +9,7 @@ import HistoryView from './components/HistoryView'
 import SettingsView from './components/SettingsView'
 import { useIpcEvent, useLiveInsights } from './hooks'
 import { configureSounds, playAlert, playObjective, playRecommendation } from './sounds'
-
-/** Applies the selected identity; components restyle via CSS variables and
- * mascots listen for the change event to swap sprites live. */
-export function applyTheme(theme: string): void {
-  const normalized = normalizeTheme(theme)
-  document.documentElement.dataset['theme'] = normalized
-  window.dispatchEvent(new CustomEvent('app-theme', { detail: normalized }))
-}
+import { applyTheme } from './appearance'
 
 export default function App(): React.JSX.Element {
   const [view, setView] = useState<ViewId>('live')
@@ -48,6 +40,10 @@ export default function App(): React.JSX.Element {
     // showing numeric champion ids.
     window.api.invoke('staticdata:championMeta').then(setChampionMeta, () => undefined)
     const offPhase = window.api.on('session:phase', setPhase)
+    const offGameReset = window.api.on('gamestate:reset', () => {
+      lastTopRef.current = ''
+      lastAlertRef.current = 0
+    })
     const onLocale = (event: Event): void => {
       const detail = (event as CustomEvent<Locale>).detail
       setLocale(normalizeLocale(detail))
@@ -55,9 +51,14 @@ export default function App(): React.JSX.Element {
     window.addEventListener('app-locale', onLocale)
     return () => {
       offPhase()
+      offGameReset()
       window.removeEventListener('app-locale', onLocale)
     }
   }, [])
+
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
 
   // Gold chime when the top recommendation changes.
   useEffect(() => {
@@ -74,7 +75,7 @@ export default function App(): React.JSX.Element {
     if (!newest || newest.id === lastAlertRef.current) return
     lastAlertRef.current = newest.id
     if (newest.kind === 'spike' || newest.kind === 'objective' || newest.kind === 'coach') {
-      // Coach tips stay silent — Hexi reacting is enough mid-game.
+      // Coach tips stay silent — the active companion reaction is enough mid-game.
       if (newest.kind === 'objective') playObjective()
       else if (newest.kind === 'spike') playAlert()
       setMascotReactKey((key) => key + 1)
@@ -83,23 +84,23 @@ export default function App(): React.JSX.Element {
 
   return (
     <LocaleProvider locale={locale}>
-    <Shell active={view} onSelect={setView} phase={phase} mascotReactKey={mascotReactKey}>
-      {view === 'live' && (
-        <LiveView
-          phase={phase}
-          liveState={liveState}
-          gameState={gameState}
-          champSelect={champSelect}
-          recommendations={recommendations}
-          championMeta={championMeta}
-          insights={insights}
-          onOpenSettings={() => setView('settings')}
-          onOpenHistory={() => setView('history')}
-        />
-      )}
-      {view === 'history' && <HistoryView />}
-      {view === 'settings' && <SettingsView />}
-    </Shell>
+      <Shell active={view} onSelect={setView} phase={phase} mascotReactKey={mascotReactKey}>
+        {view === 'live' && (
+          <LiveView
+            phase={phase}
+            liveState={liveState}
+            gameState={gameState}
+            champSelect={champSelect}
+            recommendations={recommendations}
+            championMeta={championMeta}
+            insights={insights}
+            onOpenSettings={() => setView('settings')}
+            onOpenHistory={() => setView('history')}
+          />
+        )}
+        {view === 'history' && <HistoryView />}
+        {view === 'settings' && <SettingsView />}
+      </Shell>
     </LocaleProvider>
   )
 }

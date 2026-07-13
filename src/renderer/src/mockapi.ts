@@ -11,7 +11,7 @@ import midGameState from '../../../fixtures/gamestate/mid.json'
  * and screenshotable by tooling — without Electron or a running game.
  *
  * URL params: ?phase=idle|champSelect|inGame|postGame (default inGame)
- *             ?theme=neon|abismo|anime (default neon)
+ *             ?theme=rift|dark|sakura
  *             ?lang=en|es  (default es; drives locale + the canned copy below)
  * Never active in production: main.tsx only loads this when window.api is
  * missing, which cannot happen under the preload.
@@ -19,7 +19,7 @@ import midGameState from '../../../fixtures/gamestate/mid.json'
 
 const params = new URLSearchParams(window.location.search)
 const phase = params.get('phase') ?? 'inGame'
-const theme = params.get('theme') ?? 'neon'
+const theme = params.get('theme') ?? 'rift'
 const lang: 'en' | 'es' = params.get('lang') === 'en' ? 'en' : 'es'
 
 const mid = midGameState as unknown as GameState
@@ -58,36 +58,38 @@ const streamState = cacheFriendly(mid)
 const COPY = {
   es: {
     itemIE: 'Filo Infinito',
+    itemBoots: 'Grebas de Berserker',
     itemKraken: 'Aniquilador de Kraken',
     itemGA: 'Ángel de la Guarda',
     itemDominik: 'Recuerdos de Lord Dominik',
     recReasons: [
-      'Filo Infinito es el 2º objeto de tu build de Kai’Sa',
-      'Puedes completarlo YA: te cuesta 1250 de oro y llevas 1430',
-      'en Master+ con Kai’Sa: 58% WR llevando este objeto (812 partidas)'
+      'Filo Infinito es el siguiente paso de la ruta observada de Jinx',
+      'La finalización está disponible: cuesta 1250 de oro y llevas 1430',
+      'Ruta observada en 812 partidas Master+ · 84% de confianza'
     ],
-    krakenReason: '2 tanques enfrente: daño por % de vida que los derrite',
+    krakenReason: '2 tanques enfrente: su daño por vida máxima encaja contra la primera línea',
     gaReason: 'El 68% del daño enemigo estimado es físico',
     insightsTips: [
-      'Comp enemiga muy AD (3 de 4): como carry no compres armadura de tanque — Ángel de la Guarda encaja contigo (Cota de mallas es la pieza barata)',
+      'Comp enemiga muy AD (3 de 4): conserva primero tu ruta AD; Ángel de la Guarda solo entra después del core si sus amenazas despegan',
       'Curación enemiga a la vista (Soraka): reserva hueco para heridas graves'
     ],
-    coachTip: 'Su jungla está muerto y el dragón sale en 40s: forzadlo ya, ez.',
+    coachTip:
+      'Si mantenéis prioridad, considerad preparar dragón; si no, visión y salida antes de que reaparezca su jungla.',
     coachDirection:
-      'Vais 0.9k por detrás pero tu bot está fuerte: juega con Leona, no te acerques a Zed sin visión y agrupad para el dragón del minuto 16. Si cae, empujad mid con el heraldo.',
+      'Vais 0.9k por detrás, pero bot está fuerte. Podéis preparar el dragón con Leona o ceder espacio y conservar el spike de Filo Infinito.',
     coachDraft:
-      'Kai’Sa es tu pick aquí: destrozas a sus tanques y su comp es puro AD, así que Ángel de la Guarda y a bailar. GG.',
+      'Kai’Sa cubre bien esta draft: la ruta AD equilibra el daño aliado; si sus asesinos despegan, Ángel de la Guarda puede entrar después del core.',
     coachAnalyze:
       'Buen farmeo, 0.8 CS/min sobre tu media. Ojo a la visión: 14 frente a tu media de 16.',
     csTips: [
-      'Comp enemiga muy AD (3 de 4): como carry, prioriza Ángel de la Guarda antes que armadura pura',
-      'Enfrente hay 2 tanques: tu daño por % de vida de Kai’Sa los funde'
+      'Comp enemiga muy AD (3 de 4): mantén la ruta AD; considera Ángel de la Guarda tras el core solo si sus amenazas despegan',
+      'Enfrente hay 2 tanques: el daño por vida máxima de Kai’Sa encaja contra su primera línea'
     ],
     kaisaReasons: [
       '58% de victorias en 24 partidas como ADC (tus datos)',
       'contra campeones de esta comp: 5 de 7 ganadas',
       '47% WR en Master+ este parche (1809 partidas)',
-      '2 tanques enfrente: tu daño por % de vida los derrite'
+      '2 tanques enfrente: su daño por vida máxima encaja contra la primera línea'
     ],
     jinxReasons: [
       '52% de victorias en 31 partidas como ADC (tus datos)',
@@ -95,7 +97,7 @@ const COPY = {
       'ojo: pick inmóvil contra 2 asesinos — dependerás del peel de tu equipo'
     ],
     reportSummary: [
-      'Farmeaste 0.7 CS/min por encima de tu media — GG de granja',
+      'Farmeaste 0.7 CS/min por encima de tu media: buena consistencia de recursos',
       'Seguiste 2 de 3 recomendaciones de objeto: buen timing en el Filo Infinito',
       'Visión 18 frente a tu media de 16 — vas mejorando ahí'
     ],
@@ -104,7 +106,8 @@ const COPY = {
         key: 'deaths-early',
         severity: 'high',
         finding: 'Mueres pronto: 1.8 muertes de media antes del minuto 14 (media de tu rango: 1.1)',
-        advice: 'Juega la fase de líneas más segura hasta el primer objeto: respeta el nivel 2 rival.',
+        advice:
+          'Juega la fase de líneas más segura hasta el primer objeto: respeta el nivel 2 rival.',
         games: 42
       },
       {
@@ -117,37 +120,41 @@ const COPY = {
       {
         key: 'low-vision',
         severity: 'medium',
-        finding: 'Visión por debajo del suelo de tu rol: 0.6/min frente al 0.9/min recomendado para ADC',
-        advice: 'Compra un pink al volver de base y gasta el tránsito del soporte antes de empezar la pelea.',
+        finding:
+          'Visión por debajo del suelo de tu rol: 0.6/min frente al 0.9/min recomendado para ADC',
+        advice:
+          'Compra un pink al volver de base y gasta el tránsito del soporte antes de empezar la pelea.',
         games: 42
       }
     ]
   },
   en: {
     itemIE: 'Infinity Edge',
+    itemBoots: "Berserker's Greaves",
     itemKraken: 'Kraken Slayer',
     itemGA: 'Guardian Angel',
     itemDominik: "Lord Dominik's Regards",
     recReasons: [
-      'Infinity Edge is the 2nd item in your Kai’Sa build',
-      'You can finish it NOW: it costs 1250 gold and you have 1430',
-      'in Master+ on Kai’Sa: 58% WR carrying this item (812 games)'
+      'Infinity Edge is the next step in Jinx’s observed route',
+      'Completion is available: it costs 1250 gold and you have 1430',
+      'Route observed in 812 Master+ games · 84% confidence'
     ],
     krakenReason: '2 tanks on the enemy side: %max-health damage melts them',
     gaReason: '68% of the enemy’s estimated damage is physical',
     insightsTips: [
-      'Very AD enemy comp (3 of 4): as a carry, skip tank armor — Guardian Angel fits you (Chain Vest is the cheap piece)',
+      'Very AD enemy comp (3 of 4): preserve the AD route first; Guardian Angel only enters after core if their threats pull ahead',
       'Enemy healing on the board (Soraka): save a slot for grievous wounds'
     ],
-    coachTip: 'Their jungler is dead and dragon spawns in 40s: force it now, ez.',
+    coachTip:
+      'If you keep priority, consider setting up dragon; otherwise place safe vision and exit before their jungler returns.',
     coachDirection:
-      'You’re 0.9k behind but your bot lane is strong: play around Leona, don’t step near Zed without vision, and group for the 16-minute dragon. If it falls, push mid with Herald.',
+      'You’re 0.9k behind, but bot is strong. You can set up dragon with Leona or preserve space for the Infinity Edge spike.',
     coachDraft:
-      'Kai’Sa is your pick here: you shred their tanks and their comp is all AD, so grab Guardian Angel and dance. GG.',
+      'Kai’Sa fits this draft: the AD route balances allied damage; if their assassins pull ahead, Guardian Angel can enter after core.',
     coachAnalyze:
       'Nice farm, 0.8 CS/min above your average. Watch your vision: 14 vs your average of 16.',
     csTips: [
-      'Very AD enemy comp (3 of 4): as a carry, prioritize Guardian Angel over pure armor',
+      'Very AD enemy comp (3 of 4): keep the AD route; consider Guardian Angel after core only if their threats pull ahead',
       '2 tanks across from you: Kai’Sa’s %max-health damage melts them'
     ],
     kaisaReasons: [
@@ -171,7 +178,8 @@ const COPY = {
         key: 'deaths-early',
         severity: 'high',
         finding: 'You die early: 1.8 deaths on average before minute 14 (your rank’s average: 1.1)',
-        advice: 'Play the laning phase safer until your first item: respect the enemy’s level-2 spike.',
+        advice:
+          'Play the laning phase safer until your first item: respect the enemy’s level-2 spike.',
         games: 42
       },
       {
@@ -185,7 +193,8 @@ const COPY = {
         key: 'low-vision',
         severity: 'medium',
         finding: 'Vision below your role’s floor: 0.6/min vs the 0.9/min recommended for ADC',
-        advice: 'Buy a control ward on each back and spend the support’s roam before the fight starts.',
+        advice:
+          'Buy a control ward on each back and spend the support’s roam before the fight starts.',
         games: 42
       }
     ]
@@ -224,6 +233,21 @@ const MOCK_RECOMMENDATIONS = {
       category: null,
       action: 'prioritize' as const,
       score: 88,
+      kind: 'route' as const,
+      plan: {
+        source: 'meta-route' as const,
+        confidence: 0.84,
+        steps: [
+          { itemId: 3006, itemName: C.itemBoots, owned: true },
+          { itemId: 3031, itemName: C.itemIE, owned: false },
+          { itemId: 6672, itemName: C.itemKraken, owned: false },
+          { itemId: 3036, itemName: C.itemDominik, owned: false }
+        ],
+        currentStep: 1,
+        protectedCoreRemaining: 1,
+        personalAdjusted: false,
+        damageAdjusted: false
+      },
       reasons: [...C.recReasons]
     },
     {
@@ -232,6 +256,7 @@ const MOCK_RECOMMENDATIONS = {
       category: null,
       action: 'add' as const,
       score: 61,
+      kind: 'adaptation' as const,
       reasons: [C.krakenReason]
     },
     {
@@ -240,6 +265,7 @@ const MOCK_RECOMMENDATIONS = {
       category: 'armor',
       action: 'add' as const,
       score: 55,
+      kind: 'adaptation' as const,
       reasons: [C.gaReason]
     }
   ]
@@ -249,7 +275,10 @@ type Listener = (payload: unknown) => void
 
 export function installMockApi(): void {
   const listeners = new Map<string, Listener[]>()
-  const emit = <C extends keyof IpcEventChannels>(channel: C, payload: IpcEventChannels[C]): void => {
+  const emit = <C extends keyof IpcEventChannels>(
+    channel: C,
+    payload: IpcEventChannels[C]
+  ): void => {
     for (const listener of listeners.get(channel) ?? []) listener(payload)
   }
 
@@ -271,6 +300,7 @@ export function installMockApi(): void {
             soundVolume: 60,
             soundCategories: { recommendation: true, spike: true, objective: true },
             overlayEnabled: true,
+            overlayScale: 100,
             theme,
             locale: lang,
             apiKeySet: true
@@ -327,14 +357,14 @@ export function installMockApi(): void {
           })
         case 'history:list':
           return respond(
-            Array.from({ length: 6 }, (_, index) => ({
+            Array.from({ length: 12 }, (_, index) => ({
               matchId: `EUW1_${String(7000000100 + index)}`,
-              champion: ['Kaisa', 'Jinx', 'Samira', 'Kaisa', 'Twitch', 'Ezreal'][index],
+              champion: ['Kaisa', 'Jinx', 'Samira', 'Kaisa', 'Twitch', 'Ezreal'][index % 6],
               win: index % 3 !== 1,
-              kills: 8 + index,
-              deaths: 4,
-              assists: 6,
-              csPerMin: 7.2,
+              kills: 6 + (index % 7),
+              deaths: 3 + (index % 3),
+              assists: 5 + (index % 5),
+              csPerMin: 6.8 + (index % 4) * 0.2,
               durationS: 1800 + index * 120,
               patch: '16.13',
               gameCreation: Date.now() - index * 86_400_000,
@@ -487,9 +517,16 @@ export function installMockApi(): void {
     },
     on: (channel, listener) => {
       const list = listeners.get(channel) ?? []
-      list.push(listener as Listener)
+      const typedListener = listener as Listener
+      list.push(typedListener)
       listeners.set(channel, list)
-      return () => void 0
+      return () => {
+        const active = listeners.get(channel)
+        if (active === undefined) return
+        const index = active.indexOf(typedListener)
+        if (index >= 0) active.splice(index, 1)
+        if (active.length === 0) listeners.delete(channel)
+      }
     }
   }
 
@@ -527,7 +564,10 @@ export function installMockApi(): void {
       // recent-alert line (which StrictMode's double-mounted listener dupes).
       if (!params.has('nocoach')) {
         setTimeout(() => emit('coach:tip', { gameTimeS: mid.gameTimeS, text: C.coachTip }), 2500)
-        emit('coach:direction', { gameTimeS: mid.gameTimeS, text: C.coachDirection })
+        setTimeout(
+          () => emit('coach:direction', { gameTimeS: mid.gameTimeS, text: C.coachDirection }),
+          900
+        )
       }
     }
     if (phase === 'champSelect') emit('session:champselect', MOCK_CHAMP_SELECT)

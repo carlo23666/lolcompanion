@@ -6,7 +6,8 @@ import {
   buildDraftPrompt,
   generateCoachAdvice,
   ollamaStatus,
-  resolveModel
+  resolveModel,
+  sanitizeCoachText
 } from '@main/coach'
 
 const report: PostGameReport = {
@@ -46,9 +47,21 @@ describe('buildCoachPrompt', () => {
     expect(prompt).toContain('Filo Infinito')
     expect(prompt).toContain('PROHIBIDO inventar')
     expect(prompt).toContain('español')
-    // Persona: gamer voice, second person, never the champion's name.
-    expect(prompt).toContain('gamer')
-    expect(prompt).toContain('NUNCA en tercera persona')
+    // Persona: concise adult voice and conditional decision support.
+    expect(prompt).toContain('jugadores adultos')
+    expect(prompt).toContain('No te presentes')
+    expect(prompt).not.toContain('ligeramente friki')
+    expect(prompt).toContain('opciones condicionales')
+  })
+})
+
+describe('sanitizeCoachText', () => {
+  it('removes emoji and mascot self-introductions from generated advice', () => {
+    expect(
+      sanitizeCoachText(
+        '⚠ Hola, soy Hexi, tu acompañante friki. Considera guardar la entrada hasta que aparezca una opción clara.'
+      )
+    ).toBe('Considera guardar la entrada hasta que aparezca una opción clara.')
   })
 })
 
@@ -92,9 +105,11 @@ describe('ollamaStatus', () => {
   it('reports availability and model list', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ models: [{ name: 'gemma3:4b' }, { name: 'llama3.2' }] }))
-      )
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(JSON.stringify({ models: [{ name: 'gemma3:4b' }, { name: 'llama3.2' }] }))
+        )
     )
     expect(await ollamaStatus()).toEqual({ available: true, models: ['gemma3:4b', 'llama3.2'] })
   })
@@ -113,7 +128,9 @@ describe('generateCoachAdvice', () => {
     vi.stubGlobal('fetch', fetchMock)
     const result = await generateCoachAdvice('gemma3:4b', 'prompt')
     expect(result).toEqual({ ok: true, text: 'Buen CS esta partida.' })
-    const body = JSON.parse((fetchMock.mock.calls[0] as [string, RequestInit])[1].body as string) as {
+    const body = JSON.parse(
+      (fetchMock.mock.calls[0] as [string, RequestInit])[1].body as string
+    ) as {
       model: string
       stream: boolean
     }

@@ -18,12 +18,24 @@ export interface MetaItemStat {
   firstGames?: number
 }
 
+/** One observed, coherent shop route from a champion+role timeline. */
+export interface MetaBuildRoute {
+  /** First lane/jungle/support starter bought, null when none was observed. */
+  starterId: number | null
+  /** Ordered finished items; capped by the aggregator to keep families stable. */
+  items: number[]
+  games: number
+  wins: number
+}
+
 /** Below this sample an item's average completion slot is noise. */
 export const ORDER_MIN_GAMES = 3
 
 /** Average completion position (1 = first item), or null without sample. */
 export function avgCompletionSlot(stat: MetaItemStat): number | null {
-  return stat.orderGames !== undefined && stat.slotSum !== undefined && stat.orderGames >= ORDER_MIN_GAMES
+  return stat.orderGames !== undefined &&
+    stat.slotSum !== undefined &&
+    stat.orderGames >= ORDER_MIN_GAMES
     ? stat.slotSum / stat.orderGames
     : null
 }
@@ -33,7 +45,14 @@ export interface MetaItemsInput {
   items: MetaItemStat[]
   /** Aggregated games for the champion+role (sample-size gate). */
   games: number
+  /** Exact observed route families (seed v3 / migration 009). */
+  routes?: MetaBuildRoute[]
+  /** Effective role used by the repository after its fallback. */
+  role?: string
 }
+
+/** Exact routes fragment quickly; three observations are enough to enter selection. */
+export const META_ROUTE_MIN_GAMES = 3
 
 /** Below this champion+role sample the meta build is noise. */
 export const META_TRUST_MIN_GAMES = 20
@@ -46,10 +65,7 @@ export const META_ITEM_MIN_GAMES = 5
  */
 export const SUGGESTION_SCORE_CAP = 45
 
-export function metaUsage(
-  meta: MetaItemsInput | undefined,
-  itemId: number
-): MetaItemStat | null {
+export function metaUsage(meta: MetaItemsInput | undefined, itemId: number): MetaItemStat | null {
   if (meta === undefined) return null
   const stat = meta.items.find((entry) => entry.itemId === itemId)
   return stat !== undefined && stat.games >= META_ITEM_MIN_GAMES ? stat : null
@@ -113,4 +129,3 @@ export function metaPickReason(
     wr: String(wr)
   })
 }
-

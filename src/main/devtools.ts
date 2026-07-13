@@ -5,6 +5,7 @@ import type { ChampSelectState } from '@shared/schemas/lcu'
 import type { LiveClientSnapshot } from '@shared/schemas/liveclient'
 import type { AppDatabase } from './db'
 import { buildScenarioSnapshot } from './devtools-scenario'
+import { createDevSourceCoordinator } from './dev-source-coordinator'
 import { broadcast, handleInvoke } from './ipc'
 import { createSnapshotProcessor } from './liveclient'
 import { ReplayDriver } from './liveclient/replay'
@@ -46,6 +47,17 @@ export function registerDevTools(db: AppDatabase, machine: SessionMachine): void
   const packaged = app.isPackaged
 
   const processor = createSnapshotProcessor(db, { persist: false })
+  let scenarioTimer: ReturnType<typeof setInterval> | null = null
+  let scenarioSnapshot: LiveClientSnapshot | null = null
+
+  const stopScenario = (): void => {
+    if (scenarioTimer === null) return
+    clearInterval(scenarioTimer)
+    scenarioTimer = null
+    scenarioSnapshot = null
+    machine.setLiveState('unavailable')
+  }
+
   const replay = new ReplayDriver({
     roots: [
       { dir: join(app.getAppPath(), 'fixtures', 'recordings'), prefix: 'rec' },
@@ -55,11 +67,18 @@ export function registerDevTools(db: AppDatabase, machine: SessionMachine): void
     onStateChange: (state) => machine.setLiveState(state),
     onDone: () => processor.reset()
   })
+  const sourceCoordinator = createDevSourceCoordinator({
+    stopReplay: () => replay.stop(),
+    stopScenario,
+    resetProcessor: () => processor.reset()
+  })
 
   handleInvoke('dev:enabled', () => !packaged)
   handleInvoke('dev:replays', () => (packaged ? [] : replay.list()))
   handleInvoke('dev:replay:start', (id, intervalMs) => {
     if (packaged) return { started: false, error: 'solo disponible en desarrollo' }
+    // A replay becomes the sole owner of normalized game state.
+    sourceCoordinator.switchSource()
     return replay.start(id, intervalMs)
   })
   handleInvoke('dev:replay:stop', () => {
@@ -87,19 +106,6 @@ export function registerDevTools(db: AppDatabase, machine: SessionMachine): void
   })
 
   // ---- Forced game situations (synthetic snapshots, same pipeline) ----
-  let scenarioTimer: ReturnType<typeof setInterval> | null = null
-  let scenarioSnapshot: LiveClientSnapshot | null = null
-
-  const stopScenario = (): void => {
-    if (scenarioTimer !== null) {
-      clearInterval(scenarioTimer)
-      scenarioTimer = null
-      scenarioSnapshot = null
-      machine.setLiveState('unavailable')
-      processor.reset()
-    }
-  }
-
   const applyScenario = async (
     scenario: GameScenario
   ): Promise<{ ok: boolean; error?: string }> => {
@@ -128,7 +134,7 @@ export function registerDevTools(db: AppDatabase, machine: SessionMachine): void
 
   handleInvoke('dev:scenario:start', async (scenario) => {
     if (packaged) return { started: false, error: 'solo disponible en desarrollo' }
-    replay.stop() // a replay and a scenario can't both own the live state
+    sourceCoordinator.switchSource()
     const result = await applyScenario(scenario)
     return { started: result.ok, error: result.error }
   })
@@ -141,6 +147,7 @@ export function registerDevTools(db: AppDatabase, machine: SessionMachine): void
   })
   handleInvoke('dev:scenario:stop', () => {
     stopScenario()
+    processor.reset()
     return { stopped: true }
   })
 }

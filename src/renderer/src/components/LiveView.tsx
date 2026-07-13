@@ -8,7 +8,7 @@ import { useIpcEvent, type LiveInsights as LiveInsightsData } from '../hooks'
 import { useT } from '../i18n'
 import AnimatedNumber from './AnimatedNumber'
 import ChampSelectPanel from './ChampSelectPanel'
-import { HexiSprite, useMascotName } from './Mascot'
+import { CompanionSprite, useMascotName } from './Mascot'
 
 /** Role-aware strategic read from the local-AI coach (slow cadence). */
 function GameDirectionPanel(): React.JSX.Element | null {
@@ -17,9 +17,9 @@ function GameDirectionPanel(): React.JSX.Element | null {
   const t = useT()
   if (direction === null) return null
   return (
-    <section className="card-in rounded-lg border border-indigo-800/60 bg-slate-900 p-3.5">
+    <section className="coach-brief card-in rounded-2xl p-3.5">
       <div className="flex items-start gap-2.5">
-        <HexiSprite mood="focused" className="h-9 w-9 shrink-0" />
+        <CompanionSprite mood="focused" className="h-9 w-9 shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="mb-1 text-[10px] font-semibold tracking-widest text-indigo-300 uppercase">
             {t('live.gamePlan')} · {mascot}
@@ -78,8 +78,11 @@ function OverlayHint(props: { onOpenSettings?: () => void }): React.JSX.Element 
   const t = useT()
   if (overlayEnabled !== false) return null
   return (
-    <p className="card-in rounded border border-slate-800 bg-slate-900/60 px-3 py-1.5 text-[11px] text-slate-400">
-      💡 {t('live.overlayHint')}{' '}
+    <p className="card-in rounded-xl border border-slate-800/70 bg-slate-900/60 px-3 py-2 text-[11px] text-slate-400">
+      <span className="mr-1.5 text-fuchsia-300" aria-hidden>
+        ●
+      </span>
+      {t('live.overlayHint')}{' '}
       <button
         className="text-indigo-300 underline hover:text-indigo-200"
         onClick={props.onOpenSettings}
@@ -120,12 +123,12 @@ function InGameLayout(props: {
     </div>
   )
   const statusBar = (
-    <div className="flex items-center rounded-lg border border-slate-800 bg-slate-900 px-4 py-2.5">
+    <div className="session-hud flex items-center rounded-2xl px-4 py-3">
       <div className="mr-4 flex items-center gap-2.5 border-r border-slate-800 pr-4">
         <img
           src={`ddicon://champion/${gameState.self.championId}.png`}
           alt={gameState.self.championName}
-          className="h-10 w-10 rounded border border-amber-400/40 shadow-[0_0_10px_-2px_var(--color-amber-400)]"
+          className="h-11 w-11 rounded-xl border border-amber-300/30 shadow-[0_10px_25px_-14px_rgba(246,199,92,0.8)]"
         />
         <div>
           <p className="text-sm leading-tight font-semibold text-slate-100">
@@ -161,7 +164,7 @@ function InGameLayout(props: {
     <RecommendationCard payload={props.recommendations} currentGold={gameState.self.currentGold} />
   )
   const insightsRow = props.insights ? (
-    <div className="card-in flex flex-col gap-1.5 rounded-lg border border-slate-800 bg-slate-900 px-4 py-2">
+    <div className="intel-strip card-in flex flex-col gap-1.5 rounded-2xl px-4 py-2.5">
       <div className="flex items-center gap-3">
         <LiveChips gameState={gameState} insights={props.insights} />
         <div className="min-w-32 flex-1">
@@ -212,19 +215,24 @@ function InGameLayout(props: {
       {backdrop}
       {hint}
       {statusBar}
-      <div className="grid grid-cols-1 items-start gap-3 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+      <div className="grid grid-cols-1 items-start gap-3 xl:grid-cols-[minmax(0,1.75fr)_minmax(330px,0.9fr)]">
         <div className="flex flex-col gap-3">
           {hero}
-          {direction}
           {insightsRow}
+          {gauges}
+          {direction}
         </div>
-        <div className="flex flex-col gap-3">
-          {/* Time-critical first: objective timers lead the instruments. */}
+        <aside className="context-stack flex flex-col gap-3 rounded-2xl p-3">
+          <div className="flex items-center justify-between px-1">
+            <p className="text-[10px] font-semibold tracking-[0.18em] text-slate-500 uppercase">
+              {t('live.matchContext')}
+            </p>
+            <span className="text-[9px] text-slate-700">{formatClock(gameState.gameTimeS)}</span>
+          </div>
           {objectives}
           {allies}
           {enemies}
-          {gauges}
-        </div>
+        </aside>
       </div>
     </div>
   )
@@ -249,8 +257,17 @@ export default function LiveView(props: {
     // min-h-full (not h-full): the view must be able to GROW past the
     // viewport so <main>'s scrollbar reaches everything. max-w keeps the
     // content composed on wide monitors instead of stretched and empty.
-    <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-3 p-4">
-      <h1 className="text-lg font-bold">{t('nav.live')}</h1>
+    <div className="mx-auto flex min-h-full w-full max-w-[1380px] flex-col gap-3 p-5">
+      <header className="view-heading flex items-end justify-between px-1">
+        <div>
+          <p className="text-[9px] font-semibold tracking-[0.24em] text-fuchsia-300/70 uppercase">
+            {t('live.workspace')}
+          </p>
+          <h1 className="mt-0.5 text-xl font-semibold tracking-tight text-slate-100">
+            {t('nav.live')}
+          </h1>
+        </div>
+      </header>
 
       {(phase === 'idle' || phase === 'clientOpen') && (
         <HomeDashboard phase={phase} onOpenSettings={props.onOpenSettings} />

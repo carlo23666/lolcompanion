@@ -19,6 +19,7 @@ import { SettingsRepo, SETTING_KEYS } from './db/repos/settings'
 import { catchUpMissedMatches, PostGameIngestor } from './postgame'
 import { getLocale, getOwnerPuuid, getRiotContext, registerRiotIpc } from './riot'
 import { createTranslator } from '@shared/i18n'
+import { normalizeTheme } from '@shared/themes'
 import { SessionMachine } from './session/machine'
 import { getStaticDataManager } from './staticdata'
 
@@ -33,7 +34,7 @@ function createWindow(): void {
   const window = new BrowserWindow({
     width: 1100,
     height: 750,
-    title: 'LoL Companion',
+    title: 'WinCon',
     icon: appIcon,
     backgroundColor: '#0f1117',
     webPreferences: {
@@ -189,9 +190,39 @@ void app.whenReady().then(() => {
     })
   }, 10_000)
 
-  overlay = new OverlayManager()
+  const overlaySettings = new SettingsRepo(database)
+  overlay = new OverlayManager({
+    readScale: () => Number(overlaySettings.get(SETTING_KEYS.overlayScale) ?? '100'),
+    readPosition: () => {
+      const rawX = overlaySettings.get(SETTING_KEYS.overlayX)
+      const rawY = overlaySettings.get(SETTING_KEYS.overlayY)
+      if (rawX === null || rawY === null || rawX === '' || rawY === '') return null
+      const x = Number(rawX)
+      const y = Number(rawY)
+      return Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null
+    },
+    writePosition: ({ x, y }) => {
+      overlaySettings.set(SETTING_KEYS.overlayX, String(Math.round(x)))
+      overlaySettings.set(SETTING_KEYS.overlayY, String(Math.round(y)))
+    },
+    clearPosition: () => {
+      overlaySettings.set(SETTING_KEYS.overlayX, '')
+      overlaySettings.set(SETTING_KEYS.overlayY, '')
+    }
+  })
   handleInvoke('overlay:interactive', (interactive) => {
     overlay?.setInteractive(interactive)
+    return { ok: true as const }
+  })
+  handleInvoke('overlay:move', (delta) => {
+    overlay?.moveBy(delta)
+    return { ok: true as const }
+  })
+  handleInvoke('overlay:configure', (configuration) => {
+    overlay?.configure(configuration)
+    if (configuration.theme !== undefined) {
+      broadcast('appearance:theme', normalizeTheme(configuration.theme))
+    }
     return { ok: true as const }
   })
   const machine = new SessionMachine((phase) => {

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Recommendation } from '@shared/recommendation'
 import { DEFAULT_LOCALE, normalizeLocale, type Locale, type MessageKey } from '@shared/i18n'
-import { LocaleProvider, useT } from './i18n'
-import { HexiSprite } from './components/Mascot'
-import { PersonalCurveChip, TeamGoldBar, usePersonalCurve } from './components/LiveInsights'
+import type { Recommendation } from '@shared/recommendation'
+import { CompanionSprite } from './components/Mascot'
 import { useIpcEvent, useLiveInsights, type LiveAlert } from './hooks'
+import { LocaleProvider, useT } from './i18n'
+import { applyTheme } from './appearance'
 
 const ACTION_LABEL_KEYS: Record<Recommendation['action'], MessageKey> = {
   prioritize: 'rec.action.prioritize',
@@ -14,9 +14,9 @@ const ACTION_LABEL_KEYS: Record<Recommendation['action'], MessageKey> = {
 }
 
 const ALERT_SHOW_MS = 6000
-// Walk-in Hexi: enter, speak, leave (full sentences need reading time).
-const COACH_STAY_MS = 10_500
-const COACH_LEAVE_MS = 1300
+const COACH_SHOW_MS = 10_500
+const DEV_CAPTURE_SIZE =
+  import.meta.env.DEV && new URLSearchParams(window.location.search).has('capture')
 
 function formatClock(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60)
@@ -36,7 +36,8 @@ function ObjectiveChip(props: {
   const live = remaining <= 0
   return (
     <span
-      className={`rounded px-1.5 py-0.5 font-mono text-[10px] ${
+      title={props.label}
+      className={`rounded px-1.5 py-0.5 font-mono text-[9px] ${
         live
           ? 'objective-live bg-emerald-500/20 text-emerald-300'
           : remaining <= 60
@@ -44,286 +45,276 @@ function ObjectiveChip(props: {
             : 'bg-slate-800/80 text-slate-400'
       }`}
     >
-      {props.icon} {live ? `${props.label} ${t('overlay.live')}` : formatClock(remaining)}
+      {props.icon} {live ? t('overlay.live') : formatClock(remaining)}
     </span>
   )
 }
 
-function RecommendationRow(props: { rec: Recommendation; hero: boolean }): React.JSX.Element {
-  const { rec, hero } = props
-  const t = useT()
-  return (
-    <div
-      className={`flex items-center gap-2 rounded px-1.5 py-1 ${
-        hero ? 'bg-amber-400/10' : 'bg-slate-900/60'
-      }`}
-    >
-      {rec.itemId !== null && (
-        <img
-          src={`ddicon://item/${String(rec.itemId)}.png`}
-          alt=""
-          className={`rounded border border-slate-700 ${hero ? 'h-8 w-8' : 'h-6 w-6'}`}
-        />
-      )}
-      <div className="min-w-0 flex-1">
-        <p className={`truncate font-semibold text-slate-100 ${hero ? 'text-xs' : 'text-[11px]'}`}>
-          {rec.itemName ?? rec.category}{' '}
-          <span className="text-[9px] font-bold text-indigo-300">
-            {t(ACTION_LABEL_KEYS[rec.action])}
-          </span>
-        </p>
-        {hero && rec.reasons[0] !== undefined && (
-          <p className="truncate text-[10px] text-slate-400">{rec.reasons[0]}</p>
-        )}
-      </div>
-    </div>
-  )
-}
-
 /**
- * In-game overlay (transparent always-on-top window, ?overlay=1): compact
- * Hexi bubble with the top recommendation, interrupted by spike/objective
- * alerts. Hovering expands a stats panel (top-3 recs, objective timers,
- * personal CS curve, team gold, latest alerts); 📌 keeps it open. The window
- * is click-through except while the pointer is over the card
- * (`overlay:interactive`), so it never eats game clicks.
+ * Stable bottom overlay: the active companion and current purchase remain between
+ * the ability bar and minimap. Alerts and local-coach tips use one temporary
+ * upward bubble; the mascot itself never walks across the game. Only the dock
+ * accepts mouse input, preserving click-through behavior elsewhere.
  */
-function OverlayContent(): React.JSX.Element | null {
+function OverlayContent(): React.JSX.Element {
   const t = useT()
   const recommendations = useIpcEvent('gamestate:recommendations')
   const gameState = useIpcEvent('gamestate:update')
   const insights = useLiveInsights()
-  const curve = usePersonalCurve(gameState)
-  const [activeAlert, setActiveAlert] = useState<LiveAlert | null>(null)
-  const [hovered, setHovered] = useState(false)
-  const [pinned, setPinned] = useState(false)
+  const [speech, setSpeech] = useState<LiveAlert | null>(null)
   const lastAlertIdRef = useRef(0)
+  const dragApproachRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef<{ pointerId: number; x: number; y: number } | null>(null)
 
-  // A new spike/objective alert takes over the bubble for a few seconds.
-  // Coach tips get their own walk-in Hexi instead (too much in one place).
   useEffect(() => {
     const newest = insights.alerts[0]
     if (!newest || newest.id === lastAlertIdRef.current) return
     lastAlertIdRef.current = newest.id
-    if (newest.kind !== 'spike' && newest.kind !== 'objective') return
-    setActiveAlert(newest)
-    const timer = setTimeout(() => setActiveAlert(null), ALERT_SHOW_MS)
+    if (newest.kind === 'info') return
+    setSpeech(newest)
+    const timer = setTimeout(
+      () => setSpeech(null),
+      newest.kind === 'coach' ? COACH_SHOW_MS : ALERT_SHOW_MS
+    )
     return () => clearTimeout(timer)
   }, [insights.alerts])
 
-  // Coach tip lifecycle: walk in → speak → walk out.
-  const [walkTip, setWalkTip] = useState<{ text: string; leaving: boolean } | null>(null)
   useEffect(
-    () => window.api.on('coach:tip', (tip) => setWalkTip({ text: tip.text, leaving: false })),
+    () =>
+      window.api.on('gamestate:reset', () => {
+        lastAlertIdRef.current = 0
+        setSpeech(null)
+      }),
     []
   )
+
   useEffect(() => {
-    if (walkTip === null) return
-    const timer = walkTip.leaving
-      ? setTimeout(() => setWalkTip(null), COACH_LEAVE_MS)
-      : setTimeout(() => setWalkTip((current) => (current ? { ...current, leaving: true } : null)), COACH_STAY_MS)
-    return () => clearTimeout(timer)
-  }, [walkTip])
+    const approach = dragApproachRef.current
+    if (approach === null) return
+    // Electron forwards native mousemove events through a click-through window
+    // on Windows, but React's delegated mouseenter/move events are not reliable
+    // until the window accepts input. Listen on the real DOM node to bridge it.
+    const enableInput = (): void => {
+      void window.api.invoke('overlay:interactive', true).catch(() => undefined)
+    }
+    approach.addEventListener('mousemove', enableInput, { passive: true })
+    return () => approach.removeEventListener('mousemove', enableInput)
+  }, [])
+
+  useEffect(() => {
+    void window.api
+      .invoke('overlay:configure', { speechVisible: speech !== null })
+      .catch(() => undefined)
+  }, [speech])
 
   const top = recommendations?.recommendations[0]
-  const expanded = hovered || pinned
   const now = gameState?.gameTimeS ?? 0
 
   const setInteractive = (interactive: boolean): void => {
     void window.api.invoke('overlay:interactive', interactive).catch(() => undefined)
   }
 
+  const stopDrag = (element: HTMLDivElement, pointerId: number): void => {
+    if (dragRef.current?.pointerId !== pointerId) return
+    dragRef.current = null
+    element.releasePointerCapture?.(pointerId)
+  }
+
   return (
-    <div className="relative flex h-screen w-screen flex-col justify-start bg-transparent p-1">
+    <div
+      data-testid="overlay-root"
+      style={DEV_CAPTURE_SIZE ? { width: 420, height: 220 } : undefined}
+      className="relative flex h-screen w-screen flex-col justify-end gap-2 overflow-hidden bg-transparent p-1 select-none"
+    >
+      {speech !== null && (
+        <div
+          data-testid="overlay-speech"
+          className={`overlay-speech alert-in pointer-events-none relative max-h-[116px] w-[min(360px,calc(100vw-24px))] self-end rounded-xl border bg-slate-950/95 px-3.5 py-2.5 shadow-2xl backdrop-blur-md ${
+            speech.kind === 'objective'
+              ? 'border-emerald-500/55 text-emerald-100'
+              : speech.kind === 'duel'
+                ? 'border-cyan-400/55 text-cyan-50'
+                : speech.kind === 'spike'
+                  ? 'border-amber-400/55 text-amber-100'
+                  : speech.kind === 'purchase'
+                    ? 'border-pink-400/55 text-slate-100'
+                    : 'border-indigo-500/55 text-slate-100'
+          }`}
+        >
+          {speech.itemId !== undefined && speech.itemName !== undefined && (
+            <div data-testid="overlay-speech-item" className="mb-1.5 flex items-center gap-2">
+              <img
+                src={`ddicon://item/${String(speech.itemId)}.png`}
+                alt={speech.itemName}
+                draggable={false}
+                className="h-8 w-8 shrink-0 rounded-md border border-pink-400/35"
+              />
+              <div className="min-w-0">
+                <span className="block font-mono text-[8px] tracking-[0.12em] text-pink-300 uppercase">
+                  {t('overlay.itemReference')}
+                </span>
+                <strong className="block truncate text-[11px] text-slate-50">
+                  {speech.itemName}
+                </strong>
+              </div>
+            </div>
+          )}
+          <p className="text-xs leading-relaxed font-medium">{speech.text}</p>
+        </div>
+      )}
+
       <div
+        data-testid="overlay-interaction-zone"
+        className="relative -mt-5 w-full shrink-0 pt-5"
         onMouseEnter={() => {
-          setHovered(true)
           setInteractive(true)
         }}
         onMouseLeave={() => {
-          setHovered(false)
-          if (!pinned) setInteractive(false)
+          setInteractive(false)
         }}
       >
+        {/* Windows cannot re-enable a click-through native window from an
+            app-region itself. This transparent approach band receives the
+            forwarded hover first, then the native grip can acquire the drag. */}
         <div
-          className="flex cursor-move items-center justify-between px-2 py-0.5"
-          style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+          ref={dragApproachRef}
+          data-testid="overlay-drag-approach"
+          aria-hidden="true"
+          className="absolute top-0 right-0 left-0 h-5"
+        />
+        <div
+          data-testid="overlay-dock"
+          className="overlay-dock-shell relative flex w-full items-end gap-2 rounded-xl border border-slate-700/65 bg-slate-950/92 px-2.5 pt-5 pb-2 shadow-2xl backdrop-blur-md"
         >
-          <span className="rounded bg-slate-950/70 px-1.5 text-[9px] font-bold tracking-widest text-amber-300/90 uppercase">
-            LoL Companion
-          </span>
-          <span className="rounded bg-slate-950/70 px-1.5 text-[9px] text-slate-500">
-            {expanded ? t('overlay.dragMove') : t('overlay.hoverExpand')}
-          </span>
-        </div>
-
-        <div className="flex items-start gap-1.5">
-          <HexiSprite
-            mood="focused"
-            alerting={activeAlert !== null}
-            className="h-12 w-12 shrink-0 drop-shadow-[0_0_6px_rgba(10,155,180,0.5)]"
-          />
-
-          {activeAlert !== null ? (
-            <div
-              className={`alert-in min-w-0 flex-1 rounded-lg border bg-slate-950/90 px-2.5 py-1.5 shadow-lg backdrop-blur-sm ${
-                activeAlert.kind === 'objective' ? 'border-emerald-500/60' : 'border-amber-400/60'
-              }`}
-            >
-              <p
-                className={`text-xs font-semibold ${
-                  activeAlert.kind === 'objective' ? 'text-emerald-300' : 'text-amber-300'
-                }`}
-              >
-                {activeAlert.kind === 'objective' ? '🎯' : '⚠'} {activeAlert.text}
-              </p>
-            </div>
-          ) : top ? (
-            <div className="card-in flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-amber-400/40 bg-slate-950/90 px-2.5 py-1.5 shadow-lg backdrop-blur-sm">
-              {top.itemId !== null && (
-                <img
-                  src={`ddicon://item/${String(top.itemId)}.png`}
-                  alt=""
-                  className="h-9 w-9 rounded border border-slate-700"
-                />
-              )}
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-slate-100">
-                  {top.itemName ?? top.category}{' '}
-                  <span className="text-[10px] font-bold text-indigo-300">
-                    {t(ACTION_LABEL_KEYS[top.action])}
-                  </span>
-                </p>
-                {top.reasons[0] !== undefined && (
-                  <p className="truncate text-[11px] text-slate-400">{top.reasons[0]}</p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="min-w-0 flex-1 rounded-lg border border-slate-700/60 bg-slate-950/90 px-2.5 py-1.5">
-              <p className="text-[11px] text-slate-500">{t('overlay.waiting')}</p>
-            </div>
-          )}
-        </div>
-
-        {expanded && (
           <div
-            data-testid="overlay-expanded"
-            className="card-in mt-1.5 flex flex-col gap-2 rounded-lg border border-slate-700/70 bg-slate-950/95 p-2.5 shadow-xl backdrop-blur-sm"
+            data-testid="overlay-drag-handle"
+            aria-label={t('overlay.dragMove')}
+            title={t('overlay.dragMove')}
+            className="overlay-native-drag absolute top-0 right-0 left-0 z-20 flex h-5 cursor-move items-center justify-end rounded-t-xl px-2.5 font-mono text-[9px] tracking-[0.18em] text-slate-500 uppercase"
+            onPointerDown={(event) => {
+              event.preventDefault()
+              event.currentTarget.setPointerCapture?.(event.pointerId)
+              dragRef.current = { pointerId: event.pointerId, x: event.screenX, y: event.screenY }
+            }}
+            onPointerMove={(event) => {
+              const drag = dragRef.current
+              if (drag === null || drag.pointerId !== event.pointerId) return
+              const x = event.screenX
+              const y = event.screenY
+              const delta = { x: x - drag.x, y: y - drag.y }
+              dragRef.current = { pointerId: event.pointerId, x, y }
+              if (delta.x !== 0 || delta.y !== 0) {
+                void window.api.invoke('overlay:move', delta).catch(() => undefined)
+              }
+            }}
+            onPointerUp={(event) => stopDrag(event.currentTarget, event.pointerId)}
+            onPointerCancel={(event) => stopDrag(event.currentTarget, event.pointerId)}
+            onLostPointerCapture={() => {
+              dragRef.current = null
+            }}
           >
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
-                {t('overlay.matchPanel')}
-              </span>
-              <button
-                type="button"
-                aria-pressed={pinned}
-                title={pinned ? t('overlay.unpin') : t('overlay.pin')}
-                onClick={() => setPinned((value) => !value)}
-                className={`rounded px-1.5 py-0.5 text-[11px] ${
-                  pinned ? 'bg-amber-400/20 text-amber-300' : 'bg-slate-800 text-slate-400'
-                }`}
-              >
-                📌
-              </button>
-            </div>
+            ···
+          </div>
+
+          <div className="min-w-0 flex-1">
+            {top ? (
+              <div className="flex min-w-0 items-center gap-2">
+                {top.itemId !== null && (
+                  <img
+                    src={`ddicon://item/${String(top.itemId)}.png`}
+                    alt=""
+                    draggable={false}
+                    className="h-10 w-10 shrink-0 rounded-lg border border-slate-700"
+                  />
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate pr-8 text-sm font-semibold text-slate-100">
+                    {top.itemName ?? top.category}{' '}
+                    <span className="text-[10px] font-bold text-indigo-300">
+                      {t(ACTION_LABEL_KEYS[top.action])}
+                    </span>
+                  </p>
+                  {top.reasons[0] !== undefined && (
+                    <p className="truncate text-[10px] text-slate-400">{top.reasons[0]}</p>
+                  )}
+                  {top.plan !== undefined && (
+                    <div className="mt-1 flex items-center gap-1" aria-label={t('rec.route')}>
+                      {top.plan.steps.map((step, index) => (
+                        <span
+                          key={`${String(step.itemId)}-${String(index)}`}
+                          className={`h-1.5 rounded-full ${
+                            step.owned
+                              ? 'w-3 bg-emerald-400'
+                              : index === top.plan?.currentStep
+                                ? 'w-5 bg-amber-300'
+                                : 'w-3 bg-slate-700'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p className="py-3 text-[11px] text-slate-500">{t('overlay.waiting')}</p>
+            )}
 
             {gameState !== null && (
-              <>
-                <div className="flex items-center gap-2 font-mono text-[11px] text-slate-300">
-                  <span>⏱ {formatClock(now)}</span>
-                  <span className="text-amber-300">
-                    💰 {Math.round(gameState.self.currentGold)}
-                  </span>
-                  <span>
-                    {gameState.self.scores.kills}/{gameState.self.scores.deaths}/
-                    {gameState.self.scores.assists}
-                  </span>
-                  <span>{gameState.self.scores.creepScore} CS</span>
-                  <PersonalCurveChip gameState={gameState} curve={curve} />
-                </div>
-                <div className="flex items-center gap-1.5">
+              <div className="mt-1.5 flex items-center gap-1.5 border-t border-slate-800/90 pt-1.5 font-mono text-[9px] text-slate-400">
+                <span>{formatClock(now)}</span>
+                <span className="text-amber-300">{Math.round(gameState.self.currentGold)}g</span>
+                <span>
+                  {gameState.self.scores.kills}/{gameState.self.scores.deaths}/
+                  {gameState.self.scores.assists}
+                </span>
+                <span className="ml-auto flex items-center gap-1">
                   <ObjectiveChip
-                    icon="🐉"
+                    icon="D"
                     label={t('overlay.dragon')}
                     spawnS={insights.nextDragonS}
                     now={now}
                   />
                   <ObjectiveChip
-                    icon="🟣"
+                    icon="B"
                     label={t('overlay.baron')}
                     spawnS={insights.nextBaronS}
                     now={now}
                   />
-                  <div className="min-w-16 flex-1">
-                    <TeamGoldBar gameState={gameState} />
-                  </div>
-                </div>
-              </>
-            )}
-
-            {recommendations !== null && recommendations.recommendations.length > 0 && (
-              <div className="flex flex-col gap-1">
-                {recommendations.recommendations.slice(0, 3).map((rec, index) => (
-                  <RecommendationRow
-                    key={`${String(rec.itemId ?? rec.category)}-${String(index)}`}
-                    rec={rec}
-                    hero={index === 0}
-                  />
-                ))}
-              </div>
-            )}
-
-            {insights.alerts.length > 0 && (
-              <div className="flex flex-col gap-0.5">
-                {insights.alerts.slice(0, 3).map((alert) => (
-                  <p key={alert.id} className="truncate text-[10px] text-slate-500">
-                    <span className="font-mono">{formatClock(alert.gameTimeS)}</span> ·{' '}
-                    {alert.text}
-                  </p>
-                ))}
+                </span>
               </div>
             )}
           </div>
-        )}
-      </div>
 
-      {/* Walk-in Hexi: enters from the right edge, delivers the macro tip,
-          walks out. Separate from the alert bubble so the tip never competes
-          with recommendations for the same spot. */}
-      {walkTip !== null && (
-        <div
-          data-testid="coach-walk"
-          className={`pointer-events-none absolute right-1 bottom-1 flex max-w-[370px] items-end gap-1.5 ${
-            walkTip.leaving ? 'hexi-walk-out' : 'hexi-walk-in'
-          }`}
-        >
-          <div className="min-w-0 rounded-lg rounded-br-none border border-indigo-500/60 bg-slate-950/95 px-3 py-2 shadow-xl backdrop-blur-sm">
-            <p className="text-xs leading-snug font-medium text-indigo-200">🔮 {walkTip.text}</p>
+          <div className="relative z-10 flex h-16 w-16 shrink-0 items-end justify-center">
+            <CompanionSprite
+              mood={speech === null ? 'focused' : 'alert'}
+              alerting={speech !== null}
+              className="h-16 w-16 drop-shadow-[0_0_8px_rgba(127,212,228,0.42)]"
+            />
+            <div className="absolute right-1 bottom-0 left-1 h-px bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent" />
           </div>
-          <HexiSprite
-            mood="hyped"
-            className="h-14 w-14 shrink-0 drop-shadow-[0_0_8px_rgba(127,212,228,0.6)]"
-          />
         </div>
-      )}
+      </div>
     </div>
   )
 }
 
-/**
- * The overlay is a SEPARATE window (its own renderer root), so it can't share
- * App's LocaleProvider — it loads the locale from settings on mount. The
- * overlay is recreated per game, so a mid-session language change is picked up
- * next game (rare; no live sync needed here).
- */
-export default function OverlayApp(): React.JSX.Element | null {
+/** The overlay is a separate renderer root and resolves its own locale. */
+export default function OverlayApp(): React.JSX.Element {
   const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE)
   useEffect(() => {
-    void window.api
-      .invoke('settings:get')
-      .then((settings) => setLocale(normalizeLocale(settings?.locale)), () => undefined)
+    void window.api.invoke('settings:get').then(
+      (settings) => {
+        setLocale(normalizeLocale(settings?.locale))
+        applyTheme(settings.theme)
+      },
+      () => undefined
+    )
+    return window.api.on('appearance:theme', applyTheme)
   }, [])
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
   return (
     <LocaleProvider locale={locale}>
       <OverlayContent />

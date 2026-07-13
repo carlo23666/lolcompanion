@@ -34,8 +34,15 @@ export interface BacktestReport {
   comparisons: number
   top1Rate: number
   top3Rate: number
+  /** Eligible future-purchase frames where the engine produced an item option. */
+  coverageRate: number
+  /** Covered frames where the primary option carried a coherent route plan. */
+  routePrimaryRate: number
   byChampion: Record<string, AgreementBucket & { top1Rate: number; top3Rate: number }>
-  byPhase: Record<'early' | 'mid' | 'late', AgreementBucket & { top1Rate: number; top3Rate: number }>
+  byPhase: Record<
+    'early' | 'mid' | 'late',
+    AgreementBucket & { top1Rate: number; top3Rate: number }
+  >
   disagreements: Disagreement[]
   errors: { matchId: string; message: string }[]
 }
@@ -77,6 +84,9 @@ export function runBacktest(
   const disagreements: Disagreement[] = []
   const errors: { matchId: string; message: string }[] = []
   let frames = 0
+  let eligibleFrames = 0
+  let coveredFrames = 0
+  let routePrimaryFrames = 0
 
   for (const input of inputs) {
     try {
@@ -88,14 +98,17 @@ export function runBacktest(
       )
       frames += reconstructed.length
       const champion =
-        input.match.info.participants.find((p) => p.puuid === input.ownerPuuid)
-          ?.championName ?? 'unknown'
+        input.match.info.participants.find((p) => p.puuid === input.ownerPuuid)?.championName ??
+        'unknown'
 
       for (const frame of reconstructed) {
         if (frame.actualNextPurchase === null) continue
+        eligibleFrames += 1
         const recommendations = recommend(frame.state, staticData, pool)
         const withItems = recommendations.filter((rec) => rec.itemId !== null)
         if (withItems.length === 0) continue
+        coveredFrames += 1
+        if (withItems[0]?.kind === 'route') routePrimaryFrames += 1
 
         overall.comparisons += 1
         const champBucket = byChampion.get(champion) ?? {
@@ -157,6 +170,8 @@ export function runBacktest(
     frames,
     comparisons: overall.comparisons,
     ...rate(overall),
+    coverageRate: eligibleFrames > 0 ? coveredFrames / eligibleFrames : 0,
+    routePrimaryRate: coveredFrames > 0 ? routePrimaryFrames / coveredFrames : 0,
     byChampion: Object.fromEntries(
       [...byChampion.entries()].map(([champion, bucket]) => [
         champion,

@@ -10,6 +10,7 @@ import {
   endgameRecommendation,
   loadBaselinePool,
   nextBuyRecommendation,
+  protectedCoreRemaining,
   resolveBaseline,
   type MetaItemsInput
 } from './nextbuy'
@@ -33,21 +34,39 @@ export function recommend(
   personal?: MetaItemsInput
 ): Recommendation[] {
   const baseline = resolveBaseline(state, staticData, pool, meta, personal)
+  const protectedRemaining =
+    baseline === null ? 0 : protectedCoreRemaining(state, staticData, baseline)
   const ruleRecommendations = runEngine(state, staticData, meta, t).map((rec) => {
-    if (rec.itemId !== null && baseline?.situational.includes(rec.itemId) === true) {
-      const item = rec.itemName ?? t('engine.word.thisItem')
+    const protectedRec =
+      protectedRemaining > 0
+        ? {
+            ...rec,
+            kind: 'adaptation' as const,
+            action: rec.action === 'delay' ? ('delay' as const) : ('add' as const),
+            score: Math.min(rec.score, 45),
+            reasons: [
+              ...rec.reasons,
+              t('engine.route.coreProtected', { remaining: String(protectedRemaining) })
+            ]
+          }
+        : { ...rec, kind: 'adaptation' as const }
+    if (
+      protectedRec.itemId !== null &&
+      baseline?.situational.includes(protectedRec.itemId) === true
+    ) {
+      const item = protectedRec.itemName ?? t('engine.word.thisItem')
       return {
-        ...rec,
-        score: Math.min(100, rec.score + 10),
+        ...protectedRec,
+        score: protectedRemaining > 0 ? protectedRec.score : Math.min(100, protectedRec.score + 10),
         reasons: [
-          ...rec.reasons,
+          ...protectedRec.reasons,
           baseline.source === 'pool'
             ? t('engine.recommend.situPool', { item, champion: state.self.championName })
             : t('engine.endgame.situMeta', { item, champion: state.self.championName })
         ]
       }
     }
-    return rec
+    return protectedRec
   })
 
   // Core first; once it's done, the endgame layer fills slots 5-6 and flags
@@ -60,7 +79,8 @@ export function recommend(
   // Dedupe by item: keep the highest score, merge every reason.
   const byKey = new Map<string, Recommendation>()
   for (const rec of all) {
-    const key = rec.itemId !== null ? `item:${String(rec.itemId)}` : `cat:${rec.category ?? 'general'}`
+    const key =
+      rec.itemId !== null ? `item:${String(rec.itemId)}` : `cat:${rec.category ?? 'general'}`
     const existing = byKey.get(key)
     if (!existing) {
       byKey.set(key, rec)
@@ -70,8 +90,7 @@ export function recommend(
     byKey.set(key, {
       ...winner,
       // 'replace' carries the "sell first" instruction — never lose it in a merge.
-      action:
-        existing.action === 'replace' || rec.action === 'replace' ? 'replace' : winner.action,
+      action: existing.action === 'replace' || rec.action === 'replace' ? 'replace' : winner.action,
       score: Math.min(100, Math.max(existing.score, rec.score) + 5),
       reasons: [...new Set([...existing.reasons, ...rec.reasons])]
     })

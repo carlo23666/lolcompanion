@@ -14,8 +14,8 @@ const statRow = {
 }
 
 export const metaSeedSchema = z.object({
-  // v2 adds itemOrder (WP-015); v1 seeds remain importable.
-  version: z.union([z.literal(1), z.literal(2)]),
+  // v2 adds itemOrder; v3 adds coherent buildRoutes. Older seeds remain importable.
+  version: z.union([z.literal(1), z.literal(2), z.literal(3)]),
   patch: z.string().min(1),
   exportedAt: z.string(),
   matchIds: z.array(z.string().min(1)),
@@ -32,6 +32,19 @@ export const metaSeedSchema = z.object({
         games: z.number().int().positive(),
         slotSum: z.number().int().nonnegative(),
         firstGames: z.number().int().nonnegative()
+      })
+    )
+    .optional(),
+  /** Starter + ordered finished-item route aggregates (v3). */
+  buildRoutes: z
+    .array(
+      z.object({
+        champion: z.string().min(1),
+        role: z.string(),
+        starterId: z.number().int().nonnegative(),
+        route: z.string().regex(/^\d+(,\d+)*$/),
+        games: z.number().int().positive(),
+        wins: z.number().int().nonnegative()
       })
     )
     .optional()

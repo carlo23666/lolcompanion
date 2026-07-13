@@ -116,7 +116,12 @@ describe('rule: antiheal', () => {
 
 describe('rule: armor-vs-mr', () => {
   it('recommends every squishy armor option against the 80% physical comp, preferred first', () => {
-    const outputs = armorVsMrRule(mid, staticData, REACTIVE_META)
+    const threatened = structuredClone(mid)
+    const zed = threatened.enemies.find((enemy) => enemy.championId === 'Zed')
+    if (zed === undefined) throw new Error('fixture has no Zed')
+    zed.scores.kills = 8
+    zed.scores.deaths = 3
+    const outputs = armorVsMrRule(threatened, staticData, REACTIVE_META)
     // Jinx (Marksman) → squishy options: GA preferred, Zhonya as alternative.
     expect(outputs.map((o) => o.itemId)).toEqual([3026, 3157])
     const [preferred, alternative] = outputs
@@ -139,6 +144,10 @@ describe('rule: armor-vs-mr', () => {
     const magicComp = structuredClone(mid)
     magicComp.enemyAggregates.physicalShare = 0.3
     magicComp.enemyAggregates.magicShare = 0.7
+    const magicDealer = magicComp.enemies.find((enemy) => enemy.damageType === 'magic')
+    if (magicDealer === undefined) throw new Error('fixture has no magic dealer')
+    magicDealer.scores.kills = 8
+    magicDealer.scores.deaths = 3
     const outputs = armorVsMrRule(magicComp, staticData, REACTIVE_META)
     expect(outputs.length).toBeGreaterThan(0)
     expect(outputs.every((o) => o.category === 'resistencia mágica')).toBe(true)
@@ -339,7 +348,7 @@ describe('combiner + runEngine', () => {
   it('produces a ranked, explained top for mid and late game', () => {
     for (const state of [mid, late]) {
       const recommendations = runEngine(state, staticData, REACTIVE_META)
-      expect(recommendations.length).toBeGreaterThanOrEqual(2)
+      expect(recommendations.length).toBeGreaterThanOrEqual(1)
       for (const rec of recommendations) {
         expect(rec.reasons.length).toBeGreaterThan(0)
         expect(rec.score).toBeGreaterThan(0)

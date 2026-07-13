@@ -3,7 +3,7 @@ import { useT } from '../i18n'
 
 /** Expected effective HP at time t — mirrors the engine baseline. */
 function tankBaseline(gameTimeS: number): number {
-  return 900 + 1.9 * gameTimeS
+  return 900 + 2.2 * gameTimeS
 }
 
 export default function Gauges(props: {
@@ -16,7 +16,7 @@ export default function Gauges(props: {
   const tankRatio = Math.min(aggregates.tankinessIndex / (tankBaseline(gameTimeS) * 1.5), 1)
 
   return (
-    <section className="rounded-lg border border-slate-800 bg-slate-900 p-3">
+    <section className="analysis-console rounded-2xl border border-slate-800 bg-slate-900 p-3.5">
       <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
         {t('live.enemyAnalysis')}
       </h3>

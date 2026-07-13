@@ -13,7 +13,7 @@ export const en = {
   'nav.live': 'Live',
   'nav.history': 'History',
   'nav.settings': 'Settings',
-  'shell.tagline': 'your local coach',
+  'shell.tagline': 'local live analysis',
   'phase.idle': 'Client closed',
   'phase.clientOpen': 'Client open',
   'phase.champSelect': 'Champion select',
@@ -30,13 +30,14 @@ export const en = {
   'live.baronIn': 'Baron in {time}',
   'live.baronOnMap': 'Baron on the map',
   'live.deadGold': '{gold} unspent gold — plan a back',
-  'live.overlayHint': 'Your mascot can join you in-game with an overlay (LoL in windowed or borderless).',
+  'live.overlayHint':
+    'The overlay keeps your next buy and alerts visible without covering the game (LoL in windowed or borderless).',
   'live.overlayEnable': 'Enable it in Settings',
   'live.waitingClient': 'Waiting for the League client…',
   'live.loadingGame': 'Loading game…',
   'live.notInGame': 'No game in progress',
-  'live.recommendation': 'Recommendation',
-  'live.alternatives': 'Alternatives',
+  'live.recommendation': 'Primary option',
+  'live.alternatives': 'Contextual options',
   'live.score': 'score {score}',
   'live.history': 'history',
   'live.yourTeam': 'Your team',
@@ -59,42 +60,64 @@ export const en = {
   'live.stat.kda': 'KDA',
   'live.stat.cs': 'CS',
   'live.levelAbbr': 'level {n}',
+  'live.levelShort': 'lv {n}',
   'live.patch': 'patch {patch}',
   'live.gamePlan': 'Game plan',
+  'live.workspace': 'Decision workspace',
+  'live.matchContext': 'Visible match context',
+  'live.telemetry': 'Composition telemetry',
   'live.gameOverBanner': 'Game over',
   'live.compareHistory': 'View in history — compare with your other games',
   'live.loadingTitle': 'Loading game',
   'live.loadingHint': "The loading screen is up; data arrives once you're on the Rift.",
   'live.connectingTitle': 'Connecting to the game',
   'live.connectingHint': 'Reading game data (port 2999)…',
-  'action.prioritize': 'BUY NOW',
+  'action.prioritize': 'AVAILABLE',
   'action.add': 'add',
   'action.delay': 'wait',
   'action.replace': 'replace',
-  'rec.action.prioritize': 'BUY NOW',
-  'rec.action.add': 'NEXT BUY',
-  'rec.action.delay': 'WAIT',
-  'rec.action.replace': 'SELL & SWAP',
+  'rec.action.prioritize': 'AFFORDABLE',
+  'rec.action.add': 'ROUTE OPTION',
+  'rec.action.delay': 'SHOP THRESHOLD',
+  'rec.action.replace': 'SLOT TRADE-OFF',
   'rec.hideHistory': 'hide history',
   'rec.showHistory': 'history ({n})',
+  'rec.route': 'Observed build route',
+  'rec.currentGold': '{value} gold',
+  'rec.evidence': 'Why this option',
+  'rec.confidence': '{value}% confidence',
+  'rec.coreLock': '{count} core spikes protected',
+  'rec.stepOwned': '{item}, completed',
+  'rec.stepCurrent': '{item}, current route step',
+  'rec.stepLater': '{item}, later route step',
+  'rec.option': 'Option {n}',
+  'shell.productLine': 'Decision system',
+  'theme.rift.label': 'Rift',
+  'theme.rift.hint': 'Midnight command surface · signal magenta · Hexi',
+  'theme.dark.label': 'Dark',
+  'theme.dark.hint': 'Obsidian · restrained crimson · Sombra',
+  'theme.sakura.label': 'Sakura',
+  'theme.sakura.hint': 'Warm washi · plum and dusty pink · Kohaku',
+  'shell.localData': 'LOCAL · SCREEN-VISIBLE DATA',
+  'shell.primaryNav': 'Primary navigation',
 
   // --- Home dashboard (idle / client open) ---
   'home.tip.1': 'Dragon spawns at minute 5: ask for river vision beforehand.',
   'home.tip.2': "With 2500 unspent gold you're playing at a disadvantage — plan your back.",
-  'home.tip.3': 'Grievous Wounds cuts enemy healing by 40%: don’t buy it late.',
+  'home.tip.3':
+    'Grievous Wounds cuts enemy healing by 40%: review the timing before it becomes urgent.',
   'home.tip.4': 'A losing streak weighs on you: after 2 in a row, a break beats another queue.',
   'home.tip.5': 'Enemy level 6/11/16 spikes show up in the feed: respect them.',
   'home.tip.6': "Farming 8 CS/min is worth more than chasing kills that don't come.",
   'home.tip.7': 'Check your History: your own games matter more than any guide.',
-  'home.firstRun.greeting': "Hi! I'm {mascot}, your Rift coach",
+  'home.firstRun.greeting': 'Set up your decision workspace',
   'home.firstRun.body':
-    'Set your Riot ID and sync your history: from there I analyze your champions, your builds and your live games.',
+    'Add your Riot ID and sync history to adapt builds, picks and reports to your games.',
   'home.firstRun.cta': 'Get started in Settings',
-  'home.ready.title': 'Ready to queue!',
-  'home.idle.title': 'Resting the crystal…',
-  'home.ready.body':
-    'Client detected. Hop in queue: champ select and the game start on their own.',
-  'home.idle.body': 'Open the League of Legends client; I detect it automatically.',
+  'home.ready.title': 'Client connected',
+  'home.idle.title': 'Ready when you return',
+  'home.ready.body': 'Client detected. Hop in queue: champ select and the game start on their own.',
+  'home.idle.body': 'Open the League of Legends client and the connection starts automatically.',
   'home.metric.games': 'Games',
   'home.metric.streak': 'Streak',
   'home.metric.wr': 'WR {champion}',
@@ -236,13 +259,13 @@ export const en = {
     'Your final build only matches {overlap} of {total} items with the most-bought Master+ build — compare your itemization',
 
   // --- Champ select panel ---
-  'csp.coachTitle': '{mascot} analyzes the draft',
+  'csp.coachTitle': '{mascot} · draft read',
   'csp.recalculating': 'recalculating…',
   'csp.thinking': 'Thinking…',
   'csp.waitingDraft': 'Waiting for draft changes…',
   'csp.championFallback': 'champion {id}',
   'csp.unpicked': 'unpicked',
-  'csp.buyPlan': 'Buy plan against this comp',
+  'csp.buyPlan': 'Build adjustments for this composition',
   'csp.yourPlan': 'Your plan with {champion} (from your own games)',
   'csp.situational': 'situational:',
   'csp.inProgress': 'Champion select in progress',
@@ -275,6 +298,11 @@ export const en = {
   'set.soundTest': 'Test',
   'set.overlay':
     'In-game overlay with the mascot (experimental — needs LoL windowed or borderless; activates in game)',
+  'set.overlayLayout': 'Overlay size and position',
+  'set.overlayScale': 'Scale',
+  'set.overlayMoveHint': 'Drag the ··· handle in game to move it. Position is remembered.',
+  'set.overlayReset': 'Reset position',
+  'set.overlayPositionReset': 'Overlay position reset',
   'set.theme': 'Theme',
   'set.applyHint': 'Applies instantly; press Save to keep it.',
   'set.save': 'Save',
@@ -322,7 +350,7 @@ export const en = {
   'err.noSeeds': 'No seed players (API key expired?)',
   'err.crawlInProgress': 'a crawl is already running',
   'updater.title': 'Update ready',
-  'updater.message': 'LoL Companion {version} is downloaded.',
+  'updater.message': 'WinCon {version} is downloaded.',
   'updater.detail':
     'You can restart now to apply it, or keep going; it installs on its own when you close the app.',
   'updater.restart': 'Restart now',
@@ -330,7 +358,7 @@ export const en = {
 
   // --- Local-AI coach (Ollama prompts + errors) ---
   'coach.persona':
-    "You are {name}, this player's League of Legends coach mascot with a gamer soul: warm tone with a geeky/weeb touch (you can drop slang like GG, diff, all-in, farm, tilt, \"ez\" — tastefully, max one expression per reply). The champion in the data IS THE PLAYER you're talking to: ALWAYS address them in the second person (\"you have\", \"buy\", \"force\"), NEVER in the third person or by the champion's name.",
+    'Act as {name}, the analysis voice of a tool for adult players. Use current, friendly, concise language with restrained personality. The champion in the data IS THE PLAYER. Do not introduce yourself, call yourself a mascot or coach, use emoji, role-play, catchphrases or a childish tone. Explain trade-offs and conditional options; never frame an action as mandatory.',
   'coach.dataLabel': 'DATA',
   'coach.report.frame':
     'Analyze THEIR game using ONLY the JSON data below.\nDo NOT invent numbers, items or events that are not in the data.',
@@ -339,33 +367,36 @@ export const en = {
   'coach.draft.frame':
     'The player is in champion select. Use ONLY the JSON data.\nDo NOT mention champions, items or numbers that are not in the data.',
   'coach.draft.output':
-    'Write in English, NO markdown, max 4 sentences:\nif there are suggested picks, which one fits this game best and why (lean on the reasons);\nthen the most important threat or buy plan per the automatic tips.',
+    'Write in natural English, NO markdown, max 4 sentences: compare up to two suggested picks and why each fits; then summarize the most important build adjustment. No introductions, emoji, catchphrases or filler.',
   'coach.err.http': 'Ollama returned HTTP {status}',
   'coach.err.invalid': 'Invalid Ollama response',
   'coach.err.empty': 'Ollama returned an empty response',
   'coach.err.unreachable': "Couldn't reach Ollama: {message}",
   'coach.err.disabled': 'Coach disabled (Settings)',
   'coach.role.jungle':
-    "You're the JUNGLER: say explicitly which lane to gank or which side of the map to pressure based on which allies are ahead/behind.",
+    'For JUNGLE: compare visible map-side options from allies being ahead or behind; keep the choice conditional and do not invent positions.',
   'coach.role.bottom':
-    "You're the ADC: say how to play fights (who to position with, who NOT to approach) and when to group.",
+    'For ADC: compare front-to-back play or conceding space from visible threats and leads; do not invent exact positions.',
   'coach.role.utility':
-    "You're the SUPPORT: say where to place vision, who to protect and when to rotate.",
-  'coach.role.middle': "You're MID: say when to rotate to the sides and which lane to help.",
+    'For SUPPORT: highlight vision, protection and rotation trade-offs without inventing exact positions or ward charges.',
+  'coach.role.middle':
+    'For MID: compare grouping or playing a side from visible leads; do not invent wave state.',
   'coach.role.top':
-    "You're TOP: say whether to split-push or group, based on the state of the map.",
+    'For TOP: compare split-pushing or grouping from visible leads; do not invent lane pressure.',
   'coach.role.default': 'Adapt the plan to the role the data suggests.',
   'coach.dir.frame':
-    "You're IN A LIVE GAME. Give your STRATEGIC READ of this moment with the DATA (JSON): who's winning and why, and the player's plan for the next few minutes.",
+    'The game is LIVE. Summarize the visible strategic state and compare two reasonable options for the next few minutes using only the DATA (JSON).',
   'coach.dir.noInvent': 'Do NOT invent data, champions or items that are not in the JSON.',
-  'coach.dir.output': 'Answer in English, 2 to 4 sentences, no markdown, concrete and actionable.',
+  'coach.dir.output':
+    'Answer in current English, 2 to 4 sentences, no markdown, concise and conditional. Do not introduce yourself or use emoji or catchphrases.',
   'coach.live.frame':
-    "You're IN A LIVE GAME. With the DATA (JSON) give ONE macro tip for THIS moment.\nTip types per the data: place vision before an objective spawns; play aggressive with a gold lead or dead enemies; play safe if behind or with recent enemy spikes; prep/push the wave before backing; complete the next buy.",
-  'coach.live.output': 'Answer in English, ONE sentence of max 22 words, no markdown or quotes.',
-  'coach.act.prioritize': 'you can buy it NOW',
-  'coach.act.add': 'next buy',
-  'coach.act.delay': 'save for it',
-  'coach.act.replace': 'sell and swap it',
+    "You're IN A LIVE GAME. With only the DATA (JSON), highlight ONE decision and two short conditional options. Never invent wave state, positions, cooldowns or ward charges.",
+  'coach.live.output':
+    'Answer in natural English, ONE sentence of max 26 words, no markdown, quotes or emoji; use “if” or “consider”, with no introduction or filler.',
+  'coach.act.prioritize': 'completion is available',
+  'coach.act.add': 'route option',
+  'coach.act.delay': 'shop threshold',
+  'coach.act.replace': 'slot trade-off',
   'coach.side.enemy': 'enemy',
   'coach.side.ally': 'ally',
   'coach.side.yourTeam': 'your team',
@@ -375,33 +406,35 @@ export const en = {
   'coach.ev.objective': '{objective} for {side}',
 
   // --- Mascot bubbles ---
-  'mascot.idle.1': 'Zzz…',
-  'mascot.idle.2': 'Open the client whenever',
-  'mascot.idle.3': 'Rest mode',
-  'mascot.clientOpen.1': 'Queue is ready!',
-  'mascot.clientOpen.2': 'Shall we play?',
-  'mascot.clientOpen.3': 'Warming up…',
-  'mascot.champSelect.1': 'Nice pick!',
-  'mascot.champSelect.2': 'Check their picks 👀',
-  'mascot.champSelect.3': 'Go get them!',
-  'mascot.inGame.1': 'Focus…',
-  'mascot.inGame.2': "Farm easy, I've got the map",
-  'mascot.inGame.3': 'Watch the minimap',
-  'mascot.postGame.1': 'GG',
-  'mascot.postGame.2': 'Analyzing the game…',
-  'mascot.postGame.3': 'Another one?',
-  'mascot.alert': 'Heads up! ⚠',
+  'mascot.idle.1': 'No client connected',
+  'mascot.idle.2': 'Ready when you are',
+  'mascot.idle.3': 'Local data on standby',
+  'mascot.clientOpen.1': 'Client connected',
+  'mascot.clientOpen.2': 'Waiting for queue',
+  'mascot.clientOpen.3': 'Everything is ready',
+  'mascot.champSelect.1': 'Reading the draft',
+  'mascot.champSelect.2': 'Options updated',
+  'mascot.champSelect.3': 'The composition is changing',
+  'mascot.inGame.1': 'Live read active',
+  'mascot.inGame.2': 'The plan is up to date',
+  'mascot.inGame.3': 'Checking visible changes',
+  'mascot.postGame.1': 'Game closed',
+  'mascot.postGame.2': 'Preparing the report',
+  'mascot.postGame.3': 'Data saved',
+  'mascot.alert': 'Important change',
 
   // --- In-game overlay ---
   'overlay.dragMove': 'drag to move',
   'overlay.hoverExpand': 'hover to expand',
   'overlay.unpin': 'Unpin',
   'overlay.pin': 'Pin panel open',
+  'overlay.pinShort': 'PIN',
   'overlay.dragon': 'dragon',
   'overlay.baron': 'Baron',
   'overlay.live': 'LIVE',
   'overlay.waiting': 'Waiting for a recommendation…',
   'overlay.matchPanel': 'Match panel',
+  'overlay.itemReference': 'NEXT BUY',
 
   // --- Live alerts (spike / objective window) ---
   'alert.baronFree': "Baron's up!",
@@ -413,6 +446,17 @@ export const en = {
   'alert.objectiveWindow': '{who} — {objective}',
   'alert.spike': '{champion} finished {item} — power spike',
   'alert.levelSpike': '{champion} reached level {level}',
+  'alert.purchaseFallback': 'Your next purchase target changed.',
+  'alert.duel':
+    'You have {advantages} over {champion}; if the duel is genuinely isolated, the fight is favorable.',
+  'alert.duel.join': '{first} and {second}',
+  'alert.duel.levels': '{n} levels',
+  'alert.duel.completedOne': 'one completed item',
+  'alert.duel.completedMany': '{n} completed items',
+  'alert.duel.itemValue': 'about {value} more visible item value',
+  'alert.duel.health': '{pct}% more current health',
+  'alert.duel.cs': '{n} more CS',
+  'alert.duel.kda': 'a stronger visible KDA',
 
   // --- Engine: shared words + ordinals + categories ---
   'engine.word.physical': 'physical',
@@ -457,8 +501,7 @@ export const en = {
   // --- Engine: anti-burst ---
   'engine.antiburst.threat':
     '{kda} is fed (+{diff}) and their {type} burst kills you with no answer',
-  'engine.antiburst.window':
-    '{item} gives you a survival window against their engage pattern',
+  'engine.antiburst.window': '{item} gives you a survival window against their engage pattern',
   'engine.antiburst.more': 'Additional threats: {threats}',
 
   // --- Engine: spike-now ---
@@ -468,24 +511,33 @@ export const en = {
   'engine.spike.close': 'Only {shortfall} gold short of {item} ({remaining} left, you have {gold})',
   'engine.spike.closeExplain':
     'Wait one more wave before backing: finishing it is worth more than buying small pieces',
-  'engine.spike.target':
-    '{item} is {cost} gold from completion; make it your next-base goal',
+  'engine.spike.target': '{item} is {cost} gold from completion; make it your next-base goal',
 
   // --- Engine: next-buy + endgame ---
   'engine.nextbuy.labelPool': '{ordinal} item in your {champion} build',
   'engine.nextbuy.labelMeta': '{ordinal} most-bought item in Master+ with {champion} this patch',
   'engine.nextbuy.bootsPaused': 'Boots on hold: Magical Footwear (rune) will grant them free',
   'engine.nextbuy.isLabel': '{item} is the {label}',
-  'engine.nextbuy.canFinishNow': 'You can finish it NOW: it costs {cost} gold and you have {gold}',
+  'engine.nextbuy.canFinishNow':
+    'Completion is available: it costs {cost} gold and you have {gold}',
   'engine.nextbuy.component': '{component} ({cost} gold) advances the {label}: {target}',
   'engine.nextbuy.componentGold': '{target} needs {missing} gold total; you have {gold}',
   'engine.nextbuy.saveFor': "Save gold for {target} ({label}): you're {missing} short",
   'engine.nextbuy.noPiece': 'No loose piece is worth it right now (you have {gold} gold)',
+  'engine.starter.route': '{item} is the observed starter for this route ({games} route games)',
+  'engine.starter.affordable': 'Available for {cost} gold; you currently have {gold}',
+  'engine.starter.short': '{item} is {missing} gold away',
+  'engine.route.observed': 'Observed route: {games} Master+ games · {confidence}% confidence',
+  'engine.route.personal': 'Your role-specific route history nudged this option',
+  'engine.route.damage': 'This observed route better balances your team damage profile',
+  'engine.route.inferred': 'Inferred from completion order; route-level data is not available yet',
+  'engine.route.coreProtected':
+    '{remaining} core power spike(s) remain before an ordinary deviation',
   'engine.endgame.situPool': '{item} is your situational',
   'engine.endgame.situMeta': '{item} is a common Master+ buy with {champion}',
   'engine.endgame.coreDone':
     'Your main {champion} build is complete and you have a slot: {situational}',
-  'engine.endgame.buyNow': 'You can buy it NOW: it costs {cost} gold and you have {gold}',
+  'engine.endgame.buyNow': 'This option is affordable: it costs {cost} gold and you have {gold}',
   'engine.endgame.shortGold': "You're {missing} gold short (costs {cost}, you have {gold})",
   'engine.endgame.sellStarter':
     'Inventory full but you still carry {starter}: sell it to free a slot',
@@ -496,8 +548,7 @@ export const en = {
     '{item} is what Master+ players buy with {champion} here ({games} games, {wr}% WR)',
   'engine.meta.suggestion':
     'Few Master+ {champion} players buy it: situational suggestion, not a priority',
-  'engine.exclusivity.over':
-    "Over {other}: you can't carry both at once (they share {group})",
+  'engine.exclusivity.over': "Over {other}: you can't carry both at once (they share {group})",
   'engine.recommend.situPool': '{item} is in your {champion} situationals',
   'engine.recommend.metaWr':
     'in Master+ with {champion}: {wr}% WR carrying this item ({games} games)',
@@ -524,8 +575,7 @@ export const en = {
     "Your average vision is {vision}/min, below your role's floor ({floor}/min)",
   'weakness.vision.advice':
     'Buy control wards every base and use your trinket leaving lane: vision is the cheapest stat to improve',
-  'weakness.objectives.finding':
-    '{pct}% of enemy objectives fall right after one of your deaths',
+  'weakness.objectives.finding': '{pct}% of enemy objectives fall right after one of your deaths',
   'weakness.objectives.advice':
     "Before a dragon or baron spawns, play not to die: your death opens the objective even if you're not near it",
   'weakness.participation.finding':
@@ -560,11 +610,13 @@ export const en = {
   'cs.pick.inPool': 'in your pool: baseline build ready',
   'cs.tip.heavyAP': 'Very AP enemy comp ({n} of {total})',
   'cs.tip.heavyAD': 'Very AD enemy comp ({n} of {total})',
-  'cs.tip.carryMr': "{heavy}: as a carry don't buy tank MR — {items} fit you ({cheap} is the cheap piece)",
-  'cs.tip.planMr': '{heavy}: plan magic resist — {cheap} is the cheap piece',
+  'cs.tip.carryMr':
+    '{heavy}: keep a magic-resist option after core — {items} fit your route ({cheap} is the early component)',
+  'cs.tip.planMr':
+    '{heavy}: consider magic resist after core; {cheap} lets you cover it in components',
   'cs.tip.carryArmor':
-    "{heavy}: as a carry don't buy tank armor — {items} fit you ({cheap} is the cheap piece)",
-  'cs.tip.planArmor': '{heavy}: plan armor — {cheap} is the cheap piece',
+    '{heavy}: keep an armor option after core — {items} fit your route ({cheap} is the early component)',
+  'cs.tip.planArmor': '{heavy}: consider armor after core; {cheap} lets you cover it in components',
   'cs.tip.mixed': 'Mixed enemy damage: HP outperforms stacking a single resist',
   'cs.tip.healers': 'Enemy healing on the board ({names}): save a slot for Grievous Wounds',
   'cs.tip.teamAllAd':

@@ -13,7 +13,7 @@ export const es: Catalog = {
   'nav.live': 'Live',
   'nav.history': 'Historial',
   'nav.settings': 'Ajustes',
-  'shell.tagline': 'tu coach local',
+  'shell.tagline': 'análisis local en directo',
   'phase.idle': 'Cliente cerrado',
   'phase.clientOpen': 'Cliente abierto',
   'phase.champSelect': 'Selección de campeones',
@@ -31,13 +31,13 @@ export const es: Catalog = {
   'live.baronOnMap': 'Barón en el mapa',
   'live.deadGold': '{gold} oro sin gastar — planea base',
   'live.overlayHint':
-    'Tu mascota puede acompañarte dentro del juego con un overlay (LoL en ventana o sin bordes).',
+    'El overlay mantiene la siguiente compra y los avisos visibles sin tapar la partida (LoL en ventana o sin bordes).',
   'live.overlayEnable': 'Actívalo en Ajustes',
   'live.waitingClient': 'Esperando al cliente de League…',
   'live.loadingGame': 'Cargando partida…',
   'live.notInGame': 'No hay partida en curso',
-  'live.recommendation': 'Recomendación',
-  'live.alternatives': 'Alternativas',
+  'live.recommendation': 'Opción principal',
+  'live.alternatives': 'Opciones contextuales',
   'live.score': 'puntuación {score}',
   'live.history': 'historial',
   'live.yourTeam': 'Tu equipo',
@@ -60,8 +60,12 @@ export const es: Catalog = {
   'live.stat.kda': 'KDA',
   'live.stat.cs': 'CS',
   'live.levelAbbr': 'nivel {n}',
+  'live.levelShort': 'nv {n}',
   'live.patch': 'parche {patch}',
   'live.gamePlan': 'Plan de partida',
+  'live.workspace': 'Espacio de decisiones',
+  'live.matchContext': 'Contexto visible de partida',
+  'live.telemetry': 'Telemetría de composición',
   'live.gameOverBanner': 'Fin de la partida',
   'live.compareHistory': 'Ver en historial — compara con tus otras partidas',
   'live.loadingTitle': 'Cargando partida',
@@ -69,36 +73,56 @@ export const es: Catalog = {
     'La pantalla de carga está en marcha; los datos llegan al aparecer en la Grieta.',
   'live.connectingTitle': 'Conectando con la partida',
   'live.connectingHint': 'Leyendo datos del juego (puerto 2999)…',
-  'action.prioritize': 'COMPRA YA',
+  'action.prioritize': 'DISPONIBLE',
   'action.add': 'añade',
   'action.delay': 'espera',
   'action.replace': 'reemplaza',
-  'rec.action.prioritize': 'COMPRA YA',
-  'rec.action.add': 'PRÓXIMA COMPRA',
-  'rec.action.delay': 'ESPERA',
-  'rec.action.replace': 'VENDE Y CAMBIA',
+  'rec.action.prioritize': 'ASEQUIBLE',
+  'rec.action.add': 'OPCIÓN DE RUTA',
+  'rec.action.delay': 'UMBRAL DE TIENDA',
+  'rec.action.replace': 'TRADE-OFF DE HUECO',
   'rec.hideHistory': 'ocultar historial',
   'rec.showHistory': 'historial ({n})',
+  'rec.route': 'Ruta de build observada',
+  'rec.currentGold': '{value} de oro',
+  'rec.evidence': 'Por qué aparece esta opción',
+  'rec.confidence': '{value}% de confianza',
+  'rec.coreLock': '{count} picos de núcleo protegidos',
+  'rec.stepOwned': '{item}, completado',
+  'rec.stepCurrent': '{item}, paso actual de la ruta',
+  'rec.stepLater': '{item}, paso posterior de la ruta',
+  'rec.option': 'Opción {n}',
+  'shell.productLine': 'Sistema de decisión',
+  'theme.rift.label': 'Rift',
+  'theme.rift.hint': 'Centro de mando nocturno · magenta de señal · Hexi',
+  'theme.dark.label': 'Dark',
+  'theme.dark.hint': 'Obsidiana · carmesí contenido · Sombra',
+  'theme.sakura.label': 'Sakura',
+  'theme.sakura.hint': 'Washi cálido · ciruela y rosa apagado · Kohaku',
+  'shell.localData': 'LOCAL · DATOS VISIBLES EN PANTALLA',
+  'shell.primaryNav': 'Navegación principal',
 
   // --- Home dashboard (idle / client open) ---
   'home.tip.1': 'El dragón aparece en el minuto 5: pide visión del río antes.',
   'home.tip.2': 'Con 2500 de oro sin gastar estás jugando con desventaja — planea la base.',
-  'home.tip.3': 'Heridas graves reduce la curación enemiga un 40%: no la compres tarde.',
+  'home.tip.3':
+    'Heridas graves reducen la curación enemiga un 40%: revisa el timing antes de que sea urgente.',
   'home.tip.4':
     'Tu racha de derrotas pesa: después de 2 seguidas, un descanso rinde más que otra cola.',
   'home.tip.5': 'Los picos de nivel 6/11/16 enemigos aparecen en el feed: respétalos.',
   'home.tip.6': 'Farmear 8 CS/min vale más que perseguir kills que no llegan.',
   'home.tip.7':
     'Mira tu Historial: los datos de tus propias partidas mandan más que cualquier guía.',
-  'home.firstRun.greeting': '¡Hola! Soy {mascot}, tu coach de la Grieta',
+  'home.firstRun.greeting': 'Configura tu espacio de decisiones',
   'home.firstRun.body':
-    'Configura tu Riot ID y sincroniza el historial: a partir de ahí analizo tus campeones, tus builds y tus partidas en directo.',
+    'Añade tu Riot ID y sincroniza el historial para adaptar builds, picks e informes a tus partidas.',
   'home.firstRun.cta': 'Empezar en Ajustes',
-  'home.ready.title': '¡Lista para la cola!',
-  'home.idle.title': 'Descansando el cristal…',
+  'home.ready.title': 'Cliente conectado',
+  'home.idle.title': 'Todo listo cuando vuelvas',
   'home.ready.body':
     'Cliente detectado. Entra en cola: la selección de campeones y la partida se activan solas.',
-  'home.idle.body': 'Abre el cliente de League of Legends; lo detecto automáticamente.',
+  'home.idle.body':
+    'Abre el cliente de League of Legends y la conexión se activará automáticamente.',
   'home.metric.games': 'Partidas',
   'home.metric.streak': 'Racha',
   'home.metric.wr': 'WR {champion}',
@@ -209,8 +233,8 @@ export const es: Catalog = {
   'stats.wd.6': 'Sáb',
 
   // --- Post-game report ---
-  'report.coachTitle': 'Análisis de {mascot} (IA local)',
-  'report.coachThinking': '{mascot} está pensando… (modelo local, dale unos segundos)',
+  'report.coachTitle': 'Análisis complementario (IA local)',
+  'report.coachThinking': 'Analizando la partida con el modelo local…',
   'report.coachPreparing': 'Preparando análisis…',
   'report.unknownError': 'error desconocido',
   'report.avg': 'media {value}',
@@ -230,8 +254,7 @@ export const es: Catalog = {
   'report.sum.visionGood': 'Buena visión: {score} puntos frente a tu media de {avg}',
   'report.sum.csLow':
     'Farmeo flojo: {cs} CS/min frente a tu media de {avg} — prioriza oleadas entre jugadas',
-  'report.sum.dmgHigh':
-    'Has cargado con el daño del equipo: {pct}% frente a tu media de {avg}%',
+  'report.sum.dmgHigh': 'Has cargado con el daño del equipo: {pct}% frente a tu media de {avg}%',
   'report.sum.buildConsistent':
     'Build consistente: has seguido {followed} de {total} recomendaciones del motor',
   'report.sum.buildFew':
@@ -242,13 +265,13 @@ export const es: Catalog = {
     'Tu build final solo coincide en {overlap} de {total} objetos con lo más comprado en Master+ — compara tu itemización',
 
   // --- Champ select panel ---
-  'csp.coachTitle': '{mascot} analiza el draft',
+  'csp.coachTitle': '{mascot} · lectura del draft',
   'csp.recalculating': 'recalculando…',
   'csp.thinking': 'Pensando…',
   'csp.waitingDraft': 'Esperando cambios en el draft…',
   'csp.championFallback': 'campeón {id}',
   'csp.unpicked': 'sin elegir',
-  'csp.buyPlan': 'Plan de compra contra esta comp',
+  'csp.buyPlan': 'Ajustes de build para esta composición',
   'csp.yourPlan': 'Tu plan con {champion} (de tus propias partidas)',
   'csp.situational': 'situacionales:',
   'csp.inProgress': 'Selección de campeones en curso',
@@ -257,7 +280,7 @@ export const es: Catalog = {
   'csp.yourPosition': 'tu posición: {pos}',
   'csp.noPicks': 'Sin picks visibles todavía',
   'csp.bans': 'Baneos',
-  'csp.whatPick': '¿Qué te pego? · tus partidas + Master+ + kit',
+  'csp.whatPick': 'Opciones de pick · tus partidas + Master+ + encaje',
   'csp.inGames': 'en {games} partidas',
   'csp.footer': 'Consejos derivados solo de los campeones visibles en pantalla.',
 
@@ -281,6 +304,11 @@ export const es: Catalog = {
   'set.soundTest': 'Probar',
   'set.overlay':
     'Overlay in-game con la mascota (experimental — requiere LoL en ventana o sin bordes; se activa al entrar en partida)',
+  'set.overlayLayout': 'Tamaño y posición del overlay',
+  'set.overlayScale': 'Escala',
+  'set.overlayMoveHint': 'Arrastra el control ··· durante la partida. La posición se recuerda.',
+  'set.overlayReset': 'Restablecer posición',
+  'set.overlayPositionReset': 'Posición del overlay restablecida',
   'set.theme': 'Tema',
   'set.applyHint': 'Se aplica al instante; pulsa Guardar para conservarlo.',
   'set.save': 'Guardar',
@@ -293,7 +321,8 @@ export const es: Catalog = {
     'Rastrea partidas ranked de Master, Grandmaster y Challenger con tu clave de la API y guarda solo agregados (winrates, matchups, builds). Alimenta las sugerencias de pick y el informe. Déjalo en marcha en segundo plano: ~2000 partidas/hora.',
   'set.meta.aggregated': '{n} partidas agregadas',
   'set.meta.patchEntry': 'parche {patch}: {n}',
-  'set.meta.crawling': 'Rastreando… {stored} nuevas esta sesión · semillas {done}/{total} · {rate}/h',
+  'set.meta.crawling':
+    'Rastreando… {stored} nuevas esta sesión · semillas {done}/{total} · {rate}/h',
   'set.meta.stop': 'Detener rastreo',
   'set.meta.start': 'Iniciar rastreo Master+',
   'set.meta.startError': 'no se pudo iniciar',
@@ -308,9 +337,9 @@ export const es: Catalog = {
   'set.coach.notDetected': 'Ollama no detectado. Instálalo gratis desde',
   'set.coach.andRun': 'y ejecuta',
   'set.coach.recheck': 'Volver a consultar Ollama (tras instalar o borrar modelos)',
-  'set.coach.enable': 'Activar análisis de la mascota (informe de partida y champ select)',
+  'set.coach.enable': 'Activar análisis local (informe de partida y champ select)',
   'set.coach.live':
-    'Consejos EN PARTIDA (~1 por minuto): la mascota sugiere macro en el overlay — visión antes de objetivos, cuándo forzar, cuándo jugar seguro',
+    'Lecturas EN PARTIDA (~1 por minuto): el modelo resume opciones de macro en el overlay — visión, objetivos y nivel de riesgo',
   'set.coach.model': 'Modelo',
   'set.coach.notInstalled': '{model} (no instalado — se usará otro)',
   'set.sync.title': 'Sincronización',
@@ -328,7 +357,7 @@ export const es: Catalog = {
   'err.noSeeds': 'Sin jugadores semilla (¿clave API caducada?)',
   'err.crawlInProgress': 'ya hay un rastreo en marcha',
   'updater.title': 'Actualización lista',
-  'updater.message': 'LoL Companion {version} está descargada.',
+  'updater.message': 'WinCon {version} está descargada.',
   'updater.detail':
     'Puedes reiniciar ahora para aplicarla o seguir; se instalará sola al cerrar la app.',
   'updater.restart': 'Reiniciar ahora',
@@ -336,7 +365,7 @@ export const es: Catalog = {
 
   // --- Local-AI coach (Ollama prompts + errors) ---
   'coach.persona':
-    'Eres {name}, la mascota coach de League of Legends de este jugador, con alma gamer: tono cercano y un punto friki/weeb (puedes soltar jerga como GG, diff, all-in, farmear, tiltear, "ez" — con gracia y sin pasarte, máximo una expresión por respuesta). El campeón que aparece en los datos ES EL JUGADOR con quien hablas: dirígete SIEMPRE a él/ella de tú ("tienes", "compra", "fuerza"), NUNCA en tercera persona ni llamándole por el nombre del campeón.',
+    'Actúas como {name}, la voz de análisis de una herramienta para jugadores adultos. Usa español actual, cercano, conciso y seguro, con carisma sobrio. El campeón de los datos ES EL JUGADOR. No te presentes, no digas que eres una mascota o un coach, no uses emojis, muletillas, role-play ni tono infantil. Explica trade-offs y opciones condicionales; nunca presentes una acción como obligatoria.',
   'coach.dataLabel': 'DATOS',
   'coach.report.frame':
     'Analiza SU partida usando EXCLUSIVAMENTE los datos del JSON siguiente.\nPROHIBIDO inventar cifras, objetos o eventos que no estén en los datos.',
@@ -345,79 +374,96 @@ export const es: Catalog = {
   'coach.draft.frame':
     'El jugador está en la selección de campeones. Usa EXCLUSIVAMENTE los datos del JSON.\nPROHIBIDO mencionar campeones, objetos o cifras que no aparezcan en los datos.',
   'coach.draft.output':
-    'Escribe en español, SIN markdown, máximo 4 frases:\nsi hay picks sugeridos, cuál encaja mejor con esta partida y por qué (apóyate en las razones);\ndespués la amenaza o plan de compra más importante según los avisos automáticos.',
+    'Escribe en español natural, SIN markdown, máximo 4 frases: compara hasta dos picks sugeridos y por qué encaja cada uno; después resume el ajuste de build más importante. Sin presentaciones, emojis, coletillas ni frases de relleno.',
   'coach.err.http': 'Ollama respondió HTTP {status}',
   'coach.err.invalid': 'Respuesta de Ollama no válida',
   'coach.err.empty': 'Ollama devolvió una respuesta vacía',
   'coach.err.unreachable': 'No se pudo hablar con Ollama: {message}',
   'coach.err.disabled': 'Coach desactivado (Ajustes)',
   'coach.role.jungle':
-    'Eres JUNGLA: di explícitamente qué línea gankear o qué lado del mapa presionar según qué aliados van bien/mal.',
+    'Para JUNGLA: compara las opciones visibles de lado del mapa según qué aliados van bien o mal; mantén la elección condicional y no inventes posiciones.',
   'coach.role.bottom':
-    'Eres ADC: di cómo jugar las peleas (con quién posicionarte, a quién NO acercarte) y cuándo agrupar.',
-  'coach.role.utility': 'Eres SUPPORT: di dónde poner visión, a quién proteger y cuándo rotar.',
-  'coach.role.middle': 'Eres MID: di cuándo rotar a los lados y qué línea ayudar.',
-  'coach.role.top': 'Eres TOP: di si jugar split-push o agrupar, según el estado del mapa.',
+    'Para ADC: compara jugar front-to-back o ceder espacio según las amenazas y quién va por delante; no inventes posiciones exactas.',
+  'coach.role.utility':
+    'Para SUPPORT: destaca trade-offs de visión, protección y rotación sin inventar posiciones exactas ni cargas de wards.',
+  'coach.role.middle':
+    'Para MID: compara agruparse o jugar por un lateral según la ventaja visible; no inventes el estado de las oleadas.',
+  'coach.role.top':
+    'Para TOP: compara split-push o agrupación según la ventaja visible; no inventes presión de líneas.',
   'coach.role.default': 'Adapta el plan al rol que sugieran los datos.',
   'coach.dir.frame':
-    'Estáis EN PLENA PARTIDA. Da tu LECTURA ESTRATÉGICA de este momento con los DATOS (JSON): quién va ganando y por qué, y el plan del jugador para los próximos minutos.',
+    'La partida está EN CURSO. Resume el estado estratégico visible y compara dos opciones razonables para los próximos minutos usando solo los DATOS (JSON).',
   'coach.dir.noInvent': 'PROHIBIDO inventar datos, campeones u objetos que no estén en el JSON.',
-  'coach.dir.output': 'Responde en español, 2 a 4 frases, sin markdown, concreto y accionable.',
+  'coach.dir.output':
+    'Responde en español actual, 2 a 4 frases, sin markdown, conciso y condicional. No te presentes ni uses emojis o coletillas.',
   'coach.live.frame':
-    'Estáis EN PLENA PARTIDA. Con los DATOS (JSON) da UN único consejo de macro para ESTE momento.\nTipos de consejo según lo que digan los datos: poner visión antes de que salga un objetivo; jugar agresivo si hay ventaja de oro o enemigos muertos; jugar seguro si vais por detrás o hay spikes enemigos recientes; preparar/empujar la oleada antes de volver a base; completar la próxima compra.',
+    'Estáis EN PLENA PARTIDA. Solo con los DATOS (JSON), destaca UNA decisión y dos opciones condicionales breves. No inventes oleadas, posiciones, cooldowns ni cargas de wards.',
   'coach.live.output':
-    'Responde en español, UNA sola frase de máximo 22 palabras, sin markdown ni comillas.',
-  'coach.act.prioritize': 'puedes comprarlo YA',
-  'coach.act.add': 'próxima compra',
-  'coach.act.delay': 'ahorra para él',
-  'coach.act.replace': 'vende y cámbialo',
+    'Responde en español natural, UNA sola frase de máximo 26 palabras, sin markdown, comillas ni emojis; usa «si» o «considera» y evita presentarte o rellenar.',
+  'coach.act.prioritize': 'la compra está disponible',
+  'coach.act.add': 'opción de ruta',
+  'coach.act.delay': 'umbral de tienda',
+  'coach.act.replace': 'trade-off de hueco',
   'coach.side.enemy': 'enemigo',
   'coach.side.ally': 'aliado',
   'coach.side.yourTeam': 'vuestro equipo',
   'coach.side.enemyTeam': 'el enemigo',
   'coach.ev.died': '{champion} ({side}) ha muerto',
-  'coach.ev.spike': 'spike: {champion} (enemigo) ha completado {item}',
+  'coach.ev.spike': 'pico de poder: {champion} (enemigo) ha completado {item}',
   'coach.ev.objective': '{objective} para {side}',
 
   // --- Mascot bubbles ---
-  'mascot.idle.1': 'Zzz…',
-  'mascot.idle.2': 'Abre el cliente cuando quieras',
-  'mascot.idle.3': 'Modo reposo',
-  'mascot.clientOpen.1': '¡Lista la cola!',
-  'mascot.clientOpen.2': '¿Jugamos?',
-  'mascot.clientOpen.3': 'Calentando…',
-  'mascot.champSelect.1': '¡Buen pick!',
-  'mascot.champSelect.2': 'Mira sus picks 👀',
-  'mascot.champSelect.3': '¡A por todas!',
-  'mascot.inGame.1': 'Concentración…',
-  'mascot.inGame.2': 'Farmea tranquilo, yo vigilo',
-  'mascot.inGame.3': 'Ojo al minimapa',
-  'mascot.postGame.1': 'GG',
-  'mascot.postGame.2': 'Analizando la partida…',
-  'mascot.postGame.3': '¿Otra?',
-  'mascot.alert': '¡Ojo! ⚠',
+  'mascot.idle.1': 'Sin cliente conectado',
+  'mascot.idle.2': 'Listo cuando vuelvas',
+  'mascot.idle.3': 'Datos locales en espera',
+  'mascot.clientOpen.1': 'Cliente conectado',
+  'mascot.clientOpen.2': 'Esperando cola',
+  'mascot.clientOpen.3': 'Todo preparado',
+  'mascot.champSelect.1': 'Revisando el draft',
+  'mascot.champSelect.2': 'Opciones actualizadas',
+  'mascot.champSelect.3': 'La composición está cambiando',
+  'mascot.inGame.1': 'Lectura en directo',
+  'mascot.inGame.2': 'El plan sigue actualizado',
+  'mascot.inGame.3': 'Revisando cambios visibles',
+  'mascot.postGame.1': 'Partida cerrada',
+  'mascot.postGame.2': 'Preparando el informe',
+  'mascot.postGame.3': 'Datos guardados',
+  'mascot.alert': 'Cambio importante',
 
   // --- In-game overlay ---
   'overlay.dragMove': 'arrastra para mover',
-  'overlay.hoverExpand': 'pasa el ratón para ampliar',
+  'overlay.hoverExpand': 'pasa para ampliar',
   'overlay.unpin': 'Dejar de fijar',
   'overlay.pin': 'Fijar panel abierto',
+  'overlay.pinShort': 'FIJAR',
   'overlay.dragon': 'dragón',
   'overlay.baron': 'Barón',
   'overlay.live': 'VIVO',
   'overlay.waiting': 'Esperando recomendación…',
   'overlay.matchPanel': 'Panel de partida',
+  'overlay.itemReference': 'PRÓXIMA COMPRA',
 
   // --- Live alerts (spike / objective window) ---
-  'alert.baronFree': '¡Barón libre!',
-  'alert.dragonFree': 'dragón libre',
+  'alert.baronFree': 'ventana para valorar Barón',
+  'alert.dragonFree': 'ventana para valorar dragón',
   'alert.baronIn': 'Barón sale en {time}',
   'alert.dragonIn': 'dragón sale en {time}',
   'alert.junglerDied': '{champion} (jungla enemiga) ha muerto',
   'alert.enemiesDied': '{n} enemigos han muerto',
-  'alert.objectiveWindow': '{who} — {objective}',
-  'alert.spike': '{champion} completó {item} — power spike',
-  'alert.levelSpike': '{champion} alcanzó nivel {level}',
+  'alert.objectiveWindow': '{who} · {objective}',
+  'alert.spike': '{champion} ha completado {item}: nuevo pico de poder',
+  'alert.levelSpike': '{champion} ha alcanzado el nivel {level}',
+  'alert.purchaseFallback': 'Ha cambiado tu siguiente objetivo de compra.',
+  'alert.duel':
+    'Tienes {advantages} sobre {champion}; si el duelo está realmente aislado, la pelea te favorece.',
+  'alert.duel.join': '{first} y {second}',
+  'alert.duel.levels': '{n} niveles',
+  'alert.duel.completedOne': 'un objeto completado',
+  'alert.duel.completedMany': '{n} objetos completados',
+  'alert.duel.itemValue': 'unos {value} de valor visible en objetos',
+  'alert.duel.health': 'un {pct}% más de vida actual',
+  'alert.duel.cs': '{n} súbditos más',
+  'alert.duel.kda': 'mejor KDA visible',
 
   // --- Engine: shared words + ordinals + categories ---
   'engine.word.physical': 'físico',
@@ -438,8 +484,7 @@ export const es: Catalog = {
   // --- Engine: antiheal ---
   'engine.antiheal.index':
     'Índice de curación enemiga {index}{healers} — heridas graves reduce su curación un 40%',
-  'engine.antiheal.buy':
-    '{item} cuesta {cost} de oro y llevas {gold}: cómpralo en la próxima base',
+  'engine.antiheal.buy': '{item} cuesta {cost} de oro y llevas {gold}: cómpralo en la próxima base',
   'engine.antiheal.short': '{item} cuesta {cost} de oro, te faltan {missing}',
   'engine.antiheal.allyHas':
     'Un aliado ya lleva antiheal; menos urgente pero cubre tus propios objetivos',
@@ -448,10 +493,10 @@ export const es: Catalog = {
   'engine.armorMr.dealerItems': '{champion} con {count} objetos de daño',
   'engine.armorMr.physical': 'El {pct} del daño enemigo estimado es físico ({dealers})',
   'engine.armorMr.magic': 'El {pct} del daño enemigo estimado es mágico ({dealers})',
-  'engine.armorMr.prioArmor': 'Prioriza armadura: {items} encajan con tu campeón',
-  'engine.armorMr.prioMr': 'Prioriza resistencia mágica: {items} encajan con tu campeón',
+  'engine.armorMr.prioArmor': 'Opciones de armadura compatibles con tu campeón: {items}',
+  'engine.armorMr.prioMr': 'Opciones de resistencia mágica compatibles con tu campeón: {items}',
   'engine.armorMr.preFirst':
-    'Aún sin tu primer objeto: prioriza tu build y deja esta defensa para después',
+    'Tu primer objeto sigue siendo la prioridad; revisa esta defensa después del núcleo',
 
   // --- Engine: anti-tank ---
   'engine.antitank.teamEhp':
@@ -462,8 +507,7 @@ export const es: Catalog = {
   'engine.antitank.penMagic': 'Penetración mágica con {items}',
 
   // --- Engine: anti-burst ---
-  'engine.antiburst.threat':
-    '{kda} va fed (+{diff}) y su burst {type} te mata sin respuesta',
+  'engine.antiburst.threat': '{kda} va por delante (+{diff}) y supone una amenaza de burst {type}',
   'engine.antiburst.window':
     '{item} te da una ventana de supervivencia contra su patrón de entrada',
   'engine.antiburst.more': 'Amenazas adicionales: {threats}',
@@ -475,28 +519,36 @@ export const es: Catalog = {
   'engine.spike.close':
     'Te faltan solo {shortfall} de oro para {item} ({remaining} restantes, llevas {gold})',
   'engine.spike.closeExplain':
-    'Espera una oleada más antes de basear: completarlo vale más que comprar piezas pequeñas',
+    'Si puedes mantenerte en mapa, completar el objeto rinde más que repartir el oro en piezas menores',
   'engine.spike.target':
     '{item} está a {cost} de oro de completarse; tenlo como objetivo de la próxima base',
 
   // --- Engine: next-buy + endgame ---
   'engine.nextbuy.labelPool': '{ordinal} objeto de tu build de {champion}',
-  'engine.nextbuy.labelMeta':
-    '{ordinal} objeto más comprado en Master+ con {champion} este parche',
+  'engine.nextbuy.labelMeta': '{ordinal} objeto más comprado en Master+ con {champion} este parche',
   'engine.nextbuy.bootsPaused': 'Botas en pausa: Calzado Mágico (runa) te las dará gratis',
   'engine.nextbuy.isLabel': '{item} es el {label}',
   'engine.nextbuy.canFinishNow':
-    'Puedes completarlo YA: te cuesta {cost} de oro y llevas {gold}',
+    'La finalización está disponible: cuesta {cost} de oro y llevas {gold}',
   'engine.nextbuy.component': '{component} ({cost} de oro) avanza el {label}: {target}',
   'engine.nextbuy.componentGold': 'A {target} le faltan {missing} de oro en total; llevas {gold}',
   'engine.nextbuy.saveFor': 'Guarda oro para {target} ({label}): te faltan {missing}',
   'engine.nextbuy.noPiece':
     'Ninguna pieza suelta merece la pena ahora mismo (llevas {gold} de oro)',
+  'engine.starter.route':
+    '{item} es el inicial observado para esta ruta ({games} partidas de ruta)',
+  'engine.starter.affordable': 'Disponible por {cost} de oro; ahora tienes {gold}',
+  'engine.starter.short': 'Te faltan {missing} de oro para {item}',
+  'engine.route.observed': 'Ruta observada: {games} partidas Master+ · {confidence}% de confianza',
+  'engine.route.personal': 'Tu historial en este rol inclina la opción hacia esta ruta',
+  'engine.route.damage': 'Esta ruta observada equilibra mejor el daño de tu equipo',
+  'engine.route.inferred': 'Inferida por orden de compra; aún no hay datos completos de rutas',
+  'engine.route.coreProtected': 'Quedan {remaining} picos de núcleo antes de una desviación normal',
   'engine.endgame.situPool': '{item} es tu situacional',
   'engine.endgame.situMeta': '{item} es compra habitual en Master+ con {champion}',
   'engine.endgame.coreDone':
     'Tu build principal de {champion} está completa y te queda hueco: {situational}',
-  'engine.endgame.buyNow': 'Puedes comprarlo YA: te cuesta {cost} de oro y llevas {gold}',
+  'engine.endgame.buyNow': 'Esta opción es asequible: cuesta {cost} de oro y llevas {gold}',
   'engine.endgame.shortGold': 'Te faltan {missing} de oro (cuesta {cost} y llevas {gold})',
   'engine.endgame.sellStarter':
     'Inventario lleno pero sigues llevando {starter}: véndelo para liberar hueco',
@@ -507,8 +559,7 @@ export const es: Catalog = {
     '{item} es lo que compran los Master+ con {champion} en este caso ({games} partidas, {wr}% WR)',
   'engine.meta.suggestion':
     'Pocos Master+ con {champion} lo compran: sugerencia situacional, no prioridad',
-  'engine.exclusivity.over':
-    'Antes que {other}: no se pueden llevar a la vez (comparten {group})',
+  'engine.exclusivity.over': 'Antes que {other}: no se pueden llevar a la vez (comparten {group})',
   'engine.recommend.situPool': '{item} está en tus situacionales de {champion}',
   'engine.recommend.metaWr':
     'en Master+ con {champion}: {wr}% WR llevando este objeto ({games} partidas)',
@@ -520,13 +571,13 @@ export const es: Catalog = {
   // --- Stats: weakness insights (WP-016) ---
   'weakness.deaths.early.finding': 'Mueres {avg} veces por partida antes del minuto 14',
   'weakness.deaths.early.advice':
-    'Juega la fase de líneas más atrás: cada muerte temprana regala la línea y la ventaja de nivel',
+    'Tus muertes tempranas están cediendo experiencia y control de línea; deja más margen cuando falte información del jungla',
   'weakness.deaths.mid.finding': 'Mueres {avg} veces por partida entre el minuto 14 y el 25',
   'weakness.deaths.mid.advice':
-    'En mid game muere quien camina solo: muévete con tu equipo y no cruces el río sin visión',
+    'Las muertes aisladas de mid game suelen abrir objetivos; acompaña las entradas al río y evita cruzar sin información',
   'weakness.deaths.late.finding': 'Mueres {avg} veces por partida pasado el minuto 25',
   'weakness.deaths.late.advice':
-    'En late game cada muerte son 40+ segundos fuera: no pelees sin tu equipo ni defiendas líneas sin escape',
+    'En late game, una muerte aislada abre objetivos y alarga mucho el tiempo fuera; prioriza rutas seguras y presencia de equipo',
   'weakness.gankable.finding':
     'El jungla enemigo participa en {avg} de tus muertes tempranas por partida',
   'weakness.gankable.advice':
@@ -566,18 +617,21 @@ export const es: Catalog = {
     '{n} asesinos enfrente: tu movilidad te deja reposicionarte cuando saltan',
   'cs.pick.immobileVsAssassins':
     'ojo: pick inmóvil contra {n} asesinos — dependerás del peel de tu equipo',
-  'cs.pick.antiTankStrong': '{n} tanques enfrente: tu daño por % de vida los derrite',
+  'cs.pick.antiTankStrong':
+    '{n} tanques enfrente: tu daño por vida máxima encaja bien contra su primera línea',
   'cs.pick.antiTankWeak':
-    '{n} tanques enfrente y a este pick le cuesta matarlos — plantéate un anti-tanques',
+    '{n} tanques enfrente y a este pick le cuesta atravesar la primera línea — necesitarás una opción antitanque',
   'cs.pick.inPool': 'está en tu pool: build baseline lista',
   'cs.tip.heavyAP': 'Comp enemiga muy AP ({n} de {total})',
   'cs.tip.heavyAD': 'Comp enemiga muy AD ({n} de {total})',
   'cs.tip.carryMr':
-    '{heavy}: como carry no compres RM de tanque — {items} encajan contigo ({cheap} es la pieza barata)',
-  'cs.tip.planMr': '{heavy}: planea resistencia mágica — {cheap} es la pieza barata',
+    '{heavy}: conviene reservar una opción de resistencia mágica tras el núcleo — {items} encajan en tu ruta ({cheap} es el componente temprano)',
+  'cs.tip.planMr':
+    '{heavy}: valora resistencia mágica tras el núcleo; {cheap} permite cubrirla por piezas',
   'cs.tip.carryArmor':
-    '{heavy}: como carry no compres armadura de tanque — {items} encaja contigo ({cheap} es la pieza barata)',
-  'cs.tip.planArmor': '{heavy}: planea armadura — {cheap} es la pieza barata',
+    '{heavy}: conviene reservar una opción de armadura tras el núcleo — {items} encaja en tu ruta ({cheap} es el componente temprano)',
+  'cs.tip.planArmor':
+    '{heavy}: valora armadura tras el núcleo; {cheap} permite cubrirla por piezas',
   'cs.tip.mixed': 'Daño enemigo mixto: la vida rinde más que apilar una sola resistencia',
   'cs.tip.healers': 'Curación enemiga a la vista ({names}): reserva hueco para heridas graves',
   'cs.tip.teamAllAd':

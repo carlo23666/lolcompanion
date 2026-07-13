@@ -26,6 +26,13 @@ export interface MetaOrderStat {
   firstGames: number
 }
 
+export interface MetaBuildRouteStat {
+  starterId: number | null
+  items: number[]
+  games: number
+  wins: number
+}
+
 /**
  * Aggregated Master+ meta statistics (migration 005). Reads pick the newest
  * patch that actually has data (numeric patch comparison — "16.9" < "16.13").
@@ -41,7 +48,9 @@ export class MetaRepo {
 
   /** Applies one match's deltas atomically; idempotent per matchId. */
   applyAggregate(aggregate: MetaMatchAggregate): boolean {
-    const mark = this.db.prepare('INSERT OR IGNORE INTO meta_matches (matchId, patch) VALUES (?, ?)')
+    const mark = this.db.prepare(
+      'INSERT OR IGNORE INTO meta_matches (matchId, patch) VALUES (?, ?)'
+    )
     const bumpStat = this.db.prepare(
       `INSERT INTO meta_champion_stats (patch, champion, role, games, wins) VALUES (?, ?, ?, 1, ?)
        ON CONFLICT(patch, champion, role) DO UPDATE SET games = games + 1, wins = wins + excluded.wins`
@@ -84,8 +93,11 @@ export class MetaRepo {
    * Requires the match to be in the ledger (applyAggregate/importSeed first).
    */
   applyOrderAggregate(aggregate: MetaOrderAggregate): boolean {
-    const claim = this.db.prepare(
+    const claimOrder = this.db.prepare(
       'UPDATE meta_matches SET hasTimeline = 1 WHERE matchId = ? AND hasTimeline = 0'
+    )
+    const claimRoute = this.db.prepare(
+      'UPDATE meta_matches SET hasRoute = 1 WHERE matchId = ? AND hasRoute = 0'
     )
     const bump = this.db.prepare(
       `INSERT INTO meta_champion_item_order (patch, champion, role, itemId, games, slotSum, firstGames)
@@ -94,12 +106,36 @@ export class MetaRepo {
          games = games + 1, slotSum = slotSum + excluded.slotSum,
          firstGames = firstGames + excluded.firstGames`
     )
+    const bumpRoute = this.db.prepare(
+      `INSERT INTO meta_build_routes
+       (patch, champion, role, starterId, route, games, wins)
+       VALUES (?, ?, ?, ?, ?, 1, ?)
+       ON CONFLICT(patch, champion, role, starterId, route) DO UPDATE SET
+         games = games + 1, wins = wins + excluded.wins`
+    )
     let applied = false
     this.db.transaction(() => {
-      if (claim.run(aggregate.matchId).changes === 0) return
+      const applyOrder = claimOrder.run(aggregate.matchId).changes > 0
+      const applyRoutes = claimRoute.run(aggregate.matchId).changes > 0
+      if (!applyOrder && !applyRoutes) return
       applied = true
-      for (const row of aggregate.items) {
-        bump.run(aggregate.patch, row.champion, row.role, row.itemId, row.slot, row.first ? 1 : 0)
+      if (applyOrder) {
+        for (const row of aggregate.items) {
+          bump.run(aggregate.patch, row.champion, row.role, row.itemId, row.slot, row.first ? 1 : 0)
+        }
+      }
+      if (applyRoutes) {
+        for (const row of aggregate.routes) {
+          if (row.itemIds.length === 0) continue
+          bumpRoute.run(
+            aggregate.patch,
+            row.champion,
+            row.role,
+            row.starterId ?? 0,
+            row.itemIds.join(','),
+            row.win ? 1 : 0
+          )
+        }
       }
     })()
     return applied
@@ -111,7 +147,7 @@ export class MetaRepo {
       this.db
         .prepare(
           `SELECT matchId FROM meta_matches
-           WHERE hasTimeline = 0 AND patch != 'skip' LIMIT ?`
+           WHERE (hasTimeline = 0 OR hasRoute = 0) AND patch != 'skip' LIMIT ?`
         )
         .all(limit) as { matchId: string }[]
     ).map((row) => row.matchId)
@@ -126,6 +162,32 @@ export class MetaRepo {
          WHERE patch = ? AND champion = ? AND role = ?`
       )
       .all(patch, champion, role) as MetaOrderStat[]
+  }
+
+  /** Most-observed coherent starter + finished-item routes for a champion+role. */
+  topRoutes(champion: string, role: string, patch: string, limit = 60): MetaBuildRouteStat[] {
+    const rows = this.db
+      .prepare(
+        `SELECT starterId, route, games, wins
+         FROM meta_build_routes
+         WHERE patch = ? AND champion = ? AND role = ?
+         ORDER BY games DESC, route ASC LIMIT ?`
+      )
+      .all(patch, champion, role, limit) as {
+      starterId: number
+      route: string
+      games: number
+      wins: number
+    }[]
+    return rows.map((row) => ({
+      starterId: row.starterId > 0 ? row.starterId : null,
+      items: row.route
+        .split(',')
+        .map(Number)
+        .filter((id) => Number.isInteger(id) && id > 0),
+      games: row.games,
+      wins: row.wins
+    }))
   }
 
   /** Marks a fetched-but-unusable match so it is never fetched again. */
@@ -219,7 +281,7 @@ export class MetaRepo {
     role: string,
     patch: string,
     limit: number
-  ): { role: string; games: number; items: MetaItemStat[] } | null {
+  ): { role: string; games: number; items: MetaItemStat[]; routes: MetaBuildRouteStat[] } | null {
     const direct = role === '' ? null : this.championWinrate(champion, role, patch)
     let effectiveRole = role
     let winrate = direct
@@ -233,7 +295,8 @@ export class MetaRepo {
     return {
       role: effectiveRole,
       games: winrate.games,
-      items: this.topItems(champion, effectiveRole, patch, limit)
+      items: this.topItems(champion, effectiveRole, patch, limit),
+      routes: this.topRoutes(champion, effectiveRole, patch)
     }
   }
 
@@ -253,7 +316,9 @@ export class MetaRepo {
       )
       .all(patch) as MetaSeed['matchups']
     const items = this.db
-      .prepare('SELECT champion, role, itemId, games, wins FROM meta_champion_items WHERE patch = ?')
+      .prepare(
+        'SELECT champion, role, itemId, games, wins FROM meta_champion_items WHERE patch = ?'
+      )
       .all(patch) as MetaSeed['items']
     const itemOrder = this.db
       .prepare(
@@ -261,7 +326,13 @@ export class MetaRepo {
          FROM meta_champion_item_order WHERE patch = ?`
       )
       .all(patch) as NonNullable<MetaSeed['itemOrder']>
-    return { patch, matchIds, championStats, matchups, items, itemOrder }
+    const buildRoutes = this.db
+      .prepare(
+        `SELECT champion, role, starterId, route, games, wins
+         FROM meta_build_routes WHERE patch = ?`
+      )
+      .all(patch) as NonNullable<MetaSeed['buildRoutes']>
+    return { patch, matchIds, championStats, matchups, items, itemOrder, buildRoutes }
   }
 
   /**
@@ -277,8 +348,10 @@ export class MetaRepo {
     // the slots, so their ledger rows arrive with hasTimeline = 1. v1 seeds
     // (no order rows) leave the flag at 0 → a local crawl may backfill.
     const hasOrderData = (seed.itemOrder?.length ?? 0) > 0
+    const hasRouteData = (seed.buildRoutes?.length ?? 0) > 0
     const mark = this.db.prepare(
-      'INSERT OR IGNORE INTO meta_matches (matchId, patch, hasTimeline) VALUES (?, ?, ?)'
+      `INSERT OR IGNORE INTO meta_matches
+       (matchId, patch, hasTimeline, hasRoute) VALUES (?, ?, ?, ?)`
     )
     const putStat = this.db.prepare(
       'INSERT OR REPLACE INTO meta_champion_stats (patch, champion, role, games, wins) VALUES (?, ?, ?, ?, ?)'
@@ -293,9 +366,16 @@ export class MetaRepo {
       `INSERT OR REPLACE INTO meta_champion_item_order
        (patch, champion, role, itemId, games, slotSum, firstGames) VALUES (?, ?, ?, ?, ?, ?, ?)`
     )
+    const putRoute = this.db.prepare(
+      `INSERT OR REPLACE INTO meta_build_routes
+       (patch, champion, role, starterId, route, games, wins)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    )
     const putKv = this.db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)')
     this.db.transaction(() => {
-      for (const matchId of seed.matchIds) mark.run(matchId, seed.patch, hasOrderData ? 1 : 0)
+      for (const matchId of seed.matchIds) {
+        mark.run(matchId, seed.patch, hasOrderData ? 1 : 0, hasRouteData ? 1 : 0)
+      }
       for (const row of seed.championStats) {
         putStat.run(seed.patch, row.champion, row.role, row.games, row.wins)
       }
@@ -314,6 +394,17 @@ export class MetaRepo {
           row.games,
           row.slotSum,
           row.firstGames
+        )
+      }
+      for (const row of seed.buildRoutes ?? []) {
+        putRoute.run(
+          seed.patch,
+          row.champion,
+          row.role,
+          row.starterId,
+          row.route,
+          row.games,
+          row.wins
         )
       }
       // Remember what shared base this install started from (WP-019 freshness).
@@ -381,7 +472,9 @@ export class MetaRepo {
   /** Advances a seed's pagination cursor (and marks it done when exhausted). */
   advanceSeed(puuid: string, nextStart: number, exhausted: boolean, now: number): void {
     this.db
-      .prepare('UPDATE meta_crawl_seeds SET nextStart = ?, exhausted = ?, updatedAt = ? WHERE puuid = ?')
+      .prepare(
+        'UPDATE meta_crawl_seeds SET nextStart = ?, exhausted = ?, updatedAt = ? WHERE puuid = ?'
+      )
       .run(nextStart, exhausted ? 1 : 0, now, puuid)
   }
 

@@ -17,6 +17,7 @@ import type { PostGameReport, PostGameReportResult } from './report'
 import type { Recommendation } from './recommendation'
 import type { SessionPhase } from './session'
 import type { Locale } from './i18n/types'
+import type { MaterialAdvantageSignal } from './duel'
 
 export interface RecommendationsPayload {
   gameTimeS: number
@@ -36,7 +37,9 @@ export interface AppSettings {
   soundCategories: { recommendation: boolean; spike: boolean; objective: boolean }
   /** Experimental in-game overlay window (shows while inGame). */
   overlayEnabled: boolean
-  /** Identity id ('neon'); legacy ids normalize onto it. */
+  /** Persistent overlay scale percentage (70-150). */
+  overlayScale: number
+  /** Identity id ('rift' | 'dark' | 'sakura'). */
   theme: string
   /** UI language ('en' | 'es'); ADR-009. */
   locale: Locale
@@ -87,6 +90,7 @@ export interface IpcInvokeChannels {
         soundVolume: number
         soundCategories: { recommendation: boolean; spike: boolean; objective: boolean }
         overlayEnabled: boolean
+        overlayScale: number
         theme: string
         locale: Locale
         /** New Riot API key to store; undefined = keep current, '' = clear. */
@@ -98,6 +102,20 @@ export interface IpcInvokeChannels {
   'ingest:start': { args: []; result: { started: boolean; error?: string } }
   /** Overlay hover: true = accept mouse input, false = click-through to the game. */
   'overlay:interactive': { args: [interactive: boolean]; result: { ok: true } }
+  /** Pointer-drag delta for the focusless native overlay window. */
+  'overlay:move': { args: [delta: { x: number; y: number }]; result: { ok: true } }
+  /** Live overlay preview: resize/reset the native window and synchronize its identity. */
+  'overlay:configure': {
+    args: [
+      configuration: {
+        scale?: number
+        resetPosition?: boolean
+        theme?: string
+        speechVisible?: boolean
+      }
+    ]
+    result: { ok: true }
+  }
   /** Local-AI coach (Ollama): availability + configuration. */
   'coach:status': {
     args: []
@@ -185,13 +203,19 @@ export interface IpcEventChannels {
   'ingest:progress': IngestProgressPayload
   'session:phase': SessionPhase
   'session:champselect': ChampSelectState | null
+  /** Explicit boundary between live/replay/scenario sessions. */
+  'gamestate:reset': { atMs: number }
   'gamestate:update': GameState
   'gamestate:events': GameStateEvent[]
   'gamestate:recommendations': RecommendationsPayload
+  /** Conservative isolated-duel hint derived only from visible scoreboard state. */
+  'gamestate:duel': MaterialAdvantageSignal
   /** A finished match landed in the DB (post-game auto-ingest). */
   'history:changed': { matchId: string }
   /** Meta crawler progress ticks. */
   'meta:progress': MetaCrawlProgress
+  /** Active identity changed in another renderer (main window -> overlay). */
+  'appearance:theme': string
   /** Live macro tip from the local-AI coach (the mascot speaks it in the overlay). */
   'coach:tip': { gameTimeS: number; text: string }
   /** Role-aware strategic read of the game (Live panel, slower cadence). */
@@ -233,6 +257,8 @@ export const IPC_INVOKE_CHANNELS: readonly IpcInvokeChannel[] = [
   'meta:crawl:start',
   'meta:crawl:stop',
   'overlay:interactive',
+  'overlay:move',
+  'overlay:configure',
   'coach:status',
   'coach:configure',
   'coach:analyze',
@@ -245,11 +271,14 @@ export const IPC_EVENT_CHANNELS: readonly IpcEventChannel[] = [
   'ingest:progress',
   'session:phase',
   'session:champselect',
+  'gamestate:reset',
   'gamestate:update',
   'gamestate:events',
   'gamestate:recommendations',
+  'gamestate:duel',
   'history:changed',
   'meta:progress',
+  'appearance:theme',
   'coach:tip',
   'coach:direction'
 ]

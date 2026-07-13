@@ -1,5 +1,5 @@
 import type { GameState } from '@shared/gamestate'
-import type { Recommendation } from '@shared/recommendation'
+import type { Recommendation, RecommendationPlan } from '@shared/recommendation'
 import {
   baselinePoolSchema,
   type BaselineChampion,
@@ -8,7 +8,15 @@ import {
 import type { Translator, MessageKey } from '@shared/i18n'
 import type { StaticData } from '../staticdata/manager'
 import { isFinishedBuildItem, itemConflict } from '../staticdata/itemgraph'
+import { STARTER_ITEM_IDS } from '../staticdata/starters'
 import { defaultTranslator } from './rules/helpers'
+import { selectBuildRoute, type RouteSelection } from './build-routes'
+import {
+  avgCompletionSlot,
+  META_ITEM_MIN_GAMES,
+  type MetaItemStat,
+  type MetaItemsInput
+} from './meta-items'
 import poolJson from './baselines/pool.json'
 
 /** 1-based completion-slot labels, localized (engine.ordinal.1..6). */
@@ -20,12 +28,6 @@ const ORDINAL_KEYS: readonly MessageKey[] = [
   'engine.ordinal.5',
   'engine.ordinal.6'
 ]
-import {
-  avgCompletionSlot,
-  META_ITEM_MIN_GAMES,
-  type MetaItemStat,
-  type MetaItemsInput
-} from './meta-items'
 
 /** Parsed once; JSON is bundled, so this stays pure (no runtime I/O). */
 let cachedPool: BaselinePool | null = null
@@ -40,9 +42,6 @@ export function loadBaselinePool(): BaselinePool {
  * a boots core slot is unpurchasable and must not pin the next-buy target.
  */
 const MAGICAL_FOOTWEAR_RUNE_ID = 8304
-
-/** Starter/early items worth selling once the build is otherwise full. */
-const STARTER_ITEM_IDS = new Set([1054, 1055, 1056, 1082, 1083])
 
 /** Trinkets and consumables don't occupy a "real" build slot for our math. */
 function occupiesBuildSlot(item: { tags: string[] }): boolean {
@@ -61,36 +60,17 @@ export function findBaseline(
 
 export type { MetaItemsInput } from './meta-items'
 
-/** The player's own results moved this item's place/inclusion (WP-018). */
-export interface PersonalNote {
-  games: number
-  wins: number
-  kind: 'order' | 'winrate'
-}
-
 export interface EffectiveBaseline {
   core: number[]
   situational: number[]
   /** Reason wording differs: Master+ vs the player's own build. */
   source: 'pool' | 'meta' | 'personal'
-  /** itemId → why the player's data changed its place (surfaced in reasons). */
-  personal?: Map<number, PersonalNote>
+  starterId?: number | null
+  route?: RouteSelection
 }
 
-// WP-018 personalization gates — conservative on purpose: Master+ is the base,
-// the player's own results only nudge it, and only with a real sample + edge.
 /** Games on the champion before the player's own results are trusted at all. */
 const PERSONAL_MIN_GAMES = 8
-/** Per-item sample before it can move within/into the build. */
-const PERSONAL_ITEM_MIN_GAMES = 5
-/** The player's win rate must beat the displaced item's by this to swap. */
-const PERSONAL_WR_DELTA = 0.06
-/** First-completed sample before we reorder the core to the player's opener. */
-const PERSONAL_ORDER_MIN = 4
-
-function winRate(stat: { games: number; wins: number }): number {
-  return stat.games > 0 ? stat.wins / stat.games : 0
-}
 
 /**
  * Finished-item build straight from a Master+ (or personal) item distribution,
@@ -122,81 +102,10 @@ function buildFromDistribution(
   }
   if (usable.length < 3) return null
   return {
-    core: usable.slice(0, 5).map((entry) => entry.itemId),
-    situational: usable.slice(5, 10).map((entry) => entry.itemId)
-  }
-}
-
-/**
- * Blend the player's OWN results onto the Master+ base (owner mandate
- * 2026-07-09: "Master+ is the base, my own results only tweak it"). Two
- * conservative, sample-gated nudges: (1) reorder the core to the player's own
- * opener when they clearly start elsewhere, (2) swap in an item the player
- * wins meaningfully more with. Master+ order is untouched below the gates.
- */
-function personalize(
-  base: { core: number[]; situational: number[] },
-  personal: MetaItemsInput | undefined,
-  staticData: StaticData
-): EffectiveBaseline {
-  if (personal === undefined || personal.games < PERSONAL_MIN_GAMES) {
-    return { core: base.core, situational: base.situational, source: 'meta' }
-  }
-  const core = [...base.core]
-  const situational = [...base.situational]
-  const notes = new Map<number, PersonalNote>()
-  const statOf = (id: number): MetaItemStat | undefined =>
-    personal.items.find((entry) => entry.itemId === id)
-
-  // (1) Order nudge: the item the player finishes FIRST most often, if it's a
-  // core item they don't already open with, moves to the front.
-  const opener = personal.items
-    .filter((entry) => (entry.firstGames ?? 0) >= PERSONAL_ORDER_MIN && core.includes(entry.itemId))
-    .sort((a, b) => (b.firstGames ?? 0) - (a.firstGames ?? 0))[0]
-  if (opener !== undefined && core[0] !== opener.itemId) {
-    core.splice(core.indexOf(opener.itemId), 1)
-    core.unshift(opener.itemId)
-    notes.set(opener.itemId, {
-      games: opener.firstGames ?? 0,
-      wins: opener.wins,
-      kind: 'order'
-    })
-  }
-
-  // (2) Win-rate swap: an item the player wins more with, not already core,
-  // displaces the weakest-for-the-player core item (at most one swap).
-  const candidate = personal.items
-    .filter((entry) => {
-      if (entry.games < PERSONAL_ITEM_MIN_GAMES || core.includes(entry.itemId)) return false
-      const node = staticData.itemGraph.nodes.get(entry.itemId)
-      return node !== undefined && node.availableOnSR && isFinishedBuildItem(node)
-    })
-    .sort((a, b) => winRate(b) - winRate(a))[0]
-  if (candidate !== undefined) {
-    // Weakest core item BY THE PLAYER'S OWN results (unknown = neutral 0.5).
-    const weakest = core
-      .map((id) => ({ id, stat: statOf(id) }))
-      .filter((entry) => entry.id !== opener?.itemId)
-      .sort(
-        (a, b) => (a.stat ? winRate(a.stat) : 0.5) - (b.stat ? winRate(b.stat) : 0.5)
-      )[0]
-    const weakestWr = weakest?.stat ? winRate(weakest.stat) : 0.5
-    if (weakest !== undefined && winRate(candidate) - weakestWr >= PERSONAL_WR_DELTA) {
-      core[core.indexOf(weakest.id)] = candidate.itemId
-      situational.unshift(weakest.id)
-      notes.set(candidate.itemId, {
-        games: candidate.games,
-        wins: candidate.wins,
-        kind: 'winrate'
-      })
-    }
-  }
-
-  return {
-    core,
-    situational,
-    source: 'meta',
-    personal: notes.size > 0 ? notes : undefined
+    // Legacy v1/v2 data has no co-occurrence. Keep only three ordered items
+    // as inferred core; later frequency picks remain contextual options.
+    core: usable.slice(0, 3).map((entry) => entry.itemId),
+    situational: usable.slice(3, 10).map((entry) => entry.itemId)
   }
 }
 
@@ -213,15 +122,49 @@ export function resolveBaseline(
   meta?: MetaItemsInput,
   personal?: MetaItemsInput
 ): EffectiveBaseline | null {
+  const route = selectBuildRoute(state, staticData, meta, personal)
+  if (route !== null) {
+    const routeSet = new Set(route.core)
+    const situational = (meta?.items ?? [])
+      .map((entry) => entry.itemId)
+      .filter((itemId) => !routeSet.has(itemId))
+      .filter((itemId) => {
+        const node = staticData.itemGraph.nodes.get(itemId)
+        return node !== undefined && isFinishedBuildItem(node)
+      })
+      .slice(0, 7)
+    return {
+      core: route.core,
+      situational,
+      source: 'meta',
+      starterId: route.starterId,
+      route
+    }
+  }
+
   const metaBuild = meta ? buildFromDistribution(staticData, meta.items) : null
-  if (metaBuild) return personalize(metaBuild, personal, staticData)
+  if (metaBuild) return { ...metaBuild, source: 'meta' }
 
   // No Master+ data for this champion → the player's own build carries it,
   // so an off-meta champ they've played before is never left without advice.
   if (personal && personal.games >= PERSONAL_MIN_GAMES) {
+    const personalRoute = selectBuildRoute(state, staticData, personal, undefined)
+    if (personalRoute !== null) {
+      return {
+        core: personalRoute.core,
+        situational: [],
+        source: 'personal',
+        starterId: personalRoute.starterId,
+        route: personalRoute
+      }
+    }
     const personalBuild = buildFromDistribution(staticData, personal.items)
     if (personalBuild) {
-      return { core: personalBuild.core, situational: personalBuild.situational, source: 'personal' }
+      return {
+        core: personalBuild.core,
+        situational: personalBuild.situational,
+        source: 'personal'
+      }
     }
   }
 
@@ -272,6 +215,49 @@ export function missingFor(
   return { missingGold, missingComponents }
 }
 
+/** Number of the first two non-boots route spikes not yet completed. */
+export function protectedCoreRemaining(
+  state: GameState,
+  staticData: StaticData,
+  baseline: EffectiveBaseline
+): number {
+  const protectedIds = baseline.core
+    .filter((id) => !staticData.itemGraph.nodes.get(id)?.tags.includes('Boots'))
+    .slice(0, 2)
+  const owned = new Set(state.self.items.filter((item) => item.isCompleted).map((item) => item.id))
+  return protectedIds.filter((id) => !owned.has(id)).length
+}
+
+function recommendationPlan(
+  state: GameState,
+  staticData: StaticData,
+  baseline: EffectiveBaseline
+): RecommendationPlan {
+  const owned = new Set(state.self.items.filter((item) => item.isCompleted).map((item) => item.id))
+  const steps = baseline.core.map((itemId) => ({
+    itemId,
+    itemName: staticData.itemGraph.nodes.get(itemId)?.name ?? `#${String(itemId)}`,
+    owned: owned.has(itemId)
+  }))
+  const firstMissing = steps.findIndex((step) => !step.owned)
+  return {
+    source:
+      baseline.source === 'pool'
+        ? 'pool'
+        : baseline.source === 'personal'
+          ? 'personal-route'
+          : baseline.route !== undefined
+            ? 'meta-route'
+            : 'meta-inferred',
+    confidence: baseline.route?.confidence ?? (baseline.source === 'pool' ? 0.55 : 0.48),
+    steps,
+    currentStep: firstMissing < 0 ? steps.length : firstMissing,
+    protectedCoreRemaining: protectedCoreRemaining(state, staticData, baseline),
+    personalAdjusted: baseline.route?.personalAdjusted ?? false,
+    damageAdjusted: baseline.route?.damageAdjusted ?? false
+  }
+}
+
 /**
  * Baseline next-buy: first unfinished core item, answered at component level
  * and gold-aware. Returns null when the champion is not in the pool or the
@@ -292,6 +278,67 @@ export function nextBuyRecommendation(
   const ownedCounts = new Map<number, number>()
   for (const item of state.self.items) {
     ownedCounts.set(item.id, (ownedCounts.get(item.id) ?? 0) + 1)
+  }
+
+  const withRouteContext = (rec: Recommendation): Recommendation => {
+    const reasons = [...rec.reasons]
+    if (baseline.route !== undefined) {
+      reasons.push(
+        t('engine.route.observed', {
+          games: String(baseline.route.games),
+          confidence: String(Math.round(baseline.route.confidence * 100))
+        })
+      )
+      if (baseline.route.personalAdjusted) reasons.push(t('engine.route.personal'))
+      if (baseline.route.damageAdjusted) reasons.push(t('engine.route.damage'))
+    } else if (baseline.source === 'meta') {
+      reasons.push(t('engine.route.inferred'))
+    }
+    return {
+      ...rec,
+      kind: 'route',
+      plan: recommendationPlan(state, staticData, baseline),
+      reasons
+    }
+  }
+
+  // The first shop is a distinct phase. v3 routes retain the actual starter
+  // bought by Master+ players; once the player commits to any non-consumable
+  // purchase, respect that decision and continue with the finished route.
+  const starterId = baseline.starterId ?? null
+  const ownsStarter = state.self.items.some((item) => STARTER_ITEM_IDS.has(item.id))
+  const hasCommittedPurchase = state.self.items.some(occupiesBuildSlot)
+  const starterNode = starterId === null ? undefined : graph.nodes.get(starterId)
+  if (
+    state.gameTimeS <= 180 &&
+    !ownsStarter &&
+    !hasCommittedPurchase &&
+    starterNode !== undefined &&
+    starterNode.availableOnSR
+  ) {
+    const affordable = state.self.currentGold >= starterNode.totalGold
+    return withRouteContext({
+      itemId: starterNode.id,
+      itemName: starterNode.name,
+      category: null,
+      action: affordable ? 'prioritize' : 'delay',
+      score: affordable ? 84 : 52,
+      reasons: [
+        t('engine.starter.route', {
+          item: starterNode.name,
+          games: String(baseline.route?.games ?? 0)
+        }),
+        affordable
+          ? t('engine.starter.affordable', {
+              cost: String(starterNode.totalGold),
+              gold: String(Math.floor(state.self.currentGold))
+            })
+          : t('engine.starter.short', {
+              item: starterNode.name,
+              missing: String(Math.ceil(starterNode.totalGold - state.self.currentGold))
+            })
+      ]
+    })
   }
 
   const ownsAnyBoots = state.self.items.some((item) => item.tags.includes('Boots'))
@@ -345,30 +392,17 @@ export function nextBuyRecommendation(
       ? t('engine.nextbuy.labelPool', { ordinal, champion: state.self.championName })
       : t('engine.nextbuy.labelMeta', { ordinal, champion: state.self.championName })
 
-  const { missingGold, missingComponents } = missingFor(
-    target,
-    new Map(ownedCounts),
-    staticData
-  )
+  const { missingGold, missingComponents } = missingFor(target, new Map(ownedCounts), staticData)
 
-  // Personal note (WP-018): if the player's own results moved this item, say
-  // so — Master+ is the base, this is the "your data" tweak on top of it.
-  const personalNote = baseline.personal?.get(target)
-  const personalReason = (note: PersonalNote): string =>
-    t(note.kind === 'order' ? 'engine.personal.order' : 'engine.personal.winrate', {
-      item: targetName,
-      games: String(note.games),
-      wr: String(Math.round((note.wins / Math.max(1, note.games)) * 100))
-    })
-  const withBootsNote = (rec: Recommendation): Recommendation => {
-    let reasons = rec.reasons
-    if (personalNote !== undefined) reasons = [...reasons, personalReason(personalNote)]
-    if (bootsSkippedForRune) reasons = [...reasons, t('engine.nextbuy.bootsPaused')]
-    return reasons === rec.reasons ? rec : { ...rec, reasons }
+  const withNotes = (rec: Recommendation): Recommendation => {
+    const withBoots = bootsSkippedForRune
+      ? { ...rec, reasons: [...rec.reasons, t('engine.nextbuy.bootsPaused')] }
+      : rec
+    return withRouteContext(withBoots)
   }
 
   if (gold >= missingGold) {
-    return withBootsNote({
+    return withNotes({
       itemId: target,
       itemName: targetName,
       category: null,
@@ -392,7 +426,7 @@ export function nextBuyRecommendation(
   const component = affordable[0]
 
   if (component) {
-    return withBootsNote({
+    return withNotes({
       itemId: component.id,
       itemName: component.name,
       category: null,
@@ -414,7 +448,7 @@ export function nextBuyRecommendation(
     })
   }
 
-  return withBootsNote({
+  return withNotes({
     itemId: target,
     itemName: targetName,
     category: null,

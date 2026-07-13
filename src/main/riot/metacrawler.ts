@@ -134,7 +134,8 @@ export class MetaCrawler {
       order ?? {
         matchId: match.metadata.matchId,
         patch: patchOf(match.info.gameVersion),
-        items: []
+        items: [],
+        routes: []
       }
     )
   }
