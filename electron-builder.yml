@@ -1,5 +1,5 @@
 appId: dev.carlo.lol-companion
-productName: LoL Companion
+productName: WinCon
 directories:
   output: dist
 files:

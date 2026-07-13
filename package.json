@@ -1,7 +1,7 @@
 {
   "name": "lol-companion",
-  "version": "1.5.0",
-  "description": "Local-first desktop companion for League of Legends with explained build recommendations",
+  "version": "1.6.0",
+  "description": "WinCon — local-first decision support for League of Legends with explained build recommendations",
   "main": "out/main/index.js",
   "type": "module",
   "private": true,
