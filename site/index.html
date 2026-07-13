@@ -1,421 +1,369 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>LoL Companion — your local coach for League of Legends</title>
-<meta name="description" content="Local-first desktop app that reads YOUR live game and match history and explains what to buy and why — powered by Master+ match data. Free, no accounts, no server: everything stays on your PC. Riot-compliant." />
-<link rel="icon" href="icon.png" />
-<meta property="og:title" content="LoL Companion — your local coach for League of Legends" />
-<meta property="og:description" content="Explained build recommendations in real time, champ select analysis, weakness detection and post-game reports. Local, free, and within Riot's rules." />
-<meta property="og:image" content="media/en/live-ingame.png" />
-<style>
-  :root {
-    --bg: #05060e;
-    --bg-2: #0a0d1c;
-    --panel: #0d1122;
-    --panel-2: #121737;
-    --line: #1d2447;
-    --text: #dbe2f4;
-    --muted: #8891b4;
-    --pink: #ff4d6d;
-    --pink-soft: rgba(255, 77, 109, 0.14);
-    --gold: #f0b232;
-    --green: #2fd48c;
-    --mono: "SF Mono", "Cascadia Code", Consolas, "Liberation Mono", monospace;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    background:
-      radial-gradient(1100px 500px at 80% -10%, rgba(255, 77, 109, 0.09), transparent 60%),
-      radial-gradient(900px 500px at 10% 20%, rgba(90, 110, 255, 0.08), transparent 55%),
-      var(--bg);
-    color: var(--text);
-    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    line-height: 1.6;
-    overflow-x: hidden;
-  }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; width: 100%; }
-  img { max-width: 100%; }
-
-  /* ---------- header / nav ---------- */
-  header {
-    position: sticky; top: 0; z-index: 10;
-    background: rgba(5, 6, 14, 0.85); backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--line);
-  }
-  .nav { display: flex; align-items: center; gap: 14px; min-height: 58px; flex-wrap: nowrap; }
-  .wordmark {
-    font-family: var(--mono); font-weight: 700; letter-spacing: 0.12em;
-    color: var(--pink); text-shadow: 0 0 18px rgba(255, 77, 109, 0.55);
-    font-size: 14px; text-decoration: none; white-space: nowrap; flex-shrink: 0;
-  }
-  .wordmark small { display: block; color: var(--muted); font-size: 9px; letter-spacing: 0.28em; text-shadow: none; }
-  .nav .links { margin-left: auto; display: flex; gap: 16px; align-items: center; }
-  .nav a.navlink { color: var(--muted); text-decoration: none; font-size: 14px; white-space: nowrap; }
-  .nav a.navlink:hover { color: var(--text); }
-  .lang { font-family: var(--mono); font-size: 12px; border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; color: var(--muted); text-decoration: none; flex-shrink: 0; }
-  .lang:hover { color: var(--text); }
-
-  .btn {
-    display: inline-block; text-decoration: none; font-weight: 700;
-    padding: 12px 22px; border-radius: 10px; font-size: 15px;
-    background: linear-gradient(180deg, #ff5e7b, #e83a5d);
-    color: #fff; box-shadow: 0 4px 24px rgba(255, 77, 109, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.14); white-space: nowrap;
-  }
-  .btn:hover { filter: brightness(1.08); }
-  .btn.small { padding: 8px 15px; font-size: 13px; flex-shrink: 0; }
-  .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); box-shadow: none; }
-
-  /* Collapse the section anchors on narrow screens; keep lang + download. */
-  @media (max-width: 760px) {
-    .nav .links { gap: 10px; }
-    .nav a.navlink { display: none; }
-  }
-
-  /* ---------- hero ---------- */
-  .hero { padding: 72px 0 8px; text-align: center; }
-  .hero h1 { font-size: clamp(28px, 5.4vw, 52px); line-height: 1.14; letter-spacing: -0.01em; }
-  .hero h1 em { font-style: normal; color: var(--gold); }
-  .hero p.sub { margin: 18px auto 0; max-width: 640px; color: var(--muted); font-size: clamp(15px, 2.6vw, 18px); }
-  .hero .cta { margin-top: 28px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-  .hero .fineprint { margin-top: 12px; color: var(--muted); font-size: 13px; font-family: var(--mono); }
-  .badges { margin-top: 24px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-  .badge {
-    font-family: var(--mono); font-size: 12px; color: var(--green);
-    border: 1px solid rgba(47, 212, 140, 0.35); background: rgba(47, 212, 140, 0.07);
-    padding: 5px 12px; border-radius: 999px;
-  }
-
-  /* ---------- shots ---------- */
-  figure.shot { margin: 30px auto 0; }
-  figure.shot img {
-    width: 100%; display: block; border-radius: 14px;
-    border: 1px solid var(--line);
-    box-shadow: 0 20px 70px rgba(0, 0, 0, 0.55), 0 0 50px rgba(255, 77, 109, 0.07);
-  }
-  figcaption { margin-top: 12px; color: var(--muted); font-size: 14px; text-align: center; }
-
-  /* ---------- sections ---------- */
-  section { padding: 66px 0 0; }
-  .eyebrow {
-    font-family: var(--mono); font-size: 12px; letter-spacing: 0.26em;
-    color: var(--pink); text-transform: uppercase; margin-bottom: 10px;
-  }
-  .sec-head { text-align: center; max-width: 680px; margin: 0 auto; }
-  h2 { font-size: clamp(23px, 4.2vw, 34px); letter-spacing: -0.01em; }
-  .lede { color: var(--muted); margin-top: 10px; }
-
-  /* ---------- overlay hover demo ---------- */
-  .overlay-demo {
-    position: relative; max-width: 660px; margin: 30px auto 0;
-    aspect-ratio: 484 / 300;
-    border: 1px solid var(--line); border-radius: 14px;
-    background:
-      radial-gradient(120% 120% at 20% 0%, rgba(90, 110, 255, 0.10), transparent 60%),
-      linear-gradient(180deg, #0b0f20, #070912);
-    box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5);
-    overflow: hidden;
-  }
-  .overlay-demo img { position: absolute; top: 10px; left: 10px; width: calc(100% - 20px); height: auto; }
-  /* Touch / no-hover: show the full expanded panel (no hover to trigger it). */
-  .overlay-demo .compact { opacity: 0; }
-  .overlay-demo .expanded { opacity: 1; }
-  @media (hover: hover) and (pointer: fine) {
-    .overlay-demo .compact { opacity: 1; transition: opacity 0.18s ease; }
-    .overlay-demo .expanded { opacity: 0; transition: opacity 0.18s ease; }
-    .overlay-demo:hover .compact { opacity: 0; }
-    .overlay-demo:hover .expanded { opacity: 1; }
-  }
-
-  /* ---------- feature grid ---------- */
-  .grid { margin-top: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  @media (max-width: 860px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 540px) { .grid { grid-template-columns: 1fr; } }
-  .card {
-    background: linear-gradient(180deg, var(--panel-2), var(--panel));
-    border: 1px solid var(--line); border-radius: 14px; padding: 20px;
-  }
-  .card .icon { font-size: 22px; }
-  .card h3 { margin-top: 8px; font-size: 16px; }
-  .card p { margin-top: 6px; color: var(--muted); font-size: 14px; }
-
-  /* ---------- safety ---------- */
-  .safety {
-    margin-top: 30px; border: 1px solid rgba(47, 212, 140, 0.3); border-radius: 16px;
-    background: linear-gradient(180deg, rgba(47, 212, 140, 0.06), transparent);
-    padding: 24px;
-  }
-  .safety ul { list-style: none; margin-top: 6px; display: grid; gap: 12px; }
-  .safety li { padding-left: 28px; position: relative; }
-  .safety li::before { content: "✓"; position: absolute; left: 0; color: var(--green); font-weight: 700; }
-  .safety li b { color: #fff; }
-  .safety li span { color: var(--muted); }
-
-  /* ---------- steps ---------- */
-  .steps { margin-top: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: step; }
-  @media (max-width: 780px) { .steps { grid-template-columns: 1fr; } }
-  .step { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
-  .step::before {
-    counter-increment: step; content: counter(step);
-    font-family: var(--mono); font-weight: 700; color: var(--gold);
-    display: inline-block; width: 30px; height: 30px; line-height: 28px; text-align: center;
-    border: 1px solid rgba(240, 178, 50, 0.45); border-radius: 8px; margin-bottom: 12px;
-  }
-  .step h3 { font-size: 15px; }
-  .step p { margin-top: 6px; color: var(--muted); font-size: 14px; }
-  .step a { color: var(--gold); }
-
-  /* ---------- faq ---------- */
-  .faq { margin-top: 26px; display: grid; gap: 10px; max-width: 820px; margin-left: auto; margin-right: auto; }
-  details { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 15px 18px; }
-  details[open] { border-color: rgba(255, 77, 109, 0.4); }
-  summary { cursor: pointer; font-weight: 600; font-size: 15px; list-style: none; position: relative; padding-right: 26px; }
-  summary::-webkit-details-marker { display: none; }
-  summary::after { content: "+"; position: absolute; right: 0; top: 0; color: var(--pink); font-family: var(--mono); }
-  details[open] summary::after { content: "–"; }
-  details p { margin-top: 10px; color: var(--muted); font-size: 14px; }
-  details a { color: var(--gold); }
-
-  .note {
-    margin: 22px auto 0; max-width: 820px; padding: 12px 16px; border-radius: 10px; font-size: 13px;
-    border: 1px solid rgba(240, 178, 50, 0.35); background: rgba(240, 178, 50, 0.06); color: var(--muted);
-  }
-  .note b { color: var(--gold); }
-
-  footer { margin-top: 80px; border-top: 1px solid var(--line); padding: 34px 0 56px; }
-  footer p { color: var(--muted); font-size: 13px; }
-  footer .top { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
-  footer .legal { margin-top: 16px; max-width: 760px; }
-  footer a { color: var(--muted); }
-</style>
-</head>
-<body>
-
-<header>
-  <div class="wrap nav">
-    <a class="wordmark" href="#">LOL COMPANION<small>YOUR LOCAL COACH</small></a>
-    <nav class="links">
-      <a class="navlink" href="#champ">Champ select</a>
-      <a class="navlink" href="#overlay">Overlay</a>
-      <a class="navlink" href="#know">Know your game</a>
-      <a class="navlink" href="#safe">Is it safe?</a>
-      <a class="navlink" href="#faq">FAQ</a>
-      <a class="lang" href="es.html" hreflang="es" lang="es">ES</a>
-      <a class="btn small" href="https://github.com/carlo23666/lolcompanion/releases/latest">Download</a>
-    </nav>
-  </div>
-</header>
-
-<main class="wrap">
-
-  <!-- HERO — the in-game money shot -->
-  <section class="hero" style="padding-top:72px">
-    <h1>Your buy-and-pick coach,<br /><em>local and explained</em></h1>
-    <p class="sub">
-      LoL Companion watches YOUR live game and your match history, and tells you what to buy
-      and why — backed by Master+ match data, with nothing ever leaving your PC.
-    </p>
-    <div class="cta">
-      <a class="btn" href="https://github.com/carlo23666/lolcompanion/releases/latest">Download for Windows</a>
-      <a class="btn ghost" href="#safe">Is it safe for my account?</a>
-    </div>
-    <div class="fineprint">free · no accounts · no server · auto-updates</div>
-    <div class="badges">
-      <span class="badge">official Riot APIs only</span>
-      <span class="badge">local-first: your data stays on your PC</span>
-      <span class="badge">free &amp; open source</span>
-    </div>
-
-    <figure class="shot">
-      <img src="media/en/live-ingame.png" alt="Live view: explained build recommendation with alternatives, both teams and enemy composition analysis" />
-      <figcaption>In game: every recommendation comes with its reasons — never a bare "buy this".</figcaption>
-    </figure>
-  </section>
-
-  <!-- BEFORE THE GAME -->
-  <section id="champ">
-    <div class="sec-head">
-      <div class="eyebrow">Before you lock in</div>
-      <h2>Champ select, with a plan</h2>
-      <p class="lede">
-        The moment picks appear, you get an enemy-composition read, a buy plan against that comp,
-        and pick suggestions ranked from your own history and Master+ data — all derived only from
-        what's on screen.
-      </p>
-    </div>
-    <figure class="shot">
-      <img src="media/en/champ-select.png" alt="Champion select: enemy composition analysis, pick suggestions from your history, and a buy plan against the enemy comp" />
-      <figcaption>Pick suggestions from your games + Master+ data, and a buy plan against the enemy comp.</figcaption>
-    </figure>
-  </section>
-
-  <!-- DURING THE GAME: overlay hover demo -->
-  <section id="overlay">
-    <div class="sec-head">
-      <div class="eyebrow">While you play</div>
-      <h2>A tiny overlay that expands on demand</h2>
-      <p class="lede">
-        Keep the top recommendation on screen while you play. Hover it and it opens into the full
-        match panel — buys, objective timers, team gold and your live stats. Needs LoL in windowed
-        or borderless mode.
-      </p>
-    </div>
-    <div class="overlay-demo" title="Hover to expand">
-      <img class="expanded" src="media/en/overlay-expanded.png" alt="Expanded overlay: top buys, dragon and baron timers, team gold and live stats" />
-      <img class="compact" src="media/en/overlay.png" alt="Compact overlay: the top recommendation next to the mascot" />
-    </div>
-    <figcaption>Hover the card — it grows into the full match panel, exactly like in game.</figcaption>
-  </section>
-
-  <!-- AFTER THE GAME -->
-  <section id="know">
-    <div class="sec-head">
-      <div class="eyebrow">After the game</div>
-      <h2>It tells you where you're weak — with numbers</h2>
-      <p class="lede">
-        The stats page aggregates your whole stored history and calls out patterns: deaths by game
-        phase, gank susceptibility, vision below your role's floor, objectives conceded while dead,
-        low kill participation — each with an actionable fix. Plus a full, filterable match history.
-      </p>
-    </div>
-    <figure class="shot">
-      <img src="media/en/stats.png" alt="Stats view: detected weak points with evidence, per-champion table and winrate breakdowns" />
-      <figcaption>Detected weak points with the numbers behind them, per-champion table, streaks and tilt indicators.</figcaption>
-    </figure>
-    <figure class="shot">
-      <img src="media/en/history.png" alt="History view: filterable match list with form indicator and per-champion aggregates" />
-      <figcaption>Full match history with filters, form strip and per-champion aggregates.</figcaption>
-    </figure>
-  </section>
-
-  <!-- FEATURES -->
-  <section id="features">
-    <div class="sec-head">
-      <div class="eyebrow">Features</div>
-      <h2>Everything it does for you</h2>
-    </div>
-    <div class="grid">
-      <div class="card"><div class="icon">🧠</div><h3>Explained recommendations</h3>
-        <p>Every advice carries its reasons: "78% of enemy damage is physical", "Zed is fed +7". The explanation is the product.</p></div>
-      <div class="card"><div class="icon">📊</div><h3>Master+ data for your patch</h3>
-        <p>Suggestions lean on thousands of Master, GM and Challenger games on your champion — including the ORDER top players actually build items in, aggregated on your own PC.</p></div>
-      <div class="card"><div class="icon">🎯</div><h3>Champ select with a plan</h3>
-        <p>Enemy composition analysis, a buy plan against that comp, and pick suggestions from your own history.</p></div>
-      <div class="card"><div class="icon">⚔️</div><h3>Live alerts</h3>
-        <p>Visible enemy power spikes (completed items, levels 6/11/16), objective windows and unspent-gold nudges.</p></div>
-      <div class="card"><div class="icon">🔍</div><h3>Weakness detection</h3>
-        <p>Your history, turned into verdicts: dying too much in lane, getting ganked over and over, warding too little, objectives falling right after your deaths.</p></div>
-      <div class="card"><div class="icon">👾</div><h3>Mascot + overlay + themes</h3>
-        <p>A coach with personality, an optional in-game overlay with the top recommendation, and selectable visual themes.</p></div>
-    </div>
-  </section>
-
-  <!-- SAFE -->
-  <section id="safe">
-    <div class="sec-head">
-      <div class="eyebrow">Compliance</div>
-      <h2>Is it safe for my account?</h2>
-      <p class="lede">The first question to ask of any LoL tool. Short answer: yes. The long one:</p>
-    </div>
-    <div class="safety">
-      <ul>
-        <li><b>Official Riot APIs only.</b> <span>Live Client Data API, the LoL client (LCU), Riot Web API and Data Dragon. No memory reading, no traffic sniffing, no replay parsing.</span></li>
-        <li><b>Only what's visible on your screen.</b> <span>Everything the app knows about a live game you could read off the scoreboard yourself. No enemy cooldown or ultimate tracking (banned by Riot since March 2025 — and a hard rule of this project).</span></li>
-        <li><b>Local-first.</b> <span>No server, no accounts, no telemetry. Your history and stats live in a database on your PC.</span></li>
-        <li><b>Open source.</b> <span>You can read exactly what it does on <a href="https://github.com/carlo23666/lolcompanion">GitHub</a>.</span></li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- GET STARTED -->
-  <section id="start">
-    <div class="sec-head">
-      <div class="eyebrow">Setup</div>
-      <h2>Get started</h2>
-    </div>
-    <div class="steps">
-      <div class="step">
-        <h3>Install</h3>
-        <p>Download the <a href="https://github.com/carlo23666/lolcompanion/releases/latest">Windows setup</a> and run it. SmartScreen will warn you because the app isn't code-signed: click <b>More info → Run anyway</b>. It installs per-user, no admin rights, and auto-updates from then on.</p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WinCon — read the game, play the win condition</title>
+    <meta
+      name="description"
+      content="A local-first League of Legends decision system: coherent build routes, contextual live advice, draft analysis and personal review. Every recommendation is explained."
+    />
+    <meta name="theme-color" content="#05070d" />
+    <link rel="canonical" href="https://carlo23666.github.io/lolcompanion/" />
+    <link rel="alternate" hreflang="en" href="https://carlo23666.github.io/lolcompanion/" />
+    <link rel="alternate" hreflang="es" href="https://carlo23666.github.io/lolcompanion/es.html" />
+    <link rel="icon" href="wincon-mark.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="WinCon — read the game, play the win condition" />
+    <meta
+      property="og:description"
+      content="Explained decisions before, during and after a League of Legends match — grounded in Master+ data, the visible game state and your own history."
+    />
+    <meta property="og:image" content="media/en/live-ingame.png" />
+    <link rel="stylesheet" href="styles.css?v=20260713-5" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="shell nav">
+        <a class="brand" href="#top" aria-label="WinCon home">
+          <img src="wincon-mark.svg" alt="" />
+          <span class="brand-name">WINCON<small>DECISION SYSTEM</small></span>
+        </a>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a class="nav-link" href="#engine">How it thinks</a>
+          <a class="nav-link" href="#game">In game</a>
+          <a class="nav-link" href="#review">Review</a>
+          <a class="nav-link" href="#trust">Data &amp; safety</a>
+          <a class="language" href="es.html" hreflang="es" lang="es">ES</a>
+          <a class="button compact" href="https://github.com/carlo23666/lolcompanion/releases/latest">Download</a>
+        </nav>
       </div>
-      <div class="step">
-        <h3>Get your free Riot API key</h3>
-        <p>Reading your match history needs a personal Riot API key: register a "Personal App" once at <a href="https://developer.riotgames.com">developer.riotgames.com</a> and paste the key in Settings. Riot's rules require everyone to use their own key.</p>
+    </header>
+
+    <main id="top" class="shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="kicker">Context-aware League decisions</div>
+          <h1>Read the game.<br /><span class="signal">Play the win condition.</span></h1>
+          <p class="hero-lede">
+            WinCon compares coherent build routes against the match you are actually playing, then
+            shows what changed and why. Draft, live game and review — handled locally on your PC.
+          </p>
+          <div class="hero-actions">
+            <a class="button" href="https://github.com/carlo23666/lolcompanion/releases/latest">Download for Windows</a>
+            <a class="button secondary" href="#engine">See how decisions work</a>
+          </div>
+          <p class="hero-note">FREE · SOURCE AVAILABLE · NO ACCOUNT · NO PROJECT SERVER</p>
+        </div>
+
+        <div class="product-frame">
+          <div class="frame-bar" aria-hidden="true"><i></i><i></i><i></i><span>LIVE / RIFT · HEXI / 18:42</span></div>
+          <img
+            src="media/en/live-ingame.png"
+            alt="WinCon live view showing an explained build route, alternatives, both teams and current match signals"
+          />
+        </div>
+
+        <div class="proof-strip" aria-label="Product principles">
+          <div class="proof"><strong>COHERENT ROUTES</strong><span>Core spikes stay ahead of reactive purchases.</span></div>
+          <div class="proof"><strong>VISIBLE REASONS</strong><span>No unexplained score and no blind “buy this”.</span></div>
+          <div class="proof"><strong>LOCAL-FIRST</strong><span>Your match database stays on your machine.</span></div>
+          <div class="proof"><strong>ZERO COST</strong><span>No subscription, ads, account or paid backend.</span></div>
+        </div>
+      </section>
+
+      <section id="engine" class="section">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">The decision engine</div>
+            <h2>A build is a route, not a bag of counters.</h2>
+          </div>
+          <p>
+            The highest raw win rate is not always the right answer. WinCon protects the champion’s
+            functional core, then adjusts the route when the current match gives it a reason to.
+          </p>
+        </div>
+
+        <div class="logic-board">
+          <div class="inputs">
+            <article class="logic-card">
+              <code>01 / PATCH BASELINE</code>
+              <h3>Master+ purchase routes</h3>
+              <p>What strong players buy, and in which order, on the current patch.</p>
+            </article>
+            <article class="logic-card">
+              <code>02 / LIVE CONTEXT</code>
+              <h3>The game on screen</h3>
+              <p>Compositions, items, levels, gold, objectives and current threats you can already see.</p>
+            </article>
+            <article class="logic-card">
+              <code>03 / PERSONAL SIGNAL</code>
+              <h3>Your own history</h3>
+              <p>Role and champion tendencies influence the route only when the sample supports it.</p>
+            </article>
+          </div>
+          <div class="logic-join" aria-hidden="true"></div>
+          <article class="decision-card">
+            <code>RANKED OUTPUT / EXPLAINED</code>
+            <div class="decision-title">
+              <div class="decision-item">01</div>
+              <div>
+                <h3>Complete the core spike</h3>
+                <span>HIGH CONFIDENCE</span>
+              </div>
+            </div>
+            <ul class="reason-list">
+              <li>The champion still needs its first functional breakpoint.</li>
+              <li>The enemy damage profile matters, but does not justify a full tank detour.</li>
+              <li>A defensive carry option is held for the next slot if the threat remains real.</li>
+            </ul>
+            <div class="route-line" aria-label="Three of four route stages established"><span></span><span></span><span></span><span></span></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="before-title">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">Before the game</div>
+            <h2 id="before-title">Lock in with an actual plan.</h2>
+          </div>
+          <p>
+            Draft support reads only the picks the client exposes. It weighs ally fit, enemy pressure,
+            your own results and the Master+ baseline — then turns the enemy comp into an initial buy plan.
+          </p>
+        </div>
+        <div class="draft-showcase">
+          <figure class="draft-capture">
+            <span class="capture-badge capture-dark">DARK · SOMBRA</span>
+            <img
+              src="media/en/champ-select.png"
+              alt="WinCon champion select view with ranked pick suggestions, composition analysis and a contextual buy plan"
+            />
+            <figcaption>One draft, one complete read.</figcaption>
+          </figure>
+          <div class="draft-readout">
+            <span class="stage-label">WHAT WINCON RETURNS</span>
+            <article class="draft-signal">
+              <span class="signal-number">01</span>
+              <div><h3>Pick priority</h3><strong>PERSONAL POOL + ALLY FIT</strong><p>Ranks champions you actually play against the draft already on screen.</p></div>
+            </article>
+            <article class="draft-signal">
+              <span class="signal-number">02</span>
+              <div><h3>Composition read</h3><strong>VISIBLE DAMAGE + FRONTLINE</strong><p>Summarises the pressure and gaps created by the confirmed picks.</p></div>
+            </article>
+            <article class="draft-signal">
+              <span class="signal-number">03</span>
+              <div><h3>Opening purchase route</h3><strong>CORE → CARRY DEFENCE</strong><p>Protects the functional core and holds situational defence for the slot where it belongs.</p></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="game" class="section">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">During the game</div>
+            <h2>A useful signal, without another window to manage.</h2>
+          </div>
+          <p>
+            The overlay sits around your HUD instead of taking over the right edge. The companion stays
+            docked and raises a concise, visual bubble when the next decision materially changes.
+          </p>
+        </div>
+
+        <div id="overlay-demo" class="overlay-stage">
+          <div class="hud-copy">
+            <span class="stage-label">LIVE OVERLAY</span>
+            <h3>Put it where your HUD leaves room.</h3>
+            <p>Drag from the grip, scale it from 70–150%, and recognise the next item at a glance.</p>
+          </div>
+          <figure class="gameplay-demo">
+            <div class="gameplay-viewport">
+              <span class="capture-badge capture-rift">RIFT · HEXI</span>
+              <img class="gameplay-backdrop" src="lol-gameplay-hud.jpg" alt="League of Legends gameplay cropped around the ability HUD and minimap" />
+              <div class="gameplay-overlay">
+                <img src="media/en/overlay.png" alt="Compact WinCon overlay placed between the ability HUD and minimap" />
+              </div>
+            </div>
+            <figcaption><strong>REAL HUD PLACEMENT</strong><span>Compact mode, clear of the ability bar and minimap.</span></figcaption>
+          </figure>
+          <figure class="overlay-capture overlay-advice">
+            <span class="capture-badge capture-rift">RIFT · HEXI</span>
+            <img src="media/en/overlay-expanded.png" alt="WinCon overlay showing an Infinity Edge icon, item name and contextual purchase reason" />
+            <figcaption><strong>THE ITEM, NOT JUST ITS NAME</strong><span>Purchase advice includes the matching icon.</span></figcaption>
+          </figure>
+        </div>
+        <div class="overlay-specs" aria-label="Overlay capabilities">
+          <div class="overlay-spec"><strong>Move it</strong>Drag from a dedicated grip, without selecting text.</div>
+          <div class="overlay-spec"><strong>Scale it</strong>Seven steps from 70% to 150% for different HUD sizes.</div>
+          <div class="overlay-spec"><strong>Keep playing</strong>Transparent areas pass clicks through to the game.</div>
+          <div class="overlay-spec"><strong>Stay in sync</strong>Rift, Dark and Sakura update with the app theme.</div>
+        </div>
+      </section>
+
+      <section id="themes" class="section">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">Three identities</div>
+            <h2>Same judgment. Different atmosphere.</h2>
+          </div>
+          <p>
+            These are full visual identities, not simple palette swaps. Surfaces, typography, motion and
+            companion change together; the recommendation engine does not.
+          </p>
+        </div>
+        <div class="capture-key" aria-label="Themes shown in product captures">
+          <span class="capture-rift">RIFT · LIVE + OVERLAY</span>
+          <span class="capture-dark">DARK · DRAFT</span>
+          <span class="capture-sakura">SAKURA · REVIEW</span>
+        </div>
+        <div class="theme-grid">
+          <article class="theme-card theme-rift">
+            <h3>RIFT / SIGNAL</h3><span class="mascot mascot-hexi" aria-hidden="true"></span>
+            <p><strong>Hexi</strong>Electric navy, signal pink and economy gold.</p>
+          </article>
+          <article class="theme-card theme-dark">
+            <h3>DARK / CARBON</h3><span class="mascot mascot-sombra" aria-hidden="true"></span>
+            <p><strong>Sombra</strong>Carbon black, hard geometry and restrained crimson.</p>
+          </article>
+          <article class="theme-card theme-sakura">
+            <h3>SAKURA / WASHI</h3><span class="mascot mascot-kohaku" aria-hidden="true"></span>
+            <p><strong>Kohaku</strong>Quiet washi, plum ink and sakura accents.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="review" class="section">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">After the game</div>
+            <h2>Your patterns, with evidence attached.</h2>
+          </div>
+          <p>
+            WinCon turns stored matches into concrete signals: deaths by phase, gank exposure, vision,
+            objective cost while dead, participation, champion form and recurring weak points.
+          </p>
+        </div>
+        <div class="review-grid">
+          <figure class="media-card">
+            <span class="capture-badge capture-sakura">SAKURA · KOHAKU</span>
+            <img src="media/en/stats.png" alt="WinCon stats view with evidence-backed weak points, trends and champion breakdowns" />
+            <figcaption><strong>Patterns, not platitudes</strong><span>Evidence + a next action</span></figcaption>
+          </figure>
+          <figure class="media-card">
+            <span class="capture-badge capture-sakura">SAKURA · KOHAKU</span>
+            <img src="media/en/history.png" alt="WinCon filterable match history with current form and champion aggregates" />
+            <figcaption><strong>Your match record</strong><span>Filter, compare, inspect</span></figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="system-title">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">The complete system</div>
+            <h2 id="system-title">Built around decisions, not dashboards.</h2>
+          </div>
+          <p>Every screen answers one of three questions: what is the plan, what changed, and what should improve next.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card"><span class="feature-index">01 / ROUTES</span><h3>Core before counters</h3><p>Starter, boots and functional spikes are protected before matchup adaptations can take over.</p></article>
+          <article class="feature-card"><span class="feature-index">02 / RECALL</span><h3>Buy timing you can scan</h3><p>Gold, nearby breakpoints and the value of waiting are considered together; overlay advice shows the item icon and name.</p></article>
+          <article class="feature-card"><span class="feature-index">03 / WINDOWS</span><h3>Fights and objectives</h3><p>Visible deaths, objective timing and clear level or item leads become conditional windows — never hidden gold or cooldown tracking.</p></article>
+          <article class="feature-card"><span class="feature-index">04 / PATCH</span><h3>Master+ baseline</h3><p>Aggregate purchase usage and order create the starting route for the current patch.</p></article>
+          <article class="feature-card"><span class="feature-index">05 / HISTORY</span><h3>Personal context</h3><p>Your stored performance can shift confidence without overpowering a weak sample.</p></article>
+          <article class="feature-card"><span class="feature-index">06 / REASONS</span><h3>Auditable output</h3><p>Every recommendation carries the reasons that earned its position in the route.</p></article>
+        </div>
+        <div class="ai-note">
+          <span class="lab">EXPERIMENTAL</span>
+          <div><strong>Optional local coach</strong><p>A disabled-by-default layer for rephrasing existing signals. It is not required and does not power the core decision engine.</p></div>
+          <span>NO CLOUD MODEL<br />NO BUNDLED GBs</span>
+        </div>
+      </section>
+
+      <section id="trust" class="section">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">Data boundaries</div>
+            <h2>Useful because the limits are explicit.</h2>
+          </div>
+          <p>
+            No third-party tool can promise account outcomes. WinCon instead keeps a small, auditable
+            surface and treats Riot policy constraints as product requirements.
+          </p>
+        </div>
+        <div class="trust-layout">
+          <div class="trust-callout">
+            <blockquote>“If you cannot see it in the match, it cannot drive live advice.”</blockquote>
+            <p>The live engine consumes the same state the player can read on screen. It does not create a hidden-information advantage.</p>
+          </div>
+          <div class="trust-list">
+            <article class="trust-card"><strong>No forbidden live tracking</strong><p>No enemy cooldown or ultimate timers, no memory reading, no packet sniffing and no replay reverse engineering.</p></article>
+            <article class="trust-card"><strong>No ranked champ-select de-anonymization</strong><p>WinCon respects the identities and fields the client hides.</p></article>
+            <article class="trust-card"><strong>Local storage, no telemetry</strong><p>Personal history and settings live in SQLite on your PC. There is no WinCon account or analytics backend.</p></article>
+            <article class="trust-card"><strong>Source available</strong><p>The implementation is readable on <a href="https://github.com/carlo23666/lolcompanion">GitHub</a> under PolyForm Noncommercial 1.0.0.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section id="start" class="section">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">Setup</div>
+            <h2>Install once. Let the match set the mode.</h2>
+          </div>
+          <p>The desktop app degrades gracefully with LoL closed, the client open, champ select active or a live game in progress.</p>
+        </div>
+        <div class="steps">
+          <article class="step"><h3>Install</h3><p>Get the latest per-user Windows setup from <a href="https://github.com/carlo23666/lolcompanion/releases/latest">Releases</a>. No administrator rights are required.</p></article>
+          <article class="step"><h3>Open League</h3><p>WinCon detects client, draft and live-game phases automatically. The main local features need no API key.</p></article>
+          <article class="step"><h3>Choose your surface</h3><p>Use the full workspace on a second display, or the movable overlay in borderless/windowed mode.</p></article>
+        </div>
+        <p class="setup-note"><strong>About history sync:</strong> private development use can be configured with an appropriate Riot API key. Public distribution requires Riot product registration and a production key; the live local workspace remains usable without one.</p>
+      </section>
+
+      <section id="faq" class="section">
+        <div class="section-heading">
+          <div><div class="eyebrow">FAQ</div><h2>Worth knowing before you install.</h2></div>
+          <p>Clear answers about account risk, data, cost and the optional pieces.</p>
+        </div>
+        <div class="faq">
+          <details><summary>Can I get banned for using WinCon?</summary><p>No third-party tool can guarantee account outcomes. WinCon enforces screen-visible live inputs, no enemy cooldown tracking, no ranked draft de-anonymization, and no memory or packet access. Its isolated local LCU integration is unsupported by Riot and may change. Review the current <a href="https://developer.riotgames.com/policies/general">Riot developer policies</a> before public distribution.</p></details>
+          <details><summary>Why can Windows show a warning?</summary><p>The installer is not digitally code-signed because signing certificates have a recurring cost and this is a zero-cost project. SmartScreen commonly warns for unsigned or low-reputation builds. The source is available, and you can build it yourself.</p></details>
+          <details><summary>Is it really free?</summary><p>Yes: no subscription, ads, paid services or data collection. The source is available for noncommercial use under the PolyForm Noncommercial 1.0.0 license; that is not the same as an OSI open-source license.</p></details>
+          <details><summary>What data leaves my PC?</summary><p>WinCon has no project server and sends no telemetry. The local game and client APIs remain on your machine. When you explicitly configure history sync, the app talks directly to Riot’s Web API; the resulting history is stored locally.</p></details>
+          <details><summary>Do I need a Riot API key?</summary><p>Not for live local features, draft detection or the main in-game workspace. Match-history sync in a private development setup needs an appropriate key. A public consumer build would need an approved production-key path.</p></details>
+          <details><summary>Does the overlay work in fullscreen?</summary><p>Use League in borderless or windowed mode for the overlay. Exclusive fullscreen does not reliably support desktop overlays. The main app can still run on another display.</p></details>
+          <details><summary>Do I need to install an AI model?</summary><p>No. The deterministic engine, live signals and reports work without AI. The local coach is experimental, optional and disabled by default; it only rephrases signals WinCon already produced.</p></details>
+        </div>
+      </section>
+
+      <section class="final-cta">
+        <div class="eyebrow" style="justify-content: center">Your next match</div>
+        <h2>Stop following a build. Start reading the game.</h2>
+        <p>WinCon is a source-available, zero-cost Windows project. Download the latest build or inspect every decision boundary on GitHub.</p>
+        <div class="hero-actions">
+          <a class="button" href="https://github.com/carlo23666/lolcompanion/releases/latest">Get WinCon</a>
+          <a class="button secondary" href="https://github.com/carlo23666/lolcompanion">View source</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="shell">
+        <div class="footer-top">
+          <a class="brand" href="#top"><img src="wincon-mark.svg" alt="" /><span class="brand-name">WINCON<small>DECISION SYSTEM</small></span></a>
+          <div class="footer-links">
+            <a href="https://github.com/carlo23666/lolcompanion">GitHub</a>
+            <a href="https://github.com/carlo23666/lolcompanion/releases/latest">Downloads</a>
+            <a href="https://github.com/carlo23666/lolcompanion/issues">Issues</a>
+            <a href="es.html" lang="es">Español</a>
+          </div>
+        </div>
+        <p class="footer-legal">WinCon is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.</p>
+        <p class="footer-legal">Software licensed under <a href="https://polyformproject.org/licenses/noncommercial/1.0.0/">PolyForm Noncommercial 1.0.0</a>. Free for noncommercial use.</p>
       </div>
-      <div class="step">
-        <h3>Play</h3>
-        <p>Leave the app open (a second monitor is perfect). It detects the client, champ select and the game by itself — nothing else to do.</p>
-      </div>
-    </div>
-    <p class="note"><b>Languages:</b> the app is available in English and Spanish — pick your language in Settings (English is the default). Everything it generates — recommendations, tips and the optional AI coach — follows your chosen language.</p>
-  </section>
-
-  <!-- FAQ -->
-  <section id="faq">
-    <div class="sec-head">
-      <div class="eyebrow">FAQ</div>
-      <h2>Frequently asked questions</h2>
-    </div>
-    <div class="faq">
-      <details>
-        <summary>Can I get banned for using it?</summary>
-        <p>The app was built with Riot's third-party rules as hard project constraints: official sources only, screen-visible information only, and no enemy cooldown tracking of any kind. It shouldn't pose any risk to your account — that said, it's a personal project provided without warranties.</p>
-      </details>
-      <details>
-        <summary>Why does Windows warn me during install?</summary>
-        <p>The installer isn't digitally signed (signing certificates cost hundreds of euros a year and this is a free project). The SmartScreen warning is generic for any unsigned app; the code is public and you can build it yourself from GitHub if you prefer.</p>
-      </details>
-      <details>
-        <summary>Is it free? What's the catch?</summary>
-        <p>Free and open source for noncommercial use (PolyForm Noncommercial license). No ads, no data collection: it started as a personal tool and is shared as-is.</p>
-      </details>
-      <details>
-        <summary>What data does it use and where does it end up?</summary>
-        <p>Your live game (the same local API the game itself exposes on port 2999), the LoL client for champ select, and your match history via the Riot Web API with YOUR key. Everything is stored in a SQLite database on your PC. There is no project server: nothing leaves your machine.</p>
-      </details>
-      <details>
-        <summary>Why do I need to provide an API key?</summary>
-        <p>Riot forbids apps from shipping a shared embedded key: each user registers their own (free, one time). In exchange, your history flows straight from Riot to your PC with no middleman. A keyless mode backed by a Riot production key is on the roadmap.</p>
-      </details>
-      <details>
-        <summary>Does it work in fullscreen?</summary>
-        <p>The main app does (second monitor or alt-tab). The optional in-game overlay needs LoL in windowed or borderless mode — exclusive fullscreen doesn't allow overlays.</p>
-      </details>
-      <details>
-        <summary>Is the app in English?</summary>
-        <p>Yes. The app ships in both English and Spanish — choose your language in Settings (English is the default). Everything the app generates, including the coach's advice, follows your chosen language.</p>
-      </details>
-    </div>
-  </section>
-
-</main>
-
-<footer>
-  <div class="wrap">
-    <div class="top">
-      <a class="wordmark" href="#">LOL COMPANION<small>YOUR LOCAL COACH</small></a>
-      <p>
-        <a href="https://github.com/carlo23666/lolcompanion">Source on GitHub</a> ·
-        <a href="https://github.com/carlo23666/lolcompanion/releases/latest">Downloads</a> ·
-        <a href="https://github.com/carlo23666/lolcompanion/issues">Report an issue</a> ·
-        <a href="es.html" lang="es">Versión en español</a>
-      </p>
-    </div>
-    <p class="legal">
-      LoL Companion isn't endorsed by Riot Games and doesn't reflect the views or opinions of
-      Riot Games or anyone officially involved in producing or managing Riot Games properties.
-      Riot Games, and all associated properties are trademarks or registered trademarks of
-      Riot Games, Inc.
-    </p>
-    <p class="legal">
-      Software under the <a href="https://polyformproject.org/licenses/noncommercial/1.0.0/">PolyForm
-      Noncommercial 1.0.0</a> license — free for noncommercial use.
-    </p>
-  </div>
-</footer>
-
-</body>
+    </footer>
+  </body>
 </html>

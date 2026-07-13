@@ -10,6 +10,7 @@ on:
     paths:
       - 'site/**'
       - 'docs/media/**'
+      - 'src/renderer/public/mascot/**'
       - '.github/workflows/site.yml'
   workflow_dispatch:
 
@@ -32,10 +33,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Stage site with media and favicon
         run: |
-          mkdir -p _site/media/en _site/media/es
+          mkdir -p _site/media/en _site/media/es _site/mascot
           cp -r site/. _site/
           cp docs/media/en/*.png _site/media/en/
           cp docs/media/es/*.png _site/media/es/
+          cp src/renderer/public/mascot/*-sheet.png _site/mascot/
           cp resources/icon.png _site/icon.png
       - uses: actions/configure-pages@v5
         with:

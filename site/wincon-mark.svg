@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="WinCon">
+  <path d="M4 9h13l13 16" fill="none" stroke="#eebf4f" stroke-width="4.5" stroke-linecap="square"/>
+  <path d="M4 55h13l13-16" fill="none" stroke="#e34a83" stroke-width="4.5" stroke-linecap="square"/>
+  <path d="M38 25l7-8h13M38 39l7 8h13" fill="none" stroke="#5c6988" stroke-width="3.5" stroke-linecap="square"/>
+  <path d="M38 32h18" fill="none" stroke="#eebf4f" stroke-width="4.5"/>
+  <path d="M61 32l-9-6v12z" fill="#eebf4f"/>
+  <circle cx="32" cy="32" r="8" fill="#070a12" stroke="#eebf4f" stroke-width="4"/>
+  <circle cx="32" cy="32" r="2.5" fill="#f7f9fc"/>
+</svg>
